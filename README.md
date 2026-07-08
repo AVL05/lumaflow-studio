@@ -87,6 +87,7 @@ Variables relevantes en `backend/.env`:
 APP_NAME="LumaFlow Studio"
 APP_URL=http://localhost:8000
 FRONTEND_URL=http://localhost:5173
+FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
 SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
 OLLAMA_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.1
@@ -147,7 +148,7 @@ Arranque conjunto desde la raiz:
 npm run start
 ```
 
-Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://127.0.0.1:5173`.
+Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://localhost:5173`.
 
 ## Estado del proyecto
 
