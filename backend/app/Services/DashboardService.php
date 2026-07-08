@@ -69,10 +69,30 @@ class DashboardService
                 ->latest()
                 ->limit(4)
                 ->get(),
+            'favoriteLocations' => Location::query()
+                ->ownedBy($user->id)
+                ->where('is_favorite', true)
+                ->with('coverPhoto')
+                ->withCount('sessions')
+                ->orderByDesc('rating')
+                ->latest()
+                ->limit(4)
+                ->get(),
+            'topLocationCities' => Location::query()
+                ->ownedBy($user->id)
+                ->whereNotNull('city')
+                ->select('city', DB::raw('count(*) as total'))
+                ->groupBy('city')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get(),
             'upcomingSessionsWithLocation' => Session::query()
                 ->ownedBy($user->id)
+                ->with('location')
                 ->where('date', '>=', now()->toDateString())
-                ->whereNotNull('location_name')
+                ->where(function ($query): void {
+                    $query->whereNotNull('location_id')->orWhereNotNull('location_name');
+                })
                 ->orderBy('date')
                 ->limit(4)
                 ->get(),

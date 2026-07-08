@@ -18,6 +18,8 @@ import { EmptyState } from "../components/states/EmptyState";
 import { ErrorState } from "../components/states/ErrorState";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useToast } from "../features/notifications/ToastContext";
+import { LocationSelector } from "../features/locations/LocationSelector";
+import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 import {
   labelFor,
   sessionStatuses,
@@ -27,6 +29,7 @@ import {
 
 const defaults = {
   name: "",
+  location_id: "",
   date: "",
   time: "",
   session_type: "portrait",
@@ -61,7 +64,7 @@ export function SessionsPage() {
 
   function openEdit(session) {
     setEditing(session);
-    setForm({ ...defaults, ...session, time: session.time ?? "" });
+    setForm({ ...defaults, ...session, location_id: session.location_id ? String(session.location_id) : "", time: session.time ?? "" });
     setFormError("");
     setFormOpen(true);
   }
@@ -73,10 +76,10 @@ export function SessionsPage() {
 
     try {
       if (editing) {
-        await sessionsApi.update(editing.id, form);
+        await sessionsApi.update(editing.id, normalizeSession(form));
         toast.success("Sesion actualizada.");
       } else {
-        await sessionsApi.create(form);
+        await sessionsApi.create(normalizeSession(form));
         toast.success("Sesion creada.");
       }
       setFormOpen(false);
@@ -163,7 +166,7 @@ export function SessionsPage() {
                     </h2>
                     <p className="mt-1 text-sm text-stone-500">
                       {session.client_name || "Sin cliente"} ·{" "}
-                      {session.location_name || "Sin localizacion"}
+                      {session.location?.name || session.location_name || "Sin localizacion"}
                     </p>
                   </div>
                   <Badge variant={toneForStatus(session.status)}>
@@ -290,7 +293,11 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
           onChange={(e) => setValue("location_name", e.target.value)}
         />
       </Field>
-      <div />
+      <LocationSelector
+        value={form.location_id}
+        onChange={(value) => setValue("location_id", value)}
+        onCreate={() => window.open("/app/locations", "_blank", "noopener,noreferrer")}
+      />
       <div className="md:col-span-2">
         <Field label="Descripcion">
           <Textarea
@@ -339,8 +346,13 @@ function SessionDetail({ session }) {
       </p>
       <p className="md:col-span-2">
         <span className="text-stone-100">Localizacion:</span>{" "}
-        {session.location_name || "Sin localizacion"}
+        {session.location?.name || session.location_name || "Sin localizacion"}
       </p>
+      {session.location ? (
+        <div className="md:col-span-2">
+          <LocationMapPreview latitude={session.location.latitude} longitude={session.location.longitude} name={session.location.name} />
+        </div>
+      ) : null}
       <p className="md:col-span-2">
         <span className="text-stone-100">Descripcion:</span>{" "}
         {session.description || "Sin descripcion"}
@@ -351,6 +363,21 @@ function SessionDetail({ session }) {
       </p>
     </div>
   );
+}
+
+function normalizeSession(form) {
+  return {
+    name: form.name,
+    location_id: form.location_id || null,
+    date: form.date,
+    time: form.time || null,
+    location_name: form.location_name || null,
+    session_type: form.session_type,
+    status: form.status,
+    description: form.description || null,
+    notes: form.notes || null,
+    client_name: form.client_name || null,
+  };
 }
 
 function SessionSkeleton() {

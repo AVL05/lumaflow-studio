@@ -14,6 +14,7 @@ import {
   sessionTypes,
   toneForStatus,
 } from "../utils/catalogs";
+import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
@@ -118,7 +119,47 @@ export function DashboardPage() {
                   dashboard.upcomingSessionsWithLocation.map((session) => (
                     <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{session.name}</p>
-                      <p className="mt-1 text-xs text-stone-500">{session.date} · {session.location_name}</p>
+                      <p className="mt-1 text-xs text-stone-500">{session.date} · {session.location?.name || session.location_name}</p>
+                      {session.location ? (
+                        <div className="mt-3">
+                          <LocationMapPreview latitude={session.location.latitude} longitude={session.location.longitude} name={session.location.name} />
+                        </div>
+                      ) : null}
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <Card className="p-5">
+              <h2 className="font-semibold">Localizaciones favoritas</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.favoriteLocations.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin localizaciones favoritas.</p>
+                ) : (
+                  dashboard.favoriteLocations.map((location) => (
+                    <div key={location.id} className="rounded-md bg-white/[0.04] p-3">
+                      <p className="text-sm">{location.name}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {location.city || 'Sin ciudad'} · {location.rating ? `${location.rating}/5` : 'Sin rating'} · {location.sessions_count ?? 0} sesiones
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Ciudades mas utilizadas</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.topLocationCities.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin ciudades registradas.</p>
+                ) : (
+                  dashboard.topLocationCities.map((city) => (
+                    <div key={city.city} className="flex items-center justify-between rounded-md bg-white/[0.04] p-3">
+                      <span className="text-sm">{city.city}</span>
+                      <span className="text-xs text-stone-500">{city.total} spots</span>
                     </div>
                   ))
                 )}

@@ -18,7 +18,9 @@ export function LocationCard({ location, onEdit, onDelete }) {
           <Badge variant="warm">{labelFor(locationTypes, location.type)}</Badge>
         </div>
         <p className="mt-4 text-sm text-stone-400">{location.best_time || 'Sin mejor hora'} · {labelFor(accessDifficulties, location.access_difficulty)}</p>
+        <p className="mt-2 text-sm text-stone-500">{location.rating ? `Rating ${location.rating}/5` : 'Sin valorar'} · {location.sessions_count ?? 0} sesiones</p>
         <div className="mt-4 flex flex-wrap gap-1">
+          {location.is_favorite ? <Badge variant="warm">Favorita</Badge> : null}
           {location.tags.slice(0, 3).map((tag) => <Badge key={tag}>{tag}</Badge>)}
         </div>
         <div className="mt-5 flex flex-wrap gap-2">

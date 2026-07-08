@@ -11,7 +11,7 @@ LumaFlow Studio es una plataforma full-stack para fotografos y creadores visuale
 - Auth: Laravel Sanctum con tokens Bearer para la SPA
 - Storage: Laravel Storage public disk
 - IA futura: Ollama local
-- Mapas futuros: Leaflet
+- Mapas: Leaflet
 - Graficas futuras: Recharts
 
 ## Estructura
@@ -33,7 +33,8 @@ README.md   guia principal del proyecto
 - Albums: colecciones con color, portada preparada y relacion many-to-many con fotos
 - Tags: taxonomia visual por usuario con relacion many-to-many con fotos
 - Photos: subida segura, EXIF automatico, storage publico, grid/lista, preview, edicion de metadata, albumes, tags, filtros avanzados y borrado fisico
-- Locations: CRUD protegido por usuario con coordenadas, tipo, mejor hora, dificultad, tags, equipo recomendado y preview preparado para Leaflet
+- Locations: CRUD protegido por usuario con mapa Leaflet, coordenadas seleccionables, portada, galeria, rating, favoritos, acceso, permisos, coste, links externos, clima, estaciones, tags y equipo recomendado
+- Planning: sesiones asociadas a localizaciones guardadas con mapa e informacion del spot
 - Clients: CRUD protegido por usuario con estados, contacto, empresa, notas, busqueda, filtros y detalle
 - Deliveries: CRUD protegido por usuario con cliente, sesion opcional, presupuesto, fecha, URL de galeria, notas privadas, busqueda, filtros y detalle
 - IA: asistente fotografico con Ollama local, contexto construido desde datos del usuario, status endpoint y analisis JSON guardado en `ai_analyses`
@@ -49,6 +50,7 @@ README.md   guia principal del proyecto
 - `apiResource /api/albums`
 - `GET|POST|PUT|DELETE /api/tags`
 - `apiResource /api/locations`
+- Filtros en `GET /api/locations`: `search`, `city`, `type`, `access_difficulty`, `access_mode`, `favorite`, `latitude`, `longitude`, `radius_km`
 - `apiResource /api/clients`
 - `apiResource /api/deliveries`
 - `GET /api/gallery/photos`
@@ -152,15 +154,13 @@ Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://localh
 
 ## Estado del proyecto
 
-Fase 6 implementada con clientes y entregas. El proyecto esta preparado como release privada de portfolio. No incluye facturacion, mapa interactivo real ni comparacion visual interactiva.
+Fase 7 implementada con localizaciones fotograficas avanzadas, Leaflet interactivo y asociacion de sesiones a localizaciones. El proyecto esta preparado como release privada de portfolio. No incluye facturacion ni comparacion visual interactiva.
 
 ## Roadmap
 
 - Usar EXIF para recomendaciones y busqueda inteligente
 - Activar streaming cuando el backend incorpore respuesta incremental compatible
-- Integrar Leaflet en `LocationMapPreview`
 - UI de comparacion before/after sobre `photo_comparisons`
-- Agregar mapa interactivo con Leaflet
 - Conectar clientes con contratos, entregas publicas y aprobacion formal
 - Incorporar graficas con Recharts
 - Construir recomendaciones IA con datos reales del usuario

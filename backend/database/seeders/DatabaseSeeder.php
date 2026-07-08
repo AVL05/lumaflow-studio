@@ -134,7 +134,7 @@ class DatabaseSeeder extends Seeder
             'date' => now()->toDateString(),
         ]);
 
-        $user->locations()->createMany([
+        $locations = $user->locations()->createMany([
             [
                 'name' => 'Azotea Gran Via',
                 'city' => 'Madrid',
@@ -144,6 +144,16 @@ class DatabaseSeeder extends Seeder
                 'type' => 'urban',
                 'best_time' => 'Blue hour',
                 'access_difficulty' => 'medium',
+                'rating' => 5,
+                'is_favorite' => true,
+                'access_mode' => 'public_transport',
+                'permissions_required' => 'Confirmar permiso de acceso con recepcion.',
+                'cost' => 35,
+                'google_maps_url' => 'https://www.google.com/maps/search/?api=1&query=40.42028,-3.70577',
+                'apple_maps_url' => 'https://maps.apple.com/?ll=40.42028,-3.70577&q=Azotea%20Gran%20Via',
+                'openstreetmap_url' => 'https://www.openstreetmap.org/?mlat=40.42028&mlon=-3.70577#map=16/40.42028/-3.70577',
+                'recommended_weather' => 'Cielo despejado o nubes altas.',
+                'recommended_seasons' => ['spring', 'autumn'],
                 'notes' => 'Buen fondo urbano con luces y lineas verticales.',
                 'tags' => ['blue hour', 'urban', 'editorial'],
                 'recommended_gear' => ['35mm', 'tripod', 'light'],
@@ -157,11 +167,24 @@ class DatabaseSeeder extends Seeder
                 'type' => 'studio',
                 'best_time' => 'Manana',
                 'access_difficulty' => 'easy',
+                'rating' => 4,
+                'is_favorite' => false,
+                'access_mode' => 'car',
+                'permissions_required' => 'Reserva previa.',
+                'cost' => 120,
+                'google_maps_url' => 'https://www.google.com/maps/search/?api=1&query=40.44512,-3.69190',
+                'apple_maps_url' => 'https://maps.apple.com/?ll=40.44512,-3.69190&q=Estudio%20Norte',
+                'openstreetmap_url' => 'https://www.openstreetmap.org/?mlat=40.44512&mlon=-3.69190#map=16/40.44512/-3.69190',
+                'recommended_weather' => 'Independiente del clima.',
+                'recommended_seasons' => ['winter', 'summer'],
                 'notes' => 'Interior controlado para retrato y producto.',
                 'tags' => ['studio', 'portrait', 'product'],
                 'recommended_gear' => ['flash', 'softbox', '85mm'],
             ],
         ]);
+
+        $user->sessions()->where('session_type', 'urban')->update(['location_id' => $locations[0]->id]);
+        $user->sessions()->where('session_type', 'product')->update(['location_id' => $locations[1]->id]);
 
         $client = $user->clients()->create([
             'name' => 'Marca premium',

@@ -97,6 +97,20 @@ export const accessDifficulties = [
   { value: "hard", label: "Dificil" },
 ];
 
+export const accessModes = [
+  { value: "car", label: "Coche" },
+  { value: "walking", label: "Andando" },
+  { value: "public_transport", label: "Transporte publico" },
+  { value: "mixed", label: "Mixto" },
+];
+
+export const seasons = [
+  { value: "spring", label: "Primavera" },
+  { value: "summer", label: "Verano" },
+  { value: "autumn", label: "Otono" },
+  { value: "winter", label: "Invierno" },
+];
+
 export const clientStatuses = [
   { value: "active", label: "Activo", tone: "green" },
   { value: "inactive", label: "Inactivo", tone: "neutral" },

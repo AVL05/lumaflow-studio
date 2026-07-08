@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'name', 'date', 'time', 'location_name', 'session_type', 'status', 'description', 'notes', 'client_name'])]
+#[Fillable(['user_id', 'location_id', 'name', 'date', 'time', 'location_name', 'session_type', 'status', 'description', 'notes', 'client_name'])]
 class Session extends Model
 {
     use HasFactory;
@@ -52,5 +52,10 @@ class Session extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(Photo::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 }

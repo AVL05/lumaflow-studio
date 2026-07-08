@@ -11,6 +11,8 @@ class SessionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'location_id' => $this->location_id,
+            'location' => new LocationResource($this->whenLoaded('location')),
             'name' => $this->name,
             'date' => $this->date?->toDateString(),
             'time' => $this->time,

@@ -10,7 +10,8 @@ class RecommendationService
     {
         return [
             'sessions' => $user->sessions()
-                ->select('name', 'date', 'time', 'session_type', 'status', 'location_name', 'client_name')
+                ->with('location:id,name,city,country,type,best_time,rating,is_favorite')
+                ->select('id', 'location_id', 'name', 'date', 'time', 'session_type', 'status', 'location_name', 'client_name')
                 ->latest('date')
                 ->limit(8)
                 ->get(),
@@ -43,9 +44,22 @@ class RecommendationService
                 ->limit(20)
                 ->get(),
             'locations' => $user->locations()
-                ->select('name', 'city', 'country', 'latitude', 'longitude', 'type', 'best_time', 'access_difficulty', 'tags', 'recommended_gear')
+                ->select('name', 'city', 'country', 'latitude', 'longitude', 'type', 'best_time', 'access_difficulty', 'rating', 'is_favorite', 'access_mode', 'recommended_weather', 'tags', 'recommended_gear')
                 ->latest()
                 ->limit(12)
+                ->get(),
+            'favorite_locations' => $user->locations()
+                ->where('is_favorite', true)
+                ->select('name', 'city', 'country', 'type', 'best_time', 'rating', 'recommended_weather')
+                ->orderByDesc('rating')
+                ->limit(8)
+                ->get(),
+            'session_locations' => $user->sessions()
+                ->with('location:id,name,city,type,best_time')
+                ->whereNotNull('location_id')
+                ->select('id', 'location_id', 'name', 'date', 'session_type')
+                ->latest('date')
+                ->limit(8)
                 ->get(),
             'clients' => $user->clients()
                 ->select('name', 'company', 'status', 'notes')

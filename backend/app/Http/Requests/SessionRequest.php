@@ -16,6 +16,7 @@ class SessionRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:160'],
+            'location_id' => ['nullable', Rule::exists('locations', 'id')->where('user_id', $this->user()->id)],
             'date' => ['required', 'date'],
             'time' => ['nullable', 'date_format:H:i'],
             'location_name' => ['nullable', 'string', 'max:160'],

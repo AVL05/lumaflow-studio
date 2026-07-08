@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { locationsApi } from '../api/locations'
+import { photosApi } from '../api/photos'
 import { getApiError } from '../api/client'
 import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -24,12 +25,24 @@ const defaults = {
   type: 'urban',
   best_time: '',
   access_difficulty: 'easy',
+  rating: '',
+  is_favorite: false,
+  access_mode: '',
+  permissions_required: '',
+  cost: '',
+  google_maps_url: '',
+  apple_maps_url: '',
+  openstreetmap_url: '',
+  recommended_weather: '',
+  recommended_seasons: [],
+  season_pick: '',
   notes: '',
   tags_text: '',
   recommended_gear_text: '',
   tags: [],
   recommended_gear: [],
   cover_photo_id: null,
+  photo_ids: [],
 }
 
 export function LocationsPage() {
@@ -41,6 +54,13 @@ export function LocationsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [photos, setPhotos] = useState([])
+
+  useEffect(() => {
+    photosApi.list({ per_page: 100, sort: 'created_at', direction: 'desc' })
+      .then((response) => setPhotos(response.data))
+      .catch(() => setPhotos([]))
+  }, [])
 
   function openCreate() {
     setEditing(null)
@@ -56,6 +76,8 @@ export function LocationsPage() {
       ...location,
       tags_text: location.tags?.join(', ') ?? '',
       recommended_gear_text: location.recommended_gear?.join(', ') ?? '',
+      recommended_seasons: location.recommended_seasons ?? [],
+      photo_ids: location.photos?.map((photo) => photo.id) ?? [],
     })
     setFormError('')
     setFormOpen(true)
@@ -116,7 +138,7 @@ export function LocationsPage() {
       )}
 
       <Modal open={formOpen} title={editing ? 'Editar localizacion' : 'Nueva localizacion'} onClose={() => setFormOpen(false)}>
-        <LocationForm form={form} setForm={setForm} onSubmit={submit} error={formError} saving={saving} />
+        <LocationForm form={form} setForm={setForm} photos={photos} onSubmit={submit} error={formError} saving={saving} />
       </Modal>
       <ConfirmDialog open={Boolean(deleting)} title="Eliminar localizacion" description="Esta accion elimina la localizacion guardada. No afecta sesiones ni fotos." onClose={() => setDeleting(null)} onConfirm={confirmDelete} />
     </>
@@ -133,10 +155,21 @@ function normalizeLocation(form) {
     type: form.type,
     best_time: form.best_time || null,
     access_difficulty: form.access_difficulty,
+    rating: form.rating === '' ? null : Number(form.rating),
+    is_favorite: Boolean(form.is_favorite),
+    access_mode: form.access_mode || null,
+    permissions_required: form.permissions_required || null,
+    cost: form.cost === '' ? null : Number(form.cost),
+    google_maps_url: form.google_maps_url || null,
+    apple_maps_url: form.apple_maps_url || null,
+    openstreetmap_url: form.openstreetmap_url || null,
+    recommended_weather: form.recommended_weather || null,
+    recommended_seasons: form.recommended_seasons ?? [],
     notes: form.notes || null,
     tags: splitList(form.tags_text),
     recommended_gear: splitList(form.recommended_gear_text),
     cover_photo_id: form.cover_photo_id || null,
+    photo_ids: form.photo_ids ?? [],
   }
 }
 

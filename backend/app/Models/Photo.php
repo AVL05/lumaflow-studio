@@ -67,6 +67,11 @@ class Photo extends Model
         return $this->belongsToMany(Tag::class)->withTimestamps();
     }
 
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class)->withTimestamps();
+    }
+
     public function aiAnalyses(): HasMany
     {
         return $this->hasMany(AiAnalysis::class);

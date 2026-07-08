@@ -25,6 +25,8 @@ class DashboardResource extends JsonResource
             'topPresets' => PresetResource::collection($this->resource['topPresets']),
             'latestAlbums' => AlbumResource::collection($this->resource['latestAlbums']),
             'latestLocations' => LocationResource::collection($this->resource['latestLocations']),
+            'favoriteLocations' => LocationResource::collection($this->resource['favoriteLocations']),
+            'topLocationCities' => $this->resource['topLocationCities'],
             'upcomingSessionsWithLocation' => SessionResource::collection($this->resource['upcomingSessionsWithLocation']),
             'recentClients' => ClientResource::collection($this->resource['recentClients']),
             'upcomingDeliveries' => DeliveryResource::collection($this->resource['upcomingDeliveries']),

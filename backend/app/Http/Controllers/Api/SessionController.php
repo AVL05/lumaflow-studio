@@ -20,6 +20,7 @@ class SessionController extends Controller
             ->search(request('search'))
             ->status(request('status'))
             ->type(request('type'))
+            ->with('location')
             ->withCount('photos')
             ->orderBy($sort, $direction)
             ->paginate(min((int) request('per_page', 12), 48));
@@ -31,14 +32,14 @@ class SessionController extends Controller
     {
         $session = request()->user()->sessions()->create($request->validated());
 
-        return new SessionResource($session);
+        return new SessionResource($session->load('location'));
     }
 
     public function show(Session $session): SessionResource
     {
         $this->ensureOwnership($session);
 
-        return new SessionResource($session->loadCount('photos'));
+        return new SessionResource($session->load('location')->loadCount('photos'));
     }
 
     public function update(SessionRequest $request, Session $session): SessionResource
@@ -46,7 +47,7 @@ class SessionController extends Controller
         $this->ensureOwnership($session);
         $session->update($request->validated());
 
-        return new SessionResource($session->refresh());
+        return new SessionResource($session->refresh()->load('location'));
     }
 
     public function destroy(Session $session): mixed
