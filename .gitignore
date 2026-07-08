@@ -6,6 +6,7 @@
 *.bak
 .DS_Store
 Thumbs.db
+.playwright-mcp/
 
 node_modules/
 vendor/
