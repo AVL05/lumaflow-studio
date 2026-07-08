@@ -8,7 +8,7 @@ LumaFlow Studio es una plataforma full-stack para fotografos y creadores visuale
 - Estilos: Tailwind CSS
 - Backend: Laravel API
 - Base de datos: MySQL
-- Auth: Laravel Sanctum con tokens API para la SPA
+- Auth: Laravel Sanctum con tokens Bearer para la SPA
 - Storage: Laravel Storage public disk
 - IA futura: Ollama local
 - Mapas futuros: Leaflet
@@ -88,7 +88,7 @@ APP_NAME="LumaFlow Studio"
 APP_URL=http://localhost:8000
 FRONTEND_URL=http://localhost:5173
 FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
-SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173
+SANCTUM_STATEFUL_DOMAINS=
 OLLAMA_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.1
 OLLAMA_TIMEOUT=30
