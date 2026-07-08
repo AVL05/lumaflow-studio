@@ -44,6 +44,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/ai/status', [AiController::class, 'status']);
     Route::post('/ai/chat', [AiController::class, 'chat']);
     Route::post('/ai/analyze', [AiController::class, 'analyze']);
+    Route::post('/ai/preset', [AiController::class, 'preset']);
+    Route::post('/ai/session-plan', [AiController::class, 'sessionPlan']);
+    Route::post('/ai/recommend-gear', [AiController::class, 'recommendGear']);
+    Route::get('/ai/history', [AiController::class, 'history']);
+    Route::get('/ai/history/{conversation}', [AiController::class, 'showHistory']);
+    Route::patch('/ai/history/{conversation}', [AiController::class, 'updateHistory']);
+    Route::delete('/ai/history/{conversation}', [AiController::class, 'deleteHistory']);
     Route::post('/ai/analyze-photo', [AiController::class, 'analyzePhoto']);
     Route::post('/ai/assistant', [AiController::class, 'assistant']);
 });

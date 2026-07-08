@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\AiAnalysis;
+use App\Models\AiConversation;
+use App\Models\AiSessionPlan;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
@@ -137,6 +139,19 @@ class DashboardService
                     'score' => $analysis->score,
                     'created_at' => $analysis->created_at?->toISOString(),
                 ]),
+            'aiUsage' => [
+                'conversations' => AiConversation::query()->ownedBy($user->id)->count(),
+                'analyses' => AiAnalysis::query()->where('user_id', $user->id)->count(),
+                'generatedPresets' => AiAnalysis::query()->where('user_id', $user->id)->where('type', 'preset_generation')->count(),
+                'sessionPlans' => AiSessionPlan::query()->ownedBy($user->id)->count(),
+                'optimizedSessions' => AiSessionPlan::query()->ownedBy($user->id)->distinct()->count('session_id'),
+            ],
+            'latestAiSessionPlans' => AiSessionPlan::query()
+                ->ownedBy($user->id)
+                ->with('session')
+                ->latest()
+                ->limit(3)
+                ->get(),
             'recentActivity' => $this->recentActivity($user->id),
         ];
     }

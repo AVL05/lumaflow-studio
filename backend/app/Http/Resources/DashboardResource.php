@@ -35,6 +35,8 @@ class DashboardResource extends JsonResource
             'latestAiAnalysis' => new AiAnalysisResource($this->resource['latestAiAnalysis']),
             'ollamaStatus' => $this->resource['ollamaStatus'],
             'latestAiRecommendations' => $this->resource['latestAiRecommendations'],
+            'aiUsage' => $this->resource['aiUsage'],
+            'latestAiSessionPlans' => AiSessionPlanResource::collection($this->resource['latestAiSessionPlans']),
             'recentActivity' => $this->resource['recentActivity'],
         ];
     }

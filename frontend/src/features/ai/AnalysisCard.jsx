@@ -16,14 +16,14 @@ export function AnalysisCard({ analysis }) {
         <ScoreBadge score={analysis.score} />
       </div>
       <div className="mt-5 grid gap-3 text-sm text-stone-400 md:grid-cols-2">
-        {['composition', 'lighting', 'exposure', 'contrast', 'sharpness', 'whiteBalance', 'color', 'style'].map((key) => (
+        {['composition', 'ruleOfThirds', 'horizon', 'exposure', 'contrast', 'sharpness', 'whiteBalance', 'visualStyle'].map((key) => (
           <p key={key}><span className="text-stone-100">{key}:</span> {result[key] || 'Sin dato'}</p>
         ))}
       </div>
       <List title="Fortalezas" items={result.strengths} />
-      <List title="Debilidades" items={result.weaknesses} />
+      <List title="Errores detectados" items={result.detectedErrors} />
       <List title="Recomendaciones" items={result.recommendations} />
-      {result.presetSuggestion ? <p className="mt-4 text-sm text-amber-100">Preset sugerido: {result.presetSuggestion}</p> : null}
+      {result.recommendedPreset ? <p className="mt-4 text-sm text-amber-100">Preset sugerido: {result.recommendedPreset}</p> : null}
     </Card>
   )
 }

@@ -69,6 +69,16 @@ class User extends Authenticatable
         return $this->hasMany(AiAnalysis::class);
     }
 
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(AiConversation::class);
+    }
+
+    public function aiSessionPlans(): HasMany
+    {
+        return $this->hasMany(AiSessionPlan::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

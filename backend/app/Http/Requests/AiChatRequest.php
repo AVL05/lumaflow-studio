@@ -15,6 +15,7 @@ class AiChatRequest extends FormRequest
     {
         return [
             'message' => ['required', 'string', 'max:3000'],
+            'conversation_id' => ['nullable', 'integer'],
             'history' => ['nullable', 'array', 'max:20'],
             'history.*.role' => ['required_with:history', 'in:user,assistant'],
             'history.*.content' => ['required_with:history', 'string', 'max:3000'],

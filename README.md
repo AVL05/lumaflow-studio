@@ -10,7 +10,7 @@ LumaFlow Studio es una plataforma full-stack para fotografos y creadores visuale
 - Base de datos: MySQL
 - Auth: Laravel Sanctum con tokens Bearer para la SPA
 - Storage: Laravel Storage public disk
-- IA futura: Ollama local
+- IA: Ollama local
 - Mapas: Leaflet
 - Graficas futuras: Recharts
 
@@ -37,7 +37,7 @@ README.md   guia principal del proyecto
 - Planning: sesiones asociadas a localizaciones guardadas con mapa e informacion del spot
 - Clients: CRUD protegido por usuario con estados, contacto, empresa, notas, busqueda, filtros y detalle
 - Deliveries: CRUD protegido por usuario con cliente, sesion opcional, presupuesto, fecha, URL de galeria, notas privadas, busqueda, filtros y detalle
-- IA: asistente fotografico con Ollama local, contexto construido desde datos del usuario, status endpoint y analisis JSON guardado en `ai_analyses`
+- IA: asistente fotografico con Ollama local, contexto compacto desde datos del usuario, historial persistente, analisis avanzado de fotos, generacion de presets, recomendador de equipo, planificador de sesiones e insights en dashboard
 - UX: toasts globales, modales, confirmaciones, estados loading/error/empty y componentes reutilizables
 
 ## Endpoints principales
@@ -62,6 +62,11 @@ README.md   guia principal del proyecto
 - `GET /api/ai/status`
 - `POST /api/ai/chat`
 - `POST /api/ai/analyze`
+- `POST /api/ai/preset`
+- `POST /api/ai/session-plan`
+- `POST /api/ai/recommend-gear`
+- `GET /api/ai/history`
+- `GET|PATCH|DELETE /api/ai/history/{id}`
 
 ## Requisitos
 
@@ -94,6 +99,7 @@ SANCTUM_STATEFUL_DOMAINS=
 OLLAMA_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.1
 OLLAMA_TIMEOUT=30
+OLLAMA_MAX_CONTEXT=12000
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -154,16 +160,16 @@ Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://localh
 
 ## Estado del proyecto
 
-Fase 7 implementada con localizaciones fotograficas avanzadas, Leaflet interactivo y asociacion de sesiones a localizaciones. El proyecto esta preparado como release privada de portfolio. No incluye facturacion ni comparacion visual interactiva.
+Fase 8 implementada con integracion completa de Ollama local para un asistente fotografico especializado. El proyecto esta preparado como release privada de portfolio. No incluye facturacion, comparacion visual interactiva ni streaming HTTP incremental real; la UI esta preparada para progresion visual de respuestas.
 
 ## Roadmap
 
-- Usar EXIF para recomendaciones y busqueda inteligente
-- Activar streaming cuando el backend incorpore respuesta incremental compatible
+- Usar EXIF para recomendaciones mas precisas y busqueda inteligente
+- Activar streaming HTTP incremental real con respuestas chunked/SSE
 - UI de comparacion before/after sobre `photo_comparisons`
 - Conectar clientes con contratos, entregas publicas y aprobacion formal
 - Incorporar graficas con Recharts
-- Construir recomendaciones IA con datos reales del usuario
+- Exportacion PDF dedicada para planes y conversaciones IA
 
 ## Capturas
 

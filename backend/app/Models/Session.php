@@ -58,4 +58,9 @@ class Session extends Model
     {
         return $this->belongsTo(Location::class);
     }
+
+    public function aiPlans(): HasMany
+    {
+        return $this->hasMany(AiSessionPlan::class);
+    }
 }

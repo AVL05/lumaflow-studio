@@ -90,6 +90,16 @@ export function DashboardPage() {
               value={dashboard.deliveredProjects}
               detail="Entregados o aprobados"
             />
+            <StatCard
+              label="Uso IA"
+              value={dashboard.aiUsage?.analyses ?? 0}
+              detail={`${dashboard.aiUsage?.conversations ?? 0} conversaciones`}
+            />
+            <StatCard
+              label="Planes IA"
+              value={dashboard.aiUsage?.sessionPlans ?? 0}
+              detail={`${dashboard.aiUsage?.optimizedSessions ?? 0} sesiones optimizadas`}
+            />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
@@ -390,6 +400,22 @@ export function DashboardPage() {
               )}
             </Card>
           </div>
+
+          <Card className="p-5">
+            <h2 className="font-semibold">Ultimos planes IA</h2>
+            {dashboard.latestAiSessionPlans?.length === 0 ? (
+              <p className="mt-4 text-sm text-stone-500">Sin planes de sesion generados.</p>
+            ) : (
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {dashboard.latestAiSessionPlans?.map((plan) => (
+                  <div key={plan.id} className="rounded-md bg-white/[0.04] p-4">
+                    <p className="text-sm font-medium">{plan.title}</p>
+                    <p className="mt-2 text-sm text-stone-500">{plan.summary}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
 
           <Card className="p-5">
             <h2 className="font-semibold">Actividad reciente</h2>

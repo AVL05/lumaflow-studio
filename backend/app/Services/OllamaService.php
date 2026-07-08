@@ -12,7 +12,7 @@ class OllamaService
     public function status(): array
     {
         try {
-            $response = Http::timeout($this->timeout())->get($this->url().'/api/tags');
+            $response = Http::timeout($this->timeout())->retry(1, 250)->get($this->url().'/api/tags');
 
             return [
                 'available' => $response->successful(),
@@ -38,7 +38,10 @@ class OllamaService
             $payload = [
                 'model' => $this->model(),
                 'messages' => $messages,
-                'stream' => false,
+                'stream' => (bool) ($options['stream'] ?? false),
+                'options' => [
+                    'temperature' => $options['temperature'] ?? 0.45,
+                ],
             ];
 
             if (isset($options['format'])) {
@@ -46,6 +49,7 @@ class OllamaService
             }
 
             $response = Http::timeout($this->timeout())
+                ->retry(2, 350, throw: false)
                 ->post($this->url().'/api/chat', $payload);
         } catch (ConnectionException $exception) {
             Log::warning('Ollama connection failed', ['error' => $exception->getMessage()]);
@@ -60,11 +64,16 @@ class OllamaService
         return $response->json();
     }
 
+    public function streamingAvailable(): bool
+    {
+        return true;
+    }
+
     public function json(array $messages): array
     {
-        $response = $this->chat($messages, ['format' => 'json']);
+        $response = $this->chat($messages, ['format' => 'json', 'temperature' => 0.2]);
         $content = $response['message']['content'] ?? '{}';
-        $decoded = json_decode($content, true);
+        $decoded = json_decode($content, true) ?: json_decode($this->extractJson($content), true);
 
         if (! is_array($decoded)) {
             Log::warning('Ollama JSON parse failed', ['content' => $content]);
@@ -76,16 +85,25 @@ class OllamaService
 
     private function url(): string
     {
-        return rtrim(config('services.ollama.url'), '/');
+        return rtrim(config('ollama.url'), '/');
     }
 
     private function model(): string
     {
-        return config('services.ollama.model');
+        return config('ollama.model');
     }
 
     private function timeout(): int
     {
-        return max(5, (int) config('services.ollama.timeout'));
+        return max(5, (int) config('ollama.timeout'));
+    }
+
+    private function extractJson(string $content): string
+    {
+        if (preg_match('/\{.*\}/s', $content, $matches)) {
+            return $matches[0];
+        }
+
+        return '{}';
     }
 }
