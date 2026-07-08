@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpWorkflowRelations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['user_id', 'session_id', 'title', 'description', 'file_path', 'thumbnail_path', 'file_name', 'file_size', 'mime_type', 'taken_at', 'category', 'is_favorite', 'tags', 'exif'])]
 class Photo extends Model
 {
-    use HasFactory;
+    use CleansUpWorkflowRelations, HasFactory;
 
     protected function casts(): array
     {

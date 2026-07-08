@@ -12,7 +12,7 @@ LumaFlow Studio es una plataforma full-stack para fotografos y creadores visuale
 - Storage: Laravel Storage public disk
 - IA: Ollama local
 - Mapas: Leaflet
-- Graficas futuras: Recharts
+- Graficas: Recharts
 
 ## Estructura
 
@@ -38,7 +38,17 @@ README.md   guia principal del proyecto
 - Clients: CRUD protegido por usuario con estados, contacto, empresa, notas, busqueda, filtros y detalle
 - Deliveries: CRUD protegido por usuario con cliente, sesion opcional, presupuesto, fecha, URL de galeria, notas privadas, busqueda, filtros y detalle
 - IA: asistente fotografico con Ollama local, contexto compacto desde datos del usuario, historial persistente, analisis avanzado de fotos, generacion de presets, recomendador de equipo, planificador de sesiones e insights en dashboard
-- UX: toasts globales, modales, confirmaciones, estados loading/error/empty y componentes reutilizables
+- Calendar: vistas mes, semana, dia, agenda y lista con drag & drop para reprogramar sesiones, entregas, tareas y recordatorios
+- Tasks: CRUD protegido con prioridad, estado, fecha limite, relacion con sesion y cliente, resumen de vencidas y acciones masivas
+- Checklists: checklists tipadas por sesion con plantillas, items reordenables por drag & drop, progreso en porcentaje y duplicado
+- Timeline: actividad automatica por sesion (creacion, edicion, cambio de estado, subida de fotos, analisis IA, entrega, checklist completada)
+- Reminders: recordatorios con fecha, hora, tipo y estado, asociables a sesion, cliente, entrega o tarea
+- Notifications: centro de notificaciones persistido en BD con contador global, marcado de leidas y limpieza
+- Search: buscador global unificado con atajo `Ctrl/Cmd + K`, resultados agrupados y navegacion por teclado
+- Analytics: pagina `/app/analytics` con KPIs, ocho graficas Recharts sobre datos reales, tablas comparativas y rangos de fechas
+- Bulk actions: borrado, cambio de estado, etiquetado, mover a album, asignar cliente y exportar seleccion
+- Export: descarga CSV y JSON de sesiones, clientes, entregas, tareas, fotos, equipo, presets y localizaciones
+- UX: toasts globales, modales, confirmaciones, estados loading/error/empty, skeletons, atajos de teclado, filtros persistidos y componentes reutilizables
 
 ## Endpoints principales
 
@@ -67,6 +77,25 @@ README.md   guia principal del proyecto
 - `POST /api/ai/recommend-gear`
 - `GET /api/ai/history`
 - `GET|PATCH|DELETE /api/ai/history/{id}`
+- `apiResource /api/tasks`
+- `apiResource /api/reminders`
+- `apiResource /api/checklists`
+- `GET /api/checklists/templates`
+- `POST /api/checklists/{checklist}/duplicate`
+- `PUT /api/checklists/{checklist}/reorder`
+- `POST /api/checklists/{checklist}/items`
+- `PUT|PATCH|DELETE /api/checklist-items/{item}` (`PATCH .../toggle`)
+- `GET /api/activities`
+- `GET /api/sessions/{session}/timeline`
+- `GET /api/notifications`, `GET /api/notifications/unread-count`
+- `PATCH /api/notifications/read-all`, `PATCH /api/notifications/{notification}/read`
+- `DELETE /api/notifications/clear`, `DELETE /api/notifications/{notification}`
+- `GET /api/calendar` (`from`, `to`, `sources`)
+- `PATCH /api/calendar/move`
+- `GET /api/search` (`q`, `groups`, `per_group`)
+- `GET /api/analytics` (`from`, `to`)
+- `POST /api/bulk-actions`
+- `GET|POST /api/exports/{resource}` (`format=csv|json`)
 
 ## Requisitos
 
@@ -160,7 +189,21 @@ Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://localh
 
 ## Estado del proyecto
 
-Fase 8 implementada con integracion completa de Ollama local para un asistente fotografico especializado. El proyecto esta preparado como release privada de portfolio. No incluye facturacion, comparacion visual interactiva ni streaming HTTP incremental real; la UI esta preparada para progresion visual de respuestas.
+Fase 9 implementada: ecosistema de workflow enterprise con calendario, tareas, checklists, timeline de actividad, recordatorios, notificaciones persistidas, busqueda global, acciones masivas, exportacion CSV/JSON y analitica real con Recharts. El proyecto sigue como release privada de portfolio. No incluye facturacion, comparacion visual interactiva, streaming HTTP incremental real ni exportacion PDF.
+
+## Testing
+
+Las pruebas de `phpunit.xml` apuntan a SQLite en memoria. Si tu PHP no tiene `pdo_sqlite`, crea una base MySQL de test y sobrescribe la conexion:
+
+```sql
+CREATE DATABASE lumaflow_studio_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+```bash
+DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
+```
+
+La analitica usa SQL especifico de MySQL (`DATE_FORMAT`, `JSON_EXTRACT`), asi que MySQL es el motor de referencia tambien en pruebas.
 
 ## Roadmap
 
@@ -168,8 +211,9 @@ Fase 8 implementada con integracion completa de Ollama local para un asistente f
 - Activar streaming HTTP incremental real con respuestas chunked/SSE
 - UI de comparacion before/after sobre `photo_comparisons`
 - Conectar clientes con contratos, entregas publicas y aprobacion formal
-- Incorporar graficas con Recharts
-- Exportacion PDF dedicada para planes y conversaciones IA
+- Exportacion PDF dedicada para planes, conversaciones IA e informes de analitica
+- Recordatorios con envio real (cola + notificaciones push o email)
+- Kanban de tareas con drag & drop entre columnas de estado
 
 ## Capturas
 

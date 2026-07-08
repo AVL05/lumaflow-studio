@@ -38,6 +38,14 @@ class DashboardResource extends JsonResource
             'aiUsage' => $this->resource['aiUsage'],
             'latestAiSessionPlans' => AiSessionPlanResource::collection($this->resource['latestAiSessionPlans']),
             'recentActivity' => $this->resource['recentActivity'],
+            'todayAgenda' => $this->resource['todayAgenda'],
+            'pendingTasks' => TaskResource::collection($this->resource['pendingTasks']),
+            'taskSummary' => $this->resource['taskSummary'],
+            'upcomingReminders' => ReminderResource::collection($this->resource['upcomingReminders']),
+            'unreadNotifications' => $this->resource['unreadNotifications'],
+            'monthlyProgress' => $this->resource['monthlyProgress'],
+            'favoriteGear' => GearItemResource::collection($this->resource['favoriteGear']),
+            'timeline' => ActivityResource::collection($this->resource['timeline']),
         ];
     }
 }

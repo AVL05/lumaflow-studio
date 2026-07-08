@@ -6,10 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeliveryRequest;
 use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
+use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class DeliveryController extends Controller
 {
+    public function __construct(
+        private readonly ActivityLogger $activity,
+        private readonly NotificationService $notifications,
+    ) {}
+
     public function index(): AnonymousResourceCollection
     {
         $sort = in_array(request('sort'), ['title', 'status', 'delivery_date', 'created_at'], true) ? request('sort') : 'created_at';
@@ -30,6 +37,7 @@ class DeliveryController extends Controller
     public function store(DeliveryRequest $request): DeliveryResource
     {
         $delivery = request()->user()->deliveries()->create($request->validated());
+        $this->activity->log($request->user(), $delivery, ActivityLogger::CREATED, "Entrega creada: {$delivery->title}");
 
         return new DeliveryResource($delivery->load(['client', 'session']));
     }
@@ -44,7 +52,18 @@ class DeliveryController extends Controller
     public function update(DeliveryRequest $request, Delivery $delivery): DeliveryResource
     {
         $this->ensureOwnership($delivery);
+
+        $previousStatus = $delivery->status;
         $delivery->update($request->validated());
+        $this->activity->logStatusChange($request->user(), $delivery, $previousStatus, $delivery->status);
+
+        if ($previousStatus !== $delivery->status && in_array($delivery->status, ['delivered', 'approved'], true)) {
+            if ($delivery->session) {
+                $this->activity->log($request->user(), $delivery->session, ActivityLogger::DELIVERED, "Entrega {$delivery->status}: {$delivery->title}");
+            }
+
+            $this->notifications->success($request->user(), 'Entrega actualizada', $delivery->title, "/app/deliveries/{$delivery->id}");
+        }
 
         return new DeliveryResource($delivery->refresh()->load(['client', 'session']));
     }

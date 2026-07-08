@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpWorkflowRelations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable(['user_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'delivery_date', 'gallery_url', 'private_notes'])]
 class Delivery extends Model
 {
-    use HasFactory;
+    use CleansUpWorkflowRelations, HasFactory;
 
     protected function casts(): array
     {
@@ -53,5 +55,15 @@ class Delivery extends Model
     public function session(): BelongsTo
     {
         return $this->belongsTo(Session::class);
+    }
+
+    public function reminders(): MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'remindable');
+    }
+
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
     }
 }

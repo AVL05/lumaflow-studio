@@ -79,6 +79,35 @@ class User extends Authenticatable
         return $this->hasMany(AiSessionPlan::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class);
+    }
+
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    /**
+     * Notificaciones propias de LumaFlow. Sustituye deliberadamente la relacion
+     * morfica de Illuminate\Notifications\Notifiable, que este proyecto no usa.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

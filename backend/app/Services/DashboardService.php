@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Activity;
 use App\Models\AiAnalysis;
 use App\Models\AiConversation;
 use App\Models\AiSessionPlan;
@@ -9,17 +10,23 @@ use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Location;
+use App\Models\Notification;
 use App\Models\Photo;
 use App\Models\Preset;
+use App\Models\Reminder;
 use App\Models\Session;
 use App\Models\Tag;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    public function __construct(private readonly OllamaService $ollama) {}
+    public function __construct(
+        private readonly OllamaService $ollama,
+        private readonly CalendarService $calendar,
+    ) {}
 
     public function forUser(User $user): array
     {
@@ -153,6 +160,75 @@ class DashboardService
                 ->limit(3)
                 ->get(),
             'recentActivity' => $this->recentActivity($user->id),
+            'todayAgenda' => $this->calendar->events($user, now()->toDateString(), now()->toDateString()),
+            'pendingTasks' => Task::query()
+                ->ownedBy($user->id)
+                ->open()
+                ->with(['session:id,name', 'client:id,name'])
+                ->orderByRaw('due_date is null')
+                ->orderBy('due_date')
+                ->limit(6)
+                ->get(),
+            'taskSummary' => $this->taskSummary($user->id),
+            'upcomingReminders' => Reminder::query()
+                ->ownedBy($user->id)
+                ->where('status', 'pending')
+                ->whereDate('remind_date', '>=', now()->toDateString())
+                ->orderBy('remind_date')
+                ->limit(5)
+                ->get(),
+            'unreadNotifications' => Notification::query()->ownedBy($user->id)->unread()->count(),
+            'monthlyProgress' => $this->monthlyProgress($user->id),
+            'favoriteGear' => GearItem::query()
+                ->ownedBy($user->id)
+                ->where('is_favorite', true)
+                ->orderBy('category')
+                ->limit(6)
+                ->get(),
+            'timeline' => Activity::query()
+                ->ownedBy($user->id)
+                ->latest()
+                ->limit(8)
+                ->get(),
+        ];
+    }
+
+    private function taskSummary(int $userId): array
+    {
+        $totals = Task::query()
+            ->ownedBy($userId)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return [
+            'byStatus' => collect(Task::STATUSES)
+                ->map(fn (string $status) => ['status' => $status, 'total' => (int) ($totals[$status] ?? 0)])
+                ->values()
+                ->all(),
+            'open' => Task::query()->ownedBy($userId)->open()->count(),
+            'overdue' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', '<', now()->toDateString())->count(),
+            'dueToday' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', now()->toDateString())->count(),
+        ];
+    }
+
+    private function monthlyProgress(int $userId): array
+    {
+        $start = now()->startOfMonth();
+        $end = now()->endOfMonth();
+
+        $sessions = Session::query()->ownedBy($userId)->whereBetween('date', [$start, $end]);
+        $total = (clone $sessions)->count();
+        $completed = (clone $sessions)->whereIn('status', ['completed', 'delivered'])->count();
+
+        return [
+            'month' => now()->format('Y-m'),
+            'sessions' => $total,
+            'completedSessions' => $completed,
+            'completionRate' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
+            'photos' => Photo::query()->ownedBy($userId)->whereBetween('created_at', [$start, $end])->count(),
+            'deliveries' => Delivery::query()->ownedBy($userId)->whereBetween('delivery_date', [$start, $end])->count(),
+            'completedTasks' => Task::query()->ownedBy($userId)->where('status', 'completed')->whereBetween('completed_at', [$start, $end])->count(),
         ];
     }
 

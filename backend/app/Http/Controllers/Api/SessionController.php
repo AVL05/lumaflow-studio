@@ -6,10 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SessionRequest;
 use App\Http\Resources\SessionResource;
 use App\Models\Session;
+use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SessionController extends Controller
 {
+    public function __construct(
+        private readonly ActivityLogger $activity,
+        private readonly NotificationService $notifications,
+    ) {}
+
     public function index(): AnonymousResourceCollection
     {
         $sort = in_array(request('sort'), ['date', 'name', 'status', 'session_type', 'created_at'], true) ? request('sort') : 'date';
@@ -31,6 +38,7 @@ class SessionController extends Controller
     public function store(SessionRequest $request): SessionResource
     {
         $session = request()->user()->sessions()->create($request->validated());
+        $this->activity->log($request->user(), $session, ActivityLogger::CREATED, "Sesion creada: {$session->name}");
 
         return new SessionResource($session->load('location'));
     }
@@ -45,7 +53,20 @@ class SessionController extends Controller
     public function update(SessionRequest $request, Session $session): SessionResource
     {
         $this->ensureOwnership($session);
+
+        $previousStatus = $session->status;
         $session->update($request->validated());
+
+        if ($previousStatus === $session->status) {
+            $this->activity->log($request->user(), $session, ActivityLogger::UPDATED, 'Sesion editada');
+        } else {
+            $this->activity->logStatusChange($request->user(), $session, $previousStatus, $session->status);
+        }
+
+        if ($previousStatus !== 'delivered' && $session->status === 'delivered') {
+            $this->activity->log($request->user(), $session, ActivityLogger::DELIVERED, 'Sesion marcada como entregada');
+            $this->notifications->success($request->user(), 'Sesion entregada', $session->name, '/app/sessions');
+        }
 
         return new SessionResource($session->refresh()->load('location'));
     }

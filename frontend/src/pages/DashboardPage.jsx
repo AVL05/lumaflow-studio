@@ -15,6 +15,15 @@ import {
   toneForStatus,
 } from "../utils/catalogs";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
+import {
+  ActivityWidget,
+  AgendaWidget,
+  FavoriteGearWidget,
+  MonthlyProgressWidget,
+  PendingTasksWidget,
+  RemindersWidget,
+  TopLocationsWidget,
+} from "../features/dashboard/WorkflowWidgets";
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
@@ -100,6 +109,34 @@ export function DashboardPage() {
               value={dashboard.aiUsage?.sessionPlans ?? 0}
               detail={`${dashboard.aiUsage?.optimizedSessions ?? 0} sesiones optimizadas`}
             />
+            <StatCard
+              label="Tareas abiertas"
+              value={dashboard.taskSummary?.open ?? 0}
+              detail={`${dashboard.taskSummary?.overdue ?? 0} vencidas`}
+            />
+            <StatCard
+              label="Avisos sin leer"
+              value={dashboard.unreadNotifications ?? 0}
+              detail="Centro de notificaciones"
+            />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-3">
+            <AgendaWidget events={dashboard.todayAgenda ?? []} />
+            <PendingTasksWidget
+              tasks={dashboard.pendingTasks ?? []}
+              summary={dashboard.taskSummary}
+            />
+            <RemindersWidget reminders={dashboard.upcomingReminders ?? []} />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-3">
+            <MonthlyProgressWidget progress={dashboard.monthlyProgress} />
+            <ActivityWidget activities={dashboard.timeline ?? []} />
+            <div className="grid gap-6">
+              <FavoriteGearWidget gear={dashboard.favoriteGear ?? []} />
+              <TopLocationsWidget locations={dashboard.favoriteLocations ?? []} />
+            </div>
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">

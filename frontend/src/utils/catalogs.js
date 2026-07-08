@@ -126,6 +126,75 @@ export const deliveryStatuses = [
   { value: "archived", label: "Archivado", tone: "neutral" },
 ];
 
+export const taskStatuses = [
+  { value: "todo", label: "Por hacer", tone: "neutral" },
+  { value: "in_progress", label: "En curso", tone: "warm" },
+  { value: "waiting", label: "En espera", tone: "warm" },
+  { value: "completed", label: "Completada", tone: "green" },
+  { value: "cancelled", label: "Cancelada", tone: "red" },
+];
+
+export const taskPriorities = [
+  { value: "low", label: "Baja", tone: "neutral" },
+  { value: "medium", label: "Media", tone: "neutral" },
+  { value: "high", label: "Alta", tone: "warm" },
+  { value: "urgent", label: "Urgente", tone: "red" },
+];
+
+export const checklistTypes = [
+  { value: "gear", label: "Equipo" },
+  { value: "preparation", label: "Preparacion" },
+  { value: "editing", label: "Edicion" },
+  { value: "delivery", label: "Entrega" },
+  { value: "custom", label: "Personalizada" },
+];
+
+export const reminderTypes = [
+  { value: "session", label: "Sesion" },
+  { value: "client", label: "Cliente" },
+  { value: "delivery", label: "Entrega" },
+  { value: "task", label: "Tarea" },
+  { value: "custom", label: "Personalizado" },
+];
+
+export const reminderStatuses = [
+  { value: "pending", label: "Pendiente", tone: "warm" },
+  { value: "done", label: "Hecho", tone: "green" },
+  { value: "dismissed", label: "Descartado", tone: "neutral" },
+];
+
+export const notificationTypes = [
+  { value: "success", label: "Exito", tone: "green" },
+  { value: "warning", label: "Aviso", tone: "warm" },
+  { value: "error", label: "Error", tone: "red" },
+  { value: "info", label: "Info", tone: "neutral" },
+  { value: "system", label: "Sistema", tone: "neutral" },
+];
+
+export const calendarSources = [
+  { value: "session", label: "Sesiones" },
+  { value: "delivery", label: "Entregas" },
+  { value: "task", label: "Tareas" },
+  { value: "reminder", label: "Recordatorios" },
+];
+
+export const activityTypes = [
+  { value: "created", label: "Creado" },
+  { value: "updated", label: "Editado" },
+  { value: "deleted", label: "Eliminado" },
+  { value: "status_changed", label: "Cambio de estado" },
+  { value: "photo_uploaded", label: "Foto subida" },
+  { value: "ai_analysis", label: "Analisis IA" },
+  { value: "ai_plan", label: "Plan IA" },
+  { value: "delivered", label: "Entregado" },
+  { value: "checklist_completed", label: "Checklist completada" },
+  { value: "comment", label: "Comentario" },
+];
+
+export function toneFor(options, value) {
+  return options.find((option) => option.value === value)?.tone ?? "neutral";
+}
+
 export function labelFor(options, value) {
   return options.find((option) => option.value === value)?.label ?? value;
 }

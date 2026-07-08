@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { albumsApi } from "../api/albums";
+import { bulkApi } from "../api/bulk";
 import { getApiError } from "../api/client";
+import { exportsApi } from "../api/exports";
 import { photosApi } from "../api/photos";
 import { sessionsApi } from "../api/sessions";
 import { tagsApi } from "../api/tags";
 import { Badge } from "../components/ui/Badge";
+import { BulkActionBar } from "../components/ui/BulkActionBar";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { Checkbox } from "../components/ui/Checkbox";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { Field } from "../components/ui/Field";
 import { Input } from "../components/ui/Input";
@@ -23,6 +27,7 @@ import { ExifPanel } from "../features/gallery/ExifPanel";
 import { GalleryViewSwitcher } from "../features/gallery/GalleryViewSwitcher";
 import { TagSelector } from "../features/tags/TagSelector";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useSelection } from "../hooks/useSelection";
 import { useToast } from "../features/notifications/ToastContext";
 
 const defaults = {
@@ -54,6 +59,20 @@ export function PhotosPage() {
   const [uploadError, setUploadError] = useState("");
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+  const selection = useSelection();
+  const [bulkTag, setBulkTag] = useState("");
+  const [bulkAlbum, setBulkAlbum] = useState("");
+
+  async function runBulk(action, payload) {
+    try {
+      const { affected } = await bulkApi.run("photos", action, selection.selected, payload);
+      toast.success(`${affected} fotos actualizadas.`);
+      selection.clear();
+      await resource.refresh();
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
+  }
 
   useEffect(() => {
     Promise.all([
@@ -173,6 +192,8 @@ export function PhotosPage() {
                 key={photo.id}
                 photo={photo}
                 view={view}
+                selected={selection.isSelected(photo.id)}
+                onSelect={selection.toggle}
                 onPreview={setPreview}
                 onEdit={(item) => setEditing(photoToForm(item))}
                 onDelete={setDeleting}
@@ -182,6 +203,45 @@ export function PhotosPage() {
           <Pagination meta={resource.meta} onPage={resource.setPage} />
         </>
       )}
+
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <Select
+          value={bulkTag}
+          onChange={(e) => setBulkTag(e.target.value)}
+          options={[
+            { value: "", label: "Etiqueta..." },
+            ...tags.map((tag) => ({ value: String(tag.id), label: tag.name })),
+          ]}
+        />
+        <Button
+          variant="secondary"
+          disabled={!bulkTag}
+          onClick={() => runBulk("tags", { tag_ids: [Number(bulkTag)] })}
+        >
+          Anadir etiqueta
+        </Button>
+        <Select
+          value={bulkAlbum}
+          onChange={(e) => setBulkAlbum(e.target.value)}
+          options={[
+            { value: "", label: "Album..." },
+            ...albums.map((album) => ({ value: String(album.id), label: album.name })),
+          ]}
+        />
+        <Button
+          variant="secondary"
+          disabled={!bulkAlbum}
+          onClick={() => runBulk("album", { album_id: Number(bulkAlbum) })}
+        >
+          Mover a album
+        </Button>
+        <Button variant="secondary" onClick={() => exportsApi.csv("photos", selection.selected)}>
+          Exportar
+        </Button>
+        <Button variant="danger" onClick={() => runBulk("delete")}>
+          Eliminar
+        </Button>
+      </BulkActionBar>
 
       <Modal
         open={Boolean(preview)}
@@ -309,7 +369,7 @@ function GalleryFilters({ resource, albums, tags, sessions }) {
   );
 }
 
-function PhotoCard({ photo, view, onPreview, onEdit, onDelete }) {
+function PhotoCard({ photo, view, selected, onSelect, onPreview, onEdit, onDelete }) {
   const content = (
     <>
       <button
@@ -329,12 +389,20 @@ function PhotoCard({ photo, view, onPreview, onEdit, onDelete }) {
       </button>
       <div className={view === "grid" ? "p-4" : "min-w-0 flex-1 p-4"}>
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="font-medium">{photo.title || "Sin titulo"}</h2>
-            <p className="mt-1 text-xs text-stone-500">
-              {formatBytes(photo.file_size)} ·{" "}
-              {photo.exif_summary?.camera_model || "Sin camara"}
-            </p>
+          <div className="flex min-w-0 items-start gap-3">
+            <Checkbox
+              checked={selected}
+              onChange={() => onSelect(photo.id)}
+              aria-label={`Seleccionar ${photo.title || photo.file_name}`}
+              className="mt-1"
+            />
+            <div className="min-w-0">
+              <h2 className="truncate font-medium">{photo.title || "Sin titulo"}</h2>
+              <p className="mt-1 text-xs text-stone-500">
+                {formatBytes(photo.file_size)} ·{" "}
+                {photo.exif_summary?.camera_model || "Sin camara"}
+              </p>
+            </div>
           </div>
           {photo.is_favorite ? <Badge variant="warm">Fav</Badge> : null}
         </div>

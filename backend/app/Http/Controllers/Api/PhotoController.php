@@ -7,6 +7,7 @@ use App\Http\Requests\PhotoUpdateRequest;
 use App\Http\Requests\PhotoUploadRequest;
 use App\Http\Resources\PhotoResource;
 use App\Models\Photo;
+use App\Services\ActivityLogger;
 use App\Services\ExifExtractorService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class PhotoController extends Controller
 {
+    public function __construct(private readonly ActivityLogger $activity) {}
+
     public function index(): AnonymousResourceCollection
     {
         $sort = in_array(request('sort'), ['title', 'category', 'taken_at', 'created_at'], true) ? request('sort') : 'created_at';
@@ -58,6 +61,15 @@ class PhotoController extends Controller
 
         $photo->albums()->sync($request->input('album_ids', []));
         $photo->tags()->sync($request->input('tag_ids', []));
+
+        // El timeline se ancla en la sesion cuando existe; si no, en la propia foto.
+        $this->activity->log(
+            $request->user(),
+            $photo->session ?? $photo,
+            ActivityLogger::PHOTO_UPLOADED,
+            'Foto subida: '.($photo->title ?: $photo->file_name),
+            ['photo_id' => $photo->id],
+        );
 
         return new PhotoResource($photo->load(['session', 'albums', 'tags']));
     }

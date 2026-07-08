@@ -31,14 +31,19 @@ export function MapView({
     }
   }, [])
 
+  const initialViewRef = useRef({ center, markers, selected, zoom })
+
+  // El mapa se crea una unica vez por montaje: incluir center/markers/zoom en las
+  // dependencias destruia y recreaba la instancia en cada render, dejando efectos
+  // posteriores operando sobre un mapa ya eliminado.
   useEffect(() => {
     if (!leaflet || !mapRef.current || mapInstanceRef.current) return
 
-    const initialCenter = normalizedCenter(center, markers, selected)
+    const { center: initialCenter, markers: initialMarkers, selected: initialSelected, zoom: initialZoom } = initialViewRef.current
     const instance = leaflet.map(mapRef.current, {
       zoomControl: true,
       scrollWheelZoom: true,
-    }).setView(initialCenter, zoom)
+    }).setView(normalizedCenter(initialCenter, initialMarkers, initialSelected), initialZoom)
 
     leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -52,12 +57,14 @@ export function MapView({
     return () => {
       instance.remove()
       mapInstanceRef.current = null
+      layerRef.current = null
       setMap(null)
     }
-  }, [center, leaflet, markers, selected, zoom])
+  }, [leaflet])
 
   useEffect(() => {
-    if (!map || !leaflet || !layerRef.current) return
+    // Descarta renders con una instancia ya destruida (StrictMode remonta efectos).
+    if (!map || !leaflet || !layerRef.current || map !== mapInstanceRef.current) return
 
     layerRef.current.clearLayers()
     const bounds = []
@@ -85,6 +92,14 @@ export function MapView({
       map.setView(bounds[0], zoom)
     }
   }, [leaflet, map, markers, selected, zoom])
+
+  // Recentrado cuando el consumidor cambia `center` despues del montaje.
+  useEffect(() => {
+    if (!map || map !== mapInstanceRef.current || !center) return
+    if (!isValidCoord(center[0], center[1])) return
+
+    map.setView([Number(center[0]), Number(center[1])], zoom)
+  }, [center, map, zoom])
 
   useEffect(() => {
     if (!map || !selectable) return

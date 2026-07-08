@@ -2,7 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
+use App\Models\Delivery;
+use App\Models\Session;
 use App\Models\User;
+use App\Services\ChecklistService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -195,7 +199,7 @@ class DatabaseSeeder extends Seeder
             'notes' => 'Cliente de producto y contenido editorial.',
         ]);
 
-        $user->deliveries()->create([
+        $delivery = $user->deliveries()->create([
             'client_id' => $client->id,
             'session_id' => $user->sessions()->where('session_type', 'product')->value('id'),
             'title' => 'Entrega Producto Premium',
@@ -204,6 +208,134 @@ class DatabaseSeeder extends Seeder
             'delivery_date' => now()->addDays(10)->toDateString(),
             'gallery_url' => 'https://example.com/gallery/producto-premium',
             'private_notes' => 'Preparar seleccion final y preset cinematico suave.',
+        ]);
+
+        $this->seedWorkflow($user, $client, $delivery);
+    }
+
+    /** Datos de la fase 9: tareas, checklists, recordatorios, actividad y notificaciones. */
+    private function seedWorkflow(User $user, Client $client, Delivery $delivery): void
+    {
+        $urbanSession = $user->sessions()->where('session_type', 'urban')->firstOrFail();
+        $productSession = $user->sessions()->where('session_type', 'product')->firstOrFail();
+
+        $user->tasks()->createMany([
+            [
+                'session_id' => $urbanSession->id,
+                'title' => 'Confirmar permisos de azotea',
+                'description' => 'Llamar a recepcion y cerrar franja horaria de blue hour.',
+                'priority' => 'urgent',
+                'status' => 'todo',
+                'due_date' => now()->addDays(2)->toDateString(),
+                'due_time' => '10:00',
+            ],
+            [
+                'session_id' => $urbanSession->id,
+                'title' => 'Preparar moodboard editorial',
+                'priority' => 'medium',
+                'status' => 'in_progress',
+                'due_date' => now()->addDays(3)->toDateString(),
+            ],
+            [
+                'session_id' => $productSession->id,
+                'client_id' => $client->id,
+                'title' => 'Seleccion final producto premium',
+                'priority' => 'high',
+                'status' => 'waiting',
+                'due_date' => now()->addDays(5)->toDateString(),
+            ],
+            [
+                'client_id' => $client->id,
+                'title' => 'Enviar presupuesto trimestral',
+                'priority' => 'low',
+                'status' => 'completed',
+                'due_date' => now()->subDays(4)->toDateString(),
+                'completed_at' => now()->subDays(3),
+            ],
+        ]);
+
+        $checklistNames = ['gear' => 'Equipo', 'preparation' => 'Preparacion', 'editing' => 'Edicion'];
+
+        foreach (array_keys($checklistNames) as $index => $type) {
+            $checklist = $user->checklists()->create([
+                'session_id' => $urbanSession->id,
+                'name' => $checklistNames[$type],
+                'type' => $type,
+                'position' => $index,
+            ]);
+
+            foreach (ChecklistService::TEMPLATES[$type] as $position => $title) {
+                $checklist->items()->create([
+                    'title' => $title,
+                    'position' => $position,
+                    'is_completed' => $type === 'gear' && $position < 2,
+                    'completed_at' => $type === 'gear' && $position < 2 ? now()->subHours(5) : null,
+                ]);
+            }
+        }
+
+        $user->reminders()->createMany([
+            [
+                'remindable_type' => Session::class,
+                'remindable_id' => $urbanSession->id,
+                'remind_date' => now()->addDay()->toDateString(),
+                'remind_time' => '18:30',
+                'message' => 'Cargar baterias antes de la sesion en azotea.',
+                'type' => 'session',
+                'status' => 'pending',
+            ],
+            [
+                'remindable_type' => Delivery::class,
+                'remindable_id' => $delivery->id,
+                'remind_date' => now()->addDays(9)->toDateString(),
+                'message' => 'Revisar galeria antes de enviar al cliente.',
+                'type' => 'delivery',
+                'status' => 'pending',
+            ],
+        ]);
+
+        $user->activities()->createMany([
+            [
+                'subject_type' => Session::class,
+                'subject_id' => $urbanSession->id,
+                'type' => 'created',
+                'description' => 'Sesion creada: '.$urbanSession->name,
+            ],
+            [
+                'subject_type' => Session::class,
+                'subject_id' => $productSession->id,
+                'type' => 'status_changed',
+                'description' => 'Estado planned -> editing',
+                'properties' => ['from' => 'planned', 'to' => 'editing'],
+            ],
+            [
+                'subject_type' => Delivery::class,
+                'subject_id' => $delivery->id,
+                'type' => 'created',
+                'description' => 'Entrega creada: '.$delivery->title,
+            ],
+        ]);
+
+        $user->notifications()->createMany([
+            [
+                'type' => 'info',
+                'title' => 'Sesion proxima',
+                'message' => $urbanSession->name.' en pocos dias.',
+                'link' => '/app/sessions',
+            ],
+            [
+                'type' => 'warning',
+                'title' => 'Tarea urgente pendiente',
+                'message' => 'Confirmar permisos de azotea.',
+                'link' => '/app/tasks',
+            ],
+            [
+                'type' => 'success',
+                'title' => 'Preset creado',
+                'message' => 'Cinematic Night listo para usar.',
+                'link' => '/app/presets',
+                'read_at' => now()->subDay(),
+            ],
         ]);
     }
 }

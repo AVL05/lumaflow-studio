@@ -17,6 +17,7 @@ use App\Http\Resources\PresetResource;
 use App\Models\AiConversation;
 use App\Models\Photo;
 use App\Models\Session;
+use App\Services\ActivityLogger;
 use App\Services\AiContextService;
 use App\Services\OllamaService;
 use App\Services\PhotoAnalysisService;
@@ -38,6 +39,7 @@ class AiController extends Controller
         private readonly PresetGeneratorService $presets,
         private readonly RecommendationService $recommendations,
         private readonly SessionPlannerService $sessionPlanner,
+        private readonly ActivityLogger $activity,
     ) {}
 
     public function status(): JsonResponse
@@ -103,14 +105,24 @@ class AiController extends Controller
             ->findOrFail($request->integer('photo_id'));
 
         try {
-            return new AiAnalysisResource($this->analysis->analyze(
+            $analysis = $this->analysis->analyze(
                 $request->user(),
                 $photo,
                 $request->validated('prompt') ?? null
-            ));
+            );
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 503);
         }
+
+        $this->activity->log(
+            $request->user(),
+            $photo->session ?? $photo,
+            ActivityLogger::AI_ANALYSIS,
+            'Analisis IA de foto',
+            ['photo_id' => $photo->id],
+        );
+
+        return new AiAnalysisResource($analysis);
     }
 
     public function preset(AiPresetRequest $request): PresetResource|JsonResponse
@@ -129,10 +141,14 @@ class AiController extends Controller
             ->findOrFail($request->integer('session_id'));
 
         try {
-            return new AiSessionPlanResource($this->sessionPlanner->plan($request->user(), $session, $request->validated()));
+            $plan = $this->sessionPlanner->plan($request->user(), $session, $request->validated());
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 503);
         }
+
+        $this->activity->log($request->user(), $session, ActivityLogger::AI_PLAN, 'Plan de sesion generado con IA');
+
+        return new AiSessionPlanResource($plan);
     }
 
     public function recommendGear(AiGearRecommendationRequest $request): AiAnalysisResource|JsonResponse

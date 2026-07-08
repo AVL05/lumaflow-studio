@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppLayout } from "../components/layout/AppLayout";
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
+import { lazyRoute } from "./lazyRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -16,6 +17,8 @@ import { DeliveryDetailPage } from "../pages/DeliveryDetailPage";
 import { LocationsPage } from "../pages/LocationsPage";
 import { LocationDetailPage } from "../pages/LocationDetailPage";
 import { AiAssistantPage } from "../pages/AiAssistantPage";
+import { TasksPage } from "../pages/TasksPage";
+import { RemindersPage } from "../pages/RemindersPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/app/dashboard" replace /> },
@@ -31,6 +34,16 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
       { path: "dashboard", element: <DashboardPage /> },
+      {
+        path: "calendar",
+        element: lazyRoute(() => import("../pages/CalendarPage"), "CalendarPage"),
+      },
+      { path: "tasks", element: <TasksPage /> },
+      { path: "reminders", element: <RemindersPage /> },
+      {
+        path: "analytics",
+        element: lazyRoute(() => import("../pages/AnalyticsPage"), "AnalyticsPage"),
+      },
       { path: "sessions", element: <SessionsPage /> },
       { path: "gear", element: <GearPage /> },
       { path: "presets", element: <PresetsPage /> },

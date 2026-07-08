@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpWorkflowRelations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable(['user_id', 'name', 'email', 'phone', 'company', 'instagram', 'notes', 'status'])]
 class Client extends Model
 {
-    use HasFactory;
+    use CleansUpWorkflowRelations, HasFactory;
 
     public function scopeOwnedBy($query, int $userId)
     {
@@ -41,5 +43,20 @@ class Client extends Model
     public function deliveries(): HasMany
     {
         return $this->hasMany(Delivery::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function reminders(): MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'remindable');
+    }
+
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
     }
 }

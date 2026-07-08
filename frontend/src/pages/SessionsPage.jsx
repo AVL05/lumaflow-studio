@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { bulkApi } from "../api/bulk";
+import { exportsApi } from "../api/exports";
 import { sessionsApi } from "../api/sessions";
 import { getApiError } from "../api/client";
 import { Badge } from "../components/ui/Badge";
+import { BulkActionBar } from "../components/ui/BulkActionBar";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { Checkbox } from "../components/ui/Checkbox";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { Field } from "../components/ui/Field";
 import { Input } from "../components/ui/Input";
@@ -13,10 +17,14 @@ import { Pagination } from "../components/ui/Pagination";
 import { SearchBar } from "../components/ui/SearchBar";
 import { Select } from "../components/ui/Select";
 import { Skeleton } from "../components/ui/Skeleton";
+import { Tabs } from "../components/ui/Tabs";
 import { Textarea } from "../components/ui/Textarea";
 import { EmptyState } from "../components/states/EmptyState";
 import { ErrorState } from "../components/states/ErrorState";
+import { ChecklistPanel } from "../features/checklists/ChecklistPanel";
+import { SessionTimeline } from "../features/timeline/SessionTimeline";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useSelection } from "../hooks/useSelection";
 import { useToast } from "../features/notifications/ToastContext";
 import { LocationSelector } from "../features/locations/LocationSelector";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
@@ -54,6 +62,19 @@ export function SessionsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const selection = useSelection();
+  const [bulkStatus, setBulkStatus] = useState("completed");
+
+  async function runBulk(action, payload) {
+    try {
+      const { affected } = await bulkApi.run("sessions", action, selection.selected, payload);
+      toast.success(`${affected} sesiones actualizadas.`);
+      selection.clear();
+      await resource.refresh();
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
+  }
 
   function openCreate() {
     setEditing(null);
@@ -103,8 +124,15 @@ export function SessionsPage() {
       <PageHeader
         eyebrow="Planning"
         title="Sesiones"
-        description="Gestiona sesiones con cliente, tipo, estado, localizacion, detalle operativo y filtros reales."
-        action={<Button onClick={openCreate}>Nueva sesion</Button>}
+        description="Gestiona sesiones con cliente, tipo, estado, localizacion, checklists, timeline y filtros reales."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => exportsApi.csv("sessions")}>
+              Exportar CSV
+            </Button>
+            <Button onClick={openCreate}>Nueva sesion</Button>
+          </div>
+        }
       />
 
       <div className="mb-6 grid gap-3 lg:grid-cols-[1fr_180px_180px_160px_140px]">
@@ -160,14 +188,20 @@ export function SessionsPage() {
             {resource.items.map((session) => (
               <Card key={session.id} className="p-5">
                 <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="font-semibold text-stone-50">
-                      {session.name}
-                    </h2>
-                    <p className="mt-1 text-sm text-stone-500">
-                      {session.client_name || "Sin cliente"} ·{" "}
-                      {session.location?.name || session.location_name || "Sin localizacion"}
-                    </p>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <Checkbox
+                      checked={selection.isSelected(session.id)}
+                      onChange={() => selection.toggle(session.id)}
+                      aria-label={`Seleccionar ${session.name}`}
+                      className="mt-1.5"
+                    />
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-stone-50">{session.name}</h2>
+                      <p className="mt-1 text-sm text-stone-500">
+                        {session.client_name || "Sin cliente"} ·{" "}
+                        {session.location?.name || session.location_name || "Sin localizacion"}
+                      </p>
+                    </div>
                   </div>
                   <Badge variant={toneForStatus(session.status)}>
                     {labelFor(sessionStatuses, session.status)}
@@ -202,6 +236,23 @@ export function SessionsPage() {
           <Pagination meta={resource.meta} onPage={resource.setPage} />
         </>
       )}
+
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <Select
+          value={bulkStatus}
+          onChange={(e) => setBulkStatus(e.target.value)}
+          options={sessionStatuses}
+        />
+        <Button variant="secondary" onClick={() => runBulk("status", { value: bulkStatus })}>
+          Cambiar estado
+        </Button>
+        <Button variant="secondary" onClick={() => exportsApi.csv("sessions", selection.selected)}>
+          Exportar seleccion
+        </Button>
+        <Button variant="danger" onClick={() => runBulk("delete")}>
+          Eliminar
+        </Button>
+      </BulkActionBar>
 
       <Modal
         open={formOpen}
@@ -325,7 +376,26 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
   );
 }
 
+const detailTabs = [
+  { value: "detail", label: "Detalle" },
+  { value: "checklists", label: "Checklists" },
+  { value: "timeline", label: "Timeline" },
+];
+
 function SessionDetail({ session }) {
+  const [tab, setTab] = useState("detail");
+
+  return (
+    <div>
+      <Tabs options={detailTabs} value={tab} onChange={setTab} className="mb-5" />
+      {tab === "detail" ? <SessionSummary session={session} /> : null}
+      {tab === "checklists" ? <ChecklistPanel sessionId={session.id} /> : null}
+      {tab === "timeline" ? <SessionTimeline sessionId={session.id} /> : null}
+    </div>
+  );
+}
+
+function SessionSummary({ session }) {
   return (
     <div className="grid gap-4 text-sm text-stone-400 md:grid-cols-2">
       <p>

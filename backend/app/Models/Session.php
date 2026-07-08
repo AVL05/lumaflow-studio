@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpWorkflowRelations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable(['user_id', 'location_id', 'name', 'date', 'time', 'location_name', 'session_type', 'status', 'description', 'notes', 'client_name'])]
 class Session extends Model
 {
-    use HasFactory;
+    use CleansUpWorkflowRelations, HasFactory;
 
     protected function casts(): array
     {
@@ -62,5 +64,25 @@ class Session extends Model
     public function aiPlans(): HasMany
     {
         return $this->hasMany(AiSessionPlan::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    public function reminders(): MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'remindable');
     }
 }
