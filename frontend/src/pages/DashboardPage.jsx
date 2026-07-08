@@ -1,0 +1,400 @@
+import { useEffect, useState } from "react";
+import { dashboardApi } from "../api/dashboard";
+import { getApiError } from "../api/client";
+import { Badge } from "../components/ui/Badge";
+import { Card } from "../components/ui/Card";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Skeleton } from "../components/ui/Skeleton";
+import { StatCard } from "../components/ui/StatCard";
+import { ErrorState } from "../components/states/ErrorState";
+import { EmptyState } from "../components/states/EmptyState";
+import {
+  labelFor,
+  sessionStatuses,
+  sessionTypes,
+  toneForStatus,
+} from "../utils/catalogs";
+
+export function DashboardPage() {
+  const [dashboard, setDashboard] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    dashboardApi
+      .summary()
+      .then(setDashboard)
+      .catch((err) => setError(getApiError(err)));
+  }, []);
+
+  return (
+    <>
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Metricas reales del workspace creativo: sesiones, fotos, equipo, presets y actividad reciente."
+      />
+      {error ? <ErrorState message={error} /> : null}
+      {!dashboard ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Sesiones"
+              value={dashboard.totalSessions}
+              detail="Total planificado"
+            />
+            <StatCard
+              label="Fotos"
+              value={dashboard.totalPhotos}
+              detail="Imagenes en biblioteca"
+            />
+            <StatCard
+              label="Equipo"
+              value={dashboard.totalGear}
+              detail="Items registrados"
+            />
+            <StatCard
+              label="Presets"
+              value={dashboard.totalPresets}
+              detail="Bases de color"
+            />
+            <StatCard
+              label="Etiquetas"
+              value={dashboard.totalTags}
+              detail="Taxonomia visual"
+            />
+            <StatCard
+              label="Localizaciones"
+              value={dashboard.totalLocations}
+              detail="Spots guardados"
+            />
+            <StatCard
+              label="Proximas"
+              value={dashboard.upcomingSessions.length}
+              detail="Agenda visible"
+            />
+            <StatCard
+              label="Clientes"
+              value={dashboard.totalClients}
+              detail={`${dashboard.activeClients} activos`}
+            />
+            <StatCard
+              label="Entregas pendientes"
+              value={dashboard.pendingDeliveries}
+              detail="Esperando envio"
+            />
+            <StatCard
+              label="Proyectos entregados"
+              value={dashboard.deliveredProjects}
+              detail="Entregados o aprobados"
+            />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <Card className="p-5">
+              <h2 className="font-semibold">Ultimas localizaciones</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.latestLocations.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin localizaciones.</p>
+                ) : (
+                  dashboard.latestLocations.map((location) => (
+                    <div key={location.id} className="rounded-md bg-white/[0.04] p-3">
+                      <p className="text-sm">{location.name}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {[location.city, location.country].filter(Boolean).join(", ") || "Sin ciudad"} · {location.type}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Próximas sesiones con localización</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.upcomingSessionsWithLocation.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin sesiones futuras con ubicación.</p>
+                ) : (
+                  dashboard.upcomingSessionsWithLocation.map((session) => (
+                    <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
+                      <p className="text-sm">{session.name}</p>
+                      <p className="mt-1 text-xs text-stone-500">{session.date} · {session.location_name}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <Card className="p-5">
+              <h2 className="font-semibold">Clientes recientes</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.recentClients.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin clientes todavia.</p>
+                ) : (
+                  dashboard.recentClients.map((client) => (
+                    <div key={client.id} className="flex items-center justify-between rounded-md bg-white/[0.04] p-3">
+                      <div>
+                        <p className="text-sm">{client.name}</p>
+                        <p className="mt-1 text-xs text-stone-500">{client.company || client.email || 'Sin empresa/email'}</p>
+                      </div>
+                      <Badge variant={client.status === 'active' ? 'green' : 'neutral'}>{client.status}</Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Proximas entregas</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.upcomingDeliveries.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin entregas futuras.</p>
+                ) : (
+                  dashboard.upcomingDeliveries.map((delivery) => (
+                    <div key={delivery.id} className="rounded-md bg-white/[0.04] p-3">
+                      <p className="text-sm">{delivery.title}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {delivery.client?.name || 'Sin cliente'} · {delivery.delivery_date || 'Sin fecha'}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <Card className="p-5">
+              <h2 className="font-semibold">Proximas sesiones</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.upcomingSessions.length === 0 ? (
+                  <EmptyState
+                    title="Sin sesiones proximas"
+                    description="Cuando crees sesiones futuras apareceran aqui."
+                  />
+                ) : (
+                  dashboard.upcomingSessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="rounded-md border border-white/10 bg-white/[0.04] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-medium">{session.name}</p>
+                          <p className="mt-1 text-sm text-stone-500">
+                            {session.date} {session.time || ""} ·{" "}
+                            {session.location_name || "Sin localizacion"}
+                          </p>
+                        </div>
+                        <Badge variant={toneForStatus(session.status)}>
+                          {labelFor(sessionStatuses, session.status)}
+                        </Badge>
+                      </div>
+                      <p className="mt-3 text-sm text-stone-400">
+                        {labelFor(sessionTypes, session.session_type)} ·{" "}
+                        {session.client_name || "Sin cliente"}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-5">
+              <h2 className="font-semibold">Sesiones por estado</h2>
+              <div className="mt-5 space-y-3">
+                {dashboard.sessionsByStatus.map((item) => (
+                  <div key={item.status}>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">
+                        {labelFor(sessionStatuses, item.status)}
+                      </span>
+                      <span className="text-stone-200">{item.total}</span>
+                    </div>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className="h-full rounded-full bg-amber-200/70"
+                        style={{
+                          width: `${barWidth(item.total, dashboard.totalSessions)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-3">
+            <Card className="p-5">
+              <h2 className="font-semibold">Presets mas usados</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.topPresets.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin presets usados.</p>
+                ) : (
+                  dashboard.topPresets.map((preset) => (
+                    <div
+                      key={preset.id}
+                      className="flex items-center justify-between rounded-md bg-white/[0.04] p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: preset.color }}
+                        />
+                        <span className="text-sm">{preset.name}</span>
+                      </div>
+                      <span className="text-xs text-stone-500">
+                        {preset.usage_count} usos
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Ultimos albumes</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.latestAlbums.length === 0 ? (
+                  <p className="text-sm text-stone-500">Sin albumes.</p>
+                ) : (
+                  dashboard.latestAlbums.map((album) => (
+                    <div
+                      key={album.id}
+                      className="rounded-md bg-white/[0.04] p-3"
+                    >
+                      <p className="text-sm">{album.name}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {album.photos_count ?? 0} fotos
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Resumen EXIF</h2>
+              <div className="mt-4 grid gap-3 text-sm text-stone-400">
+                <p>
+                  Modelos de camara:{" "}
+                  <span className="text-stone-100">
+                    {dashboard.exifSummary.cameraModels}
+                  </span>
+                </p>
+                <p>
+                  Fotos etiquetadas:{" "}
+                  <span className="text-stone-100">
+                    {dashboard.exifSummary.taggedPhotos}
+                  </span>
+                </p>
+                <p>
+                  Etiquetas activas:{" "}
+                  <span className="text-stone-100">
+                    {dashboard.exifSummary.tags}
+                  </span>
+                </p>
+              </div>
+            </Card>
+          </div>
+
+          <Card className="p-5">
+            <h2 className="font-semibold">Fotos favoritas</h2>
+            {dashboard.favoritePhotos.length === 0 ? (
+              <p className="mt-4 text-sm text-stone-500">
+                Marca fotos como favoritas para verlas aqui.
+              </p>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                {dashboard.favoritePhotos.map((photo) => (
+                  <img
+                    key={photo.id}
+                    src={photo.url}
+                    alt={photo.title || "Favorita"}
+                    className="aspect-square rounded-md object-cover"
+                    loading="lazy"
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
+
+          <div className="grid gap-6 xl:grid-cols-3">
+            <Card className="p-5">
+              <h2 className="font-semibold">Estado Ollama</h2>
+              <p className="mt-4 text-sm text-stone-400">
+                <span className={dashboard.ollamaStatus.available ? 'text-emerald-100' : 'text-red-100'}>
+                  {dashboard.ollamaStatus.available ? 'Disponible' : 'No disponible'}
+                </span>
+              </p>
+              <p className="mt-2 text-xs text-stone-500">{dashboard.ollamaStatus.model}</p>
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Ultimo analisis</h2>
+              {dashboard.latestAiAnalysis?.id ? (
+                <div className="mt-4 text-sm text-stone-400">
+                  <p>{dashboard.latestAiAnalysis.summary}</p>
+                  <p className="mt-2 text-amber-100">Score {dashboard.latestAiAnalysis.score}/100</p>
+                </div>
+              ) : <p className="mt-4 text-sm text-stone-500">Sin analisis IA todavia.</p>}
+            </Card>
+            <Card className="p-5">
+              <h2 className="font-semibold">Recomendaciones IA</h2>
+              {dashboard.latestAiRecommendations.length === 0 ? <p className="mt-4 text-sm text-stone-500">Sin recomendaciones.</p> : (
+                <div className="mt-4 space-y-3">
+                  {dashboard.latestAiRecommendations.map((item, index) => (
+                    <p key={`${item.created_at}-${index}`} className="text-sm text-stone-400">{item.summary}</p>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
+
+          <Card className="p-5">
+            <h2 className="font-semibold">Actividad reciente</h2>
+            {dashboard.recentActivity.length === 0 ? (
+              <p className="mt-4 text-sm text-stone-500">
+                Sin actividad todavia.
+              </p>
+            ) : (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {dashboard.recentActivity.map((activity, index) => (
+                  <div
+                    key={`${activity.type}-${activity.created_at}-${index}`}
+                    className="rounded-md bg-white/[0.04] p-4"
+                  >
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">
+                      {activity.type} · {activity.meta || "sin meta"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+    </>
+  );
+}
+
+function barWidth(total, base) {
+  if (!base) return 0;
+  return Math.max(6, Math.round((total / base) * 100));
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+          <Skeleton key={item} className="h-32" />
+        ))}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <Skeleton className="h-96" />
+        <Skeleton className="h-96" />
+      </div>
+    </div>
+  );
+}
