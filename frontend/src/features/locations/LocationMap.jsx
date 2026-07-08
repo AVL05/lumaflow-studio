@@ -1,4 +1,4 @@
-import { MapView } from './MapView'
+import { MapView } from "./MapView";
 
 export function LocationMap({ location, selectable = false, onSelect }) {
   return (
@@ -9,5 +9,5 @@ export function LocationMap({ location, selectable = false, onSelect }) {
       height="h-96"
       zoom={15}
     />
-  )
+  );
 }

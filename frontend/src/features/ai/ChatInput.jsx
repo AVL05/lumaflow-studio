@@ -1,5 +1,5 @@
-import { Button } from '../../components/ui/Button'
-import { Textarea } from '../../components/ui/Textarea'
+import { Button } from "../../components/ui/Button";
+import { Textarea } from "../../components/ui/Textarea";
 
 export function ChatInput({ value, onChange, onSubmit, onCancel, disabled }) {
   return (
@@ -11,9 +11,13 @@ export function ChatInput({ value, onChange, onSubmit, onCancel, disabled }) {
         placeholder="Ej: prepara checklist para sesion urbana nocturna con mi equipo favorito"
       />
       <div className="flex gap-2">
-        <Button disabled={disabled || !value.trim()}>{disabled ? 'Pensando...' : 'Enviar'}</Button>
-        {disabled ? <Button type="button" onClick={onCancel}>Cancelar</Button> : null}
+        <Button disabled={disabled || !value.trim()}>{disabled ? "Pensando..." : "Enviar"}</Button>
+        {disabled ? (
+          <Button type="button" onClick={onCancel}>
+            Cancelar
+          </Button>
+        ) : null}
       </div>
     </form>
-  )
+  );
 }

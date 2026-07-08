@@ -2,7 +2,30 @@
   "name": "lumaflow-studio",
   "private": true,
   "version": "1.0.0",
+  "description": "Plataforma full-stack de gestion del flujo de trabajo para fotografos.",
   "scripts": {
-    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start.ps1"
+    "start": "concurrently -k -n backend,frontend -c blue,magenta \"npm:start:backend\" \"npm:start:frontend\"",
+    "start:backend": "cd backend && php artisan serve --host=127.0.0.1 --port=8000",
+    "start:frontend": "cd frontend && npm run dev -- --host localhost --port 5173",
+    "dev": "npm run start",
+    "build": "cd frontend && npm run build",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && php vendor/bin/pint --test",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && php vendor/bin/pint",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && php artisan test",
+    "test:frontend": "cd frontend && npm run test",
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && composer setup",
+    "setup:frontend": "cd frontend && npm install",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

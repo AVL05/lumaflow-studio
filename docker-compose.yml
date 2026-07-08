@@ -1,0 +1,95 @@
+name: lumaflow-studio
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-lumaflow_studio}
+      MYSQL_USER: ${DB_USERNAME:-lumaflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_NAME: LumaFlow Studio
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-http://localhost:8000}
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-lumaflow_studio}
+      DB_USERNAME: ${DB_USERNAME:-lumaflow}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      FILESYSTEM_DISK: public
+      SESSION_DRIVER: file
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      FRONTEND_URLS: ${FRONTEND_URLS:-http://localhost:5173,http://localhost:8080}
+      # Desde el contenedor, el Ollama del host se alcanza por host.docker.internal.
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1}
+      SEED_DATABASE: ${SEED_DATABASE:-false}
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend-storage:/app/storage/app/public
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+
+  # Opcional: `docker compose --profile ollama up` levanta el modelo en un
+  # contenedor. Sin el perfil se usa el Ollama instalado en el host.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+volumes:
+  mysql-data:
+  backend-storage:
+  ollama-models:

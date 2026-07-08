@@ -1,7 +1,7 @@
-import { Card } from '../../components/ui/Card'
+import { Card } from "../../components/ui/Card";
 
 export function LocationGallery({ photos = [], coverPhoto }) {
-  const items = photos.length ? photos : coverPhoto ? [coverPhoto] : []
+  const items = photos.length ? photos : coverPhoto ? [coverPhoto] : [];
 
   return (
     <Card className="p-5">
@@ -14,7 +14,7 @@ export function LocationGallery({ photos = [], coverPhoto }) {
             <img
               key={photo.id}
               src={photo.url}
-              alt={photo.title || photo.file_name || 'Foto de localizacion'}
+              alt={photo.title || photo.file_name || "Foto de localizacion"}
               className="aspect-[4/3] rounded-md object-cover"
               loading="lazy"
             />
@@ -22,5 +22,5 @@ export function LocationGallery({ photos = [], coverPhoto }) {
         </div>
       )}
     </Card>
-  )
+  );
 }

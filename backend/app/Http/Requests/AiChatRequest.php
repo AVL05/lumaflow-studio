@@ -13,12 +13,11 @@ class AiChatRequest extends FormRequest
 
     public function rules(): array
     {
+        // El historial no se acepta del cliente: se reconstruye desde la
+        // conversacion persistida para que no se pueda inyectar contexto falso.
         return [
             'message' => ['required', 'string', 'max:3000'],
             'conversation_id' => ['nullable', 'integer'],
-            'history' => ['nullable', 'array', 'max:20'],
-            'history.*.role' => ['required_with:history', 'in:user,assistant'],
-            'history.*.content' => ['required_with:history', 'string', 'max:3000'],
         ];
     }
 }

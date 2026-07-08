@@ -63,7 +63,14 @@ export const SessionTypesChart = memo(function SessionTypesChart({ data }) {
   return (
     <ChartPanel title="Tipos de sesion" description="Distribucion por especialidad" data={rows}>
       <PieChart>
-        <Pie data={rows} dataKey="total" nameKey="label" innerRadius={55} outerRadius={90} paddingAngle={2}>
+        <Pie
+          data={rows}
+          dataKey="total"
+          nameKey="label"
+          innerRadius={55}
+          outerRadius={90}
+          paddingAngle={2}
+        >
           {rows.map((row, index) => (
             <Cell key={row.label} fill={colorAt(index)} stroke="#12110f" />
           ))}
@@ -124,9 +131,30 @@ export const AiUsageChart = memo(function AiUsageChart({ data }) {
         <YAxis allowDecimals={false} {...axisProps} />
         <Tooltip {...tooltipProps} labelFormatter={monthTick} />
         <Legend wrapperStyle={{ fontSize: 11, color: "#a8a29e" }} />
-        <Line type="monotone" dataKey="analyses" name="Analisis" stroke={colorAt(0)} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="conversations" name="Chats" stroke={colorAt(1)} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="plans" name="Planes" stroke={colorAt(2)} strokeWidth={2} dot={false} />
+        <Line
+          type="monotone"
+          dataKey="analyses"
+          name="Analisis"
+          stroke={colorAt(0)}
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="conversations"
+          name="Chats"
+          stroke={colorAt(1)}
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="plans"
+          name="Planes"
+          stroke={colorAt(2)}
+          strokeWidth={2}
+          dot={false}
+        />
       </LineChart>
     </ChartPanel>
   );

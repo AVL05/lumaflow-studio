@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { bulkApi } from "../api/bulk";
 import { clientsApi } from "../api/clients";
 import { getApiError } from "../api/client";
-import { dashboardApi } from "../api/dashboard";
 import { exportsApi } from "../api/exports";
 import { sessionsApi } from "../api/sessions";
 import { tasksApi } from "../api/tasks";
@@ -69,20 +68,23 @@ export function TasksPage() {
       .catch(() => toast.error("No se pudieron cargar sesiones y clientes."));
   }, [toast]);
 
-  // El resumen se recalcula solo tras mutaciones, no en cada repaginado.
+  // Endpoint dedicado: antes se cargaba el dashboard entero (incluida la sonda
+  // de Ollama) solo para leer estos cuatro totales.
   const refreshSummary = useCallback(() => {
-    dashboardApi
+    tasksApi
       .summary()
-      .then((data) => setSummary(data.taskSummary))
+      .then(setSummary)
       .catch(() => setSummary(null));
   }, []);
 
   useEffect(refreshSummary, [refreshSummary]);
 
-  async function reload() {
-    await resource.refresh();
+  const refresh = resource.refresh;
+
+  const reload = useCallback(async () => {
+    await refresh();
     refreshSummary();
-  }
+  }, [refresh, refreshSummary]);
 
   function openCreate() {
     setEditing(null);
@@ -91,7 +93,8 @@ export function TasksPage() {
     setFormOpen(true);
   }
 
-  function openEdit(task) {
+  // Estables para que TaskCard (memoizada) no se re-renderice en cada seleccion.
+  const openEdit = useCallback((task) => {
     setEditing(task);
     setForm({
       ...defaults,
@@ -103,7 +106,7 @@ export function TasksPage() {
     });
     setFormError("");
     setFormOpen(true);
-  }
+  }, []);
 
   async function submit(event) {
     event.preventDefault();
@@ -130,17 +133,20 @@ export function TasksPage() {
     }
   }
 
-  async function toggleStatus(task) {
-    try {
-      await tasksApi.update(task.id, {
-        ...normalizeTask(task),
-        status: task.status === "completed" ? "todo" : "completed",
-      });
-      await reload();
-    } catch (err) {
-      toast.error(getApiError(err));
-    }
-  }
+  const toggleStatus = useCallback(
+    async (task) => {
+      try {
+        await tasksApi.update(task.id, {
+          ...normalizeTask(task),
+          status: task.status === "completed" ? "todo" : "completed",
+        });
+        await reload();
+      } catch (err) {
+        toast.error(getApiError(err));
+      }
+    },
+    [reload, toast],
+  );
 
   async function confirmDelete() {
     await tasksApi.remove(deleting.id);

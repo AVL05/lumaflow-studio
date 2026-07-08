@@ -9,6 +9,7 @@ use App\Http\Resources\PhotoResource;
 use App\Models\Photo;
 use App\Services\ActivityLogger;
 use App\Services\ExifExtractorService;
+use App\Support\AuditLog;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -61,6 +62,8 @@ class PhotoController extends Controller
 
         $photo->albums()->sync($request->input('album_ids', []));
         $photo->tags()->sync($request->input('tag_ids', []));
+
+        AuditLog::upload($request->user()->id, $photo->id, (int) $photo->file_size, (string) $photo->mime_type);
 
         // El timeline se ancla en la sesion cuando existe; si no, en la propia foto.
         $this->activity->log(

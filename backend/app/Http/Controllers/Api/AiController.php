@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AiAnalyzeRequest;
-use App\Http\Requests\AiAssistantRequest;
 use App\Http\Requests\AiChatRequest;
 use App\Http\Requests\AiGearRecommendationRequest;
 use App\Http\Requests\AiHistoryRequest;
@@ -194,40 +193,6 @@ class AiController extends Controller
         $conversation->delete();
 
         return response()->noContent();
-    }
-
-    public function analyzePhoto(AiAssistantRequest $request): AiAnalysisResource|JsonResponse
-    {
-        $photo = $request->filled('photo_id')
-            ? Photo::query()->where('user_id', $request->user()->id)->findOrFail($request->integer('photo_id'))
-            : null;
-
-        abort_unless($photo, 422, 'photo_id requerido.');
-
-        try {
-            return new AiAnalysisResource($this->analysis->analyze($request->user(), $photo, $request->validated('prompt')));
-        } catch (RuntimeException $exception) {
-            return response()->json(['message' => $exception->getMessage()], 503);
-        }
-    }
-
-    public function assistant(AiAssistantRequest $request): JsonResponse
-    {
-        try {
-            $response = $this->ollama->chat($this->prompts->chat(
-                $this->context->forUser($request->user()),
-                $request->validated('prompt'),
-                []
-            ));
-        } catch (RuntimeException $exception) {
-            return response()->json(['message' => $exception->getMessage()], 503);
-        }
-
-        return response()->json([
-            'answer' => $response['message']['content'] ?? '',
-            'model' => config('ollama.model'),
-            'provider' => 'ollama',
-        ]);
     }
 
     private function conversation(AiChatRequest $request): AiConversation

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\GearItemController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PhotoController;
@@ -21,19 +22,24 @@ use App\Http\Controllers\Api\PresetController;
 use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\SystemController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/health', HealthController::class);
 
-Route::middleware('auth:sanctum')->group(function (): void {
+// Endpoints sin autenticar: limite estricto para frenar fuerza bruta y registro masivo.
+Route::middleware('throttle:10,1')->group(function (): void {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::get('/dashboard', DashboardController::class);
-    Route::get('/dashboard/summary', DashboardController::class);
 
     Route::apiResource('sessions', SessionController::class);
     Route::apiResource('gear', GearItemController::class)->parameters(['gear' => 'gearItem']);
@@ -53,19 +59,25 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy']);
 
     Route::get('/ai/status', [AiController::class, 'status']);
-    Route::post('/ai/chat', [AiController::class, 'chat']);
-    Route::post('/ai/analyze', [AiController::class, 'analyze']);
-    Route::post('/ai/preset', [AiController::class, 'preset']);
-    Route::post('/ai/session-plan', [AiController::class, 'sessionPlan']);
-    Route::post('/ai/recommend-gear', [AiController::class, 'recommendGear']);
+
+    // La inferencia local es cara: se limita aparte del resto de la API.
+    Route::middleware('throttle:20,1')->group(function (): void {
+        Route::post('/ai/chat', [AiController::class, 'chat']);
+        Route::post('/ai/analyze', [AiController::class, 'analyze']);
+        Route::post('/ai/preset', [AiController::class, 'preset']);
+        Route::post('/ai/session-plan', [AiController::class, 'sessionPlan']);
+        Route::post('/ai/recommend-gear', [AiController::class, 'recommendGear']);
+    });
+
     Route::get('/ai/history', [AiController::class, 'history']);
     Route::get('/ai/history/{conversation}', [AiController::class, 'showHistory']);
     Route::patch('/ai/history/{conversation}', [AiController::class, 'updateHistory']);
     Route::delete('/ai/history/{conversation}', [AiController::class, 'deleteHistory']);
-    Route::post('/ai/analyze-photo', [AiController::class, 'analyzePhoto']);
-    Route::post('/ai/assistant', [AiController::class, 'assistant']);
+
+    Route::get('/system', SystemController::class);
 
     // Fase 9: workflow enterprise
+    Route::get('/tasks/summary', [TaskController::class, 'summary']);
     Route::apiResource('tasks', TaskController::class);
     Route::apiResource('reminders', ReminderController::class);
 

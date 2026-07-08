@@ -8,12 +8,7 @@ import { Skeleton } from "../components/ui/Skeleton";
 import { StatCard } from "../components/ui/StatCard";
 import { ErrorState } from "../components/states/ErrorState";
 import { EmptyState } from "../components/states/EmptyState";
-import {
-  labelFor,
-  sessionStatuses,
-  sessionTypes,
-  toneForStatus,
-} from "../utils/catalogs";
+import { labelFor, sessionStatuses, sessionTypes, toneForStatus } from "../utils/catalogs";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 import {
   ActivityWidget,
@@ -49,31 +44,11 @@ export function DashboardPage() {
       ) : (
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              label="Sesiones"
-              value={dashboard.totalSessions}
-              detail="Total planificado"
-            />
-            <StatCard
-              label="Fotos"
-              value={dashboard.totalPhotos}
-              detail="Imagenes en biblioteca"
-            />
-            <StatCard
-              label="Equipo"
-              value={dashboard.totalGear}
-              detail="Items registrados"
-            />
-            <StatCard
-              label="Presets"
-              value={dashboard.totalPresets}
-              detail="Bases de color"
-            />
-            <StatCard
-              label="Etiquetas"
-              value={dashboard.totalTags}
-              detail="Taxonomia visual"
-            />
+            <StatCard label="Sesiones" value={dashboard.totalSessions} detail="Total planificado" />
+            <StatCard label="Fotos" value={dashboard.totalPhotos} detail="Imagenes en biblioteca" />
+            <StatCard label="Equipo" value={dashboard.totalGear} detail="Items registrados" />
+            <StatCard label="Presets" value={dashboard.totalPresets} detail="Bases de color" />
+            <StatCard label="Etiquetas" value={dashboard.totalTags} detail="Taxonomia visual" />
             <StatCard
               label="Localizaciones"
               value={dashboard.totalLocations}
@@ -150,7 +125,9 @@ export function DashboardPage() {
                     <div key={location.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{location.name}</p>
                       <p className="mt-1 text-xs text-stone-500">
-                        {[location.city, location.country].filter(Boolean).join(", ") || "Sin ciudad"} · {location.type}
+                        {[location.city, location.country].filter(Boolean).join(", ") ||
+                          "Sin ciudad"}{" "}
+                        · {location.type}
                       </p>
                     </div>
                   ))
@@ -166,10 +143,16 @@ export function DashboardPage() {
                   dashboard.upcomingSessionsWithLocation.map((session) => (
                     <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{session.name}</p>
-                      <p className="mt-1 text-xs text-stone-500">{session.date} · {session.location?.name || session.location_name}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {session.date} · {session.location?.name || session.location_name}
+                      </p>
                       {session.location ? (
                         <div className="mt-3">
-                          <LocationMapPreview latitude={session.location.latitude} longitude={session.location.longitude} name={session.location.name} />
+                          <LocationMapPreview
+                            latitude={session.location.latitude}
+                            longitude={session.location.longitude}
+                            name={session.location.name}
+                          />
                         </div>
                       ) : null}
                     </div>
@@ -190,7 +173,9 @@ export function DashboardPage() {
                     <div key={location.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{location.name}</p>
                       <p className="mt-1 text-xs text-stone-500">
-                        {location.city || 'Sin ciudad'} · {location.rating ? `${location.rating}/5` : 'Sin rating'} · {location.sessions_count ?? 0} sesiones
+                        {location.city || "Sin ciudad"} ·{" "}
+                        {location.rating ? `${location.rating}/5` : "Sin rating"} ·{" "}
+                        {location.sessions_count ?? 0} sesiones
                       </p>
                     </div>
                   ))
@@ -204,7 +189,10 @@ export function DashboardPage() {
                   <p className="text-sm text-stone-500">Sin ciudades registradas.</p>
                 ) : (
                   dashboard.topLocationCities.map((city) => (
-                    <div key={city.city} className="flex items-center justify-between rounded-md bg-white/[0.04] p-3">
+                    <div
+                      key={city.city}
+                      className="flex items-center justify-between rounded-md bg-white/[0.04] p-3"
+                    >
                       <span className="text-sm">{city.city}</span>
                       <span className="text-xs text-stone-500">{city.total} spots</span>
                     </div>
@@ -222,12 +210,19 @@ export function DashboardPage() {
                   <p className="text-sm text-stone-500">Sin clientes todavia.</p>
                 ) : (
                   dashboard.recentClients.map((client) => (
-                    <div key={client.id} className="flex items-center justify-between rounded-md bg-white/[0.04] p-3">
+                    <div
+                      key={client.id}
+                      className="flex items-center justify-between rounded-md bg-white/[0.04] p-3"
+                    >
                       <div>
                         <p className="text-sm">{client.name}</p>
-                        <p className="mt-1 text-xs text-stone-500">{client.company || client.email || 'Sin empresa/email'}</p>
+                        <p className="mt-1 text-xs text-stone-500">
+                          {client.company || client.email || "Sin empresa/email"}
+                        </p>
                       </div>
-                      <Badge variant={client.status === 'active' ? 'green' : 'neutral'}>{client.status}</Badge>
+                      <Badge variant={client.status === "active" ? "green" : "neutral"}>
+                        {client.status}
+                      </Badge>
                     </div>
                   ))
                 )}
@@ -243,7 +238,8 @@ export function DashboardPage() {
                     <div key={delivery.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{delivery.title}</p>
                       <p className="mt-1 text-xs text-stone-500">
-                        {delivery.client?.name || 'Sin cliente'} · {delivery.delivery_date || 'Sin fecha'}
+                        {delivery.client?.name || "Sin cliente"} ·{" "}
+                        {delivery.delivery_date || "Sin fecha"}
                       </p>
                     </div>
                   ))
@@ -333,9 +329,7 @@ export function DashboardPage() {
                         />
                         <span className="text-sm">{preset.name}</span>
                       </div>
-                      <span className="text-xs text-stone-500">
-                        {preset.usage_count} usos
-                      </span>
+                      <span className="text-xs text-stone-500">{preset.usage_count} usos</span>
                     </div>
                   ))
                 )}
@@ -348,14 +342,9 @@ export function DashboardPage() {
                   <p className="text-sm text-stone-500">Sin albumes.</p>
                 ) : (
                   dashboard.latestAlbums.map((album) => (
-                    <div
-                      key={album.id}
-                      className="rounded-md bg-white/[0.04] p-3"
-                    >
+                    <div key={album.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{album.name}</p>
-                      <p className="mt-1 text-xs text-stone-500">
-                        {album.photos_count ?? 0} fotos
-                      </p>
+                      <p className="mt-1 text-xs text-stone-500">{album.photos_count ?? 0} fotos</p>
                     </div>
                   ))
                 )}
@@ -366,21 +355,15 @@ export function DashboardPage() {
               <div className="mt-4 grid gap-3 text-sm text-stone-400">
                 <p>
                   Modelos de camara:{" "}
-                  <span className="text-stone-100">
-                    {dashboard.exifSummary.cameraModels}
-                  </span>
+                  <span className="text-stone-100">{dashboard.exifSummary.cameraModels}</span>
                 </p>
                 <p>
                   Fotos etiquetadas:{" "}
-                  <span className="text-stone-100">
-                    {dashboard.exifSummary.taggedPhotos}
-                  </span>
+                  <span className="text-stone-100">{dashboard.exifSummary.taggedPhotos}</span>
                 </p>
                 <p>
                   Etiquetas activas:{" "}
-                  <span className="text-stone-100">
-                    {dashboard.exifSummary.tags}
-                  </span>
+                  <span className="text-stone-100">{dashboard.exifSummary.tags}</span>
                 </p>
               </div>
             </Card>
@@ -411,8 +394,10 @@ export function DashboardPage() {
             <Card className="p-5">
               <h2 className="font-semibold">Estado Ollama</h2>
               <p className="mt-4 text-sm text-stone-400">
-                <span className={dashboard.ollamaStatus.available ? 'text-emerald-100' : 'text-red-100'}>
-                  {dashboard.ollamaStatus.available ? 'Disponible' : 'No disponible'}
+                <span
+                  className={dashboard.ollamaStatus.available ? "text-emerald-100" : "text-red-100"}
+                >
+                  {dashboard.ollamaStatus.available ? "Disponible" : "No disponible"}
                 </span>
               </p>
               <p className="mt-2 text-xs text-stone-500">{dashboard.ollamaStatus.model}</p>
@@ -422,16 +407,24 @@ export function DashboardPage() {
               {dashboard.latestAiAnalysis?.id ? (
                 <div className="mt-4 text-sm text-stone-400">
                   <p>{dashboard.latestAiAnalysis.summary}</p>
-                  <p className="mt-2 text-amber-100">Score {dashboard.latestAiAnalysis.score}/100</p>
+                  <p className="mt-2 text-amber-100">
+                    Score {dashboard.latestAiAnalysis.score}/100
+                  </p>
                 </div>
-              ) : <p className="mt-4 text-sm text-stone-500">Sin analisis IA todavia.</p>}
+              ) : (
+                <p className="mt-4 text-sm text-stone-500">Sin analisis IA todavia.</p>
+              )}
             </Card>
             <Card className="p-5">
               <h2 className="font-semibold">Recomendaciones IA</h2>
-              {dashboard.latestAiRecommendations.length === 0 ? <p className="mt-4 text-sm text-stone-500">Sin recomendaciones.</p> : (
+              {dashboard.latestAiRecommendations.length === 0 ? (
+                <p className="mt-4 text-sm text-stone-500">Sin recomendaciones.</p>
+              ) : (
                 <div className="mt-4 space-y-3">
                   {dashboard.latestAiRecommendations.map((item, index) => (
-                    <p key={`${item.created_at}-${index}`} className="text-sm text-stone-400">{item.summary}</p>
+                    <p key={`${item.created_at}-${index}`} className="text-sm text-stone-400">
+                      {item.summary}
+                    </p>
                   ))}
                 </div>
               )}
@@ -448,29 +441,6 @@ export function DashboardPage() {
                   <div key={plan.id} className="rounded-md bg-white/[0.04] p-4">
                     <p className="text-sm font-medium">{plan.title}</p>
                     <p className="mt-2 text-sm text-stone-500">{plan.summary}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <Card className="p-5">
-            <h2 className="font-semibold">Actividad reciente</h2>
-            {dashboard.recentActivity.length === 0 ? (
-              <p className="mt-4 text-sm text-stone-500">
-                Sin actividad todavia.
-              </p>
-            ) : (
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {dashboard.recentActivity.map((activity, index) => (
-                  <div
-                    key={`${activity.type}-${activity.created_at}-${index}`}
-                    className="rounded-md bg-white/[0.04] p-4"
-                  >
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">
-                      {activity.type} · {activity.meta || "sin meta"}
-                    </p>
                   </div>
                 ))}
               </div>

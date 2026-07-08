@@ -1,7 +1,15 @@
 import { Checkbox } from "../../components/ui/Checkbox";
 
 /** Fila reordenable por drag & drop nativo dentro de una checklist. */
-export function ChecklistItemRow({ item, index, onToggle, onRemove, onDragStart, onDragOver, onDrop }) {
+export function ChecklistItemRow({
+  item,
+  index,
+  onToggle,
+  onRemove,
+  onDragStart,
+  onDragOver,
+  onDrop,
+}) {
   return (
     <li
       draggable

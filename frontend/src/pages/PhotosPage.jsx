@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { albumsApi } from "../api/albums";
 import { bulkApi } from "../api/bulk";
 import { getApiError } from "../api/client";
@@ -62,6 +62,9 @@ export function PhotosPage() {
   const selection = useSelection();
   const [bulkTag, setBulkTag] = useState("");
   const [bulkAlbum, setBulkAlbum] = useState("");
+
+  // Estable para no invalidar la memoizacion de PhotoCard en cada render.
+  const startEditing = useCallback((photo) => setEditing(photoToForm(photo)), []);
 
   async function runBulk(action, payload) {
     try {
@@ -162,12 +165,7 @@ export function PhotosPage() {
             upload
           />
         </Card>
-        <GalleryFilters
-          resource={resource}
-          albums={albums}
-          tags={tags}
-          sessions={sessions}
-        />
+        <GalleryFilters resource={resource} albums={albums} tags={tags} sessions={sessions} />
       </div>
 
       {resource.error ? <ErrorState message={resource.error} /> : null}
@@ -195,7 +193,7 @@ export function PhotosPage() {
                 selected={selection.isSelected(photo.id)}
                 onSelect={selection.toggle}
                 onPreview={setPreview}
-                onEdit={(item) => setEditing(photoToForm(item))}
+                onEdit={startEditing}
                 onDelete={setDeleting}
               />
             ))}
@@ -250,11 +248,7 @@ export function PhotosPage() {
       >
         {preview ? <PhotoQuickPreview photo={preview} /> : null}
       </Modal>
-      <Modal
-        open={Boolean(editing)}
-        title="Editar foto"
-        onClose={() => setEditing(null)}
-      >
+      <Modal open={Boolean(editing)} title="Editar foto" onClose={() => setEditing(null)}>
         {editing ? (
           <PhotoForm
             form={editing}
@@ -369,7 +363,16 @@ function GalleryFilters({ resource, albums, tags, sessions }) {
   );
 }
 
-function PhotoCard({ photo, view, selected, onSelect, onPreview, onEdit, onDelete }) {
+/** Memoizada: la galeria muestra hasta 60 tarjetas y la seleccion cambia a menudo. */
+const PhotoCard = memo(function PhotoCard({
+  photo,
+  view,
+  selected,
+  onSelect,
+  onPreview,
+  onEdit,
+  onDelete,
+}) {
   const content = (
     <>
       <button
@@ -378,6 +381,7 @@ function PhotoCard({ photo, view, selected, onSelect, onPreview, onEdit, onDelet
       >
         <img
           loading="lazy"
+          decoding="async"
           src={photo.url}
           alt={photo.title || photo.file_name || "Foto"}
           className={
@@ -399,16 +403,14 @@ function PhotoCard({ photo, view, selected, onSelect, onPreview, onEdit, onDelet
             <div className="min-w-0">
               <h2 className="truncate font-medium">{photo.title || "Sin titulo"}</h2>
               <p className="mt-1 text-xs text-stone-500">
-                {formatBytes(photo.file_size)} ·{" "}
-                {photo.exif_summary?.camera_model || "Sin camara"}
+                {formatBytes(photo.file_size)} · {photo.exif_summary?.camera_model || "Sin camara"}
               </p>
             </div>
           </div>
           {photo.is_favorite ? <Badge variant="warm">Fav</Badge> : null}
         </div>
         <p className="mt-3 text-sm text-stone-500">
-          {photo.category || "Sin categoria"} ·{" "}
-          {photo.session?.name || "Sin sesion"}
+          {photo.category || "Sin categoria"} · {photo.session?.name || "Sin sesion"}
         </p>
         <div className="mt-3 flex flex-wrap gap-1">
           {photo.tags?.slice(0, 3).map((tag) => (
@@ -431,13 +433,9 @@ function PhotoCard({ photo, view, selected, onSelect, onPreview, onEdit, onDelet
   );
 
   return (
-    <Card
-      className={view === "grid" ? "overflow-hidden" : "flex overflow-hidden"}
-    >
-      {content}
-    </Card>
+    <Card className={view === "grid" ? "overflow-hidden" : "flex overflow-hidden"}>{content}</Card>
   );
-}
+});
 
 function PhotoQuickPreview({ photo }) {
   return (
@@ -449,12 +447,9 @@ function PhotoQuickPreview({ photo }) {
       />
       <div className="space-y-5">
         <div>
-          <p className="text-sm text-stone-400">
-            {photo.description || "Sin descripcion."}
-          </p>
+          <p className="text-sm text-stone-400">{photo.description || "Sin descripcion."}</p>
           <p className="mt-2 text-xs text-stone-500">
-            {photo.category || "Sin categoria"} ·{" "}
-            {photo.taken_at || "Sin fecha"}
+            {photo.category || "Sin categoria"} · {photo.taken_at || "Sin fecha"}
           </p>
         </div>
         <ExifPanel exif={photo.exif_summary} />
@@ -474,8 +469,7 @@ function PhotoForm({
   saving,
   upload = false,
 }) {
-  const setValue = (name, value) =>
-    setForm((current) => ({ ...current, [name]: value }));
+  const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
     <form className="mt-5 space-y-4" onSubmit={onSubmit}>
@@ -491,10 +485,7 @@ function PhotoForm({
         </Field>
       ) : null}
       <Field label="Titulo">
-        <Input
-          value={form.title ?? ""}
-          onChange={(e) => setValue("title", e.target.value)}
-        />
+        <Input value={form.title ?? ""} onChange={(e) => setValue("title", e.target.value)} />
       </Field>
       <Field label="Descripcion">
         <Textarea
@@ -519,12 +510,7 @@ function PhotoForm({
       <Field label="Album">
         <Select
           value={form.album_ids?.[0] ? String(form.album_ids[0]) : ""}
-          onChange={(e) =>
-            setValue(
-              "album_ids",
-              e.target.value ? [Number(e.target.value)] : [],
-            )
-          }
+          onChange={(e) => setValue("album_ids", e.target.value ? [Number(e.target.value)] : [])}
           options={[
             { value: "", label: "Sin album" },
             ...albums.map((album) => ({
@@ -535,10 +521,7 @@ function PhotoForm({
         />
       </Field>
       <Field label="Categoria">
-        <Input
-          value={form.category ?? ""}
-          onChange={(e) => setValue("category", e.target.value)}
-        />
+        <Input value={form.category ?? ""} onChange={(e) => setValue("category", e.target.value)} />
       </Field>
       <Field label="Fecha">
         <Input
@@ -576,8 +559,7 @@ function appendPhotoPayload(data, form) {
       value.forEach((item) => data.append(`${key}[]`, item));
       return;
     }
-    if (value !== "" && value !== null && value !== undefined)
-      data.append(key, value);
+    if (value !== "" && value !== null && value !== undefined) data.append(key, value);
   });
 }
 
@@ -614,9 +596,7 @@ function PhotoSkeleton({ view }) {
   return (
     <div
       className={
-        view === "grid"
-          ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-          : "space-y-3"
+        view === "grid" ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" : "space-y-3"
       }
     >
       {Array.from({ length: 8 }, (_, index) => (

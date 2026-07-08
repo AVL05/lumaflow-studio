@@ -2,34 +2,45 @@
 
 namespace App\Services;
 
+use App\Support\AuditLog;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class OllamaService
 {
+    /** El dashboard consulta el estado en cada carga: se cachea para no pagar la red. */
+    private const STATUS_TTL = 15;
+
+    /** Sonda de disponibilidad, no inferencia: no debe heredar el timeout largo del chat. */
+    private const STATUS_TIMEOUT = 3;
+
     public function status(): array
     {
-        try {
-            $response = Http::timeout($this->timeout())->retry(1, 250)->get($this->url().'/api/tags');
+        return Cache::remember('ollama:status', self::STATUS_TTL, function (): array {
+            try {
+                $response = Http::timeout(self::STATUS_TIMEOUT)->get($this->url().'/api/tags');
 
-            return [
-                'available' => $response->successful(),
-                'url' => $this->url(),
-                'model' => $this->model(),
-                'models' => $response->json('models', []),
-                'error' => $response->successful() ? null : $response->body(),
-            ];
-        } catch (ConnectionException $exception) {
-            return [
-                'available' => false,
-                'url' => $this->url(),
-                'model' => $this->model(),
-                'models' => [],
-                'error' => $exception->getMessage(),
-            ];
-        }
+                return [
+                    'available' => $response->successful(),
+                    'url' => $this->url(),
+                    'model' => $this->model(),
+                    'models' => $response->json('models', []),
+                    'error' => $response->successful() ? null : 'HTTP '.$response->status(),
+                ];
+            } catch (ConnectionException $exception) {
+                AuditLog::aiFailure('status', class_basename($exception));
+
+                return [
+                    'available' => false,
+                    'url' => $this->url(),
+                    'model' => $this->model(),
+                    'models' => [],
+                    'error' => 'unreachable',
+                ];
+            }
+        });
     }
 
     public function chat(array $messages, array $options = []): array
@@ -52,12 +63,13 @@ class OllamaService
                 ->retry(2, 350, throw: false)
                 ->post($this->url().'/api/chat', $payload);
         } catch (ConnectionException $exception) {
-            Log::warning('Ollama connection failed', ['error' => $exception->getMessage()]);
+            AuditLog::aiFailure('chat', 'connection_failed');
             throw new RuntimeException('Ollama no disponible.');
         }
 
         if (! $response->successful()) {
-            Log::warning('Ollama request failed', ['status' => $response->status(), 'body' => $response->body()]);
+            // No se registra el cuerpo: puede contener el prompt del usuario.
+            AuditLog::aiFailure('chat', 'http_'.$response->status());
             throw new RuntimeException('Ollama devolvio error '.$response->status().'.');
         }
 
@@ -76,7 +88,7 @@ class OllamaService
         $decoded = json_decode($content, true) ?: json_decode($this->extractJson($content), true);
 
         if (! is_array($decoded)) {
-            Log::warning('Ollama JSON parse failed', ['content' => $content]);
+            AuditLog::aiFailure('json', 'invalid_json');
             throw new RuntimeException('Ollama no devolvio JSON valido.');
         }
 

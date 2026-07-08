@@ -1,10 +1,19 @@
+import { memo } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Checkbox } from "../../components/ui/Checkbox";
 import { labelFor, taskPriorities, taskStatuses, toneFor } from "../../utils/catalogs";
 
-export function TaskCard({ task, selected, onSelect, onToggle, onEdit, onDelete }) {
+/** Memoizada: cada clic de la seleccion multiple re-renderiza el listado entero. */
+export const TaskCard = memo(function TaskCard({
+  task,
+  selected,
+  onSelect,
+  onToggle,
+  onEdit,
+  onDelete,
+}) {
   const done = task.status === "completed";
 
   return (
@@ -63,4 +72,4 @@ export function TaskCard({ task, selected, onSelect, onToggle, onEdit, onDelete 
       </div>
     </Card>
   );
-}
+});

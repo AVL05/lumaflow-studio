@@ -34,11 +34,7 @@ export function SessionTimeline({ sessionId }) {
   return (
     <ol className="mt-2">
       {data.map((activity, index) => (
-        <TimelineItem
-          key={activity.id}
-          activity={activity}
-          last={index === data.length - 1}
-        />
+        <TimelineItem key={activity.id} activity={activity} last={index === data.length - 1} />
       ))}
     </ol>
   );

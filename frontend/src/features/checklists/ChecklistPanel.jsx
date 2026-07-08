@@ -19,10 +19,7 @@ const defaults = { name: "", type: "gear", use_template: true };
 /** Panel autocontenido de checklists para una sesion concreta. */
 export function ChecklistPanel({ sessionId }) {
   const toast = useToast();
-  const fetcher = useCallback(
-    () => checklistsApi.list({ session_id: sessionId }),
-    [sessionId],
-  );
+  const fetcher = useCallback(() => checklistsApi.list({ session_id: sessionId }), [sessionId]);
   const { data, loading, error, refresh } = useResource(fetcher);
   const [form, setForm] = useState(defaults);
   const [creating, setCreating] = useState(false);

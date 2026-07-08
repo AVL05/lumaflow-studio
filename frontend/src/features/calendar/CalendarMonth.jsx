@@ -46,9 +46,7 @@ export const CalendarMonth = memo(function CalendarMonth({
             <div className="mb-1 flex items-center justify-between">
               <span
                 className={`grid h-6 w-6 place-items-center rounded-full text-xs ${
-                  iso === today
-                    ? "bg-amber-200 font-semibold text-stone-950"
-                    : "text-stone-500"
+                  iso === today ? "bg-amber-200 font-semibold text-stone-950" : "text-stone-500"
                 }`}
               >
                 {dayNumber(iso)}
@@ -67,9 +65,7 @@ export const CalendarMonth = memo(function CalendarMonth({
                 <CalendarEvent key={event.id} event={event} onSelect={onSelect} compact />
               ))}
               {(byDate[iso]?.length ?? 0) > 3 ? (
-                <p className="px-1 text-[11px] text-stone-500">
-                  +{byDate[iso].length - 3} mas
-                </p>
+                <p className="px-1 text-[11px] text-stone-500">+{byDate[iso].length - 3} mas</p>
               ) : null}
             </div>
           </DayDropZone>

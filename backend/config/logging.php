@@ -73,6 +73,18 @@ return [
             'replace_placeholders' => true,
         ],
 
+        /*
+         * Canal de dominio de LumaFlow: auth, uploads, IA y excepciones de API.
+         * Se escribe solo desde App\Support\AuditLog, que sanea el contexto.
+         */
+        'lumaflow' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/lumaflow.log'),
+            'level' => env('LUMAFLOW_LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

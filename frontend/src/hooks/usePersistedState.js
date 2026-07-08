@@ -11,9 +11,7 @@ function read(key, fallback) {
     const parsed = JSON.parse(raw);
 
     // Fusiona con el valor inicial para tolerar filtros nuevos entre versiones.
-    return isPlainObject(fallback) && isPlainObject(parsed)
-      ? { ...fallback, ...parsed }
-      : parsed;
+    return isPlainObject(fallback) && isPlainObject(parsed) ? { ...fallback, ...parsed } : parsed;
   } catch {
     return fallback;
   }

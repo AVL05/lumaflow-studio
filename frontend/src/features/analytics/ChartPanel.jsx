@@ -10,9 +10,7 @@ export function ChartPanel({ title, description, data, height = 260, children, a
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-stone-100">{title}</h2>
-          {description ? (
-            <p className="mt-1 text-xs text-stone-500">{description}</p>
-          ) : null}
+          {description ? <p className="mt-1 text-xs text-stone-500">{description}</p> : null}
         </div>
         {action}
       </div>

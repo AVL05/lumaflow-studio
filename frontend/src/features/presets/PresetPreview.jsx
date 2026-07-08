@@ -13,13 +13,7 @@ export function PresetPreview({ preset }) {
   return (
     <div className="space-y-3">
       {previewFields.map(([label, key, min = -100, max = 100]) => (
-        <PresetSlider
-          key={key}
-          label={label}
-          value={preset[key] ?? 0}
-          min={min}
-          max={max}
-        />
+        <PresetSlider key={key} label={label} value={preset[key] ?? 0} min={min} max={max} />
       ))}
     </div>
   );

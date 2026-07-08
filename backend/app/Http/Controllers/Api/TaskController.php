@@ -8,6 +8,8 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\ActivityLogger;
 use App\Services\NotificationService;
+use App\Services\TaskSummaryService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TaskController extends Controller
@@ -15,7 +17,14 @@ class TaskController extends Controller
     public function __construct(
         private readonly ActivityLogger $activity,
         private readonly NotificationService $notifications,
+        private readonly TaskSummaryService $summaries,
     ) {}
+
+    /** Totales agregados para las tarjetas de la pagina de tareas. */
+    public function summary(): JsonResponse
+    {
+        return response()->json(['data' => $this->summaries->forUser(request()->user()->id)]);
+    }
 
     public function index(): AnonymousResourceCollection
     {

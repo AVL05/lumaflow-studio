@@ -7,7 +7,15 @@ import { ProgressBar } from "../../components/ui/ProgressBar";
 import { checklistTypes, labelFor } from "../../utils/catalogs";
 import { ChecklistItemRow } from "./ChecklistItemRow";
 
-export function ChecklistCard({ checklist, onToggleItem, onAddItem, onRemoveItem, onReorder, onDuplicate, onDelete }) {
+export function ChecklistCard({
+  checklist,
+  onToggleItem,
+  onAddItem,
+  onRemoveItem,
+  onReorder,
+  onDuplicate,
+  onDelete,
+}) {
   const [draft, setDraft] = useState("");
   const dragFrom = useRef(null);
   const dragTo = useRef(null);
@@ -24,7 +32,10 @@ export function ChecklistCard({ checklist, onToggleItem, onAddItem, onRemoveItem
 
     dragFrom.current = null;
     dragTo.current = null;
-    onReorder(checklist, ordered.map((item) => item.id));
+    onReorder(
+      checklist,
+      ordered.map((item) => item.id),
+    );
   }
 
   async function submitItem(event) {

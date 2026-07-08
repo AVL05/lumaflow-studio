@@ -6,9 +6,7 @@ export function useSelection() {
 
   const toggle = useCallback((id) => {
     setSelected((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id],
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     );
   }, []);
 

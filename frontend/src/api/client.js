@@ -28,10 +28,7 @@ apiClient.interceptors.response.use(
   },
 );
 
-export function getApiError(
-  error,
-  fallback = "No se pudo completar la operacion.",
-) {
+export function getApiError(error, fallback = "No se pudo completar la operacion.") {
   const errors = error.response?.data?.errors;
 
   if (errors) {

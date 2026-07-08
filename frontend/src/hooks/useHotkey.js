@@ -20,8 +20,7 @@ export function useHotkey(combo, handler, { allowInInput = false, enabled = true
 
     function onKeyDown(event) {
       const target = event.target;
-      const inEditable =
-        editableTags.includes(target?.tagName) || target?.isContentEditable;
+      const inEditable = editableTags.includes(target?.tagName) || target?.isContentEditable;
 
       if (inEditable && !allowInInput) return;
       if (event.key?.toLowerCase() !== key) return;

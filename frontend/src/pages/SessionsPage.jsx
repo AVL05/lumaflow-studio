@@ -28,12 +28,7 @@ import { useSelection } from "../hooks/useSelection";
 import { useToast } from "../features/notifications/ToastContext";
 import { LocationSelector } from "../features/locations/LocationSelector";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
-import {
-  labelFor,
-  sessionStatuses,
-  sessionTypes,
-  toneForStatus,
-} from "../utils/catalogs";
+import { labelFor, sessionStatuses, sessionTypes, toneForStatus } from "../utils/catalogs";
 
 const defaults = {
   name: "",
@@ -85,7 +80,12 @@ export function SessionsPage() {
 
   function openEdit(session) {
     setEditing(session);
-    setForm({ ...defaults, ...session, location_id: session.location_id ? String(session.location_id) : "", time: session.time ?? "" });
+    setForm({
+      ...defaults,
+      ...session,
+      location_id: session.location_id ? String(session.location_id) : "",
+      time: session.time ?? "",
+    });
     setFormError("");
     setFormOpen(true);
   }
@@ -144,10 +144,7 @@ export function SessionsPage() {
         <Select
           value={resource.filters.status ?? ""}
           onChange={(e) => resource.updateFilter("status", e.target.value)}
-          options={[
-            { value: "", label: "Todos los estados" },
-            ...sessionStatuses,
-          ]}
+          options={[{ value: "", label: "Todos los estados" }, ...sessionStatuses]}
         />
         <Select
           value={resource.filters.type ?? ""}
@@ -217,10 +214,7 @@ export function SessionsPage() {
                   {session.description || session.notes || "Sin descripcion."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setDetail(session)}
-                  >
+                  <Button variant="secondary" onClick={() => setDetail(session)}>
                     Detalle
                   </Button>
                   <Button variant="secondary" onClick={() => openEdit(session)}>
@@ -267,11 +261,7 @@ export function SessionsPage() {
           saving={saving}
         />
       </Modal>
-      <Modal
-        open={Boolean(detail)}
-        title={detail?.name}
-        onClose={() => setDetail(null)}
-      >
+      <Modal open={Boolean(detail)} title={detail?.name} onClose={() => setDetail(null)}>
         {detail ? <SessionDetail session={detail} /> : null}
       </Modal>
       <ConfirmDialog
@@ -286,8 +276,7 @@ export function SessionsPage() {
 }
 
 function SessionForm({ form, setForm, onSubmit, error, saving }) {
-  const setValue = (name, value) =>
-    setForm((current) => ({ ...current, [name]: value }));
+  const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
     <form className="grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
@@ -297,11 +286,7 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
         </div>
       ) : null}
       <Field label="Nombre">
-        <Input
-          required
-          value={form.name}
-          onChange={(e) => setValue("name", e.target.value)}
-        />
+        <Input required value={form.name} onChange={(e) => setValue("name", e.target.value)} />
       </Field>
       <Field label="Cliente">
         <Input
@@ -368,9 +353,7 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
         </Field>
       </div>
       <div className="md:col-span-2 flex justify-end">
-        <Button disabled={saving}>
-          {saving ? "Guardando..." : "Guardar sesion"}
-        </Button>
+        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar sesion"}</Button>
       </div>
     </form>
   );
@@ -399,20 +382,16 @@ function SessionSummary({ session }) {
   return (
     <div className="grid gap-4 text-sm text-stone-400 md:grid-cols-2">
       <p>
-        <span className="text-stone-100">Cliente:</span>{" "}
-        {session.client_name || "Sin cliente"}
+        <span className="text-stone-100">Cliente:</span> {session.client_name || "Sin cliente"}
       </p>
       <p>
-        <span className="text-stone-100">Fecha:</span> {session.date}{" "}
-        {session.time || ""}
+        <span className="text-stone-100">Fecha:</span> {session.date} {session.time || ""}
       </p>
       <p>
-        <span className="text-stone-100">Tipo:</span>{" "}
-        {labelFor(sessionTypes, session.session_type)}
+        <span className="text-stone-100">Tipo:</span> {labelFor(sessionTypes, session.session_type)}
       </p>
       <p>
-        <span className="text-stone-100">Estado:</span>{" "}
-        {labelFor(sessionStatuses, session.status)}
+        <span className="text-stone-100">Estado:</span> {labelFor(sessionStatuses, session.status)}
       </p>
       <p className="md:col-span-2">
         <span className="text-stone-100">Localizacion:</span>{" "}
@@ -420,7 +399,11 @@ function SessionSummary({ session }) {
       </p>
       {session.location ? (
         <div className="md:col-span-2">
-          <LocationMapPreview latitude={session.location.latitude} longitude={session.location.longitude} name={session.location.name} />
+          <LocationMapPreview
+            latitude={session.location.latitude}
+            longitude={session.location.longitude}
+            name={session.location.name}
+          />
         </div>
       ) : null}
       <p className="md:col-span-2">
@@ -428,8 +411,7 @@ function SessionSummary({ session }) {
         {session.description || "Sin descripcion"}
       </p>
       <p className="md:col-span-2">
-        <span className="text-stone-100">Notas:</span>{" "}
-        {session.notes || "Sin notas"}
+        <span className="text-stone-100">Notas:</span> {session.notes || "Sin notas"}
       </p>
     </div>
   );

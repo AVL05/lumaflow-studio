@@ -4,7 +4,13 @@ import { Panel } from "../../components/ui/Panel";
 import { calendarSources } from "../../utils/catalogs";
 import { sourceDots } from "./calendarUtils";
 
-export function CalendarSidebar({ sources, onToggleSource, counts, onCreateTask, onCreateReminder }) {
+export function CalendarSidebar({
+  sources,
+  onToggleSource,
+  counts,
+  onCreateTask,
+  onCreateReminder,
+}) {
   return (
     <Panel className="p-4">
       <h2 className="text-sm font-semibold text-stone-100">Filtros</h2>
@@ -21,9 +27,7 @@ export function CalendarSidebar({ sources, onToggleSource, counts, onCreateTask,
                 </span>
               }
             />
-            <span className="text-xs tabular-nums text-stone-600">
-              {counts[source.value] ?? 0}
-            </span>
+            <span className="text-xs tabular-nums text-stone-600">{counts[source.value] ?? 0}</span>
           </div>
         ))}
       </div>

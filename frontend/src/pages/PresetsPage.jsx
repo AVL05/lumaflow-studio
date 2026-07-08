@@ -38,9 +38,7 @@ const sliders = [
   "grain",
   "vignette",
 ];
-const defaults = Object.fromEntries(
-  sliders.map((key) => [key, key === "intensity" ? 50 : 0]),
-);
+const defaults = Object.fromEntries(sliders.map((key) => [key, key === "intensity" ? 50 : 0]));
 
 const defaultPreset = {
   name: "",
@@ -136,10 +134,7 @@ export function PresetsPage() {
         <Select
           value={resource.filters.category ?? ""}
           onChange={(e) => resource.updateFilter("category", e.target.value)}
-          options={[
-            { value: "", label: "Todas las categorias" },
-            ...presetCategories,
-          ]}
+          options={[{ value: "", label: "Todas las categorias" }, ...presetCategories]}
         />
         <Select
           value={resource.filters.style ?? ""}
@@ -205,11 +200,7 @@ export function PresetsPage() {
           saving={saving}
         />
       </Modal>
-      <Modal
-        open={Boolean(detail)}
-        title={detail?.name}
-        onClose={() => setDetail(null)}
-      >
+      <Modal open={Boolean(detail)} title={detail?.name} onClose={() => setDetail(null)}>
         {detail ? <PresetDetail preset={detail} /> : null}
       </Modal>
       <ConfirmDialog
@@ -224,8 +215,7 @@ export function PresetsPage() {
 }
 
 function PresetForm({ form, setForm, onSubmit, error, saving }) {
-  const setValue = (name, value) =>
-    setForm((current) => ({ ...current, [name]: value }));
+  const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
     <form className="grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
@@ -235,11 +225,7 @@ function PresetForm({ form, setForm, onSubmit, error, saving }) {
         </div>
       ) : null}
       <Field label="Nombre">
-        <Input
-          required
-          value={form.name}
-          onChange={(e) => setValue("name", e.target.value)}
-        />
+        <Input required value={form.name} onChange={(e) => setValue("name", e.target.value)} />
       </Field>
       <Field label="Version">
         <Input
@@ -291,13 +277,7 @@ function PresetForm({ form, setForm, onSubmit, error, saving }) {
         <Field key={key} label={key.replace("_", " ")}>
           <Input
             type="number"
-            min={
-              ["grain", "sharpness", "noise_reduction", "intensity"].includes(
-                key,
-              )
-                ? 0
-                : -100
-            }
+            min={["grain", "sharpness", "noise_reduction", "intensity"].includes(key) ? 0 : -100}
             max="100"
             value={form[key]}
             onChange={(e) => setValue(key, Number(e.target.value))}
@@ -314,9 +294,7 @@ function PresetForm({ form, setForm, onSubmit, error, saving }) {
         </Field>
       </div>
       <div className="md:col-span-2 flex justify-end">
-        <Button disabled={saving}>
-          {saving ? "Guardando..." : "Guardar preset"}
-        </Button>
+        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar preset"}</Button>
       </div>
     </form>
   );
@@ -331,8 +309,7 @@ function PresetDetail({ preset }) {
           {labelFor(presetCategories, preset.category)}
         </p>
         <p>
-          <span className="text-stone-100">Estilo:</span>{" "}
-          {labelFor(presetStyles, preset.style)}
+          <span className="text-stone-100">Estilo:</span> {labelFor(presetStyles, preset.style)}
         </p>
         <p>
           <span className="text-stone-100">Version:</span> {preset.version}

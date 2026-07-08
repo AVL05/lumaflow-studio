@@ -200,7 +200,5 @@ export function labelFor(options, value) {
 }
 
 export function toneForStatus(status) {
-  return (
-    sessionStatuses.find((option) => option.value === status)?.tone ?? "neutral"
-  );
+  return sessionStatuses.find((option) => option.value === status)?.tone ?? "neutral";
 }

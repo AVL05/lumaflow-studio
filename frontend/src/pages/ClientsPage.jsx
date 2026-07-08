@@ -1,84 +1,88 @@
-import { useState } from 'react'
-import { clientsApi } from '../api/clients'
-import { getApiError } from '../api/client'
-import { Button } from '../components/ui/Button'
-import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { Modal } from '../components/ui/Modal'
-import { PageHeader } from '../components/ui/PageHeader'
-import { Pagination } from '../components/ui/Pagination'
-import { SearchBar } from '../components/ui/SearchBar'
-import { Select } from '../components/ui/Select'
-import { Skeleton } from '../components/ui/Skeleton'
-import { EmptyState } from '../components/states/EmptyState'
-import { ErrorState } from '../components/states/ErrorState'
-import { ClientCard } from '../features/clients/ClientCard'
-import { ClientForm } from '../features/clients/ClientForm'
-import { useToast } from '../features/notifications/ToastContext'
-import { usePaginatedResource } from '../hooks/usePaginatedResource'
-import { clientStatuses } from '../utils/catalogs'
+import { useState } from "react";
+import { clientsApi } from "../api/clients";
+import { getApiError } from "../api/client";
+import { Button } from "../components/ui/Button";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { Modal } from "../components/ui/Modal";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Pagination } from "../components/ui/Pagination";
+import { SearchBar } from "../components/ui/SearchBar";
+import { Select } from "../components/ui/Select";
+import { Skeleton } from "../components/ui/Skeleton";
+import { EmptyState } from "../components/states/EmptyState";
+import { ErrorState } from "../components/states/ErrorState";
+import { ClientCard } from "../features/clients/ClientCard";
+import { ClientForm } from "../features/clients/ClientForm";
+import { useToast } from "../features/notifications/ToastContext";
+import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { clientStatuses } from "../utils/catalogs";
 
 const defaults = {
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  instagram: '',
-  notes: '',
-  status: 'lead',
-}
+  name: "",
+  email: "",
+  phone: "",
+  company: "",
+  instagram: "",
+  notes: "",
+  status: "lead",
+};
 
 export function ClientsPage() {
-  const toast = useToast()
-  const resource = usePaginatedResource(clientsApi.list, { per_page: 12, sort: 'created_at', direction: 'desc' })
-  const [form, setForm] = useState(defaults)
-  const [editing, setEditing] = useState(null)
-  const [deleting, setDeleting] = useState(null)
-  const [formOpen, setFormOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [formError, setFormError] = useState('')
+  const toast = useToast();
+  const resource = usePaginatedResource(clientsApi.list, {
+    per_page: 12,
+    sort: "created_at",
+    direction: "desc",
+  });
+  const [form, setForm] = useState(defaults);
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   function openCreate() {
-    setEditing(null)
-    setForm(defaults)
-    setFormError('')
-    setFormOpen(true)
+    setEditing(null);
+    setForm(defaults);
+    setFormError("");
+    setFormOpen(true);
   }
 
   function openEdit(client) {
-    setEditing(client)
-    setForm({ ...defaults, ...client })
-    setFormError('')
-    setFormOpen(true)
+    setEditing(client);
+    setForm({ ...defaults, ...client });
+    setFormError("");
+    setFormOpen(true);
   }
 
   async function submit(event) {
-    event.preventDefault()
-    setSaving(true)
-    setFormError('')
+    event.preventDefault();
+    setSaving(true);
+    setFormError("");
 
     try {
-      const payload = normalizeClient(form)
+      const payload = normalizeClient(form);
       if (editing) {
-        await clientsApi.update(editing.id, payload)
-        toast.success('Cliente actualizado.')
+        await clientsApi.update(editing.id, payload);
+        toast.success("Cliente actualizado.");
       } else {
-        await clientsApi.create(payload)
-        toast.success('Cliente creado.')
+        await clientsApi.create(payload);
+        toast.success("Cliente creado.");
       }
-      setFormOpen(false)
-      await resource.refresh()
+      setFormOpen(false);
+      await resource.refresh();
     } catch (err) {
-      setFormError(getApiError(err))
+      setFormError(getApiError(err));
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   async function confirmDelete() {
-    await clientsApi.remove(deleting.id)
-    toast.success('Cliente eliminado.')
-    setDeleting(null)
-    await resource.refresh()
+    await clientsApi.remove(deleting.id);
+    toast.success("Cliente eliminado.");
+    setDeleting(null);
+    await resource.refresh();
   }
 
   return (
@@ -92,36 +96,38 @@ export function ClientsPage() {
 
       <div className="mb-6 grid gap-3 lg:grid-cols-[1fr_180px_160px_140px]">
         <SearchBar
-          value={resource.filters.search ?? ''}
-          onChange={(value) => resource.updateFilter('search', value)}
+          value={resource.filters.search ?? ""}
+          onChange={(value) => resource.updateFilter("search", value)}
           placeholder="Buscar por nombre, email, empresa o Instagram"
         />
         <Select
-          value={resource.filters.status ?? ''}
-          onChange={(e) => resource.updateFilter('status', e.target.value)}
-          options={[{ value: '', label: 'Todos los estados' }, ...clientStatuses]}
+          value={resource.filters.status ?? ""}
+          onChange={(e) => resource.updateFilter("status", e.target.value)}
+          options={[{ value: "", label: "Todos los estados" }, ...clientStatuses]}
         />
         <Select
-          value={resource.filters.sort ?? 'created_at'}
-          onChange={(e) => resource.updateFilter('sort', e.target.value)}
+          value={resource.filters.sort ?? "created_at"}
+          onChange={(e) => resource.updateFilter("sort", e.target.value)}
           options={[
-            { value: 'created_at', label: 'Fecha' },
-            { value: 'name', label: 'Nombre' },
-            { value: 'status', label: 'Estado' },
+            { value: "created_at", label: "Fecha" },
+            { value: "name", label: "Nombre" },
+            { value: "status", label: "Estado" },
           ]}
         />
         <Select
-          value={resource.filters.direction ?? 'desc'}
-          onChange={(e) => resource.updateFilter('direction', e.target.value)}
+          value={resource.filters.direction ?? "desc"}
+          onChange={(e) => resource.updateFilter("direction", e.target.value)}
           options={[
-            { value: 'asc', label: 'Asc' },
-            { value: 'desc', label: 'Desc' },
+            { value: "asc", label: "Asc" },
+            { value: "desc", label: "Desc" },
           ]}
         />
       </div>
 
       {resource.error ? <ErrorState message={resource.error} /> : null}
-      {resource.loading ? <ClientSkeleton /> : resource.items.length === 0 ? (
+      {resource.loading ? (
+        <ClientSkeleton />
+      ) : resource.items.length === 0 ? (
         <EmptyState
           title="Sin clientes"
           description="Crea el primer cliente para conectar sesiones y entregas."
@@ -131,15 +137,30 @@ export function ClientsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {resource.items.map((client) => (
-              <ClientCard key={client.id} client={client} onEdit={openEdit} onDelete={setDeleting} />
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={openEdit}
+                onDelete={setDeleting}
+              />
             ))}
           </div>
           <Pagination meta={resource.meta} onPage={resource.setPage} />
         </>
       )}
 
-      <Modal open={formOpen} title={editing ? 'Editar cliente' : 'Nuevo cliente'} onClose={() => setFormOpen(false)}>
-        <ClientForm form={form} setForm={setForm} onSubmit={submit} error={formError} saving={saving} />
+      <Modal
+        open={formOpen}
+        title={editing ? "Editar cliente" : "Nuevo cliente"}
+        onClose={() => setFormOpen(false)}
+      >
+        <ClientForm
+          form={form}
+          setForm={setForm}
+          onSubmit={submit}
+          error={formError}
+          saving={saving}
+        />
       </Modal>
       <ConfirmDialog
         open={Boolean(deleting)}
@@ -149,7 +170,7 @@ export function ClientsPage() {
         onConfirm={confirmDelete}
       />
     </>
-  )
+  );
 }
 
 function normalizeClient(form) {
@@ -161,13 +182,15 @@ function normalizeClient(form) {
     instagram: form.instagram || null,
     notes: form.notes || null,
     status: form.status,
-  }
+  };
 }
 
 function ClientSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-64" />)}
+      {Array.from({ length: 6 }, (_, index) => (
+        <Skeleton key={index} className="h-64" />
+      ))}
     </div>
-  )
+  );
 }

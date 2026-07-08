@@ -70,11 +70,14 @@ export function NotificationsProvider({ children }) {
     setUnread(0);
   }, []);
 
-  const remove = useCallback(async (id) => {
-    await notificationsApi.remove(id);
-    setItems((current) => current.filter((item) => item.id !== id));
-    await refreshCount();
-  }, [refreshCount]);
+  const remove = useCallback(
+    async (id) => {
+      await notificationsApi.remove(id);
+      setItems((current) => current.filter((item) => item.id !== id));
+      await refreshCount();
+    },
+    [refreshCount],
+  );
 
   const clearRead = useCallback(async () => {
     await notificationsApi.clear("read");
@@ -82,13 +85,21 @@ export function NotificationsProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ unread, items, loading, refreshCount, refreshList, markRead, markAllRead, remove, clearRead }),
+    () => ({
+      unread,
+      items,
+      loading,
+      refreshCount,
+      refreshList,
+      markRead,
+      markAllRead,
+      remove,
+      clearRead,
+    }),
     [unread, items, loading, refreshCount, refreshList, markRead, markAllRead, remove, clearRead],
   );
 
-  return (
-    <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>
-  );
+  return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

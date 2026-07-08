@@ -1,4 +1,4 @@
-import { Card } from '../../components/ui/Card'
+import { Card } from "../../components/ui/Card";
 
 export function InsightCard({ label, value, detail }) {
   return (
@@ -7,5 +7,5 @@ export function InsightCard({ label, value, detail }) {
       <p className="mt-3 text-2xl font-semibold text-stone-100">{value}</p>
       <p className="mt-1 text-sm text-stone-500">{detail}</p>
     </Card>
-  )
+  );
 }

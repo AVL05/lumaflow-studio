@@ -24,10 +24,7 @@ export function GlobalSearch({ open, onOpen, onClose }) {
   useHotkey("mod+k", () => (open ? onClose() : onOpen()), { allowInInput: true });
   useHotkey("escape", onClose, { allowInInput: true, enabled: open });
 
-  const flat = useMemo(
-    () => result?.groups.flatMap((group) => group.items) ?? [],
-    [result],
-  );
+  const flat = useMemo(() => result?.groups.flatMap((group) => group.items) ?? [], [result]);
 
   useEffect(() => {
     if (open) {

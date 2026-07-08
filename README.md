@@ -1,220 +1,247 @@
+<div align="center">
+
 # LumaFlow Studio
 
-LumaFlow Studio es una plataforma full-stack para fotografos y creadores visuales. La base actual incluye autenticacion, API REST, dashboard con datos reales, CRUD profesional de sesiones, inventario de equipo, sistema avanzado de presets, albumes, etiquetas, biblioteca fotografica con EXIF, localizaciones fotograficas, clientes, entregas y una estructura preparada para modulos futuros.
+**Plataforma full-stack de gestion del flujo de trabajo para fotografos, con asistente de IA que corre en local.**
+
+[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)](https://www.mysql.com)
+[![Ollama](https://img.shields.io/badge/Ollama-local-000000)](https://ollama.com)
+[![License](https://img.shields.io/badge/License-MIT-amber)](LICENSE)
+
+[Documentacion tecnica](docs/) · [API](docs/api.md) · [Arquitectura](docs/architecture.md) · [Despliegue](docs/deployment.md)
+
+</div>
+
+---
+
+## Descripcion
+
+Un fotografo profesional trabaja con sesiones, clientes, equipo, presets, localizaciones y miles de archivos, pero suele gestionarlo todo en hojas de calculo dispersas. LumaFlow Studio reune ese flujo completo en una sola aplicacion: planificacion, produccion, biblioteca con EXIF, CRM ligero, entregas, analitica y un asistente de IA que **solo razona sobre los datos reales del usuario y nunca sale de su maquina**.
+
+Es una release privada de portfolio. No busca ser un SaaS, sino demostrar arquitectura, criterio tecnico y acabado de producto sobre un dominio con reglas propias.
+
+## Capturas
+
+> Pendientes de preparar el material visual. La pagina `/about-project` incluye los marcadores de posicion.
+
+| Dashboard | Calendario | Analitica |
+|---|---|---|
+| _pendiente_ | _pendiente_ | _pendiente_ |
+
+| Biblioteca | Localizaciones | Asistente IA |
+|---|---|---|
+| _pendiente_ | _pendiente_ | _pendiente_ |
 
 ## Stack
 
-- Frontend: React + Vite + JavaScript
-- Estilos: Tailwind CSS
-- Backend: Laravel API
-- Base de datos: MySQL
-- Auth: Laravel Sanctum con tokens Bearer para la SPA
-- Storage: Laravel Storage public disk
-- IA: Ollama local
-- Mapas: Leaflet
-- Graficas: Recharts
+| Capa | Tecnologia |
+|---|---|
+| Frontend | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet |
+| Backend | Laravel 13, PHP 8.3+, Sanctum (tokens Bearer) |
+| Datos | MySQL 8, Eloquent |
+| IA | Ollama local (`llama3.1` por defecto) |
+| Calidad | PHPUnit, Pint, Vitest, Testing Library, oxlint, Prettier |
+| Infra | Docker Compose (frontend, backend, MySQL, phpMyAdmin, Ollama opcional) |
 
-## Estructura
+## Arquitectura
 
-```txt
-frontend/   SPA React con router, auth provider, layout y modulos de producto
-backend/    API Laravel con Sanctum, requests, resources, controllers, services y seeders
-scripts/    utilidades locales, incluido arranque conjunto backend/frontend
-README.md   guia principal del proyecto
+Dos aplicaciones independientes en un monorepo. No comparten codigo ni build: se comunican solo por HTTP.
+
+```
+routes/api.php  ->  Api\XController  ->  XRequest (validacion)
+                          │
+                          ▼
+                   App\Services\*  (logica de dominio)
+                          │
+                          ▼
+                 Modelo + scopes  ->  XResource (serializacion)
+
+frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/
 ```
 
-## Funcionalidades implementadas
+Tres decisiones que explican casi todo el codigo:
 
-- Auth: registro, login, logout y `GET /api/user`
-- Dashboard: metricas reales, proximas sesiones, sesiones por estado y actividad reciente
-- Sessions: CRUD protegido por usuario con busqueda, filtros, ordenacion, paginacion, detalle y confirmacion de borrado
-- Gear: CRUD protegido por usuario con categorias, favoritos, estado, compra, filtros y busqueda
-- Presets: CRUD profesional, filtros, favoritos, duplicado, versionado, color identificativo y sliders de simulacion visual
-- Albums: colecciones con color, portada preparada y relacion many-to-many con fotos
-- Tags: taxonomia visual por usuario con relacion many-to-many con fotos
-- Photos: subida segura, EXIF automatico, storage publico, grid/lista, preview, edicion de metadata, albumes, tags, filtros avanzados y borrado fisico
-- Locations: CRUD protegido por usuario con mapa Leaflet, coordenadas seleccionables, portada, galeria, rating, favoritos, acceso, permisos, coste, links externos, clima, estaciones, tags y equipo recomendado
-- Planning: sesiones asociadas a localizaciones guardadas con mapa e informacion del spot
-- Clients: CRUD protegido por usuario con estados, contacto, empresa, notas, busqueda, filtros y detalle
-- Deliveries: CRUD protegido por usuario con cliente, sesion opcional, presupuesto, fecha, URL de galeria, notas privadas, busqueda, filtros y detalle
-- IA: asistente fotografico con Ollama local, contexto compacto desde datos del usuario, historial persistente, analisis avanzado de fotos, generacion de presets, recomendador de equipo, planificador de sesiones e insights en dashboard
-- Calendar: vistas mes, semana, dia, agenda y lista con drag & drop para reprogramar sesiones, entregas, tareas y recordatorios
-- Tasks: CRUD protegido con prioridad, estado, fecha limite, relacion con sesion y cliente, resumen de vencidas y acciones masivas
-- Checklists: checklists tipadas por sesion con plantillas, items reordenables por drag & drop, progreso en porcentaje y duplicado
-- Timeline: actividad automatica por sesion (creacion, edicion, cambio de estado, subida de fotos, analisis IA, entrega, checklist completada)
-- Reminders: recordatorios con fecha, hora, tipo y estado, asociables a sesion, cliente, entrega o tarea
-- Notifications: centro de notificaciones persistido en BD con contador global, marcado de leidas y limpieza
-- Search: buscador global unificado con atajo `Ctrl/Cmd + K`, resultados agrupados y navegacion por teclado
-- Analytics: pagina `/app/analytics` con KPIs, ocho graficas Recharts sobre datos reales, tablas comparativas y rangos de fechas
-- Bulk actions: borrado, cambio de estado, etiquetado, mover a album, asignar cliente y exportar seleccion
-- Export: descarga CSV y JSON de sesiones, clientes, entregas, tareas, fotos, equipo, presets y localizaciones
-- UX: toasts globales, modales, confirmaciones, estados loading/error/empty, skeletons, atajos de teclado, filtros persistidos y componentes reutilizables
+- **Multi-tenancy por `user_id`.** Sin middleware magico: cada consulta parte del scope `ownedBy()` y cada creacion cuelga de la relacion del usuario.
+- **404 en lugar de 403.** Un 403 sobre un recurso ajeno confirmaria que existe.
+- **La logica vive en servicios.** Los controladores son delgados y testeables.
 
-## Endpoints principales
+Detalle completo en [docs/architecture.md](docs/architecture.md).
 
-- `GET /api/dashboard`
-- `apiResource /api/sessions`
-- `apiResource /api/gear`
-- `apiResource /api/presets`
-- `POST /api/presets/{preset}/duplicate`
-- `apiResource /api/albums`
-- `GET|POST|PUT|DELETE /api/tags`
-- `apiResource /api/locations`
-- Filtros en `GET /api/locations`: `search`, `city`, `type`, `access_difficulty`, `access_mode`, `favorite`, `latitude`, `longitude`, `radius_km`
-- `apiResource /api/clients`
-- `apiResource /api/deliveries`
-- `GET /api/gallery/photos`
-- `GET /api/photos`
-- `POST /api/photos/upload`
-- `PUT /api/photos/{photo}`
-- `GET /api/photos/{photo}/metadata`
-- `DELETE /api/photos/{photo}`
-- `GET /api/ai/status`
-- `POST /api/ai/chat`
-- `POST /api/ai/analyze`
-- `POST /api/ai/preset`
-- `POST /api/ai/session-plan`
-- `POST /api/ai/recommend-gear`
-- `GET /api/ai/history`
-- `GET|PATCH|DELETE /api/ai/history/{id}`
-- `apiResource /api/tasks`
-- `apiResource /api/reminders`
-- `apiResource /api/checklists`
-- `GET /api/checklists/templates`
-- `POST /api/checklists/{checklist}/duplicate`
-- `PUT /api/checklists/{checklist}/reorder`
-- `POST /api/checklists/{checklist}/items`
-- `PUT|PATCH|DELETE /api/checklist-items/{item}` (`PATCH .../toggle`)
-- `GET /api/activities`
-- `GET /api/sessions/{session}/timeline`
-- `GET /api/notifications`, `GET /api/notifications/unread-count`
-- `PATCH /api/notifications/read-all`, `PATCH /api/notifications/{notification}/read`
-- `DELETE /api/notifications/clear`, `DELETE /api/notifications/{notification}`
-- `GET /api/calendar` (`from`, `to`, `sources`)
-- `PATCH /api/calendar/move`
-- `GET /api/search` (`q`, `groups`, `per_group`)
-- `GET /api/analytics` (`from`, `to`)
-- `POST /api/bulk-actions`
-- `GET|POST /api/exports/{resource}` (`format=csv|json`)
+## Modulos
 
-## Requisitos
+| Modulo | Que hace |
+|---|---|
+| **Dashboard** | Metricas reales, agenda del dia, tareas pendientes, recordatorios, progreso mensual, timeline de actividad |
+| **Calendario** | Vistas mes, semana, dia, agenda y lista. Drag & drop para reprogramar sesiones, entregas, tareas y recordatorios |
+| **Sesiones** | CRUD con cliente, tipo, estado, localizacion, checklists tipadas y timeline automatico |
+| **Tareas** | Prioridad, estado, fecha limite, relacion con sesion y cliente, resumen de vencidas, acciones masivas |
+| **Checklists** | Plantillas por tipo (equipo, preparacion, edicion, entrega), items reordenables, progreso en porcentaje, duplicado |
+| **Recordatorios** | Fecha, hora, tipo y estado. Asociables a sesion, cliente, entrega o tarea |
+| **Biblioteca** | Subida con EXIF automatico, albumes, etiquetas, filtros avanzados, preview, borrado fisico |
+| **Localizaciones** | Mapa Leaflet, coordenadas, acceso, permisos, coste, clima, estaciones, equipo recomendado |
+| **Clientes y entregas** | CRM ligero conectado a sesiones, presupuestos y galerias |
+| **Presets** | CRUD profesional con versionado, duplicado, color identificativo y sliders de simulacion |
+| **Analitica** | KPIs y ocho graficas Recharts sobre datos reales, tablas comparativas, rangos de fechas |
+| **Busqueda global** | `Ctrl/Cmd + K`. Nueve grupos, resultados agrupados, navegacion por teclado |
+| **Notificaciones** | Centro persistido en BD, contador global, marcado y limpieza |
+| **Asistente IA** | Chat con contexto, analisis de fotos, generacion de presets, planes de sesion, recomendador de equipo |
+| **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y Ollama |
 
-- PHP 8.3+
-- Composer
-- Node.js 22+
-- npm
-- MySQL 8+
+## Instalacion
 
-## Backend
+Requisitos: PHP 8.3+, Composer, Node 22+, MySQL 8. Ollama es opcional.
 
 ```bash
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan storage:link
-php artisan migrate --seed
-php artisan serve
+git clone https://github.com/AVL05/lumaflow-studio.git
+cd lumaflow-studio
 ```
-
-Variables relevantes en `backend/.env`:
-
-```env
-APP_NAME="LumaFlow Studio"
-APP_URL=http://localhost:8000
-FRONTEND_URL=http://localhost:5173
-FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
-SANCTUM_STATEFUL_DOMAINS=
-OLLAMA_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=llama3.1
-OLLAMA_TIMEOUT=30
-OLLAMA_MAX_CONTEXT=12000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=lumaflow_studio
-DB_USERNAME=root
-DB_PASSWORD=
-
-SESSION_DRIVER=file
-FILESYSTEM_DISK=public
-```
-
-Antes de migrar, crea la base de datos MySQL:
 
 ```sql
 CREATE DATABASE lumaflow_studio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-## Frontend
-
 ```bash
-cd frontend
-npm install
-npm run dev
+npm install     # dependencias raiz
+npm run setup   # composer install, APP_KEY, storage:link, migrate, npm install
+npm run start   # backend :8000 y frontend :5173, en una sola terminal
 ```
 
-Variables opcionales en `frontend/.env`:
+Usuario de ejemplo tras sembrar (`php artisan db:seed`): `test@example.com` / `password`.
+
+## Docker
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+| Servicio | URL |
+|---|---|
+| Frontend | http://localhost:8080 |
+| Backend | http://localhost:8000 |
+| phpMyAdmin | http://localhost:8081 |
+
+Con el modelo de IA en contenedor:
+
+```bash
+docker compose --profile ollama up --build
+docker compose exec ollama ollama pull llama3.1
+```
+
+Sin ese perfil, el backend usa el Ollama del host. Detalles en [docs/deployment.md](docs/deployment.md).
+
+## Variables
+
+Ninguna contiene secretos reales; son valores de desarrollo. Los `.env` nunca se commitean.
+
+**Raiz** (`.env`, solo para Docker): `APP_KEY`, `DB_*`, `FRONTEND_URLS`, `VITE_API_URL`, `OLLAMA_*`, `SEED_DATABASE`.
+
+**`backend/.env`**:
 
 ```env
-VITE_API_URL=http://localhost:8000/api
+APP_NAME="LumaFlow Studio"
+APP_URL=http://localhost:8000
+FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
+
+DB_CONNECTION=mysql
+DB_DATABASE=lumaflow_studio
+DB_USERNAME=root
+DB_PASSWORD=
+
+FILESYSTEM_DISK=public
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.1
+OLLAMA_TIMEOUT=30
+OLLAMA_MAX_CONTEXT=12000
 ```
 
-## Comandos utiles
+**`frontend/.env`**: `VITE_API_URL=http://localhost:8000/api`
 
-Backend:
+## Scripts
 
-```bash
-php artisan route:list --path=api
-php artisan migrate:fresh --seed --force
-php artisan test
-vendor/bin/pint
+Desde la raiz:
+
+| Script | Que hace |
+|---|---|
+| `npm run start` | Backend + frontend en una sola terminal |
+| `npm run dev` | Alias de `start` |
+| `npm run build` | Build de produccion del frontend |
+| `npm run lint` | oxlint + `pint --test` |
+| `npm run format` | Prettier + Pint |
+| `npm run test` | PHPUnit + Vitest |
+| `npm run setup` | Instalacion completa |
+| `npm run docker:up` / `docker:down` / `docker:reset` | Ciclo de vida de Docker |
+
+## Estructura
+
+```
+lumaflow-studio/
+├── backend/
+│   ├── app/
+│   │   ├── Http/{Controllers/Api, Requests, Resources}
+│   │   ├── Models/{, Concerns}
+│   │   ├── Policies/
+│   │   ├── Services/
+│   │   └── Support/AuditLog.php
+│   ├── database/{migrations, seeders}
+│   ├── routes/api.php
+│   ├── tests/{Feature, Unit}
+│   └── Dockerfile
+├── frontend/
+│   ├── src/{api, app, components, features, hooks, pages, styles, test}
+│   └── Dockerfile
+├── docs/
+├── docker-compose.yml
+└── LICENSE
 ```
 
-Frontend:
+## IA
 
-```bash
-npm run lint
-npm run build
-```
+El asistente corre sobre **Ollama en local**: ningun dato sale del equipo, no hay claves de API ni proveedores externos.
 
-Arranque conjunto desde la raiz:
+`AiContextService` arma un resumen compacto de las sesiones, equipo, presets, fotos y clientes del usuario y lo trunca a un presupuesto de caracteres. `PromptBuilderService` lo entrega junto a un system prompt que restringe el ambito a la fotografia y **prohibe inventar datos**. Las tareas estructuradas (generar un preset, planificar una sesion, recomendar equipo) exigen JSON estricto contra un esquema.
 
-```bash
-npm run start
-```
+El historial de conversacion se reconstruye en el servidor, nunca se acepta del cliente. Los prompts jamas se escriben en los logs. Si Ollama no responde, los endpoints de IA devuelven 503 y el resto de la aplicacion sigue funcionando.
 
-Este comando levanta Laravel en `http://127.0.0.1:8000` y Vite en `http://localhost:5173`.
-
-## Estado del proyecto
-
-Fase 9 implementada: ecosistema de workflow enterprise con calendario, tareas, checklists, timeline de actividad, recordatorios, notificaciones persistidas, busqueda global, acciones masivas, exportacion CSV/JSON y analitica real con Recharts. El proyecto sigue como release privada de portfolio. No incluye facturacion, comparacion visual interactiva, streaming HTTP incremental real ni exportacion PDF.
+Detalle en [docs/ai.md](docs/ai.md).
 
 ## Testing
 
-Las pruebas de `phpunit.xml` apuntan a SQLite en memoria. Si tu PHP no tiene `pdo_sqlite`, crea una base MySQL de test y sobrescribe la conexion:
-
-```sql
-CREATE DATABASE lumaflow_studio_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```bash
+npm run test                                    # todo
+cd backend && php artisan test --filter=AuthTest
+cd frontend && npm run test:coverage
 ```
+
+42 tests de backend (auth, CRUD, permisos, workflow, salud, policies) y 33 de frontend (hooks, utilidades del calendario, `Modal`, `TaskCard`, `ProtectedRoute`).
+
+`phpunit.xml` apunta a SQLite en memoria. Si tu PHP no trae `pdo_sqlite`:
 
 ```bash
 DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
 ```
 
-La analitica usa SQL especifico de MySQL (`DATE_FORMAT`, `JSON_EXTRACT`), asi que MySQL es el motor de referencia tambien en pruebas.
-
 ## Roadmap
 
-- Usar EXIF para recomendaciones mas precisas y busqueda inteligente
-- Activar streaming HTTP incremental real con respuestas chunked/SSE
-- UI de comparacion before/after sobre `photo_comparisons`
-- Conectar clientes con contratos, entregas publicas y aprobacion formal
-- Exportacion PDF dedicada para planes, conversaciones IA e informes de analitica
-- Recordatorios con envio real (cola + notificaciones push o email)
-- Kanban de tareas con drag & drop entre columnas de estado
+Lo que **no** esta implementado, y por que, en [docs/roadmap.md](docs/roadmap.md). Resumen: streaming real de IA, envio de recordatorios con colas, exportacion PDF, comparacion before/after y kanban de tareas.
 
-## Capturas
+## Contribucion
 
-Pendiente de anadir capturas del dashboard, sesiones, equipo y biblioteca cuando se prepare el material visual del portfolio.
+Proyecto personal de portfolio; no se buscan contribuciones externas. Si aun asi quieres proponer un cambio:
+
+1. Abre un issue describiendo el problema antes de escribir codigo.
+2. Respeta las convenciones: `vendor/bin/pint` en backend, `npm run lint && npm run format` en frontend.
+3. Anade tests para el comportamiento que cambies.
+4. Commits en imperativo, con el ambito por delante: `feat(calendar): ...`, `fix(auth): ...`.
+
+## Creditos
+
+Diseno y desarrollo: **Alex Vicente Lopez**.
+
+Construido sobre [Laravel](https://laravel.com), [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Recharts](https://recharts.org), [Leaflet](https://leafletjs.com) y [Ollama](https://ollama.com). Mapas base de [CARTO](https://carto.com) sobre datos de [OpenStreetMap](https://www.openstreetmap.org).
+
+## Licencia
+
+[MIT](LICENSE).

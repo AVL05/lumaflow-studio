@@ -1,5 +1,5 @@
-import { Badge } from '../../components/ui/Badge'
-import { accessDifficulties, labelFor, locationTypes } from '../../utils/catalogs'
+import { Badge } from "../../components/ui/Badge";
+import { accessDifficulties, labelFor, locationTypes } from "../../utils/catalogs";
 
 export function LocationHeader({ location }) {
   return (
@@ -9,12 +9,14 @@ export function LocationHeader({ location }) {
           <h1 className="text-2xl font-semibold">{location.name}</h1>
           {location.is_favorite ? <Badge variant="warm">Favorita</Badge> : null}
         </div>
-        <p className="mt-2 text-sm text-stone-500">{[location.city, location.country].filter(Boolean).join(', ') || 'Sin ciudad'}</p>
+        <p className="mt-2 text-sm text-stone-500">
+          {[location.city, location.country].filter(Boolean).join(", ") || "Sin ciudad"}
+        </p>
       </div>
       <div className="flex flex-wrap gap-2">
         <Badge variant="warm">{labelFor(locationTypes, location.type)}</Badge>
         <Badge>{labelFor(accessDifficulties, location.access_difficulty)}</Badge>
       </div>
     </div>
-  )
+  );
 }

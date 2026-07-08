@@ -26,6 +26,7 @@ class DashboardService
     public function __construct(
         private readonly OllamaService $ollama,
         private readonly CalendarService $calendar,
+        private readonly TaskSummaryService $taskSummary,
     ) {}
 
     public function forUser(User $user): array
@@ -159,7 +160,6 @@ class DashboardService
                 ->latest()
                 ->limit(3)
                 ->get(),
-            'recentActivity' => $this->recentActivity($user->id),
             'todayAgenda' => $this->calendar->events($user, now()->toDateString(), now()->toDateString()),
             'pendingTasks' => Task::query()
                 ->ownedBy($user->id)
@@ -169,7 +169,7 @@ class DashboardService
                 ->orderBy('due_date')
                 ->limit(6)
                 ->get(),
-            'taskSummary' => $this->taskSummary($user->id),
+            'taskSummary' => $this->taskSummary->forUser($user->id),
             'upcomingReminders' => Reminder::query()
                 ->ownedBy($user->id)
                 ->where('status', 'pending')
@@ -190,25 +190,6 @@ class DashboardService
                 ->latest()
                 ->limit(8)
                 ->get(),
-        ];
-    }
-
-    private function taskSummary(int $userId): array
-    {
-        $totals = Task::query()
-            ->ownedBy($userId)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        return [
-            'byStatus' => collect(Task::STATUSES)
-                ->map(fn (string $status) => ['status' => $status, 'total' => (int) ($totals[$status] ?? 0)])
-                ->values()
-                ->all(),
-            'open' => Task::query()->ownedBy($userId)->open()->count(),
-            'overdue' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', '<', now()->toDateString())->count(),
-            'dueToday' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', now()->toDateString())->count(),
         ];
     }
 
@@ -240,58 +221,6 @@ class DashboardService
                 'total' => (int) ($totals[$status] ?? 0),
             ])
             ->values()
-            ->all();
-    }
-
-    private function recentActivity(int $userId): array
-    {
-        $sessions = Session::query()
-            ->ownedBy($userId)
-            ->selectRaw("'session' as type, name as title, status as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        $photos = Photo::query()
-            ->ownedBy($userId)
-            ->selectRaw("'photo' as type, COALESCE(title, file_name, 'Foto sin titulo') as title, category as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        $gear = GearItem::query()
-            ->ownedBy($userId)
-            ->selectRaw("'gear' as type, name as title, category as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        $presets = Preset::query()
-            ->where('user_id', $userId)
-            ->selectRaw("'preset' as type, name as title, style as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        $clients = Client::query()
-            ->ownedBy($userId)
-            ->selectRaw("'client' as type, name as title, status as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        $deliveries = Delivery::query()
-            ->ownedBy($userId)
-            ->selectRaw("'delivery' as type, title, status as meta, created_at")
-            ->latest()
-            ->limit(5);
-
-        return DB::query()
-            ->fromSub($sessions->unionAll($photos)->unionAll($gear)->unionAll($presets)->unionAll($clients)->unionAll($deliveries), 'activity')
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->get()
-            ->map(fn ($item) => [
-                'type' => $item->type,
-                'title' => $item->title,
-                'meta' => $item->meta,
-                'created_at' => $item->created_at,
-            ])
             ->all();
     }
 }

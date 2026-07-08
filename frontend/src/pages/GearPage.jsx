@@ -75,8 +75,7 @@ export function GearPage() {
     const payload = {
       ...form,
       weight_grams: form.weight_grams === "" ? null : Number(form.weight_grams),
-      purchase_price:
-        form.purchase_price === "" ? null : Number(form.purchase_price),
+      purchase_price: form.purchase_price === "" ? null : Number(form.purchase_price),
       purchase_date: form.purchase_date || null,
     };
 
@@ -122,10 +121,7 @@ export function GearPage() {
         <Select
           value={resource.filters.category ?? ""}
           onChange={(e) => resource.updateFilter("category", e.target.value)}
-          options={[
-            { value: "", label: "Todas las categorias" },
-            ...gearCategories,
-          ]}
+          options={[{ value: "", label: "Todas las categorias" }, ...gearCategories]}
         />
         <Select
           value={resource.filters.favorites ?? ""}
@@ -170,9 +166,7 @@ export function GearPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {resource.items.map((item) => {
-              const category = gearCategories.find(
-                (option) => option.value === item.category,
-              );
+              const category = gearCategories.find((option) => option.value === item.category);
               return (
                 <Card key={item.id} className="p-5">
                   <div className="flex items-start justify-between gap-4">
@@ -183,28 +177,17 @@ export function GearPage() {
                       <div>
                         <h2 className="font-semibold">{item.name}</h2>
                         <p className="mt-1 text-sm text-stone-500">
-                          {[item.brand, item.model].filter(Boolean).join(" ") ||
-                            "Sin marca/modelo"}
+                          {[item.brand, item.model].filter(Boolean).join(" ") || "Sin marca/modelo"}
                         </p>
                       </div>
                     </div>
-                    {item.is_favorite ? (
-                      <Badge variant="warm">Favorito</Badge>
-                    ) : null}
+                    {item.is_favorite ? <Badge variant="warm">Favorito</Badge> : null}
                   </div>
                   <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-stone-400">
                     <span>{labelFor(gearCategories, item.category)}</span>
                     <span>{labelFor(gearConditions, item.condition)}</span>
-                    <span>
-                      {item.weight_grams
-                        ? `${item.weight_grams} g`
-                        : "Sin peso"}
-                    </span>
-                    <span>
-                      {item.purchase_price
-                        ? `${item.purchase_price} EUR`
-                        : "Sin precio"}
-                    </span>
+                    <span>{item.weight_grams ? `${item.weight_grams} g` : "Sin peso"}</span>
+                    <span>{item.purchase_price ? `${item.purchase_price} EUR` : "Sin precio"}</span>
                   </div>
                   <div className="mt-5 flex flex-wrap gap-2">
                     <Button variant="secondary" onClick={() => openEdit(item)}>
@@ -247,8 +230,7 @@ export function GearPage() {
 }
 
 function GearForm({ form, setForm, onSubmit, error, saving }) {
-  const setValue = (name, value) =>
-    setForm((current) => ({ ...current, [name]: value }));
+  const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
     <form className="grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
@@ -258,11 +240,7 @@ function GearForm({ form, setForm, onSubmit, error, saving }) {
         </div>
       ) : null}
       <Field label="Nombre">
-        <Input
-          required
-          value={form.name}
-          onChange={(e) => setValue("name", e.target.value)}
-        />
+        <Input required value={form.name} onChange={(e) => setValue("name", e.target.value)} />
       </Field>
       <Field label="Categoria">
         <Select
@@ -272,16 +250,10 @@ function GearForm({ form, setForm, onSubmit, error, saving }) {
         />
       </Field>
       <Field label="Marca">
-        <Input
-          value={form.brand ?? ""}
-          onChange={(e) => setValue("brand", e.target.value)}
-        />
+        <Input value={form.brand ?? ""} onChange={(e) => setValue("brand", e.target.value)} />
       </Field>
       <Field label="Modelo">
-        <Input
-          value={form.model ?? ""}
-          onChange={(e) => setValue("model", e.target.value)}
-        />
+        <Input value={form.model ?? ""} onChange={(e) => setValue("model", e.target.value)} />
       </Field>
       <Field label="Peso gramos">
         <Input
@@ -333,9 +305,7 @@ function GearForm({ form, setForm, onSubmit, error, saving }) {
         Marcar como favorito
       </label>
       <div className="md:col-span-2 flex justify-end">
-        <Button disabled={saving}>
-          {saving ? "Guardando..." : "Guardar equipo"}
-        </Button>
+        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar equipo"}</Button>
       </div>
     </form>
   );

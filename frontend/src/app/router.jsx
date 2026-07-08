@@ -19,11 +19,20 @@ import { LocationDetailPage } from "../pages/LocationDetailPage";
 import { AiAssistantPage } from "../pages/AiAssistantPage";
 import { TasksPage } from "../pages/TasksPage";
 import { RemindersPage } from "../pages/RemindersPage";
+import { SystemPage } from "../pages/SystemPage";
+import { NotFoundPage } from "../pages/NotFoundPage";
+
+const errorElement = <NotFoundPage asErrorBoundary />;
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/app/dashboard" replace /> },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> },
+  { path: "/", element: <Navigate to="/app/dashboard" replace />, errorElement },
+  { path: "/login", element: <LoginPage />, errorElement },
+  { path: "/register", element: <RegisterPage />, errorElement },
+  {
+    path: "/about-project",
+    element: lazyRoute(() => import("../pages/AboutProjectPage"), "AboutProjectPage"),
+    errorElement,
+  },
   {
     path: "/app",
     element: (
@@ -31,6 +40,7 @@ export const router = createBrowserRouter([
         <AppLayout />
       </ProtectedRoute>
     ),
+    errorElement,
     children: [
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
       { path: "dashboard", element: <DashboardPage /> },
@@ -56,6 +66,8 @@ export const router = createBrowserRouter([
       { path: "locations/:id", element: <LocationDetailPage /> },
       { path: "photos", element: <PhotosPage /> },
       { path: "ai-assistant", element: <AiAssistantPage /> },
+      { path: "system", element: <SystemPage /> },
     ],
   },
+  { path: "*", element: <NotFoundPage /> },
 ]);

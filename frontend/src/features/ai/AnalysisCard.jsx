@@ -1,10 +1,10 @@
-import { Card } from '../../components/ui/Card'
-import { ScoreBadge } from './ScoreBadge'
+import { Card } from "../../components/ui/Card";
+import { ScoreBadge } from "./ScoreBadge";
 
 export function AnalysisCard({ analysis }) {
-  if (!analysis) return null
+  if (!analysis) return null;
 
-  const result = analysis.result ?? {}
+  const result = analysis.result ?? {};
 
   return (
     <Card className="p-5">
@@ -16,27 +16,42 @@ export function AnalysisCard({ analysis }) {
         <ScoreBadge score={analysis.score} />
       </div>
       <div className="mt-5 grid gap-3 text-sm text-stone-400 md:grid-cols-2">
-        {['composition', 'ruleOfThirds', 'horizon', 'exposure', 'contrast', 'sharpness', 'whiteBalance', 'visualStyle'].map((key) => (
-          <p key={key}><span className="text-stone-100">{key}:</span> {result[key] || 'Sin dato'}</p>
+        {[
+          "composition",
+          "ruleOfThirds",
+          "horizon",
+          "exposure",
+          "contrast",
+          "sharpness",
+          "whiteBalance",
+          "visualStyle",
+        ].map((key) => (
+          <p key={key}>
+            <span className="text-stone-100">{key}:</span> {result[key] || "Sin dato"}
+          </p>
         ))}
       </div>
       <List title="Fortalezas" items={result.strengths} />
       <List title="Errores detectados" items={result.detectedErrors} />
       <List title="Recomendaciones" items={result.recommendations} />
-      {result.recommendedPreset ? <p className="mt-4 text-sm text-amber-100">Preset sugerido: {result.recommendedPreset}</p> : null}
+      {result.recommendedPreset ? (
+        <p className="mt-4 text-sm text-amber-100">Preset sugerido: {result.recommendedPreset}</p>
+      ) : null}
     </Card>
-  )
+  );
 }
 
 function List({ title, items = [] }) {
-  if (!items.length) return null
+  if (!items.length) return null;
 
   return (
     <div className="mt-5">
       <p className="text-xs uppercase tracking-[0.16em] text-stone-500">{title}</p>
       <ul className="mt-2 space-y-1 text-sm text-stone-400">
-        {items.map((item) => <li key={item}>- {item}</li>)}
+        {items.map((item) => (
+          <li key={item}>- {item}</li>
+        ))}
       </ul>
     </div>
-  )
+  );
 }

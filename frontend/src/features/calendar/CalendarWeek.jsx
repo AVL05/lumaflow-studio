@@ -3,7 +3,13 @@ import { CalendarEvent } from "./CalendarEvent";
 import { DayDropZone } from "./DayDropZone";
 import { dayNumber, groupByDate, todayIso, weekGrid, weekdayLabels } from "./calendarUtils";
 
-export const CalendarWeek = memo(function CalendarWeek({ cursor, events, onMove, onSelect, onCreate }) {
+export const CalendarWeek = memo(function CalendarWeek({
+  cursor,
+  events,
+  onMove,
+  onSelect,
+  onCreate,
+}) {
   const days = weekGrid(cursor);
   const byDate = groupByDate(events);
   const today = todayIso();

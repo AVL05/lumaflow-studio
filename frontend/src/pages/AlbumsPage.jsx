@@ -118,12 +118,7 @@ export function AlbumsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {resource.items.map((album) => (
-              <AlbumCard
-                key={album.id}
-                album={album}
-                onEdit={openEdit}
-                onDelete={setDeleting}
-              />
+              <AlbumCard key={album.id} album={album} onEdit={openEdit} onDelete={setDeleting} />
             ))}
           </div>
           <Pagination meta={resource.meta} onPage={resource.setPage} />
@@ -162,14 +157,10 @@ export function AlbumsPage() {
             <Textarea
               rows="4"
               value={form.description ?? ""}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </Field>
-          <Button disabled={saving}>
-            {saving ? "Guardando..." : "Guardar album"}
-          </Button>
+          <Button disabled={saving}>{saving ? "Guardando..." : "Guardar album"}</Button>
         </form>
       </Modal>
       <ConfirmDialog

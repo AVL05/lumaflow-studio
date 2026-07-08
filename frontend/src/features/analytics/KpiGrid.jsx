@@ -28,7 +28,11 @@ export function KpiGrid({ kpis }) {
         detail={`Pipeline ${currency.format(kpis.pipeline)}`}
       />
       <StatCard label="Clientes activos" value={kpis.activeClients} detail="Cartera viva" />
-      <StatCard label="Tareas abiertas" value={kpis.openTasks} detail={`${kpis.overdueTasks} vencidas`} />
+      <StatCard
+        label="Tareas abiertas"
+        value={kpis.openTasks}
+        detail={`${kpis.overdueTasks} vencidas`}
+      />
       <StatCard label="Interacciones IA" value={kpis.aiInteractions} detail="Analisis y chats" />
       <StatCard
         label="Tasa de cierre"

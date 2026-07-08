@@ -81,9 +81,7 @@ export function RegisterPage() {
             className={inputClass}
             type="password"
             value={form.password_confirmation}
-            onChange={(e) =>
-              setForm({ ...form, password_confirmation: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
           />
         </Field>
         <Button className="w-full" disabled={loading}>

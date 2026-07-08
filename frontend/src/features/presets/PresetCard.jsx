@@ -4,13 +4,7 @@ import { Card } from "../../components/ui/Card";
 import { labelFor, presetCategories, presetStyles } from "../../utils/catalogs";
 import { PresetPreview } from "./PresetPreview";
 
-export function PresetCard({
-  preset,
-  onDetail,
-  onEdit,
-  onDuplicate,
-  onDelete,
-}) {
+export function PresetCard({ preset, onDetail, onEdit, onDuplicate, onDelete }) {
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4">
@@ -22,8 +16,7 @@ export function PresetCard({
           <div>
             <h2 className="font-semibold text-stone-50">{preset.name}</h2>
             <p className="mt-1 text-sm text-stone-500">
-              {labelFor(presetCategories, preset.category)} ·{" "}
-              {labelFor(presetStyles, preset.style)}
+              {labelFor(presetCategories, preset.category)} · {labelFor(presetStyles, preset.style)}
             </p>
           </div>
         </div>

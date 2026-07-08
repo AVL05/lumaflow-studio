@@ -29,9 +29,7 @@ export function AnalyticsTable({ title, description, rows, valueLabel = "Total",
               {rows.map((row) => (
                 <tr key={row.label} className="border-t border-white/[0.05]">
                   <td className="max-w-64 truncate py-2 text-stone-200">{row.label}</td>
-                  {metaLabel ? (
-                    <td className="py-2 text-stone-500">{row.meta ?? "-"}</td>
-                  ) : null}
+                  {metaLabel ? <td className="py-2 text-stone-500">{row.meta ?? "-"}</td> : null}
                   <td className="py-2 text-right tabular-nums text-stone-300">{row.total}</td>
                   <td className="py-2 text-right tabular-nums text-stone-600">
                     {total > 0 ? Math.round((row.total / total) * 100) : 0}%

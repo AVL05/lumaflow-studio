@@ -34,7 +34,12 @@ export function RemindersPage() {
   const toast = useToast();
   const resource = usePaginatedResource(remindersApi.list, { per_page: 20 });
 
-  const [catalogs, setCatalogs] = useState({ sessions: [], clients: [], deliveries: [], tasks: [] });
+  const [catalogs, setCatalogs] = useState({
+    sessions: [],
+    clients: [],
+    deliveries: [],
+    tasks: [],
+  });
   const [form, setForm] = useState(defaults);
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
