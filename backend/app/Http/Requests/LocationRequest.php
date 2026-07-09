@@ -39,19 +39,11 @@ class LocationRequest extends FormRequest
             'tags.*' => ['string', 'max:50'],
             'recommended_gear' => ['nullable', 'array'],
             'recommended_gear.*' => ['string', 'max:80'],
-            'cover_photo_id' => ['nullable', Rule::exists('photos', 'id')->where('user_id', $this->user()->id)],
-            'photo_ids' => ['nullable', 'array'],
-            'photo_ids.*' => [Rule::exists('photos', 'id')->where('user_id', $this->user()->id)],
         ];
     }
 
     public function locationAttributes(): array
     {
-        return collect($this->validated())->except('photo_ids')->all();
-    }
-
-    public function photoIds(): array
-    {
-        return collect($this->validated('photo_ids', []))->unique()->values()->all();
+        return $this->validated();
     }
 }

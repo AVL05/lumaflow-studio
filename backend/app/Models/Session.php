@@ -51,11 +51,6 @@ class Session extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function photos(): HasMany
-    {
-        return $this->hasMany(Photo::class);
-    }
-
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
@@ -79,10 +74,5 @@ class Session extends Model
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');
-    }
-
-    public function reminders(): MorphMany
-    {
-        return $this->morphMany(Reminder::class, 'remindable');
     }
 }

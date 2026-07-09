@@ -96,32 +96,6 @@ export function PendingTasksWidget({ tasks, summary }) {
   );
 }
 
-export function RemindersWidget({ reminders }) {
-  return (
-    <WidgetCard
-      title="Recordatorios"
-      action={
-        <Link to="/app/reminders" className="text-xs text-amber-200 hover:text-amber-100">
-          Gestionar
-        </Link>
-      }
-    >
-      {reminders.length === 0 ? (
-        <Empty text="Sin recordatorios proximos." />
-      ) : (
-        <ul className="space-y-2">
-          {reminders.map((reminder) => (
-            <li key={reminder.id} className="rounded-md bg-white/[0.04] p-3">
-              <p className="truncate text-sm text-stone-200">{reminder.message}</p>
-              <p className="mt-1 text-xs tabular-nums text-stone-400">{reminder.remind_at}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </WidgetCard>
-  );
-}
-
 export function MonthlyProgressWidget({ progress }) {
   return (
     <WidgetCard title="Progreso mensual">
@@ -130,7 +104,6 @@ export function MonthlyProgressWidget({ progress }) {
         {[
           ["Sesiones", progress.sessions],
           ["Cerradas", progress.completedSessions],
-          ["Fotos", progress.photos],
           ["Entregas", progress.deliveries],
           ["Tareas hechas", progress.completedTasks],
           ["Mes", progress.month],

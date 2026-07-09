@@ -48,17 +48,15 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar (el resumen de tareas lo consumen el dashboard y la pagina de tareas a traves de `TaskSummaryService`).
 
-**Relaciones morficas sin clave foranea.** `activities` y `reminders` apuntan a Session, Task, Client, Delivery o Photo. Al no haber FK, el trait `Concerns\CleansUpWorkflowRelations` las limpia en el evento `deleting`. Por eso `BulkActionService::delete()` borra modelo a modelo: un `whereIn()->delete()` por query builder saltaria el evento y dejaria huerfanos.
+**Relaciones morficas sin clave foranea.** `activities` apunta a Session, Task, Client o Delivery. Al no haber FK, el trait `Concerns\CleansUpWorkflowRelations` la limpia en el evento `deleting`. Por eso `BulkActionService::delete()` borra modelo a modelo: un `whereIn()->delete()` por query builder saltaria el evento y dejaria huerfanos.
 
-**La agregacion ocurre en la base de datos.** `AnalyticsService` agrupa y cuenta en SQL en vez de cargar colecciones en memoria. El coste es acoplarse a MySQL (`DATE_FORMAT`, `JSON_EXTRACT`), que es el unico motor soportado.
+**La agregacion ocurre en la base de datos.** `AnalyticsService` agrupa y cuenta en SQL en vez de cargar colecciones en memoria. El coste es acoplarse a MySQL (`DATE_FORMAT`), que es el unico motor soportado.
 
 **La IA principal corre en WebGPU.** La SPA carga WebLLM bajo demanda y ejecuta la inferencia en el navegador. Ollama queda como compatibilidad backend opcional: si no responde, `HealthService` marca el sistema como `degraded`, nunca como `down`.
 
 ## Limites conscientes
 
-- Sin colas ni jobs: los recordatorios se muestran, no se envian.
 - Sin streaming real de IA: `streamingAvailable()` devuelve `true` pero no hay chunked/SSE; la UI solo simula progresion.
 - Sin exportacion PDF: `ExportService` solo acepta `csv` y `json`.
-- `photo_comparisons` existe en el esquema y tiene modelo, pero la UI de comparacion before/after esta en el roadmap.
 
 Ver [roadmap.md](roadmap.md).

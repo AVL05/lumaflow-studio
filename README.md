@@ -18,7 +18,7 @@
 
 ## Descripcion
 
-Un fotografo profesional trabaja con sesiones, clientes, equipo, presets, localizaciones y miles de archivos, pero suele gestionarlo todo en hojas de calculo dispersas. LumaFlow Studio reune ese flujo completo en una sola aplicacion: planificacion, produccion, biblioteca con EXIF, CRM ligero, entregas, analitica y un asistente de IA que **solo razona sobre los datos reales del usuario y nunca sale de su maquina**.
+Un fotografo profesional trabaja con sesiones, clientes, equipo y localizaciones, pero suele gestionarlo todo en hojas de calculo dispersas. LumaFlow Studio reune ese flujo completo en una sola aplicacion: planificacion, produccion, CRM ligero, entregas, analitica y un asistente de IA que **solo razona sobre los datos reales del usuario y nunca sale de su maquina**.
 
 Es una release privada de portfolio. No busca ser un SaaS, sino demostrar arquitectura, criterio tecnico y acabado de producto sobre un dominio con reglas propias.
 
@@ -73,20 +73,17 @@ Detalle completo en [docs/architecture.md](docs/architecture.md).
 
 | Modulo | Que hace |
 |---|---|
-| **Dashboard** | Metricas reales, agenda del dia, tareas pendientes, recordatorios, progreso mensual, timeline de actividad |
-| **Calendario** | Vistas mes, semana, dia, agenda y lista. Drag & drop para reprogramar sesiones, entregas, tareas y recordatorios |
+| **Dashboard** | Metricas reales, agenda del dia, tareas pendientes, progreso mensual, timeline de actividad |
+| **Calendario** | Vistas mes, semana, dia, agenda y lista. Drag & drop para reprogramar sesiones, entregas y tareas |
 | **Sesiones** | CRUD con cliente, tipo, estado, localizacion, checklists tipadas y timeline automatico |
 | **Tareas** | Prioridad, estado, fecha limite, relacion con sesion y cliente, resumen de vencidas, acciones masivas |
 | **Checklists** | Plantillas por tipo (equipo, preparacion, edicion, entrega), items reordenables, progreso en porcentaje, duplicado |
-| **Recordatorios** | Fecha, hora, tipo y estado. Asociables a sesion, cliente, entrega o tarea |
-| **Biblioteca** | Subida con EXIF automatico, albumes, etiquetas, filtros avanzados, preview, borrado fisico |
 | **Localizaciones** | Mapa Leaflet, coordenadas, acceso, permisos, coste, clima, estaciones, equipo recomendado |
 | **Clientes y entregas** | CRM ligero conectado a sesiones, presupuestos y galerias |
-| **Presets** | CRUD profesional con versionado, duplicado, color identificativo y sliders de simulacion |
-| **Analitica** | KPIs y ocho graficas Recharts sobre datos reales, tablas comparativas, rangos de fechas |
-| **Busqueda global** | `Ctrl/Cmd + K`. Nueve grupos, resultados agrupados, navegacion por teclado |
+| **Analitica** | KPIs y graficas Recharts sobre datos reales, tablas comparativas, rangos de fechas |
+| **Busqueda global** | `Ctrl/Cmd + K`. Resultados agrupados, navegacion por teclado |
 | **Notificaciones** | Centro persistido en BD, contador global, marcado y limpieza |
-| **Asistente IA** | Chat con contexto, analisis de fotos, generacion de presets, planes de sesion, recomendador de equipo |
+| **Asistente IA** | Chat con contexto, planes de sesion, recomendador de equipo |
 | **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y compatibilidad Ollama |
 
 ## Instalacion
@@ -206,7 +203,7 @@ lumaflow-studio/
 
 El asistente principal corre con **WebGPU en el navegador** mediante WebLLM: no hay claves de API ni proveedores externos. El modelo se carga bajo demanda la primera vez que el usuario usa el centro de IA.
 
-El backend conserva servicios Ollama como compatibilidad local avanzada para endpoints de IA, pero la SPA no depende de tener Ollama instalado. Las tareas estructuradas (generar un preset, planificar una sesion, recomendar equipo) piden JSON estricto y se parsean en el cliente.
+El backend conserva servicios Ollama como compatibilidad local avanzada para endpoints de IA, pero la SPA no depende de tener Ollama instalado. Las tareas estructuradas (planificar una sesion, recomendar equipo) piden JSON estricto y se parsean en el cliente.
 
 Detalle en [docs/ai.md](docs/ai.md).
 

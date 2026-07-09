@@ -65,21 +65,6 @@ return new class extends Migration
             $table->index(['user_id', 'type']);
         });
 
-        Schema::create('reminders', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->nullableMorphs('remindable');
-            $table->date('remind_date');
-            $table->time('remind_time')->nullable();
-            $table->string('message');
-            $table->enum('type', ['session', 'client', 'delivery', 'task', 'custom'])->default('custom');
-            $table->enum('status', ['pending', 'done', 'dismissed'])->default('pending');
-            $table->timestamps();
-
-            $table->index(['user_id', 'status']);
-            $table->index(['user_id', 'remind_date']);
-        });
-
         Schema::create('notifications', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -97,7 +82,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('notifications');
-        Schema::dropIfExists('reminders');
         Schema::dropIfExists('activities');
         Schema::dropIfExists('checklist_items');
         Schema::dropIfExists('checklists');

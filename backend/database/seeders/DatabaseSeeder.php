@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\ChecklistService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -65,77 +64,6 @@ class DatabaseSeeder extends Seeder
                 'condition' => 'active',
                 'is_favorite' => true,
             ],
-        ]);
-
-        $user->presets()->createMany([
-            [
-                'name' => 'Warm Editorial Base',
-                'description' => 'Base calida para piel y luz ambiente.',
-                'category' => 'portrait',
-                'style' => 'warm',
-                'contrast' => 18,
-                'shadows' => -12,
-                'highlights' => -8,
-                'whites' => 6,
-                'blacks' => -10,
-                'saturation' => 6,
-                'vibrance' => 10,
-                'temperature' => 14,
-                'tint' => 2,
-                'grain' => 8,
-                'clarity' => 10,
-                'texture' => 6,
-                'intensity' => 70,
-                'sharpness' => 20,
-                'noise_reduction' => 5,
-                'vignette' => -8,
-                'recommended_use' => 'Retrato editorial y sesiones urbanas con piel calida.',
-                'is_favorite' => true,
-                'color' => '#d6a15f',
-                'version' => '1.0',
-                'usage_count' => 6,
-            ],
-            [
-                'name' => 'Cinematic Night',
-                'description' => 'Contraste nocturno controlado para neones y escenas urbanas.',
-                'category' => 'color',
-                'style' => 'cinematic',
-                'contrast' => 24,
-                'shadows' => -20,
-                'highlights' => -15,
-                'whites' => -4,
-                'blacks' => -18,
-                'saturation' => -4,
-                'vibrance' => 8,
-                'temperature' => -6,
-                'tint' => 4,
-                'grain' => 12,
-                'clarity' => 16,
-                'texture' => 10,
-                'intensity' => 78,
-                'sharpness' => 18,
-                'noise_reduction' => 8,
-                'vignette' => -16,
-                'recommended_use' => 'Nocturnas, neones y ambientes de bajo contraste.',
-                'is_favorite' => false,
-                'color' => '#7c8ea6',
-                'version' => '1.1',
-                'usage_count' => 3,
-            ],
-        ]);
-
-        $tags = collect(['Golden Hour', 'Blue Hour', 'Sunset', 'Portrait', 'Studio', 'Outdoor', 'Night', 'Cars', 'Nature', 'Travel'])
-            ->map(fn (string $name) => $user->tags()->create([
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'color' => '#d6b17a',
-            ]));
-
-        $user->albums()->create([
-            'name' => 'Portfolio Editorial',
-            'description' => 'Seleccion inicial para trabajos editoriales y sesiones urbanas.',
-            'color' => '#d6a15f',
-            'date' => now()->toDateString(),
         ]);
 
         $locations = $user->locations()->createMany([
@@ -274,26 +202,6 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        $user->reminders()->createMany([
-            [
-                'remindable_type' => Session::class,
-                'remindable_id' => $urbanSession->id,
-                'remind_date' => now()->addDay()->toDateString(),
-                'remind_time' => '18:30',
-                'message' => 'Cargar baterias antes de la sesion en azotea.',
-                'type' => 'session',
-                'status' => 'pending',
-            ],
-            [
-                'remindable_type' => Delivery::class,
-                'remindable_id' => $delivery->id,
-                'remind_date' => now()->addDays(9)->toDateString(),
-                'message' => 'Revisar galeria antes de enviar al cliente.',
-                'type' => 'delivery',
-                'status' => 'pending',
-            ],
-        ]);
-
         $user->activities()->createMany([
             [
                 'subject_type' => Session::class,
@@ -331,9 +239,9 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'type' => 'success',
-                'title' => 'Preset creado',
-                'message' => 'Cinematic Night listo para usar.',
-                'link' => '/app/presets',
+                'title' => 'Equipo registrado',
+                'message' => 'Sony A7 IV anadido al inventario.',
+                'link' => '/app/gear',
                 'read_at' => now()->subDay(),
             ],
         ]);

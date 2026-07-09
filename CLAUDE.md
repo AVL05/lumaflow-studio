@@ -21,7 +21,7 @@ Backend (`cd backend`):
 ```bash
 composer install
 php artisan migrate --seed          # requiere DB MySQL `lumaflow_studio` ya creada
-php artisan storage:link            # imprescindible para servir fotos subidas
+php artisan storage:link            # storage publico usado por el healthcheck
 php artisan serve
 php artisan test                    # PHPUnit — falla si el PHP local no trae pdo_sqlite
 php artisan test --filter=NombreTest
@@ -50,8 +50,8 @@ Flujo por recurso: `routes/api.php` → `Api/XController` → `XRequest` (valida
 
 Convenciones críticas:
 
-- **Multi-tenancy por `user_id`.** Cada controller filtra con el scope `ownedBy(request()->user()->id)` en `index` y crea vía `request()->user()->relacion()->create(...)`. Para `show/update/destroy` hay dos variantes vivas, ambas devolviendo **404, no 403**: los recursos anteriores a la fase 9 usan un `ensureOwnership()` privado con `abort_unless(...)`; los de la fase 9 (tasks, checklists, reminders, notifications) usan `$this->authorizeOwnership('update', $model)` del `Controller` base, que consulta la policy correspondiente en `app/Policies` (todas extienden `OwnedResourcePolicy`, autodescubiertas por Laravel) y convierte el `false` en 404. Preferir la segunda en código nuevo.
-- **Relaciones mórficas sin FK.** `activities` y `reminders` apuntan a Session/Task/Client/Delivery/Photo por morph. El trait `Concerns\CleansUpWorkflowRelations` las limpia en el evento `deleting`. Por eso `BulkActionService::delete()` borra modelo a modelo: un `->whereIn()->delete()` por query builder saltaría el evento y dejaría huérfanos.
+- **Multi-tenancy por `user_id`.** Cada controller filtra con el scope `ownedBy(request()->user()->id)` en `index` y crea vía `request()->user()->relacion()->create(...)`. Para `show/update/destroy` hay dos variantes vivas, ambas devolviendo **404, no 403**: los recursos anteriores a la fase 9 usan un `ensureOwnership()` privado con `abort_unless(...)`; los de la fase 9 (tasks, checklists, notifications) usan `$this->authorizeOwnership('update', $model)` del `Controller` base, que consulta la policy correspondiente en `app/Policies` (todas extienden `OwnedResourcePolicy`, autodescubiertas por Laravel) y convierte el `false` en 404. Preferir la segunda en código nuevo.
+- **Relaciones mórficas sin FK.** `activities` apunta a Session/Task/Client/Delivery por morph. El trait `Concerns\CleansUpWorkflowRelations` la limpia en el evento `deleting`. Por eso `BulkActionService::delete()` borra modelo a modelo: un `->whereIn()->delete()` por query builder saltaría el evento y dejaría huérfanos.
 - Los modelos declaran campos rellenables con el atributo PHP 8 de Laravel 13: `#[Fillable([...])]` sobre la clase, no `protected $fillable`.
 - Filtros/búsqueda como scopes de Eloquent (`scopeSearch`, `scopeStatus`, `scopeType`), aplicados con `->when()`.
 - Paginación: `paginate(min((int) request('per_page', N), MAX))`.
@@ -71,21 +71,22 @@ Convenciones críticas:
 
 ### Capa IA (Ollama)
 
-`AiController` inyecta 8 servicios. Cadena típica: `AiContextService` (arma contexto compacto desde los datos del usuario y lo trunca a `ollama.max_context`) → `PromptBuilderService` (system prompt en español; para tareas estructuradas emite `jsonTask` con `required_schema`) → `OllamaService` (`chat()` texto libre; `json()` fuerza `format: json` y reintenta extraer el objeto por regex si el modelo mete ruido).
+`AiController` inyecta los servicios de IA. Cadena típica: `AiContextService` (arma contexto compacto desde los datos del usuario y lo trunca a `ollama.max_context`) → `PromptBuilderService` (system prompt en español; para tareas estructuradas emite `jsonTask` con `required_schema`) → `OllamaService` (`chat()` texto libre; `json()` fuerza `format: json` y reintenta extraer el objeto por regex si el modelo mete ruido). Endpoints activos: `chat`, `session-plan`, `recommend-gear`.
 
 - `OllamaService` lanza `RuntimeException` cuando Ollama no responde; **cada endpoint IA lo captura y devuelve HTTP 503** con `{message}`. Mantener ese contrato.
 - `status()` se cachea 15 s y usa un timeout propio de 3 s, no `OLLAMA_TIMEOUT`: el dashboard lo consulta en cada carga.
 - Config en `config/ollama.php` (`OLLAMA_URL`, `OLLAMA_MODEL`, `OLLAMA_TIMEOUT`, `OLLAMA_MAX_CONTEXT`).
 - El system prompt prohíbe inventar datos y salir del ámbito fotográfico. Al añadir tareas IA, seguir el patrón `jsonTask` + un Resource dedicado.
+- No existen los endpoints `/ai/analyze` ni `/ai/preset` (dependían de Fotos y Presets, eliminados junto con esas features).
 - **El historial no se acepta del cliente**: `AiChatRequest` solo valida `message` y `conversation_id`; los últimos 12 mensajes salen de la conversación persistida.
 - Streaming: `streamingAvailable()` devuelve `true` pero no hay chunked/SSE real; la UI solo simula progresión.
 
 ### Capa workflow (fase 9)
 
-- `ActivityLogger` es la única puerta al timeline: se inyecta en Session/Delivery/Photo/Ai/Task controllers y escribe en `activities` con `subject` mórfico. El timeline de una sesión se ancla en la propia `Session`, incluso para fotos y análisis IA (`$photo->session ?? $photo`).
+- `ActivityLogger` es la única puerta al timeline: se inyecta en Session/Delivery/Ai/Task controllers y escribe en `activities` con `subject` mórfico.
 - `NotificationService` escribe en la tabla `notifications`. **Ojo:** `User::notifications()` sobrescribe deliberadamente la relación mórfica de `Illuminate\Notifications\Notifiable`, que el proyecto no usa.
-- `AnalyticsService` usa SQL exclusivo de MySQL (`DATE_FORMAT`, `JSON_EXTRACT`) y agrega en base de datos. «Equipo más utilizado» se deriva del EXIF real de las fotos cruzado con el inventario, no de un contador sintético.
-- `CalendarService` normaliza cuatro fuentes (session, delivery, task, reminder) al mismo shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo.
+- `AnalyticsService` usa SQL exclusivo de MySQL (`DATE_FORMAT`) y agrega en base de datos.
+- `CalendarService` normaliza tres fuentes (session, delivery, task) al mismo shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo.
 - `BulkActionService::MATRIX` define qué acción admite cada recurso; `ExportService::COLUMNS` qué columnas se exportan. Ambos son la fuente de verdad para la validación de sus Form Requests.
 - `TaskSummaryService` lo comparten el dashboard y `GET /api/tasks/summary`. No volver a cargar el dashboard entero solo para leer totales de tareas.
 
@@ -100,7 +101,7 @@ Convenciones críticas:
 - `CalendarPage`, `AnalyticsPage` y `AboutProjectPage` se cargan con `lazyRoute()` (`app/lazyRoute.jsx`) para sacar Recharts y el calendario del bundle inicial. Mantener ese patrón al añadir páginas pesadas.
 - Drag & drop es HTML5 nativo, sin librería: el calendario mueve eventos con el tipo de dato `application/lumaflow-event` (ver `DayDropZone`), y las checklists reordenan items con índices en refs.
 - **`Button` no fija `type` a propósito**: varios formularios usan el botón sin `type` como submit implícito. Ponerle `type="button"` por defecto rompería todos los envíos.
-- `TaskCard` y `PhotoCard` van envueltas en `memo`; los handlers que reciben deben ir en `useCallback` o la memoización no sirve de nada.
+- `TaskCard` va envuelta en `memo`; los handlers que recibe deben ir en `useCallback` o la memoización no sirve de nada.
 - `MapView` crea la instancia de Leaflet una sola vez por montaje. No meter `center`/`markers`/`zoom` en las dependencias del efecto de creación: destruye y recrea el mapa en cada render y rompe bajo StrictMode.
 - `Modal` gestiona Escape, atrapa el foco y devuelve el foco previo al cerrar. Reutilizarlo en vez de montar diálogos a mano.
 - Estructura: `components/ui` primitivos, `components/states` (Loading/Error/Empty), `components/layout`, `features/<dominio>` UI de dominio, `pages/` composición.
@@ -117,4 +118,4 @@ Convenciones críticas:
 - Los comentarios/copy del producto van en español. Identificadores en inglés.
 - Tailwind v4 vía `@tailwindcss/vite` — no hay `tailwind.config.js`; los tokens viven en `src/styles/main.css`.
 - Nunca commitear `.env`. `backend/.env` guarda DB/Ollama/storage; `frontend/.env` solo `VITE_API_URL`; el `.env` de la raíz es solo para docker compose.
-- `photo_comparisons` (tabla + modelo) está reservado para la UI de comparación before/after del roadmap. No es código muerto.
+- Fotos, Álbumes, Presets y Recordatorios fueron eliminados del producto (frontend + backend + migraciones). No reintroducir sin decisión explícita.

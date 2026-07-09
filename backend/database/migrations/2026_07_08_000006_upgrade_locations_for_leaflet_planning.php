@@ -24,15 +24,6 @@ return new class extends Migration
             $table->index(['user_id', 'rating']);
         });
 
-        Schema::create('location_photo', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('location_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('photo_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-
-            $table->unique(['location_id', 'photo_id']);
-        });
-
         Schema::table('sessions', function (Blueprint $table): void {
             $table->foreignId('location_id')->nullable()->after('user_id')->constrained('locations')->nullOnDelete();
             $table->index(['user_id', 'location_id']);
@@ -45,8 +36,6 @@ return new class extends Migration
             $table->dropIndex(['user_id', 'location_id']);
             $table->dropConstrainedForeignId('location_id');
         });
-
-        Schema::dropIfExists('location_photo');
 
         Schema::table('locations', function (Blueprint $table): void {
             $table->dropIndex(['user_id', 'is_favorite']);

@@ -37,24 +37,10 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 |---|---|---|
 | Sessions | `apiResource /sessions` | `search`, `status`, `type`, `sort`, `direction` |
 | Gear | `apiResource /gear` | `search`, `category`, `condition`, `favorite` |
-| Presets | `apiResource /presets` + `POST /presets/{preset}/duplicate` | `search`, `category`, `style`, `favorite` |
-| Albums | `apiResource /albums` | `search` |
-| Tags | `GET POST PUT DELETE /tags` | — |
 | Locations | `apiResource /locations` | `search`, `city`, `type`, `access_difficulty`, `access_mode`, `favorite`, `latitude`, `longitude`, `radius_km` |
 | Clients | `apiResource /clients` | `search`, `status`, `sort`, `direction` |
 | Deliveries | `apiResource /deliveries` | `search`, `status`, `client_id` |
 | Tasks | `apiResource /tasks` + `GET /tasks/summary` | `search`, `status`, `priority`, `due_from`, `due_to`, `session_id`, `client_id`, `open` |
-| Reminders | `apiResource /reminders` | `search`, `status`, `type`, `from`, `to` |
-
-### Fotos
-
-| Metodo | Ruta | Notas |
-|---|---|---|
-| GET | `/photos`, `/gallery/photos` | `search`, `category`, `session_id`, `album_id`, `tag_id`, `camera`, `lens`, `iso`, `date`, `favorites` |
-| POST | `/photos/upload` | `multipart/form-data`. `image`, `mimes:jpg,jpeg,png,webp`, `max:12288` |
-| PUT | `/photos/{photo}` | Metadata, albumes y etiquetas |
-| GET | `/photos/{photo}/metadata` | EXIF completo |
-| DELETE | `/photos/{photo}` | Borra registro y archivo fisico |
 
 ### Checklists
 
@@ -70,8 +56,8 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 
 | Metodo | Ruta | Notas |
 |---|---|---|
-| GET | `/dashboard` | Metricas, agenda del dia, tareas, recordatorios, progreso mensual, timeline |
-| GET | `/calendar` | Requiere `from` y `to`. Opcional `sources=session,delivery,task,reminder` |
+| GET | `/dashboard` | Metricas, agenda del dia, tareas, progreso mensual, timeline |
+| GET | `/calendar` | Requiere `from` y `to`. Opcional `sources=session,delivery,task` |
 | PATCH | `/calendar/move` | `{source, source_id, date, time?}`. Reprogramacion por drag & drop |
 | GET | `/activities` | Feed global. Filtro `type` |
 | GET | `/sessions/{session}/timeline` | Timeline cronologico de una sesion |
@@ -85,18 +71,17 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 
 **Acciones masivas soportadas** (`BulkActionService::MATRIX`):
 
-| Recurso | delete | status | tags | album | client |
-|---|:-:|:-:|:-:|:-:|:-:|
-| sessions | si | si | | | |
-| photos | si | | si | si | |
-| tasks | si | si | | | si |
-| deliveries | si | si | | | si |
-| clients | si | si | | | |
-| gear, presets, locations | si | | | | |
+| Recurso | delete | status | client |
+|---|:-:|:-:|:-:|
+| sessions | si | si | |
+| tasks | si | si | si |
+| deliveries | si | si | si |
+| clients | si | si | |
+| gear, locations | si | | |
 
 Una combinacion no soportada devuelve 422.
 
-**Recursos exportables**: `sessions`, `clients`, `deliveries`, `tasks`, `photos`, `gear`, `presets`, `locations`. Formatos `csv` y `json` (PDF esta en el roadmap).
+**Recursos exportables**: `sessions`, `clients`, `deliveries`, `tasks`, `gear`, `locations`. Formatos `csv` y `json` (PDF esta en el roadmap).
 
 ### IA
 
@@ -106,8 +91,6 @@ Una combinacion no soportada devuelve 422.
 |---|---|---|
 | GET | `/ai/status` | Disponibilidad y modelos. Cacheado 15 s |
 | POST | `/ai/chat` | `{message, conversation_id?}`. El historial lo reconstruye el servidor |
-| POST | `/ai/analyze` | `{photo_id, prompt?}` |
-| POST | `/ai/preset` | Genera un preset editable |
 | POST | `/ai/session-plan` | `{session_id, ...}` |
 | POST | `/ai/recommend-gear` | Solo recomienda equipo existente |
 | GET PATCH DELETE | `/ai/history`, `/ai/history/{conversation}` | Conversaciones persistidas |

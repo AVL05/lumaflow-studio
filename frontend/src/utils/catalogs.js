@@ -41,41 +41,6 @@ export const gearConditions = [
   { value: "retired", label: "Retirado" },
 ];
 
-export const presetStyles = [
-  { value: "cinematic", label: "Cinematic" },
-  { value: "moody", label: "Moody" },
-  { value: "urban", label: "Urban" },
-  { value: "street", label: "Street" },
-  { value: "portrait", label: "Portrait" },
-  { value: "wedding", label: "Wedding" },
-  { value: "landscape", label: "Landscape" },
-  { value: "nature", label: "Nature" },
-  { value: "automotive", label: "Automotive" },
-  { value: "product", label: "Product" },
-  { value: "editorial", label: "Editorial" },
-  { value: "documentary", label: "Documentary" },
-  { value: "travel", label: "Travel" },
-  { value: "black_white", label: "Black & White" },
-  { value: "warm", label: "Warm" },
-  { value: "cold", label: "Cold" },
-  { value: "minimal", label: "Minimal" },
-  { value: "film", label: "Film" },
-  { value: "vintage", label: "Vintage" },
-  { value: "custom", label: "Custom" },
-];
-
-export const presetCategories = [
-  { value: "color", label: "Color" },
-  { value: "black_white", label: "Blanco y negro" },
-  { value: "portrait", label: "Retrato" },
-  { value: "outdoor", label: "Exterior" },
-  { value: "indoor", label: "Interior" },
-  { value: "product", label: "Producto" },
-  { value: "social", label: "Redes Sociales" },
-  { value: "client", label: "Cliente" },
-  { value: "experimental", label: "Experimental" },
-];
-
 export const locationTypes = [
   { value: "urban", label: "Urban" },
   { value: "nature", label: "Nature" },
@@ -149,20 +114,6 @@ export const checklistTypes = [
   { value: "custom", label: "Personalizada" },
 ];
 
-export const reminderTypes = [
-  { value: "session", label: "Sesion" },
-  { value: "client", label: "Cliente" },
-  { value: "delivery", label: "Entrega" },
-  { value: "task", label: "Tarea" },
-  { value: "custom", label: "Personalizado" },
-];
-
-export const reminderStatuses = [
-  { value: "pending", label: "Pendiente", tone: "warm" },
-  { value: "done", label: "Hecho", tone: "green" },
-  { value: "dismissed", label: "Descartado", tone: "neutral" },
-];
-
 export const notificationTypes = [
   { value: "success", label: "Exito", tone: "green" },
   { value: "warning", label: "Aviso", tone: "warm" },
@@ -175,7 +126,6 @@ export const calendarSources = [
   { value: "session", label: "Sesiones" },
   { value: "delivery", label: "Entregas" },
   { value: "task", label: "Tareas" },
-  { value: "reminder", label: "Recordatorios" },
 ];
 
 export const activityTypes = [
@@ -183,8 +133,6 @@ export const activityTypes = [
   { value: "updated", label: "Editado" },
   { value: "deleted", label: "Eliminado" },
   { value: "status_changed", label: "Cambio de estado" },
-  { value: "photo_uploaded", label: "Foto subida" },
-  { value: "ai_analysis", label: "Analisis IA" },
   { value: "ai_plan", label: "Plan IA" },
   { value: "delivered", label: "Entregado" },
   { value: "checklist_completed", label: "Checklist completada" },

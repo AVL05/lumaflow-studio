@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { locationsApi } from "../api/locations";
-import { photosApi } from "../api/photos";
 import { getApiError } from "../api/client";
 import { Button } from "../components/ui/Button";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
@@ -41,8 +40,6 @@ const defaults = {
   recommended_gear_text: "",
   tags: [],
   recommended_gear: [],
-  cover_photo_id: null,
-  photo_ids: [],
 };
 
 export function LocationsPage() {
@@ -58,14 +55,6 @@ export function LocationsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
-  const [photos, setPhotos] = useState([]);
-
-  useEffect(() => {
-    photosApi
-      .list({ per_page: 100, sort: "created_at", direction: "desc" })
-      .then((response) => setPhotos(response.data))
-      .catch(() => setPhotos([]));
-  }, []);
 
   function openCreate() {
     setEditing(null);
@@ -82,7 +71,6 @@ export function LocationsPage() {
       tags_text: location.tags?.join(", ") ?? "",
       recommended_gear_text: location.recommended_gear?.join(", ") ?? "",
       recommended_seasons: location.recommended_seasons ?? [],
-      photo_ids: location.photos?.map((photo) => photo.id) ?? [],
     });
     setFormError("");
     setFormOpen(true);
@@ -161,7 +149,6 @@ export function LocationsPage() {
         <LocationForm
           form={form}
           setForm={setForm}
-          photos={photos}
           onSubmit={submit}
           error={formError}
           saving={saving}
@@ -170,7 +157,7 @@ export function LocationsPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar localizacion"
-        description="Esta accion elimina la localizacion guardada. No afecta sesiones ni fotos."
+        description="Esta accion elimina la localizacion guardada. No afecta a las sesiones asociadas."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />
@@ -201,8 +188,6 @@ function normalizeLocation(form) {
     notes: form.notes || null,
     tags: splitList(form.tags_text),
     recommended_gear: splitList(form.recommended_gear_text),
-    cover_photo_id: form.cover_photo_id || null,
-    photo_ids: form.photo_ids ?? [],
   };
 }
 

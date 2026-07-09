@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AiController;
-use App\Http\Controllers\Api\AlbumController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BulkActionController;
@@ -17,13 +16,9 @@ use App\Http\Controllers\Api\GearItemController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\PhotoController;
-use App\Http\Controllers\Api\PresetController;
-use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SystemController;
-use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,28 +40,15 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
 
     Route::apiResource('sessions', SessionController::class);
     Route::apiResource('gear', GearItemController::class)->parameters(['gear' => 'gearItem']);
-    Route::apiResource('presets', PresetController::class);
-    Route::post('/presets/{preset}/duplicate', [PresetController::class, 'duplicate']);
-    Route::apiResource('albums', AlbumController::class);
-    Route::apiResource('tags', TagController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::apiResource('locations', LocationController::class);
     Route::apiResource('clients', ClientController::class);
     Route::apiResource('deliveries', DeliveryController::class);
-
-    Route::get('/gallery/photos', [PhotoController::class, 'index']);
-    Route::get('/photos', [PhotoController::class, 'index']);
-    Route::post('/photos/upload', [PhotoController::class, 'upload']);
-    Route::put('/photos/{photo}', [PhotoController::class, 'update']);
-    Route::get('/photos/{photo}/metadata', [PhotoController::class, 'metadata']);
-    Route::delete('/photos/{photo}', [PhotoController::class, 'destroy']);
 
     Route::get('/ai/status', [AiController::class, 'status']);
 
     // La inferencia local es cara: se limita aparte del resto de la API.
     Route::middleware('throttle:20,1')->group(function (): void {
         Route::post('/ai/chat', [AiController::class, 'chat']);
-        Route::post('/ai/analyze', [AiController::class, 'analyze']);
-        Route::post('/ai/preset', [AiController::class, 'preset']);
         Route::post('/ai/session-plan', [AiController::class, 'sessionPlan']);
         Route::post('/ai/recommend-gear', [AiController::class, 'recommendGear']);
     });
@@ -81,7 +63,6 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
     // Fase 9: workflow enterprise
     Route::get('/tasks/summary', [TaskController::class, 'summary']);
     Route::apiResource('tasks', TaskController::class);
-    Route::apiResource('reminders', ReminderController::class);
 
     Route::get('/checklists/templates', [ChecklistController::class, 'templates']);
     Route::apiResource('checklists', ChecklistController::class);

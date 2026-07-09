@@ -11,7 +11,6 @@ class AiAnalysisResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'photo_id' => $this->photo_id,
             'type' => $this->type,
             'prompt' => $this->prompt,
             'result' => $this->result,

@@ -204,11 +204,10 @@ export function SessionsPage() {
                     {labelFor(sessionStatuses, session.status)}
                   </Badge>
                 </div>
-                <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-stone-400">
+                <div className="mt-5 grid grid-cols-3 gap-3 text-sm text-stone-400">
                   <span>{session.date}</span>
                   <span>{session.time || "Sin hora"}</span>
                   <span>{labelFor(sessionTypes, session.session_type)}</span>
-                  <span>{session.photos_count ?? 0} fotos</span>
                 </div>
                 <p className="mt-4 line-clamp-2 text-sm text-stone-400">
                   {session.description || session.notes || "Sin descripcion."}
@@ -267,7 +266,7 @@ export function SessionsPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar sesion"
-        description="Esta accion eliminara la sesion. Las fotos asociadas quedaran sin sesion."
+        description="Esta accion eliminara la sesion de forma permanente."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />

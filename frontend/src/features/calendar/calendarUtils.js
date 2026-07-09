@@ -125,12 +125,10 @@ export const sourceStyles = {
   session: "border-amber-200/25 bg-amber-200/10 text-amber-100",
   delivery: "border-emerald-300/25 bg-emerald-300/10 text-emerald-100",
   task: "border-sky-300/25 bg-sky-300/10 text-sky-100",
-  reminder: "border-fuchsia-300/25 bg-fuchsia-300/10 text-fuchsia-100",
 };
 
 export const sourceDots = {
   session: "bg-amber-200",
   delivery: "bg-emerald-300",
   task: "bg-sky-300",
-  reminder: "bg-fuchsia-300",
 };

@@ -7,9 +7,8 @@ import { ErrorState } from "../../components/states/ErrorState";
 import { accessDifficulties, accessModes, locationTypes, seasons } from "../../utils/catalogs";
 import { LocationMap } from "./LocationMap";
 
-export function LocationForm({ form, setForm, photos = [], onSubmit, error, saving }) {
+export function LocationForm({ form, setForm, onSubmit, error, saving }) {
   const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
-  const selectedPhotoIds = new Set(form.photo_ids ?? []);
 
   return (
     <form className="grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
@@ -192,47 +191,6 @@ export function LocationForm({ form, setForm, photos = [], onSubmit, error, savi
             onChange={(event) => setValue("openstreetmap_url", event.target.value)}
           />
         </Field>
-      </div>
-      <Field label="Portada">
-        <Select
-          value={form.cover_photo_id ?? ""}
-          onChange={(event) => setValue("cover_photo_id", event.target.value)}
-          options={[
-            { value: "", label: "Sin portada" },
-            ...photos.map((photo) => ({
-              value: String(photo.id),
-              label: photo.title || photo.file_name || `Foto ${photo.id}`,
-            })),
-          ]}
-        />
-      </Field>
-      <div className="md:col-span-2">
-        <p className="mb-2 text-xs uppercase tracking-[0.16em] text-stone-400">Galeria</p>
-        <div className="grid max-h-52 gap-2 overflow-auto rounded-md border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-2">
-          {photos.length === 0 ? (
-            <p className="text-sm text-stone-400">
-              Sube fotos para asociarlas a esta localizacion.
-            </p>
-          ) : (
-            photos.map((photo) => (
-              <label key={photo.id} className="flex items-center gap-2 text-sm text-stone-300">
-                <input
-                  type="checkbox"
-                  checked={selectedPhotoIds.has(photo.id)}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      photo_ids: event.target.checked
-                        ? Array.from(new Set([...(current.photo_ids ?? []), photo.id]))
-                        : (current.photo_ids ?? []).filter((id) => id !== photo.id),
-                    }))
-                  }
-                />
-                {photo.title || photo.file_name || `Foto ${photo.id}`}
-              </label>
-            ))
-          )}
-        </div>
       </div>
       <div className="md:col-span-2">
         <Field label="Tags">

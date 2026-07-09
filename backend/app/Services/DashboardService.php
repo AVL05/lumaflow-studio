@@ -11,11 +11,7 @@ use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Location;
 use App\Models\Notification;
-use App\Models\Photo;
-use App\Models\Preset;
-use App\Models\Reminder;
 use App\Models\Session;
-use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -33,7 +29,7 @@ class DashboardService
     {
         $counts = User::query()
             ->whereKey($user->id)
-            ->withCount(['sessions', 'photos', 'gearItems', 'presets', 'tags', 'locations', 'clients', 'deliveries'])
+            ->withCount(['sessions', 'gearItems', 'locations', 'clients', 'deliveries'])
             ->firstOrFail();
 
         $sessionsByStatus = Session::query()
@@ -52,37 +48,20 @@ class DashboardService
                 ->limit(6)
                 ->get(),
             'sessionsByStatus' => $this->statusTotals($sessionsByStatus),
-            'totalPhotos' => $counts->photos_count,
             'totalGear' => $counts->gear_items_count,
-            'totalPresets' => $counts->presets_count,
-            'totalTags' => $counts->tags_count,
             'totalLocations' => $counts->locations_count,
             'totalClients' => $counts->clients_count,
             'activeClients' => Client::query()->ownedBy($user->id)->where('status', 'active')->count(),
             'pendingDeliveries' => Delivery::query()->ownedBy($user->id)->where('status', 'pending')->count(),
             'deliveredProjects' => Delivery::query()->ownedBy($user->id)->whereIn('status', ['delivered', 'approved'])->count(),
-            'topPresets' => Preset::query()
-                ->ownedBy($user->id)
-                ->orderByDesc('usage_count')
-                ->orderByDesc('is_favorite')
-                ->limit(4)
-                ->get(),
-            'latestAlbums' => $user->albums()
-                ->with('coverPhoto')
-                ->withCount('photos')
-                ->latest()
-                ->limit(4)
-                ->get(),
             'latestLocations' => Location::query()
                 ->ownedBy($user->id)
-                ->with('coverPhoto')
                 ->latest()
                 ->limit(4)
                 ->get(),
             'favoriteLocations' => Location::query()
                 ->ownedBy($user->id)
                 ->where('is_favorite', true)
-                ->with('coverPhoto')
                 ->withCount('sessions')
                 ->orderByDesc('rating')
                 ->latest()
@@ -120,18 +99,6 @@ class DashboardService
                 ->orderBy('delivery_date')
                 ->limit(4)
                 ->get(),
-            'favoritePhotos' => Photo::query()
-                ->ownedBy($user->id)
-                ->where('is_favorite', true)
-                ->with(['session', 'albums', 'tags'])
-                ->latest()
-                ->limit(6)
-                ->get(),
-            'exifSummary' => [
-                'cameraModels' => Photo::query()->ownedBy($user->id)->whereNotNull('exif->camera_model')->distinct()->count('id'),
-                'taggedPhotos' => Photo::query()->ownedBy($user->id)->whereHas('tags')->count(),
-                'tags' => Tag::query()->ownedBy($user->id)->count(),
-            ],
             'latestAiAnalysis' => AiAnalysis::query()
                 ->where('user_id', $user->id)
                 ->latest()
@@ -150,7 +117,6 @@ class DashboardService
             'aiUsage' => [
                 'conversations' => AiConversation::query()->ownedBy($user->id)->count(),
                 'analyses' => AiAnalysis::query()->where('user_id', $user->id)->count(),
-                'generatedPresets' => AiAnalysis::query()->where('user_id', $user->id)->where('type', 'preset_generation')->count(),
                 'sessionPlans' => AiSessionPlan::query()->ownedBy($user->id)->count(),
                 'optimizedSessions' => AiSessionPlan::query()->ownedBy($user->id)->distinct()->count('session_id'),
             ],
@@ -170,13 +136,6 @@ class DashboardService
                 ->limit(6)
                 ->get(),
             'taskSummary' => $this->taskSummary->forUser($user->id),
-            'upcomingReminders' => Reminder::query()
-                ->ownedBy($user->id)
-                ->where('status', 'pending')
-                ->whereDate('remind_date', '>=', now()->toDateString())
-                ->orderBy('remind_date')
-                ->limit(5)
-                ->get(),
             'unreadNotifications' => Notification::query()->ownedBy($user->id)->unread()->count(),
             'monthlyProgress' => $this->monthlyProgress($user->id),
             'favoriteGear' => GearItem::query()
@@ -207,7 +166,6 @@ class DashboardService
             'sessions' => $total,
             'completedSessions' => $completed,
             'completionRate' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
-            'photos' => Photo::query()->ownedBy($userId)->whereBetween('created_at', [$start, $end])->count(),
             'deliveries' => Delivery::query()->ownedBy($userId)->whereBetween('delivery_date', [$start, $end])->count(),
             'completedTasks' => Task::query()->ownedBy($userId)->where('status', 'completed')->whereBetween('completed_at', [$start, $end])->count(),
         ];

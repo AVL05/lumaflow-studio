@@ -22,7 +22,6 @@ class SessionResource extends JsonResource
             'description' => $this->description,
             'notes' => $this->notes,
             'client_name' => $this->client_name,
-            'photos_count' => $this->whenCounted('photos'),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

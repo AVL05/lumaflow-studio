@@ -1,7 +1,6 @@
 import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
 import { accessDifficulties, labelFor, locationTypes } from "../../utils/catalogs";
-import { LocationGallery } from "./LocationGallery";
 import { LocationHeader } from "./LocationHeader";
 import { LocationMap } from "./LocationMap";
 import { LocationSidebar } from "./LocationSidebar";
@@ -39,7 +38,6 @@ export function LocationDetail({ location, onCopy }) {
             <TagBlock title="Tags" items={location.tags} />
             <TagBlock title="Equipo recomendado" items={location.recommended_gear} />
           </Card>
-          <LocationGallery photos={location.photos} coverPhoto={location.cover_photo} />
         </div>
         <div className="space-y-6">
           <LocationSidebar location={location} onCopy={onCopy} />

@@ -11,9 +11,6 @@ import { KpiGrid } from "../features/analytics/KpiGrid";
 import {
   AiUsageChart,
   ClientsByStatusChart,
-  GearUsageChart,
-  PhotosByCategoryChart,
-  PresetUsageChart,
   ProjectStatusChart,
   SessionTypesChart,
   SessionsByMonthChart,
@@ -29,9 +26,7 @@ const exportResources = [
   { value: "clients", label: "Clientes" },
   { value: "deliveries", label: "Entregas" },
   { value: "tasks", label: "Tareas" },
-  { value: "photos", label: "Fotos" },
   { value: "gear", label: "Equipo" },
-  { value: "presets", label: "Presets" },
   { value: "locations", label: "Localizaciones" },
 ];
 
@@ -95,31 +90,19 @@ export function AnalyticsPage() {
             <SessionTypesChart data={data.sessionTypes} />
             <ProjectStatusChart data={data.projectStatus} />
             <ClientsByStatusChart data={data.clientsByStatus} />
-            <PresetUsageChart data={data.presetUsage} />
-            <GearUsageChart data={data.gearUsage} />
-            <PhotosByCategoryChart data={data.photosByCategory} />
             <TasksByStatusChart data={data.tasksByStatus} />
             <div className="xl:col-span-2">
               <AiUsageChart data={data.aiUsage} />
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            <AnalyticsTable
-              title="Localizaciones mas utilizadas"
-              description="Sesiones asociadas a cada spot guardado"
-              rows={data.topLocations}
-              valueLabel="Sesiones"
-              metaLabel="Ciudad"
-            />
-            <AnalyticsTable
-              title="Presets por uso"
-              description="Contador real de aplicaciones"
-              rows={data.presetUsage}
-              valueLabel="Usos"
-              metaLabel="Estilo"
-            />
-          </div>
+          <AnalyticsTable
+            title="Localizaciones mas utilizadas"
+            description="Sesiones asociadas a cada spot guardado"
+            rows={data.topLocations}
+            valueLabel="Sesiones"
+            metaLabel="Ciudad"
+          />
 
           <p className="text-xs text-stone-400">
             Rango analizado: {data.range.from} → {data.range.to}. Exportacion PDF prevista para la

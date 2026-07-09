@@ -14,13 +14,9 @@ class AiContextService
             'user' => Arr::only($user->toArray(), ['name']),
             'sessions' => $this->sessions($user),
             'gear' => $this->gear($user),
-            'presets' => $this->presets($user),
-            'photos' => $this->photos($user),
-            'albums' => $this->albums($user),
             'locations' => $this->locations($user),
             'clients' => $this->clients($user),
             'deliveries' => $this->deliveries($user),
-            'tags' => $this->tags($user),
             'focus' => $this->sanitize($focus),
         ];
 
@@ -44,38 +40,6 @@ class AiContextService
             ->select('name', 'category', 'brand', 'model', 'condition', 'is_favorite')
             ->orderByDesc('is_favorite')
             ->limit(20)
-            ->get()
-            ->toArray();
-    }
-
-    private function presets(User $user): array
-    {
-        return $user->presets()
-            ->select('name', 'category', 'style', 'contrast', 'shadows', 'highlights', 'temperature', 'saturation', 'clarity', 'grain', 'recommended_use', 'is_favorite', 'usage_count')
-            ->orderByDesc('usage_count')
-            ->limit(16)
-            ->get()
-            ->toArray();
-    }
-
-    private function photos(User $user): array
-    {
-        return $user->photos()
-            ->with(['session:id,name', 'albums:id,name', 'tags:id,name'])
-            ->select('id', 'session_id', 'title', 'description', 'category', 'is_favorite', 'exif', 'taken_at')
-            ->latest()
-            ->limit(18)
-            ->get()
-            ->toArray();
-    }
-
-    private function albums(User $user): array
-    {
-        return $user->albums()
-            ->select('id', 'name', 'description', 'date')
-            ->withCount('photos')
-            ->latest()
-            ->limit(10)
             ->get()
             ->toArray();
     }
@@ -112,17 +76,6 @@ class AiContextService
             ->toArray();
     }
 
-    private function tags(User $user): array
-    {
-        return $user->tags()
-            ->select('id', 'name')
-            ->withCount('photos')
-            ->orderByDesc('photos_count')
-            ->limit(30)
-            ->get()
-            ->toArray();
-    }
-
     private function limit(array $context): array
     {
         $max = max(4000, (int) config('ollama.max_context'));
@@ -132,7 +85,7 @@ class AiContextService
             return $context;
         }
 
-        foreach (['photos', 'gear', 'presets', 'sessions', 'locations', 'tags'] as $key) {
+        foreach (['gear', 'sessions', 'locations'] as $key) {
             $context[$key] = Collection::make($context[$key])->take(8)->values()->all();
             if (strlen(json_encode($context, JSON_UNESCAPED_UNICODE)) <= $max) {
                 break;

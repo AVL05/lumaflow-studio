@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Album;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Location;
-use App\Models\Photo;
-use App\Models\Preset;
 use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
@@ -16,17 +13,13 @@ use App\Models\User;
 class SearchService
 {
     public const GROUPS = [
-        'sessions', 'clients', 'gear', 'presets', 'photos',
-        'albums', 'locations', 'tasks', 'deliveries',
+        'sessions', 'clients', 'gear', 'locations', 'tasks', 'deliveries',
     ];
 
     private const LABELS = [
         'sessions' => 'Sesiones',
         'clients' => 'Clientes',
         'gear' => 'Equipo',
-        'presets' => 'Presets',
-        'photos' => 'Fotos',
-        'albums' => 'Albumes',
         'locations' => 'Localizaciones',
         'tasks' => 'Tareas',
         'deliveries' => 'Entregas',
@@ -77,15 +70,6 @@ class SearchService
 
             'gear' => GearItem::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
                 ->map(fn (GearItem $item) => $this->item('gear', $item->id, $item->name, trim(($item->brand ?? '').' '.($item->model ?? '')), '/app/gear', $item->category))->all(),
-
-            'presets' => Preset::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
-                ->map(fn (Preset $item) => $this->item('presets', $item->id, $item->name, $item->recommended_use, '/app/presets', $item->style))->all(),
-
-            'photos' => Photo::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
-                ->map(fn (Photo $item) => $this->item('photos', $item->id, $item->title ?? $item->file_name, $item->description, '/app/photos', $item->category))->all(),
-
-            'albums' => Album::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
-                ->map(fn (Album $item) => $this->item('albums', $item->id, $item->name, $item->description, '/app/albums', null))->all(),
 
             'locations' => Location::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
                 ->map(fn (Location $item) => $this->item('locations', $item->id, $item->name, trim(($item->city ?? '').' '.($item->country ?? '')), "/app/locations/{$item->id}", $item->type))->all(),

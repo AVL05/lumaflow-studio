@@ -20,8 +20,7 @@ class LocationController extends Controller
 
         $locations = Location::query()
             ->ownedBy(request()->user()->id)
-            ->with('coverPhoto')
-            ->withCount(['photos', 'sessions'])
+            ->withCount('sessions')
             ->search(request('search'))
             ->city(request('city'))
             ->type(request('type'))
@@ -39,25 +38,23 @@ class LocationController extends Controller
     public function store(LocationRequest $request): LocationResource
     {
         $location = request()->user()->locations()->create($request->locationAttributes());
-        $location->photos()->sync($request->photoIds());
 
-        return new LocationResource($location->load(['coverPhoto', 'photos'])->loadCount(['photos', 'sessions']));
+        return new LocationResource($location->loadCount('sessions'));
     }
 
     public function show(Location $location): LocationResource
     {
         $this->ensureOwnership($location);
 
-        return new LocationResource($location->load(['coverPhoto', 'photos', 'sessions'])->loadCount(['photos', 'sessions']));
+        return new LocationResource($location->load('sessions')->loadCount('sessions'));
     }
 
     public function update(LocationRequest $request, Location $location): LocationResource
     {
         $this->ensureOwnership($location);
         $location->update($request->locationAttributes());
-        $location->photos()->sync($request->photoIds());
 
-        return new LocationResource($location->refresh()->load(['coverPhoto', 'photos'])->loadCount(['photos', 'sessions']));
+        return new LocationResource($location->refresh()->loadCount('sessions'));
     }
 
     public function destroy(Location $location): mixed

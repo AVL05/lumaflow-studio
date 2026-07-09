@@ -6,7 +6,6 @@ use App\Models\Checklist;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\Notification;
-use App\Models\Reminder;
 use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
@@ -103,25 +102,6 @@ class WorkflowTest extends TestCase
         $this->assertSame(1, $first->refresh()->position);
     }
 
-    public function test_reminder_rejects_foreign_subject(): void
-    {
-        $foreignSession = Session::create([
-            'user_id' => User::factory()->create()->id,
-            'name' => 'Ajena',
-            'date' => now()->toDateString(),
-            'session_type' => 'portrait',
-            'status' => 'planned',
-        ]);
-
-        $this->postJson('/api/reminders', [
-            'remind_date' => now()->toDateString(),
-            'message' => 'Prueba',
-            'type' => 'session',
-            'remindable_type' => 'session',
-            'remindable_id' => $foreignSession->id,
-        ])->assertStatus(422)->assertJsonValidationErrors('remindable_id');
-    }
-
     public function test_calendar_returns_events_and_moves_them(): void
     {
         $session = $this->makeSession(now()->addDays(2)->toDateString());
@@ -174,7 +154,7 @@ class WorkflowTest extends TestCase
         );
     }
 
-    public function test_deleting_a_subject_removes_its_activities_and_reminders(): void
+    public function test_deleting_a_subject_removes_its_activities(): void
     {
         $session = $this->makeSession();
         $this->putJson("/api/sessions/{$session->id}", [
@@ -184,21 +164,11 @@ class WorkflowTest extends TestCase
             'status' => 'completed',
         ])->assertOk();
 
-        $this->postJson('/api/reminders', [
-            'remind_date' => now()->toDateString(),
-            'message' => 'Recordatorio ligado',
-            'type' => 'session',
-            'remindable_type' => 'session',
-            'remindable_id' => $session->id,
-        ])->assertCreated();
-
         $this->assertDatabaseCount('activities', 1);
-        $this->assertDatabaseCount('reminders', 1);
 
         $this->deleteJson("/api/sessions/{$session->id}")->assertNoContent();
 
         $this->assertDatabaseCount('activities', 0);
-        $this->assertDatabaseCount('reminders', 0);
     }
 
     public function test_bulk_delete_also_cleans_morph_relations(): void
@@ -281,13 +251,11 @@ class WorkflowTest extends TestCase
     public function test_dashboard_exposes_workflow_widgets(): void
     {
         Task::create(['user_id' => $this->user->id, 'title' => 'Pendiente', 'priority' => 'high', 'status' => 'todo']);
-        Reminder::create(['user_id' => $this->user->id, 'remind_date' => now()->addDay(), 'message' => 'Ping', 'type' => 'custom']);
 
         $this->getJson('/api/dashboard')
             ->assertOk()
             ->assertJsonPath('data.taskSummary.open', 1)
             ->assertJsonCount(1, 'data.pendingTasks')
-            ->assertJsonCount(1, 'data.upcomingReminders')
             ->assertJsonStructure(['data' => ['monthlyProgress', 'todayAgenda', 'unreadNotifications', 'timeline']]);
     }
 

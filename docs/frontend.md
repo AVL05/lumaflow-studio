@@ -13,8 +13,8 @@ frontend/src/
 │   ├── states/    Loading / Error / Empty
 │   └── layout/    AppLayout
 ├── features/      UI por dominio: calendar, tasks, checklists, timeline,
-│                  reminders, notifications, search, analytics, dashboard,
-│                  locations, gallery, ai, auth, clients, deliveries, presets
+│                  notifications, search, analytics, dashboard,
+│                  locations, ai, auth, clients, deliveries
 ├── hooks/         usePaginatedResource, useResource, useSelection,
 │                  useHotkey, useDebouncedValue, usePersistedState
 ├── pages/         composicion, una por ruta
@@ -71,7 +71,7 @@ Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayo
 
 **Drag & drop es HTML5 nativo**, sin libreria. El calendario mueve eventos con el tipo de dato `application/lumaflow-event` (ver `DayDropZone`); las checklists reordenan items con indices en refs.
 
-**Memoizacion.** `TaskCard` y `PhotoCard` estan envueltas en `memo` porque la seleccion multiple re-renderiza el listado entero. Los handlers que reciben (`onEdit`, `onToggle`) van en `useCallback` para no invalidar la memo.
+**Memoizacion.** `TaskCard` esta envuelta en `memo` porque la seleccion multiple re-renderiza el listado entero. Los handlers que recibe (`onEdit`, `onToggle`) van en `useCallback` para no invalidar la memo.
 
 **`MapView` crea la instancia de Leaflet una sola vez por montaje.** Incluir `center`, `markers` o `zoom` en las dependencias del efecto destruia y recreaba el mapa en cada render, y bajo StrictMode dejaba efectos posteriores operando sobre un mapa ya eliminado.
 

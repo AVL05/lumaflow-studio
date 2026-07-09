@@ -16,10 +16,6 @@ class ActivityLogger
 
     public const STATUS_CHANGED = 'status_changed';
 
-    public const PHOTO_UPLOADED = 'photo_uploaded';
-
-    public const AI_ANALYSIS = 'ai_analysis';
-
     public const AI_PLAN = 'ai_plan';
 
     public const DELIVERED = 'delivered';

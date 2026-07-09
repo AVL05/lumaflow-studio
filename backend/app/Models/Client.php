@@ -50,11 +50,6 @@ class Client extends Model
         return $this->hasMany(Task::class);
     }
 
-    public function reminders(): MorphMany
-    {
-        return $this->morphMany(Reminder::class, 'remindable');
-    }
-
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');

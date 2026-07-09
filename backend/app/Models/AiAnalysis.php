@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'photo_id', 'type', 'prompt', 'result', 'summary', 'score'])]
+#[Fillable(['user_id', 'type', 'prompt', 'result', 'summary', 'score'])]
 class AiAnalysis extends Model
 {
     use HasFactory;
@@ -23,10 +23,5 @@ class AiAnalysis extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function photo(): BelongsTo
-    {
-        return $this->belongsTo(Photo::class);
     }
 }

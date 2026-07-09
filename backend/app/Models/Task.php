@@ -78,11 +78,6 @@ class Task extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function reminders(): MorphMany
-    {
-        return $this->morphMany(Reminder::class, 'remindable');
-    }
-
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');

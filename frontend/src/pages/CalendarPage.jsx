@@ -3,10 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { calendarApi } from "../api/calendar";
 import { clientsApi } from "../api/clients";
 import { getApiError } from "../api/client";
-import { remindersApi } from "../api/reminders";
 import { sessionsApi } from "../api/sessions";
 import { tasksApi } from "../api/tasks";
-import { deliveriesApi } from "../api/deliveries";
 import { Button } from "../components/ui/Button";
 import { Modal } from "../components/ui/Modal";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -29,7 +27,6 @@ import {
   todayIso,
 } from "../features/calendar/calendarUtils";
 import { useToast } from "../features/notifications/ToastContext";
-import { ReminderForm } from "../features/reminders/ReminderForm";
 import { TaskForm } from "../features/tasks/TaskForm";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { calendarSources } from "../utils/catalogs";
@@ -53,15 +50,6 @@ const taskDefaults = {
   client_id: "",
 };
 
-const reminderDefaults = {
-  message: "",
-  remind_date: "",
-  remind_time: "",
-  type: "custom",
-  status: "pending",
-  remindable_id: "",
-};
-
 export function CalendarPage() {
   const toast = useToast();
   const navigate = useNavigate();
@@ -70,22 +58,28 @@ export function CalendarPage() {
     view: "month",
     sources: calendarSources.map((source) => source.value),
   });
+
+  // Autocorrige preferencias persistidas que referencien fuentes ya retiradas (p.ej. "reminder").
+  useEffect(() => {
+    const validValues = calendarSources.map((source) => source.value);
+    const cleaned = prefs.sources.filter((source) => validValues.includes(source));
+    if (cleaned.length !== prefs.sources.length) {
+      setPrefs((current) => ({ ...current, sources: cleaned }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [cursor, setCursor] = useState(todayIso());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [taskForm, setTaskForm] = useState(taskDefaults);
-  const [reminderForm, setReminderForm] = useState(reminderDefaults);
   const [taskOpen, setTaskOpen] = useState(false);
-  const [reminderOpen, setReminderOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
 
   const [sessions, setSessions] = useState([]);
   const [clients, setClients] = useState([]);
-  const [deliveries, setDeliveries] = useState([]);
-  const [tasks, setTasks] = useState([]);
 
   const range = useMemo(() => rangeForView(prefs.view, cursor), [prefs.view, cursor]);
 
@@ -108,12 +102,10 @@ export function CalendarPage() {
 
   // Catalogos para los formularios rapidos; se cargan una sola vez.
   useEffect(() => {
-    Promise.all([sessionsApi.list(), clientsApi.list(), deliveriesApi.list(), tasksApi.list()])
-      .then(([sessionList, clientList, deliveryList, taskList]) => {
+    Promise.all([sessionsApi.list(), clientsApi.list()])
+      .then(([sessionList, clientList]) => {
         setSessions(sessionList);
         setClients(clientList);
-        setDeliveries(deliveryList);
-        setTasks(taskList);
       })
       .catch(() => toast.error("No se pudieron cargar los catalogos del calendario."));
   }, [toast]);
@@ -126,16 +118,6 @@ export function CalendarPage() {
         return totals;
       }, {}),
     [events],
-  );
-
-  const subjects = useMemo(
-    () => ({
-      session: sessions.map((item) => ({ value: String(item.id), label: item.name })),
-      client: clients.map((item) => ({ value: String(item.id), label: item.name })),
-      delivery: deliveries.map((item) => ({ value: String(item.id), label: item.title })),
-      task: tasks.map((item) => ({ value: String(item.id), label: item.title })),
-    }),
-    [sessions, clients, deliveries, tasks],
   );
 
   function toggleSource(source) {
@@ -174,12 +156,6 @@ export function CalendarPage() {
     setTaskOpen(true);
   }
 
-  function openReminder(date) {
-    setReminderForm({ ...reminderDefaults, remind_date: date ?? cursor });
-    setFormError("");
-    setReminderOpen(true);
-  }
-
   async function submitTask(event) {
     event.preventDefault();
     setSaving(true);
@@ -204,31 +180,6 @@ export function CalendarPage() {
     }
   }
 
-  async function submitReminder(event) {
-    event.preventDefault();
-    setSaving(true);
-    setFormError("");
-
-    try {
-      await remindersApi.create({
-        message: reminderForm.message,
-        remind_date: reminderForm.remind_date,
-        remind_time: reminderForm.remind_time || null,
-        type: reminderForm.type,
-        status: reminderForm.status,
-        remindable_type: reminderForm.type === "custom" ? null : reminderForm.type,
-        remindable_id: reminderForm.remindable_id || null,
-      });
-      toast.success("Recordatorio creado.");
-      setReminderOpen(false);
-      await load();
-    } catch (err) {
-      setFormError(getApiError(err));
-    } finally {
-      setSaving(false);
-    }
-  }
-
   function shift(direction) {
     if (prefs.view === "month") return setCursor((current) => addMonths(current, direction));
     if (prefs.view === "week") return setCursor((current) => addDays(current, direction * 7));
@@ -243,7 +194,7 @@ export function CalendarPage() {
       <PageHeader
         eyebrow="Workflow"
         title="Calendario"
-        description="Sesiones, entregas, tareas y recordatorios en una sola linea temporal. Arrastra para reprogramar."
+        description="Sesiones, entregas y tareas en una sola linea temporal. Arrastra para reprogramar."
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => setCursor(todayIso())}>
@@ -313,7 +264,6 @@ export function CalendarPage() {
             onToggleSource={toggleSource}
             counts={counts}
             onCreateTask={() => openTask(cursor)}
-            onCreateReminder={() => openReminder(cursor)}
           />
           <Panel className="p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Rango consultado</p>
@@ -334,17 +284,6 @@ export function CalendarPage() {
           saving={saving}
           sessions={sessions}
           clients={clients}
-        />
-      </Modal>
-
-      <Modal open={reminderOpen} title="Nuevo recordatorio" onClose={() => setReminderOpen(false)}>
-        <ReminderForm
-          form={reminderForm}
-          setForm={setReminderForm}
-          onSubmit={submitReminder}
-          error={formError}
-          saving={saving}
-          subjects={subjects}
         />
       </Modal>
     </>

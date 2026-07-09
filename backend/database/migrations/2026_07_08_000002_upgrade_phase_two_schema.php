@@ -25,21 +25,10 @@ return new class extends Migration
         });
 
         DB::statement("ALTER TABLE gear_items MODIFY category ENUM('camera','lens','filter','flash','light','tripod','gimbal','drone','gopro','mobile','accessory','battery','sd_card')");
-
-        Schema::table('photos', function (Blueprint $table): void {
-            $table->string('file_name')->nullable()->after('thumbnail_path');
-            $table->unsignedBigInteger('file_size')->nullable()->after('file_name');
-            $table->string('mime_type')->nullable()->after('file_size');
-            $table->date('taken_at')->nullable()->after('mime_type');
-        });
     }
 
     public function down(): void
     {
-        Schema::table('photos', function (Blueprint $table): void {
-            $table->dropColumn(['file_name', 'file_size', 'mime_type', 'taken_at']);
-        });
-
         Schema::table('gear_items', function (Blueprint $table): void {
             $table->dropColumn(['weight_grams', 'condition', 'purchase_date', 'purchase_price']);
         });

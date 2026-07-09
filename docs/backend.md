@@ -36,8 +36,8 @@ backend/app/
 |---|---|
 | `ActivityLogger` | Unica puerta al timeline. Escribe en `activities` con `subject` morfico. |
 | `NotificationService` | Notificaciones persistidas. `User::notifications()` sobrescribe deliberadamente la relacion de `Notifiable`, que el proyecto no usa. |
-| `CalendarService` | Normaliza sesiones, entregas, tareas y recordatorios al shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo. |
-| `SearchService` | Busqueda unificada en nueve grupos, con limite por grupo. |
+| `CalendarService` | Normaliza sesiones, entregas y tareas al shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo. |
+| `SearchService` | Busqueda unificada por grupos, con limite por grupo. |
 | `AnalyticsService` | KPIs y series. SQL exclusivo de MySQL. |
 | `BulkActionService` | `MATRIX` define que accion admite cada recurso; es la fuente de verdad de la validacion. |
 | `ExportService` | `COLUMNS` define que se exporta. CSV en streaming, JSON como adjunto. |
@@ -51,7 +51,6 @@ backend/app/
 - **Rate limiting**: `throttle:10,1` en `/register` y `/login`; `throttle:180,1` en toda la API autenticada; `throttle:20,1` adicional en los endpoints de inferencia.
 - **Sesion unica**: `login` borra los tokens previos del usuario antes de emitir uno nuevo.
 - **Enumeracion de cuentas**: el error de credenciales es identico exista o no el email.
-- **Uploads**: `PhotoUploadRequest` valida `image`, `mimes:jpg,jpeg,png,webp`, `max:12288` (12 MB). El nombre se re-genera con `Str::random`, nunca se confia en el del cliente. Los `album_ids` y `tag_ids` se validan con `Rule::exists(...)->where('user_id', ...)`.
 - **Historial de IA**: no se acepta del cliente. Se reconstruye desde la conversacion persistida para que no se pueda inyectar contexto falso.
 - **CORS**: `config/cors.php` lee `FRONTEND_URLS`. `supports_credentials` es `false` porque la SPA usa tokens, no cookies.
 
@@ -63,7 +62,6 @@ Canal `lumaflow` (diario, en `storage/logs/lumaflow.log`). Se escribe solo a tra
 |---|---|
 | `auth.registered`, `auth.login`, `auth.logout` | `user_id` |
 | `auth.failed` | `email_hash` (sha256 truncado, nunca el email) |
-| `photo.uploaded` | `user_id`, `photo_id`, `bytes`, `mime` |
 | `ai.failed` | `operation`, `reason`. Nunca el prompt ni la respuesta. |
 | `api.exception` | clase, mensaje, fichero, metodo, ruta, `user_id` |
 

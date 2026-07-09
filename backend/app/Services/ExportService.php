@@ -6,8 +6,6 @@ use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Location;
-use App\Models\Photo;
-use App\Models\Preset;
 use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
@@ -27,9 +25,7 @@ class ExportService
         'clients' => ['id', 'name', 'email', 'phone', 'company', 'instagram', 'status'],
         'deliveries' => ['id', 'title', 'status', 'budget', 'delivery_date', 'gallery_url'],
         'tasks' => ['id', 'title', 'priority', 'status', 'due_date', 'due_time', 'completed_at'],
-        'photos' => ['id', 'title', 'file_name', 'category', 'is_favorite', 'taken_at'],
         'gear' => ['id', 'name', 'category', 'brand', 'model', 'condition', 'is_favorite'],
-        'presets' => ['id', 'name', 'category', 'style', 'usage_count', 'version'],
         'locations' => ['id', 'name', 'city', 'country', 'type', 'rating', 'is_favorite'],
     ];
 
@@ -63,9 +59,7 @@ class ExportService
             'clients' => Client::query()->ownedBy($user->id),
             'deliveries' => Delivery::query()->ownedBy($user->id),
             'tasks' => Task::query()->ownedBy($user->id),
-            'photos' => Photo::query()->ownedBy($user->id),
             'gear' => GearItem::query()->ownedBy($user->id),
-            'presets' => Preset::query()->ownedBy($user->id),
             'locations' => Location::query()->ownedBy($user->id),
         };
     }

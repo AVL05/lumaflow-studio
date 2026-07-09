@@ -3,24 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AiAnalyzeRequest;
 use App\Http\Requests\AiChatRequest;
 use App\Http\Requests\AiGearRecommendationRequest;
 use App\Http\Requests\AiHistoryRequest;
-use App\Http\Requests\AiPresetRequest;
 use App\Http\Requests\AiSessionPlanRequest;
 use App\Http\Resources\AiAnalysisResource;
 use App\Http\Resources\AiConversationResource;
 use App\Http\Resources\AiSessionPlanResource;
-use App\Http\Resources\PresetResource;
 use App\Models\AiConversation;
-use App\Models\Photo;
 use App\Models\Session;
 use App\Services\ActivityLogger;
 use App\Services\AiContextService;
 use App\Services\OllamaService;
-use App\Services\PhotoAnalysisService;
-use App\Services\PresetGeneratorService;
 use App\Services\PromptBuilderService;
 use App\Services\RecommendationService;
 use App\Services\SessionPlannerService;
@@ -34,8 +28,6 @@ class AiController extends Controller
         private readonly OllamaService $ollama,
         private readonly AiContextService $context,
         private readonly PromptBuilderService $prompts,
-        private readonly PhotoAnalysisService $analysis,
-        private readonly PresetGeneratorService $presets,
         private readonly RecommendationService $recommendations,
         private readonly SessionPlannerService $sessionPlanner,
         private readonly ActivityLogger $activity,
@@ -95,42 +87,6 @@ class AiController extends Controller
             'provider' => 'ollama',
             'streaming_supported' => $this->ollama->streamingAvailable(),
         ]);
-    }
-
-    public function analyze(AiAnalyzeRequest $request): AiAnalysisResource|JsonResponse
-    {
-        $photo = Photo::query()
-            ->where('user_id', $request->user()->id)
-            ->findOrFail($request->integer('photo_id'));
-
-        try {
-            $analysis = $this->analysis->analyze(
-                $request->user(),
-                $photo,
-                $request->validated('prompt') ?? null
-            );
-        } catch (RuntimeException $exception) {
-            return response()->json(['message' => $exception->getMessage()], 503);
-        }
-
-        $this->activity->log(
-            $request->user(),
-            $photo->session ?? $photo,
-            ActivityLogger::AI_ANALYSIS,
-            'Analisis IA de foto',
-            ['photo_id' => $photo->id],
-        );
-
-        return new AiAnalysisResource($analysis);
-    }
-
-    public function preset(AiPresetRequest $request): PresetResource|JsonResponse
-    {
-        try {
-            return new PresetResource($this->presets->generate($request->user(), $request->validated()));
-        } catch (RuntimeException $exception) {
-            return response()->json(['message' => $exception->getMessage()], 503);
-        }
     }
 
     public function sessionPlan(AiSessionPlanRequest $request): AiSessionPlanResource|JsonResponse

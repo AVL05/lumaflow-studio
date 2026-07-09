@@ -28,7 +28,6 @@ class SessionController extends Controller
             ->status(request('status'))
             ->type(request('type'))
             ->with('location')
-            ->withCount('photos')
             ->orderBy($sort, $direction)
             ->paginate(min((int) request('per_page', 12), 48));
 
@@ -47,7 +46,7 @@ class SessionController extends Controller
     {
         $this->ensureOwnership($session);
 
-        return new SessionResource($session->load('location')->loadCount('photos'));
+        return new SessionResource($session->load('location'));
     }
 
     public function update(SessionRequest $request, Session $session): SessionResource

@@ -16,7 +16,6 @@ import {
   FavoriteGearWidget,
   MonthlyProgressWidget,
   PendingTasksWidget,
-  RemindersWidget,
   TopLocationsWidget,
 } from "../features/dashboard/WorkflowWidgets";
 
@@ -36,7 +35,7 @@ export function DashboardPage() {
       <PageHeader
         eyebrow="Overview"
         title="Dashboard"
-        description="Metricas reales del workspace creativo: sesiones, fotos, equipo, presets y actividad reciente."
+        description="Metricas reales del workspace creativo: sesiones, equipo, clientes y actividad reciente."
       />
       {error ? <ErrorState message={error} /> : null}
       {!dashboard ? (
@@ -77,21 +76,17 @@ export function DashboardPage() {
             </div>
           </Card>
 
-          <div className="grid gap-6 xl:grid-cols-3">
+          <div className="grid gap-6 xl:grid-cols-2">
             <AgendaWidget events={dashboard.todayAgenda ?? []} />
             <PendingTasksWidget
               tasks={dashboard.pendingTasks ?? []}
               summary={dashboard.taskSummary}
             />
-            <RemindersWidget reminders={dashboard.upcomingReminders ?? []} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
             <StatCard label="Sesiones" value={dashboard.totalSessions} detail="Total planificado" />
-            <StatCard label="Fotos" value={dashboard.totalPhotos} detail="Imagenes en biblioteca" />
             <StatCard label="Equipo" value={dashboard.totalGear} detail="Items registrados" />
-            <StatCard label="Presets" value={dashboard.totalPresets} detail="Bases de color" />
-            <StatCard label="Etiquetas" value={dashboard.totalTags} detail="Taxonomia visual" />
             <StatCard
               label="Localizaciones"
               value={dashboard.totalLocations}
@@ -343,86 +338,6 @@ export function DashboardPage() {
               </div>
             </Card>
           </div>
-
-          <div className="grid gap-6 xl:grid-cols-3">
-            <Card className="p-5">
-              <h2 className="font-semibold">Presets mas usados</h2>
-              <div className="mt-4 space-y-3">
-                {dashboard.topPresets.length === 0 ? (
-                  <p className="text-sm text-stone-400">Sin presets usados.</p>
-                ) : (
-                  dashboard.topPresets.map((preset) => (
-                    <div
-                      key={preset.id}
-                      className="flex items-center justify-between rounded-md bg-white/[0.04] p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: preset.color }}
-                        />
-                        <span className="text-sm">{preset.name}</span>
-                      </div>
-                      <span className="text-xs text-stone-400">{preset.usage_count} usos</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Card>
-            <Card className="p-5">
-              <h2 className="font-semibold">Ultimos albumes</h2>
-              <div className="mt-4 space-y-3">
-                {dashboard.latestAlbums.length === 0 ? (
-                  <p className="text-sm text-stone-400">Sin albumes.</p>
-                ) : (
-                  dashboard.latestAlbums.map((album) => (
-                    <div key={album.id} className="rounded-md bg-white/[0.04] p-3">
-                      <p className="text-sm">{album.name}</p>
-                      <p className="mt-1 text-xs text-stone-400">{album.photos_count ?? 0} fotos</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Card>
-            <Card className="p-5">
-              <h2 className="font-semibold">Resumen EXIF</h2>
-              <div className="mt-4 grid gap-3 text-sm text-stone-400">
-                <p>
-                  Modelos de camara:{" "}
-                  <span className="text-stone-100">{dashboard.exifSummary.cameraModels}</span>
-                </p>
-                <p>
-                  Fotos etiquetadas:{" "}
-                  <span className="text-stone-100">{dashboard.exifSummary.taggedPhotos}</span>
-                </p>
-                <p>
-                  Etiquetas activas:{" "}
-                  <span className="text-stone-100">{dashboard.exifSummary.tags}</span>
-                </p>
-              </div>
-            </Card>
-          </div>
-
-          <Card className="p-5">
-            <h2 className="font-semibold">Fotos favoritas</h2>
-            {dashboard.favoritePhotos.length === 0 ? (
-              <p className="mt-4 text-sm text-stone-400">
-                Marca fotos como favoritas para verlas aqui.
-              </p>
-            ) : (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                {dashboard.favoritePhotos.map((photo) => (
-                  <img
-                    key={photo.id}
-                    src={photo.url}
-                    alt={photo.title || "Favorita"}
-                    className="aspect-square rounded-md object-cover"
-                    loading="lazy"
-                  />
-                ))}
-              </div>
-            )}
-          </Card>
 
           <div className="grid gap-6 xl:grid-cols-3">
             <Card className="p-5">

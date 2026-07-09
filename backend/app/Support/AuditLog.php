@@ -30,21 +30,6 @@ class AuditLog
         self::write('info', 'auth.registered', ['user_id' => $userId]);
     }
 
-    public static function upload(int $userId, int $photoId, int $bytes, string $mime): void
-    {
-        self::write('info', 'photo.uploaded', [
-            'user_id' => $userId,
-            'photo_id' => $photoId,
-            'bytes' => $bytes,
-            'mime' => $mime,
-        ]);
-    }
-
-    public static function uploadRejected(int $userId, string $reason): void
-    {
-        self::write('warning', 'photo.rejected', ['user_id' => $userId, 'reason' => $reason]);
-    }
-
     /** Errores de la capa IA. Se registra la causa, nunca el prompt del usuario. */
     public static function aiFailure(string $operation, string $reason, ?int $userId = null): void
     {

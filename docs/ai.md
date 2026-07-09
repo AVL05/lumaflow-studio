@@ -20,12 +20,10 @@ AiController -> PromptBuilderService -> OllamaService
 
 | Servicio | Responsabilidad |
 |---|---|
-| `AiContextService` | Resume sesiones (10), equipo (20), presets (16), fotos (18), albumes (10), localizaciones (16), clientes (12), entregas (12) y etiquetas (30). Si el JSON supera el presupuesto, recorta por bloques hasta encajar |
+| `AiContextService` | Resume sesiones (10), equipo (20), localizaciones (16), clientes (12) y entregas (12). Si el JSON supera el presupuesto, recorta por bloques hasta encajar |
 | `PromptBuilderService` | System prompt y plantillas de tarea |
 | `webGpuAi.js` | Inferencia WebGPU en navegador, carga de modelo y parseo JSON |
 | `OllamaService` | Transporte HTTP, reintentos y parseo de JSON para compatibilidad backend |
-| `PhotoAnalysisService` | Analisis de una foto con su EXIF |
-| `PresetGeneratorService` | Genera un preset editable y lo persiste |
 | `RecommendationService` | Recomienda equipo existente; lista aparte lo que falta |
 | `SessionPlannerService` | Plan de sesion asociado a una sesion real |
 
@@ -37,7 +35,7 @@ AiController -> PromptBuilderService -> OllamaService
 
 **Tareas estructuradas.** `jsonTask` anade al system prompt `"Devuelve exclusivamente JSON valido. Sin markdown."` y pasa un `required_schema`, los rangos numericos y los valores permitidos. Al anadir una tarea nueva: seguir el patron `jsonTask` + un Resource dedicado.
 
-**El system prompt acota el dominio.** Prohibe inventar equipo, clientes, localizaciones, fotografias, sesiones, albumes o presupuestos, y prohibe responder fuera del ambito fotografico.
+**El system prompt acota el dominio.** Prohibe inventar equipo, clientes, localizaciones, sesiones o presupuestos, y prohibe responder fuera del ambito fotografico.
 
 **El historial no viene del cliente.** `AiChatRequest` acepta solo `message` y `conversation_id`. Los ultimos 12 mensajes se leen de la conversacion persistida. Un cliente no puede inyectar contexto falso.
 
@@ -64,7 +62,7 @@ La sonda de estado (`/api/ai/status`) **no** usa `OLLAMA_TIMEOUT`: tiene un time
 
 ## Rate limiting
 
-`throttle:20,1` sobre `/ai/chat`, `/ai/analyze`, `/ai/preset`, `/ai/session-plan` y `/ai/recommend-gear`. La inferencia local es cara y no debe competir con el resto de la API.
+`throttle:20,1` sobre `/ai/chat`, `/ai/session-plan` y `/ai/recommend-gear`. La inferencia local es cara y no debe competir con el resto de la API.
 
 ## Limitaciones actuales
 

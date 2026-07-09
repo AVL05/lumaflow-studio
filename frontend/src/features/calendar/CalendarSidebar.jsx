@@ -4,13 +4,7 @@ import { Panel } from "../../components/ui/Panel";
 import { calendarSources } from "../../utils/catalogs";
 import { sourceDots } from "./calendarUtils";
 
-export function CalendarSidebar({
-  sources,
-  onToggleSource,
-  counts,
-  onCreateTask,
-  onCreateReminder,
-}) {
+export function CalendarSidebar({ sources, onToggleSource, counts, onCreateTask }) {
   return (
     <Panel className="p-4">
       <h2 className="text-sm font-semibold text-stone-100">Filtros</h2>
@@ -36,9 +30,6 @@ export function CalendarSidebar({
         <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Crear</p>
         <Button variant="secondary" className="w-full" onClick={onCreateTask}>
           Nueva tarea
-        </Button>
-        <Button variant="secondary" className="w-full" onClick={onCreateReminder}>
-          Nuevo recordatorio
         </Button>
       </div>
 

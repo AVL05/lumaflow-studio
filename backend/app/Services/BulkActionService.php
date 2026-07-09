@@ -2,34 +2,27 @@
 
 namespace App\Services;
 
-use App\Models\Album;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Location;
-use App\Models\Photo;
-use App\Models\Preset;
 use App\Models\Session;
-use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class BulkActionService
 {
-    public const ACTIONS = ['delete', 'status', 'tags', 'album', 'client'];
+    public const ACTIONS = ['delete', 'status', 'client'];
 
     /** Acciones permitidas por recurso. La validacion se apoya en este mapa. */
     public const MATRIX = [
         'sessions' => ['delete', 'status'],
-        'photos' => ['delete', 'tags', 'album'],
         'tasks' => ['delete', 'status', 'client'],
         'deliveries' => ['delete', 'status', 'client'],
         'clients' => ['delete', 'status'],
         'gear' => ['delete'],
-        'presets' => ['delete'],
         'locations' => ['delete'],
     ];
 
@@ -63,8 +56,6 @@ class BulkActionService
         return DB::transaction(fn (): int => match ($action) {
             'delete' => $this->delete($user, $resource, $ids),
             'status' => $this->status($user, $resource, $ids, $payload['value'] ?? ''),
-            'tags' => $this->tags($user, $ids, $payload['tag_ids'] ?? []),
-            'album' => $this->album($user, $ids, (int) ($payload['album_id'] ?? 0)),
             'client' => $this->client($user, $resource, $ids, (int) ($payload['client_id'] ?? 0)),
         });
     }
@@ -73,14 +64,8 @@ class BulkActionService
     {
         $models = $this->scoped($resource, $user)->whereIn('id', $ids)->get();
 
-        if ($resource === 'photos') {
-            Storage::disk('public')->delete(
-                $models->flatMap(fn (Photo $photo) => array_filter([$photo->file_path, $photo->thumbnail_path]))->all()
-            );
-        }
-
         // Borrado modelo a modelo: un delete masivo por query saltaria los eventos
-        // que limpian actividades y recordatorios morficos.
+        // que limpian actividades morficas.
         $models->each->delete();
 
         return $models->count();
@@ -101,27 +86,6 @@ class BulkActionService
         return $models->count();
     }
 
-    private function tags(User $user, array $ids, array $tagIds): int
-    {
-        $tagIds = Tag::query()->ownedBy($user->id)->whereIn('id', $tagIds)->pluck('id')->all();
-        $photos = Photo::query()->ownedBy($user->id)->whereIn('id', $ids)->get();
-
-        foreach ($photos as $photo) {
-            $photo->tags()->syncWithoutDetaching($tagIds);
-        }
-
-        return $photos->count();
-    }
-
-    private function album(User $user, array $ids, int $albumId): int
-    {
-        $album = Album::query()->ownedBy($user->id)->findOrFail($albumId);
-        $photoIds = Photo::query()->ownedBy($user->id)->whereIn('id', $ids)->pluck('id')->all();
-        $album->photos()->syncWithoutDetaching($photoIds);
-
-        return count($photoIds);
-    }
-
     private function client(User $user, string $resource, array $ids, int $clientId): int
     {
         Client::query()->ownedBy($user->id)->findOrFail($clientId);
@@ -133,12 +97,10 @@ class BulkActionService
     {
         return match ($resource) {
             'sessions' => Session::query()->ownedBy($user->id),
-            'photos' => Photo::query()->ownedBy($user->id),
             'tasks' => Task::query()->ownedBy($user->id),
             'deliveries' => Delivery::query()->ownedBy($user->id),
             'clients' => Client::query()->ownedBy($user->id),
             'gear' => GearItem::query()->ownedBy($user->id),
-            'presets' => Preset::query()->ownedBy($user->id),
             'locations' => Location::query()->ownedBy($user->id),
         };
     }

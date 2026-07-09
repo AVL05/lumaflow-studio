@@ -14,7 +14,6 @@ const navGroups = [
       ["Dashboard", "/app/dashboard"],
       ["Calendario", "/app/calendar"],
       ["Tareas", "/app/tasks"],
-      ["Recordatorios", "/app/reminders"],
       ["Analitica", "/app/analytics"],
     ],
   ],
@@ -23,15 +22,7 @@ const navGroups = [
     [
       ["Sesiones", "/app/sessions"],
       ["Equipo", "/app/gear"],
-      ["Presets", "/app/presets"],
       ["Localizaciones", "/app/locations"],
-    ],
-  ],
-  [
-    "Biblioteca",
-    [
-      ["Fotos", "/app/photos"],
-      ["Álbumes", "/app/albums"],
     ],
   ],
   [

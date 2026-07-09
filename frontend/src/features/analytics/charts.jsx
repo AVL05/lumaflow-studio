@@ -102,20 +102,6 @@ export const ProjectStatusChart = memo(function ProjectStatusChart({ data }) {
   );
 });
 
-export const PresetUsageChart = memo(function PresetUsageChart({ data }) {
-  return (
-    <ChartPanel title="Uso de presets" description="Presets mas aplicados" data={data} height={300}>
-      <BarChart data={data} layout="vertical" margin={{ left: 24 }}>
-        <CartesianGrid {...gridProps} horizontal={false} vertical />
-        <XAxis type="number" allowDecimals={false} {...axisProps} />
-        <YAxis type="category" dataKey="label" width={140} {...axisProps} />
-        <Tooltip {...tooltipProps} />
-        <Bar dataKey="total" name="Usos" radius={[0, 4, 4, 0]} fill={colorAt(0)} />
-      </BarChart>
-    </ChartPanel>
-  );
-});
-
 export const AiUsageChart = memo(function AiUsageChart({ data }) {
   const hasData = data.some((row) => row.analyses + row.conversations + row.plans > 0);
 
@@ -156,45 +142,6 @@ export const AiUsageChart = memo(function AiUsageChart({ data }) {
           dot={false}
         />
       </LineChart>
-    </ChartPanel>
-  );
-});
-
-export const PhotosByCategoryChart = memo(function PhotosByCategoryChart({ data }) {
-  return (
-    <ChartPanel title="Fotografias por categoria" description="Biblioteca clasificada" data={data}>
-      <PieChart>
-        <Pie data={data} dataKey="total" nameKey="label" outerRadius={90} paddingAngle={2}>
-          {data.map((row, index) => (
-            <Cell key={row.label} fill={colorAt(index)} stroke="#12110f" />
-          ))}
-        </Pie>
-        <Tooltip {...tooltipProps} cursor={false} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#a8a29e" }} />
-      </PieChart>
-    </ChartPanel>
-  );
-});
-
-export const GearUsageChart = memo(function GearUsageChart({ data }) {
-  return (
-    <ChartPanel
-      title="Equipo mas utilizado"
-      description="Derivado del EXIF real de las fotografias"
-      data={data}
-      height={300}
-    >
-      <BarChart data={data} layout="vertical" margin={{ left: 24 }}>
-        <CartesianGrid {...gridProps} horizontal={false} vertical />
-        <XAxis type="number" allowDecimals={false} {...axisProps} />
-        <YAxis type="category" dataKey="label" width={160} {...axisProps} />
-        <Tooltip {...tooltipProps} />
-        <Bar dataKey="total" name="Fotos" radius={[0, 4, 4, 0]}>
-          {data.map((row) => (
-            <Cell key={row.label} fill={row.owned ? colorAt(0) : colorAt(1)} />
-          ))}
-        </Bar>
-      </BarChart>
     </ChartPanel>
   );
 });

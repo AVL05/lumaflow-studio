@@ -14,12 +14,11 @@ const stack = [
 
 const modules = [
   ["Sesiones", "CRUD con cliente, tipo, estado, localizacion, checklists y timeline."],
-  ["Biblioteca", "Subida con EXIF automatico, albumes, etiquetas y filtros avanzados."],
   ["Localizaciones", "Mapa Leaflet, coordenadas, acceso, permisos, clima y equipo sugerido."],
   ["Clientes y entregas", "CRM ligero conectado a sesiones, presupuestos y galerias."],
-  ["Workflow", "Calendario con drag & drop, tareas, recordatorios y notificaciones."],
-  ["Analitica", "KPIs y ocho graficas calculadas sobre datos reales del usuario."],
-  ["Asistente IA", "Chat, analisis de fotos, generacion de presets y planes de sesion."],
+  ["Workflow", "Calendario con drag & drop, tareas y notificaciones."],
+  ["Analitica", "KPIs y graficas calculadas sobre datos reales del usuario."],
+  ["Asistente IA", "Chat con contexto, planes de sesion y recomendacion de equipo."],
 ];
 
 const decisions = [
@@ -36,12 +35,8 @@ const decisions = [
     "AiContextService arma un contexto compacto y acotado; el prompt de sistema prohibe inventar equipo, clientes o sesiones. El historial se reconstruye del servidor, nunca del cliente.",
   ],
   [
-    "Equipo mas utilizado derivado del EXIF",
-    "En vez de un contador sintetico, la analitica cruza el EXIF real de las fotografias con el inventario declarado.",
-  ],
-  [
     "Agregacion en base de datos",
-    "La analitica no carga colecciones en memoria: agrupa y cuenta en SQL, y el calendario normaliza cuatro fuentes en un unico shape de evento.",
+    "La analitica no carga colecciones en memoria: agrupa y cuenta en SQL, y el calendario normaliza tres fuentes en un unico shape de evento.",
   ],
   [
     "IA local en navegador",
@@ -81,7 +76,7 @@ export function AboutProjectPage() {
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-400">
             LumaFlow Studio nace de una pregunta concreta: un fotografo profesional trabaja con
-            sesiones, clientes, equipo, presets, localizaciones y miles de archivos, pero suele
+            sesiones, clientes, equipo y localizaciones, pero suele
             gestionarlo todo en hojas de calculo dispersas. Este proyecto reune ese flujo completo
             en una sola aplicacion full-stack, con un asistente de IA que corre en el navegador con
             WebGPU y solo razona sobre los datos reales del usuario.
@@ -157,8 +152,6 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
           <div className="mt-4 flex flex-wrap gap-2">
             {[
               "Chat con contexto",
-              "Analisis de fotos",
-              "Generacion de presets",
               "Planes de sesion",
               "Recomendador de equipo",
             ].map((item) => (

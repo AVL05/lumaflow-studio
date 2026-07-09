@@ -22,7 +22,6 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->json('tags')->nullable();
             $table->json('recommended_gear')->nullable();
-            $table->foreignId('cover_photo_id')->nullable()->constrained('photos')->nullOnDelete();
             $table->timestamps();
 
             $table->index(['user_id', 'type']);

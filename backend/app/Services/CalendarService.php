@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Delivery;
-use App\Models\Reminder;
 use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
@@ -11,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CalendarService
 {
-    public const SOURCES = ['session', 'delivery', 'task', 'reminder'];
+    public const SOURCES = ['session', 'delivery', 'task'];
 
     /**
      * Eventos normalizados del rango [from, to] para el calendario y la agenda.
@@ -26,7 +25,6 @@ class CalendarService
                 'session' => $this->sessions($user, $from, $to),
                 'delivery' => $this->deliveries($user, $from, $to),
                 'task' => $this->tasks($user, $from, $to),
-                'reminder' => $this->reminders($user, $from, $to),
             })
             ->sortBy([['date', 'asc'], ['time', 'asc']])
             ->values()
@@ -46,7 +44,6 @@ class CalendarService
             'session' => array_filter(['date' => $date, 'time' => $time], fn ($value) => $value !== null),
             'delivery' => ['delivery_date' => $date],
             'task' => ['due_date' => $date, 'due_time' => $time],
-            'reminder' => ['remind_date' => $date, 'remind_time' => $time],
         });
 
         return $model->refresh();
@@ -58,7 +55,6 @@ class CalendarService
             'session' => Session::query(),
             'delivery' => Delivery::query(),
             'task' => Task::query(),
-            'reminder' => Reminder::query(),
         };
 
         return $query->ownedBy($user->id)->findOrFail($id);
@@ -130,25 +126,6 @@ class CalendarService
                     'client' => $task->client?->name,
                 ],
                 '/app/tasks',
-            ))
-            ->all();
-    }
-
-    private function reminders(User $user, string $from, string $to): array
-    {
-        return Reminder::query()
-            ->ownedBy($user->id)
-            ->whereBetween('remind_date', [$from, $to])
-            ->get()
-            ->map(fn (Reminder $reminder) => $this->event(
-                'reminder',
-                $reminder->id,
-                $reminder->message,
-                $reminder->remind_date?->toDateString(),
-                $reminder->remind_time,
-                $reminder->status,
-                ['reminder_type' => $reminder->type],
-                '/app/calendar',
             ))
             ->all();
     }

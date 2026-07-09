@@ -7,10 +7,7 @@ use App\Models\AiConversation;
 use App\Models\AiSessionPlan;
 use App\Models\Client;
 use App\Models\Delivery;
-use App\Models\GearItem;
 use App\Models\Location;
-use App\Models\Photo;
-use App\Models\Preset;
 use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
@@ -37,10 +34,7 @@ class AnalyticsService
             'sessionsByMonth' => $this->sessionsByMonth($user, $from, $to),
             'sessionTypes' => $this->groupCount(Session::query()->ownedBy($user->id)->whereBetween('date', [$from, $to]), 'session_type'),
             'projectStatus' => $this->groupCount(Delivery::query()->ownedBy($user->id), 'status'),
-            'presetUsage' => $this->presetUsage($user),
             'aiUsage' => $this->aiUsage($user, $from, $to),
-            'photosByCategory' => $this->groupCount(Photo::query()->ownedBy($user->id)->whereBetween('created_at', [$from, $to]), 'category'),
-            'gearUsage' => $this->gearUsage($user),
             'clientsByStatus' => $this->groupCount(Client::query()->ownedBy($user->id), 'status'),
             'tasksByStatus' => $this->groupCount(Task::query()->ownedBy($user->id), 'status'),
             'topLocations' => $this->topLocations($user),
@@ -58,7 +52,6 @@ class AnalyticsService
             'sessions' => $currentSessions,
             'sessionsTrend' => $this->trend($currentSessions, $previousSessions),
             'completedSessions' => (clone $sessions)->whereIn('status', ['completed', 'delivered'])->count(),
-            'photos' => Photo::query()->ownedBy($user->id)->whereBetween('created_at', [$from, $to])->count(),
             'revenue' => (float) Delivery::query()
                 ->ownedBy($user->id)
                 ->whereIn('status', ['delivered', 'approved'])
@@ -120,52 +113,6 @@ class AnalyticsService
             ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bucket, count(*) as total")
             ->groupBy('bucket')
             ->pluck('total', 'bucket');
-    }
-
-    private function presetUsage(User $user): array
-    {
-        return Preset::query()
-            ->ownedBy($user->id)
-            ->select('name', 'usage_count', 'style')
-            ->orderByDesc('usage_count')
-            ->limit(8)
-            ->get()
-            ->map(fn (Preset $preset) => [
-                'label' => $preset->name,
-                'total' => (int) $preset->usage_count,
-                'meta' => $preset->style,
-            ])
-            ->all();
-    }
-
-    /**
-     * "Equipo mas utilizado" se deriva del EXIF real de las fotos y se cruza con
-     * el inventario del usuario, en lugar de un contador sintetico.
-     */
-    private function gearUsage(User $user): array
-    {
-        $exif = Photo::query()
-            ->ownedBy($user->id)
-            ->selectRaw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(exif, '$.camera_model')), JSON_UNQUOTE(JSON_EXTRACT(exif, '$.lens'))) as label, count(*) as total")
-            ->whereNotNull('exif')
-            ->groupBy('label')
-            ->havingRaw('label is not null')
-            ->orderByDesc('total')
-            ->limit(8)
-            ->get();
-
-        $inventory = GearItem::query()
-            ->ownedBy($user->id)
-            ->get(['name', 'model', 'brand'])
-            ->map(fn (GearItem $item) => mb_strtolower(trim($item->model ?: $item->name)));
-
-        return $exif
-            ->map(fn ($row) => [
-                'label' => (string) $row->label,
-                'total' => (int) $row->total,
-                'owned' => $inventory->contains(fn (string $gear) => $gear !== '' && str_contains(mb_strtolower((string) $row->label), $gear)),
-            ])
-            ->all();
     }
 
     private function topLocations(User $user): array

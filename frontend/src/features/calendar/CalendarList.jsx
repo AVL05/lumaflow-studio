@@ -5,7 +5,6 @@ import {
   calendarSources,
   deliveryStatuses,
   labelFor,
-  reminderStatuses,
   sessionStatuses,
   taskStatuses,
   toneFor,
@@ -16,7 +15,6 @@ const statusCatalogs = {
   session: sessionStatuses,
   delivery: deliveryStatuses,
   task: taskStatuses,
-  reminder: reminderStatuses,
 };
 
 /** Vista lista compacta, pensada para densidad de datos. */

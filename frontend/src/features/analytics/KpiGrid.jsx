@@ -21,7 +21,6 @@ export function KpiGrid({ kpis }) {
         value={kpis.completedSessions}
         detail="Realizadas o entregadas"
       />
-      <StatCard label="Fotografias" value={kpis.photos} detail="Subidas en el rango" />
       <StatCard
         label="Facturado"
         value={currency.format(kpis.revenue)}

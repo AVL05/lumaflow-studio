@@ -5,8 +5,6 @@ const toneByType = {
   updated: "bg-stone-400",
   deleted: "bg-red-400",
   status_changed: "bg-amber-200",
-  photo_uploaded: "bg-emerald-300",
-  ai_analysis: "bg-fuchsia-300",
   ai_plan: "bg-fuchsia-300",
   delivered: "bg-emerald-300",
   checklist_completed: "bg-emerald-300",

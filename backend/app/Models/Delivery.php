@@ -57,11 +57,6 @@ class Delivery extends Model
         return $this->belongsTo(Session::class);
     }
 
-    public function reminders(): MorphMany
-    {
-        return $this->morphMany(Reminder::class, 'remindable');
-    }
-
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');

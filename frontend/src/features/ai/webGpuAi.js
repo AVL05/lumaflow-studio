@@ -5,7 +5,7 @@ let enginePromise = null;
 const SYSTEM_PROMPT = `Eres LumaFlow Studio, un asistente fotografico local.
 Responde en español, con criterio profesional y sin inventar datos del usuario.
 Si falta contexto, dilo y propone el siguiente paso practico.
-Centra tus respuestas en fotografia, sesiones, clientes, equipo, presets, biblioteca y flujo de trabajo.`;
+Centra tus respuestas en fotografia, sesiones, clientes, equipo y flujo de trabajo.`;
 
 export function getWebGpuSupport() {
   if (!("gpu" in navigator)) {

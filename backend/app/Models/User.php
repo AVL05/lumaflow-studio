@@ -30,26 +30,6 @@ class User extends Authenticatable
         return $this->hasMany(GearItem::class);
     }
 
-    public function presets(): HasMany
-    {
-        return $this->hasMany(Preset::class);
-    }
-
-    public function photos(): HasMany
-    {
-        return $this->hasMany(Photo::class);
-    }
-
-    public function albums(): HasMany
-    {
-        return $this->hasMany(Album::class);
-    }
-
-    public function tags(): HasMany
-    {
-        return $this->hasMany(Tag::class);
-    }
-
     public function locations(): HasMany
     {
         return $this->hasMany(Location::class);
@@ -88,11 +68,6 @@ class User extends Authenticatable
     public function checklists(): HasMany
     {
         return $this->hasMany(Checklist::class);
-    }
-
-    public function reminders(): HasMany
-    {
-        return $this->hasMany(Reminder::class);
     }
 
     public function activities(): HasMany

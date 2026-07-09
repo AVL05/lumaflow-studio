@@ -21,9 +21,6 @@ class BulkActionRequest extends FormRequest
             'ids' => ['required', 'array', 'min:1', 'max:200'],
             'ids.*' => ['integer', 'min:1'],
             'value' => ['required_if:action,status', 'nullable', 'string', 'max:40'],
-            'tag_ids' => ['required_if:action,tags', 'array'],
-            'tag_ids.*' => ['integer', 'min:1'],
-            'album_id' => ['required_if:action,album', 'nullable', 'integer', 'min:1'],
             'client_id' => ['required_if:action,client', 'nullable', 'integer', 'min:1'],
         ];
     }
