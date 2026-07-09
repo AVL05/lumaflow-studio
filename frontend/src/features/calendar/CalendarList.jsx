@@ -1,8 +1,23 @@
 import { memo } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { EmptyState } from "../../components/states/EmptyState";
-import { calendarSources, labelFor } from "../../utils/catalogs";
+import {
+  calendarSources,
+  deliveryStatuses,
+  labelFor,
+  reminderStatuses,
+  sessionStatuses,
+  taskStatuses,
+  toneFor,
+} from "../../utils/catalogs";
 import { sourceDots } from "./calendarUtils";
+
+const statusCatalogs = {
+  session: sessionStatuses,
+  delivery: deliveryStatuses,
+  task: taskStatuses,
+  reminder: reminderStatuses,
+};
 
 /** Vista lista compacta, pensada para densidad de datos. */
 export const CalendarList = memo(function CalendarList({ events, onSelect }) {
@@ -39,7 +54,13 @@ export const CalendarList = memo(function CalendarList({ events, onSelect }) {
               </td>
               <td className="max-w-80 truncate px-3 py-2 text-stone-100">{event.title}</td>
               <td className="px-3 py-2">
-                <Badge>{event.status ?? "-"}</Badge>
+                {event.status ? (
+                  <Badge variant={toneFor(statusCatalogs[event.source] ?? [], event.status)}>
+                    {labelFor(statusCatalogs[event.source] ?? [], event.status)}
+                  </Badge>
+                ) : (
+                  <span className="text-stone-400">-</span>
+                )}
               </td>
             </tr>
           ))}
