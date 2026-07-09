@@ -77,7 +77,16 @@ export function DashboardPage() {
             </div>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="grid gap-6 xl:grid-cols-3">
+            <AgendaWidget events={dashboard.todayAgenda ?? []} />
+            <PendingTasksWidget
+              tasks={dashboard.pendingTasks ?? []}
+              summary={dashboard.taskSummary}
+            />
+            <RemindersWidget reminders={dashboard.upcomingReminders ?? []} />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
             <StatCard label="Sesiones" value={dashboard.totalSessions} detail="Total planificado" />
             <StatCard label="Fotos" value={dashboard.totalPhotos} detail="Imagenes en biblioteca" />
             <StatCard label="Equipo" value={dashboard.totalGear} detail="Items registrados" />
@@ -128,15 +137,6 @@ export function DashboardPage() {
               value={dashboard.unreadNotifications ?? 0}
               detail="Centro de notificaciones"
             />
-          </div>
-
-          <div className="grid gap-6 xl:grid-cols-3">
-            <AgendaWidget events={dashboard.todayAgenda ?? []} />
-            <PendingTasksWidget
-              tasks={dashboard.pendingTasks ?? []}
-              summary={dashboard.taskSummary}
-            />
-            <RemindersWidget reminders={dashboard.upcomingReminders ?? []} />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-3">

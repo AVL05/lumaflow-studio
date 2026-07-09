@@ -5,7 +5,7 @@ const variants = {
     "border border-white/10 bg-white/[0.055] text-stone-100 shadow-[inset_0_1px_0_rgba(255,255,255,.06)] hover:border-amber-200/20 hover:bg-white/[0.09]",
   ghost: "text-stone-400 hover:bg-white/[0.06] hover:text-stone-100",
   danger:
-    "border border-red-400/20 bg-red-500/10 text-red-100 hover:border-red-300/30 hover:bg-red-500/20",
+    "border border-transparent text-red-300/80 hover:border-red-400/30 hover:bg-red-500/15 hover:text-red-100",
 };
 
 const base =

@@ -12,7 +12,7 @@ export const chartPalette = [
 
 export const axisProps = {
   stroke: "#57534e",
-  tick: { fill: "#78716c", fontSize: 11 },
+  tick: { fill: "#a8a29e", fontSize: 11 },
   tickLine: false,
   axisLine: false,
 };

@@ -52,6 +52,7 @@ export function PhotosPage() {
   const [albums, setAlbums] = useState([]);
   const [tags, setTags] = useState([]);
   const [view, setView] = useState("grid");
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadForm, setUploadForm] = useState({ ...defaults, photo: null });
   const [editing, setEditing] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -109,6 +110,7 @@ export function PhotosPage() {
       toast.success("Foto subida con metadata y EXIF.");
       setUploadForm({ ...defaults, photo: null });
       event.target.reset();
+      setUploadOpen(false);
       await resource.refresh();
     } catch (err) {
       setUploadError(getApiError(err));
@@ -147,24 +149,15 @@ export function PhotosPage() {
         eyebrow="Library"
         title="Biblioteca fotografica"
         description="Galeria avanzada con albumes, tags, filtros EXIF, favoritos, preview rapido y metadata editable."
-        action={<GalleryViewSwitcher value={view} onChange={setView} />}
+        action={
+          <div className="flex items-center gap-3">
+            <GalleryViewSwitcher value={view} onChange={setView} />
+            <Button onClick={() => setUploadOpen(true)}>Subir foto</Button>
+          </div>
+        }
       />
 
-      <div className="mb-6 grid gap-6 xl:grid-cols-[360px_1fr]">
-        <Card className="p-5">
-          <h2 className="text-lg font-semibold">Subir imagen</h2>
-          <PhotoForm
-            form={uploadForm}
-            setForm={setUploadForm}
-            sessions={sessions}
-            albums={albums}
-            tags={tags}
-            onSubmit={upload}
-            error={uploadError}
-            saving={saving}
-            upload
-          />
-        </Card>
+      <div className="mb-6">
         <GalleryFilters resource={resource} albums={albums} tags={tags} sessions={sessions} />
       </div>
 
@@ -241,6 +234,19 @@ export function PhotosPage() {
         </Button>
       </BulkActionBar>
 
+      <Modal open={uploadOpen} title="Subir imagen" onClose={() => setUploadOpen(false)}>
+        <PhotoForm
+          form={uploadForm}
+          setForm={setUploadForm}
+          sessions={sessions}
+          albums={albums}
+          tags={tags}
+          onSubmit={upload}
+          error={uploadError}
+          saving={saving}
+          upload
+        />
+      </Modal>
       <Modal
         open={Boolean(preview)}
         title={preview?.title || preview?.file_name || "Preview"}
