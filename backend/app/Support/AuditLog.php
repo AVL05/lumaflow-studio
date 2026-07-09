@@ -40,6 +40,16 @@ class AuditLog
         ]);
     }
 
+    /** Fallos de envio de correo transaccional. Nunca se registra el cuerpo del mensaje. */
+    public static function mailFailed(string $mailable, string $reason, ?int $userId = null): void
+    {
+        self::write('warning', 'mail.failed', [
+            'mailable' => $mailable,
+            'reason' => $reason,
+            'user_id' => $userId,
+        ]);
+    }
+
     /** Excepciones no controladas que llegan al handler de la API. */
     public static function apiException(Throwable $exception, string $method, string $path, ?int $userId = null): void
     {

@@ -20,6 +20,8 @@ class DeliveryRequest extends FormRequest
             'title' => ['required', 'string', 'max:180'],
             'status' => ['required', Rule::in(['draft', 'pending', 'delivered', 'approved', 'archived'])],
             'budget' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+            'payment_status' => ['nullable', Rule::in(['pending', 'partial', 'paid'])],
+            'amount_paid' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'delivery_date' => ['nullable', 'date'],
             'gallery_url' => ['nullable', 'url', 'max:255'],
             'private_notes' => ['nullable', 'string', 'max:3000'],

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { systemApi } from "../api/system";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -6,6 +6,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
 import { Skeleton } from "../components/ui/Skeleton";
 import { ErrorState } from "../components/states/ErrorState";
+import { useAuth } from "../features/auth/AuthContext";
 import { ServiceCard } from "../features/system/ServiceCard";
 import { useResource } from "../hooks/useResource";
 
@@ -26,7 +27,19 @@ const overall = {
 const REFRESH_MS = 30_000;
 
 export function SystemPage() {
+  const { user } = useAuth();
   const { data, loading, error, refresh } = useResource(useCallback(() => systemApi.status(), []));
+  const [copied, setCopied] = useState(false);
+
+  const feedUrl = user?.calendar_token
+    ? `${(import.meta.env.VITE_API_URL ?? "http://localhost:8000/api").replace(/\/$/, "")}/public/calendar/${user.calendar_token}`
+    : null;
+
+  async function copyFeedUrl() {
+    await navigator.clipboard.writeText(feedUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
 
   useEffect(() => {
     const timer = window.setInterval(refresh, REFRESH_MS);
@@ -84,6 +97,24 @@ export function SystemPage() {
               ) : null,
             )}
           </div>
+
+          {feedUrl ? (
+            <Panel className="flex flex-wrap items-center justify-between gap-3 p-5">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.16em] text-stone-400">
+                  Sincronizacion de calendario
+                </p>
+                <p className="mt-2 truncate text-sm text-stone-300">
+                  Suscribe este feed en Google Calendar, Apple Calendar u Outlook para ver tus
+                  sesiones, entregas y tareas en tu calendario habitual.
+                </p>
+                <p className="mt-2 truncate text-xs text-amber-100">{feedUrl}</p>
+              </div>
+              <Button variant="secondary" onClick={copyFeedUrl}>
+                {copied ? "Copiado" : "Copiar enlace"}
+              </Button>
+            </Panel>
+          ) : null}
 
           <p className="text-xs text-stone-400">
             Se refresca cada 30 segundos. Ollama es opcional: si no responde, el backend queda

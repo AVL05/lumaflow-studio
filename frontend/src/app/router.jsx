@@ -17,6 +17,9 @@ import { LocationsPage } from "../pages/LocationsPage";
 import { LocationDetailPage } from "../pages/LocationDetailPage";
 import { AiAssistantPage } from "../pages/AiAssistantPage";
 import { TasksPage } from "../pages/TasksPage";
+import { BookingRequestsPage } from "../pages/BookingRequestsPage";
+import { BookingPage } from "../pages/BookingPage";
+import { ClientPortalPage } from "../pages/ClientPortalPage";
 import { SystemPage } from "../pages/SystemPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
@@ -33,6 +36,8 @@ export const router = createBrowserRouter([
     element: lazyRoute(() => import("../pages/AboutProjectPage"), "AboutProjectPage"),
     errorElement,
   },
+  { path: "/book/:slug", element: <BookingPage />, errorElement },
+  { path: "/deliver/:token", element: <ClientPortalPage />, errorElement },
   {
     path: "/app",
     element: (
@@ -59,6 +64,7 @@ export const router = createBrowserRouter([
       { path: "clients/:id", element: <ClientDetailPage /> },
       { path: "deliveries", element: <DeliveriesPage /> },
       { path: "deliveries/:id", element: <DeliveryDetailPage /> },
+      { path: "booking-requests", element: <BookingRequestsPage /> },
       { path: "locations", element: <LocationsPage /> },
       { path: "locations/:id", element: <LocationDetailPage /> },
       { path: "ai-assistant", element: <AiAssistantPage /> },

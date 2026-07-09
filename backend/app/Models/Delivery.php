@@ -8,17 +8,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Str;
 
-#[Fillable(['user_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'delivery_date', 'gallery_url', 'private_notes'])]
+#[Fillable(['user_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
 class Delivery extends Model
 {
     use CleansUpWorkflowRelations, HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Delivery $delivery): void {
+            $delivery->public_token ??= Str::random(40);
+        });
+    }
 
     protected function casts(): array
     {
         return [
             'budget' => 'decimal:2',
+            'amount_paid' => 'decimal:2',
             'delivery_date' => 'date',
+            'client_responded_at' => 'datetime',
         ];
     }
 

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password'])]
@@ -19,6 +20,32 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            $user->studio_slug ??= self::uniqueSlug($user->name);
+            $user->calendar_token ??= Str::random(40);
+        });
+    }
+
+    private static function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name) ?: 'studio';
+        $slug = $base;
+        $suffix = 1;
+
+        while (self::query()->where('studio_slug', $slug)->exists()) {
+            $slug = $base.'-'.(++$suffix);
+        }
+
+        return $slug;
+    }
+
+    public function bookingRequests(): HasMany
+    {
+        return $this->hasMany(BookingRequest::class);
+    }
 
     public function sessions(): HasMany
     {

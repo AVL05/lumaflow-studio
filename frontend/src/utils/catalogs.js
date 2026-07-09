@@ -91,6 +91,19 @@ export const deliveryStatuses = [
   { value: "archived", label: "Archivado", tone: "neutral" },
 ];
 
+export const paymentStatuses = [
+  { value: "pending", label: "Pendiente", tone: "red" },
+  { value: "partial", label: "Parcial", tone: "warm" },
+  { value: "paid", label: "Pagado", tone: "green" },
+];
+
+export const bookingRequestStatuses = [
+  { value: "new", label: "Nueva", tone: "warm" },
+  { value: "contacted", label: "Contactada", tone: "neutral" },
+  { value: "converted", label: "Convertida", tone: "green" },
+  { value: "archived", label: "Archivada", tone: "neutral" },
+];
+
 export const taskStatuses = [
   { value: "todo", label: "Por hacer", tone: "neutral" },
   { value: "in_progress", label: "En curso", tone: "warm" },

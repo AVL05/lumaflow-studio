@@ -30,6 +30,7 @@ const navGroups = [
     [
       ["Clientes", "/app/clients"],
       ["Entregas", "/app/deliveries"],
+      ["Solicitudes", "/app/booking-requests"],
       ["AI Assistant", "/app/ai-assistant"],
     ],
   ],

@@ -25,6 +25,8 @@ const defaults = {
   title: "",
   status: "draft",
   budget: "",
+  payment_status: "pending",
+  amount_paid: "",
   delivery_date: "",
   gallery_url: "",
   private_notes: "",
@@ -76,6 +78,7 @@ export function DeliveriesPage() {
       client_id: String(delivery.client?.id ?? delivery.client_id ?? ""),
       session_id: String(delivery.session?.id ?? delivery.session_id ?? ""),
       budget: delivery.budget ?? "",
+      amount_paid: delivery.amount_paid ?? "",
       delivery_date: delivery.delivery_date ?? "",
     });
     setFormError("");
@@ -210,6 +213,8 @@ function normalizeDelivery(form) {
     title: form.title,
     status: form.status,
     budget: form.budget === "" ? null : Number(form.budget),
+    payment_status: form.payment_status || "pending",
+    amount_paid: form.amount_paid === "" ? 0 : Number(form.amount_paid),
     delivery_date: form.delivery_date || null,
     gallery_url: form.gallery_url || null,
     private_notes: form.private_notes || null,

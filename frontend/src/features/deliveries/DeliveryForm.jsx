@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
 import { ErrorState } from "../../components/states/ErrorState";
-import { deliveryStatuses } from "../../utils/catalogs";
+import { deliveryStatuses, paymentStatuses } from "../../utils/catalogs";
 
 export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error, saving }) {
   const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
@@ -54,6 +54,22 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
           step="0.01"
           value={form.budget ?? ""}
           onChange={(e) => setValue("budget", e.target.value)}
+        />
+      </Field>
+      <Field label="Estado de pago">
+        <Select
+          value={form.payment_status ?? "pending"}
+          onChange={(e) => setValue("payment_status", e.target.value)}
+          options={paymentStatuses}
+        />
+      </Field>
+      <Field label="Importe pagado">
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          value={form.amount_paid ?? ""}
+          onChange={(e) => setValue("amount_paid", e.target.value)}
         />
       </Field>
       <Field label="Fecha entrega">

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\BookingRequestController;
 use App\Http\Controllers\Api\BulkActionController;
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\ChecklistController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\Api\GearItemController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\Public\PublicBookingController;
+use App\Http\Controllers\Api\Public\PublicCalendarController;
+use App\Http\Controllers\Api\Public\PublicDeliveryController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SystemController;
@@ -30,6 +34,17 @@ Route::middleware('throttle:10,1')->group(function (): void {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
+
+// Superficie publica sin autenticar: portal de cliente, reserva y feed de calendario.
+// Todo se resuelve por token/slug opaco, nunca por id incremental.
+Route::middleware('throttle:30,1')->group(function (): void {
+    Route::get('/public/studios/{slug}', [PublicBookingController::class, 'show']);
+    Route::post('/public/studios/{slug}/bookings', [PublicBookingController::class, 'store']);
+    Route::get('/public/deliveries/{token}', [PublicDeliveryController::class, 'show']);
+    Route::post('/public/deliveries/{token}/approve', [PublicDeliveryController::class, 'approve']);
+    Route::post('/public/deliveries/{token}/request-changes', [PublicDeliveryController::class, 'requestChanges']);
+    Route::get('/public/calendar/{token}', [PublicCalendarController::class, 'feed']);
 });
 
 Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
@@ -63,6 +78,11 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
     // Fase 9: workflow enterprise
     Route::get('/tasks/summary', [TaskController::class, 'summary']);
     Route::apiResource('tasks', TaskController::class);
+
+    Route::get('/booking-requests', [BookingRequestController::class, 'index']);
+    Route::patch('/booking-requests/{bookingRequest}', [BookingRequestController::class, 'update']);
+    Route::post('/booking-requests/{bookingRequest}/convert', [BookingRequestController::class, 'convert']);
+    Route::delete('/booking-requests/{bookingRequest}', [BookingRequestController::class, 'destroy']);
 
     Route::get('/checklists/templates', [ChecklistController::class, 'templates']);
     Route::apiResource('checklists', ChecklistController::class);

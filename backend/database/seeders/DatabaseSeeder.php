@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\ChecklistService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,9 +20,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // WithoutModelEvents silencia el hook creating() del modelo: el slug y el
+        // token de calendario se generan aqui a mano en vez de dejarlos en null.
         $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'studio_slug' => 'test-user',
+            'calendar_token' => Str::random(40),
         ]);
 
         $user->sessions()->createMany([
@@ -133,9 +138,22 @@ class DatabaseSeeder extends Seeder
             'title' => 'Entrega Producto Premium',
             'status' => 'pending',
             'budget' => 1200,
+            'payment_status' => 'partial',
+            'amount_paid' => 400,
             'delivery_date' => now()->addDays(10)->toDateString(),
             'gallery_url' => 'https://example.com/gallery/producto-premium',
             'private_notes' => 'Preparar seleccion final y preset cinematico suave.',
+            'public_token' => Str::random(40),
+        ]);
+
+        $user->bookingRequests()->create([
+            'name' => 'Laura Gimenez',
+            'email' => 'laura.gimenez@example.com',
+            'phone' => '+34 600 111 222',
+            'session_type' => 'wedding',
+            'preferred_date' => now()->addMonths(2)->toDateString(),
+            'message' => 'Buscamos fotografo para boda en Madrid, unos 120 invitados.',
+            'status' => 'new',
         ]);
 
         $this->seedWorkflow($user, $client, $delivery);

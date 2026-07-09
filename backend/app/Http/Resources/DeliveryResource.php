@@ -18,9 +18,14 @@ class DeliveryResource extends JsonResource
             'title' => $this->title,
             'status' => $this->status,
             'budget' => $this->budget,
+            'payment_status' => $this->payment_status,
+            'amount_paid' => $this->amount_paid,
             'delivery_date' => $this->delivery_date?->toDateString(),
             'gallery_url' => $this->gallery_url,
             'private_notes' => $this->private_notes,
+            'public_token' => $this->public_token,
+            'client_message' => $this->client_message,
+            'client_responded_at' => $this->client_responded_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }
