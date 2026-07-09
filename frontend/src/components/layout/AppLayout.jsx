@@ -5,6 +5,7 @@ import { useAuth } from "../../features/auth/AuthContext";
 import { NotificationBell } from "../../features/notifications/NotificationBell";
 import { NotificationCenter } from "../../features/notifications/NotificationCenter";
 import { GlobalSearch } from "../../features/search/GlobalSearch";
+import { usePersistedState } from "../../hooks/usePersistedState";
 
 const navGroups = [
   [
@@ -58,6 +59,11 @@ export function AppLayout() {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = usePersistedState("sidebar-collapsed-groups", {});
+
+  function toggleGroup(group) {
+    setCollapsedGroups((current) => ({ ...current, [group]: !current[group] }));
+  }
 
   async function handleLogout() {
     await logout();
@@ -76,7 +82,7 @@ export function AppLayout() {
       </a>
 
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-80 overflow-y-auto border-r border-white/10 bg-[#0b0a09]/90 p-5 shadow-[30px_0_80px_rgba(0,0,0,.28)] backdrop-blur-xl lg:flex lg:flex-col">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(31,28,23,.9),rgba(15,14,12,.96))] p-5 shadow-2xl shadow-black/30">
+        <div className="relative shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(31,28,23,.9),rgba(15,14,12,.96))] p-5 shadow-2xl shadow-black/30">
           <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-200/10 blur-2xl" />
           <div className="relative flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-100 text-sm font-bold text-stone-950">
@@ -92,25 +98,46 @@ export function AppLayout() {
           </p>
         </div>
 
-        <nav aria-label="Navegacion principal" className="mt-8 space-y-7">
-          {navGroups.map(([group, items]) => (
-            <div key={group}>
-              <p
-                id={`nav-${group}`}
-                className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400"
-              >
-                {group}
-              </p>
-              <div className="space-y-1.5" role="group" aria-labelledby={`nav-${group}`}>
-                {items.map(([label, href], index) => (
-                  <NavLink key={href} to={href} className={navLinkClass}>
-                    <span>{label}</span>
-                    <span className="text-xs opacity-80">{String(index + 1).padStart(2, "0")}</span>
-                  </NavLink>
-                ))}
+        <nav aria-label="Navegacion principal" className="mt-8 space-y-5">
+          {navGroups.map(([group, items]) => {
+            const collapsed = Boolean(collapsedGroups[group]);
+
+            return (
+              <div key={group}>
+                <button
+                  type="button"
+                  id={`nav-${group}`}
+                  onClick={() => toggleGroup(group)}
+                  aria-expanded={!collapsed}
+                  className="flex w-full items-center justify-between rounded-lg px-3 pb-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400 transition hover:text-stone-100"
+                >
+                  {group}
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`}
+                  >
+                    <path
+                      d="M5 7.5 10 12.5 15 7.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {collapsed ? null : (
+                  <div className="space-y-1.5" role="group" aria-labelledby={`nav-${group}`}>
+                    {items.map(([label, href]) => (
+                      <NavLink key={href} to={href} className={navLinkClass}>
+                        <span>{label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.035] p-4 shadow-[0_18px_60px_rgba(0,0,0,.2)]">
