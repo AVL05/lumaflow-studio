@@ -19,6 +19,59 @@ import { ConversationSidebar } from "../features/ai/ConversationSidebar";
 import { GearRecommendation } from "../features/ai/GearRecommendation";
 import { PresetGenerator } from "../features/ai/PresetGenerator";
 import { SessionPlanner } from "../features/ai/SessionPlanner";
+import {
+  createLocalConversation,
+  getWebGpuSupport,
+  runWebGpuChat,
+  runWebGpuJson,
+} from "../features/ai/webGpuAi";
+
+const presetSchema = {
+  name: "string",
+  style: "string",
+  category: "string",
+  color: "#RRGGBB",
+  recommended_use: "string",
+  description: "string",
+};
+
+const analysisSchema = {
+  summary: "string",
+  score: 0,
+  result: {
+    composition: "string",
+    exposure: "string",
+    sharpness: "string",
+    visualStyle: "string",
+    strengths: ["string"],
+    detectedErrors: ["string"],
+    recommendations: ["string"],
+    recommendedPreset: "string",
+  },
+};
+
+const gearSchema = {
+  result: {
+    camera: "string",
+    lenses: ["string"],
+    lighting: ["string"],
+    accessories: ["string"],
+    notes: ["string"],
+  },
+};
+
+const planSchema = {
+  plan: {
+    overview: "string",
+    timeline: ["string"],
+    shotList: ["string"],
+    lighting: ["string"],
+    risks: ["string"],
+    checklist: ["string"],
+  },
+};
+
+const WEBGPU_HISTORY_KEY = "lumaflow_webgpu_conversations";
 
 export function AiAssistantPage() {
   const [status, setStatus] = useState(null);
@@ -36,6 +89,7 @@ export function AiAssistantPage() {
   const [gearRecommendation, setGearRecommendation] = useState(null);
   const [sessionPlan, setSessionPlan] = useState(null);
   const [loading, setLoading] = useState("");
+  const [loadingText, setLoadingText] = useState("");
   const [error, setError] = useState("");
   const abortRef = useRef(null);
 
@@ -44,9 +98,9 @@ export function AiAssistantPage() {
   const loadConversations = useCallback(async () => {
     try {
       const response = await aiApi.history({ search, per_page: 30 });
-      setConversations(response.data);
+      setConversations(filterLocalConversations(readLocalConversations(), search).concat(response.data));
     } catch {
-      setConversations([]);
+      setConversations(filterLocalConversations(readLocalConversations(), search));
     }
   }, [search]);
 
@@ -55,17 +109,17 @@ export function AiAssistantPage() {
     try {
       const [statusResponse, dashboardResponse, photoResponse, sessionResponse, historyResponse] =
         await Promise.all([
-          aiApi.status(),
+          Promise.resolve(getWebGpuSupport()),
           dashboardApi.summary(),
           photosApi.list({ per_page: 80 }),
           sessionsApi.list({ per_page: 80 }),
           aiApi.history({ per_page: 30 }),
         ]);
-      setStatus(statusResponse);
+      setStatus({ ...statusResponse, streaming_supported: true });
       setDashboard(dashboardResponse);
       setPhotos(photoResponse.data);
       setSessions(sessionResponse.data);
-      setConversations(historyResponse.data);
+      setConversations(readLocalConversations().concat(historyResponse.data));
     } catch (err) {
       setError(getApiError(err));
     }
@@ -82,6 +136,11 @@ export function AiAssistantPage() {
 
   async function selectConversation(conversation) {
     setError("");
+    if (isLocalConversation(conversation)) {
+      setActiveConversation(conversation);
+      return;
+    }
+
     try {
       setActiveConversation(await aiApi.showHistory(conversation.id));
     } catch (err) {
@@ -98,6 +157,7 @@ export function AiAssistantPage() {
     setError("");
     setLoading("chat");
     abortRef.current = new AbortController();
+    const previousConversation = activeConversation;
     const optimistic = { id: `local-${Date.now()}`, role: "user", content };
     setActiveConversation((current) =>
       current
@@ -106,16 +166,20 @@ export function AiAssistantPage() {
     );
 
     try {
-      const response = await aiApi.chat(
-        { message: content, conversation_id: activeConversation?.id },
-        { signal: abortRef.current.signal },
-      );
-      setActiveConversation(response.conversation);
-      await loadConversations();
+      const answer = await runWebGpuChat({
+        signal: abortRef.current.signal,
+        onProgress: updateWebGpuProgress,
+        messages: [...(previousConversation?.messages ?? []), { role: "user", content }],
+      });
+      const conversation = createLocalConversation(previousConversation, content, answer);
+      saveLocalConversation(conversation);
+      setActiveConversation(conversation);
+      setConversations((current) => upsertConversation(current, conversation));
     } catch (err) {
-      if (err.name !== "CanceledError") setError(getApiError(err, "Ollama no disponible."));
+      if (err.name !== "AbortError") setError(err.message || "WebGPU no disponible.");
     } finally {
       setLoading("");
+      setLoadingText("");
       abortRef.current = null;
     }
   }
@@ -124,10 +188,16 @@ export function AiAssistantPage() {
     event.preventDefault();
     await runAiAction(
       "analysis",
-      () =>
-        aiApi
-          .analyze({ photo_id: Number(photoId), prompt: analysisPrompt || null })
-          .then(setAnalysis),
+      async () => {
+        const photo = photos.find((item) => String(item.id) === String(photoId));
+        const result = await runWebGpuJson({
+          onProgress: updateWebGpuProgress,
+          schema: analysisSchema,
+          payload: { photo, prompt: analysisPrompt || null },
+          task: "Analiza esta fotografia usando su metadata disponible. No afirmes ver pixeles si solo hay EXIF o campos de biblioteca.",
+        });
+        setAnalysis(result);
+      },
       "No se pudo analizar la foto.",
     );
   }
@@ -135,7 +205,15 @@ export function AiAssistantPage() {
   async function generatePreset(payload) {
     await runAiAction(
       "preset",
-      () => aiApi.preset(payload).then(setGeneratedPreset),
+      async () => {
+        const result = await runWebGpuJson({
+          onProgress: updateWebGpuProgress,
+          schema: presetSchema,
+          payload,
+          task: "Genera un preset fotografico profesional para LumaFlow Studio.",
+        });
+        setGeneratedPreset(result);
+      },
       "No se pudo generar el preset.",
     );
   }
@@ -143,7 +221,15 @@ export function AiAssistantPage() {
   async function recommendGear(payload) {
     await runAiAction(
       "gear",
-      () => aiApi.recommendGear(payload).then(setGearRecommendation),
+      async () => {
+        const result = await runWebGpuJson({
+          onProgress: updateWebGpuProgress,
+          schema: gearSchema,
+          payload,
+          task: "Recomienda equipo fotografico practico para esta sesion.",
+        });
+        setGearRecommendation(result);
+      },
       "No se pudo recomendar equipo.",
     );
   }
@@ -151,7 +237,16 @@ export function AiAssistantPage() {
   async function planSession(payload) {
     await runAiAction(
       "plan",
-      () => aiApi.sessionPlan(payload).then(setSessionPlan),
+      async () => {
+        const session = sessions.find((item) => item.id === payload.session_id);
+        const result = await runWebGpuJson({
+          onProgress: updateWebGpuProgress,
+          schema: planSchema,
+          payload: { ...payload, session },
+          task: "Crea un plan de produccion fotografica accionable para esta sesion.",
+        });
+        setSessionPlan(result);
+      },
       "No se pudo generar el plan.",
     );
   }
@@ -164,10 +259,23 @@ export function AiAssistantPage() {
       const refreshed = await dashboardApi.summary();
       setDashboard(refreshed);
     } catch (err) {
-      setError(getApiError(err, fallback));
+      setError(err.message || getApiError(err, fallback));
     } finally {
       setLoading("");
+      setLoadingText("");
     }
+  }
+
+  function updateWebGpuProgress(progress) {
+    setLoadingText(progress.text || "");
+    setStatus((current) => ({
+      ...current,
+      available: true,
+      provider: "webgpu",
+      model: current?.model || getWebGpuSupport().model,
+      loadingText: progress.text,
+      streaming_supported: true,
+    }));
   }
 
   function exportMarkdown() {
@@ -184,6 +292,14 @@ export function AiAssistantPage() {
   async function renameConversation(conversation) {
     const title = window.prompt("Nuevo nombre", conversation.title);
     if (!title) return;
+    if (isLocalConversation(conversation)) {
+      const renamed = { ...conversation, title };
+      saveLocalConversation(renamed);
+      setConversations((current) => upsertConversation(current, renamed));
+      if (activeConversation?.id === conversation.id) setActiveConversation(renamed);
+      return;
+    }
+
     await aiApi.updateHistory(conversation.id, { title });
     await loadConversations();
     if (activeConversation?.id === conversation.id)
@@ -192,6 +308,13 @@ export function AiAssistantPage() {
 
   async function deleteConversation(conversation) {
     if (!window.confirm("Eliminar esta conversacion?")) return;
+    if (isLocalConversation(conversation)) {
+      deleteLocalConversation(conversation.id);
+      if (activeConversation?.id === conversation.id) setActiveConversation(null);
+      setConversations((current) => current.filter((item) => item.id !== conversation.id));
+      return;
+    }
+
     await aiApi.deleteHistory(conversation.id);
     if (activeConversation?.id === conversation.id) setActiveConversation(null);
     await loadConversations();
@@ -202,7 +325,7 @@ export function AiAssistantPage() {
       <PageHeader
         eyebrow="IA local"
         title="Centro inteligente fotografico"
-        description="Ollama integrado para planificar sesiones, analizar fotos, generar presets y recomendar equipo usando solo tus datos."
+        description="WebGPU ejecuta la IA en tu navegador para planificar sesiones, analizar fotos, generar presets y recomendar equipo usando solo tus datos."
       />
       {error ? (
         <div className="mb-5">
@@ -211,7 +334,7 @@ export function AiAssistantPage() {
       ) : null}
 
       <div className="space-y-6">
-        <AiDashboard status={status} dashboard={dashboard} />
+        <AiDashboard status={{ ...status, loadingText }} dashboard={dashboard} />
 
         <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
           <ConversationSidebar
@@ -297,4 +420,43 @@ export function AiAssistantPage() {
       </div>
     </>
   );
+}
+
+function readLocalConversations() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(WEBGPU_HISTORY_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalConversation(conversation) {
+  const conversations = upsertConversation(readLocalConversations(), conversation);
+  localStorage.setItem(WEBGPU_HISTORY_KEY, JSON.stringify(conversations.slice(0, 30)));
+}
+
+function deleteLocalConversation(id) {
+  const conversations = readLocalConversations().filter((item) => item.id !== id);
+  localStorage.setItem(WEBGPU_HISTORY_KEY, JSON.stringify(conversations));
+}
+
+function upsertConversation(conversations, conversation) {
+  return [conversation, ...conversations.filter((item) => item.id !== conversation.id)];
+}
+
+function filterLocalConversations(conversations, search) {
+  const term = search.trim().toLowerCase();
+  if (!term) return conversations;
+
+  return conversations.filter((conversation) =>
+    [conversation.title, ...(conversation.messages ?? []).map((message) => message.content)]
+      .join(" ")
+      .toLowerCase()
+      .includes(term),
+  );
+}
+
+function isLocalConversation(conversation) {
+  return conversation?.provider === "webgpu" || String(conversation?.id ?? "").startsWith("webgpu-");
 }

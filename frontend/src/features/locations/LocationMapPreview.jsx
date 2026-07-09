@@ -15,10 +15,10 @@ export function LocationMapPreview({ latitude, longitude, name }) {
         <div>
           <div className="mx-auto mb-3 h-4 w-4 rounded-full bg-amber-200 shadow-[0_0_24px_rgba(253,230,138,0.55)]" />
           <p className="font-medium text-stone-100">{name || "Localizacion"}</p>
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-stone-400">
             {valid ? `${latitude}, ${longitude}` : "Coordenadas pendientes"}
           </p>
-          <p className="mt-3 text-xs uppercase tracking-[0.16em] text-stone-600">
+          <p className="mt-3 text-xs uppercase tracking-[0.16em] text-stone-400">
             Coordenadas requeridas
           </p>
         </div>

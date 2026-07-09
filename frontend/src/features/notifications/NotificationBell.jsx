@@ -12,7 +12,7 @@ export function NotificationBell({ onOpen }) {
     >
       Avisos
       {unread > 0 ? (
-        <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-amber-200 px-1 text-[11px] font-semibold tabular-nums text-stone-950">
+        <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-amber-200 px-1 text-xs font-semibold tabular-nums text-stone-950">
           {unread > 99 ? "99+" : unread}
         </span>
       ) : null}

@@ -30,7 +30,7 @@ export function LocationForm({ form, setForm, photos = [], onSubmit, error, savi
             setForm((current) => ({ ...current, latitude, longitude }))
           }
         />
-        <p className="mt-2 text-xs text-stone-500">
+        <p className="mt-2 text-xs text-stone-400">
           Haz clic en el mapa o busca coordenadas para seleccionar el punto exacto.
         </p>
       </div>
@@ -207,10 +207,10 @@ export function LocationForm({ form, setForm, photos = [], onSubmit, error, savi
         />
       </Field>
       <div className="md:col-span-2">
-        <p className="mb-2 text-xs uppercase tracking-[0.16em] text-stone-500">Galeria</p>
+        <p className="mb-2 text-xs uppercase tracking-[0.16em] text-stone-400">Galeria</p>
         <div className="grid max-h-52 gap-2 overflow-auto rounded-md border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-2">
           {photos.length === 0 ? (
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-stone-400">
               Sube fotos para asociarlas a esta localizacion.
             </p>
           ) : (

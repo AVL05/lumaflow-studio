@@ -12,10 +12,10 @@ export function AlbumCard({ album, onEdit, onDelete }) {
       />
       <div className="p-5">
         <h2 className="font-semibold">{album.name}</h2>
-        <p className="mt-2 line-clamp-2 text-sm text-stone-500">
+        <p className="mt-2 line-clamp-2 text-sm text-stone-400">
           {album.description || "Sin descripcion."}
         </p>
-        <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-500">
+        <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-400">
           {album.photos_count ?? 0} fotos
         </p>
         <div className="mt-5 flex gap-2">

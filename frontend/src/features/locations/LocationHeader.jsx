@@ -9,7 +9,7 @@ export function LocationHeader({ location }) {
           <h1 className="text-2xl font-semibold">{location.name}</h1>
           {location.is_favorite ? <Badge variant="warm">Favorita</Badge> : null}
         </div>
-        <p className="mt-2 text-sm text-stone-500">
+        <p className="mt-2 text-sm text-stone-400">
           {[location.city, location.country].filter(Boolean).join(", ") || "Sin ciudad"}
         </p>
       </div>

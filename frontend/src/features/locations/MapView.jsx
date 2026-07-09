@@ -146,7 +146,7 @@ export function MapView({
         aria-label="Mapa interactivo de localizaciones"
       />
       {!leaflet ? (
-        <div className="absolute inset-0 grid place-items-center bg-[#11100e] text-sm text-stone-500">
+        <div className="absolute inset-0 grid place-items-center bg-[#11100e] text-sm text-stone-400">
           Cargando mapa...
         </div>
       ) : null}
@@ -156,7 +156,7 @@ export function MapView({
           className="absolute left-3 top-3 z-[500] flex max-w-[calc(100%-1.5rem)] gap-2"
         >
           <input
-            className="w-56 rounded-md border border-white/10 bg-black/70 px-3 py-2 text-xs text-stone-100 outline-none backdrop-blur placeholder:text-stone-500"
+            className="w-56 rounded-md border border-white/10 bg-black/70 px-3 py-2 text-xs text-stone-100 outline-none backdrop-blur placeholder:text-stone-400"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="40.4168, -3.7038"

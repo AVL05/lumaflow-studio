@@ -24,7 +24,7 @@ export function NotificationItem({ notification, onRead, onRemove, onNavigate })
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-stone-100">{notification.title}</p>
           {notification.message ? (
-            <p className="mt-1 line-clamp-2 text-xs text-stone-500">{notification.message}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-stone-400">{notification.message}</p>
           ) : null}
         </div>
         <Badge variant={toneFor(notificationTypes, notification.type)}>
@@ -32,13 +32,13 @@ export function NotificationItem({ notification, onRead, onRemove, onNavigate })
         </Badge>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-600">
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-400">
         <span>{formatDate(notification.created_at)}</span>
         {notification.link ? (
           <Link
             to={notification.link}
             onClick={onNavigate}
-            className="text-amber-200/80 transition hover:text-amber-100"
+            className="text-amber-200 transition hover:text-amber-100"
           >
             Abrir
           </Link>

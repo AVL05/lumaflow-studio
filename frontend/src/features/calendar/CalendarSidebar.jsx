@@ -27,13 +27,13 @@ export function CalendarSidebar({
                 </span>
               }
             />
-            <span className="text-xs tabular-nums text-stone-600">{counts[source.value] ?? 0}</span>
+            <span className="text-xs tabular-nums text-stone-400">{counts[source.value] ?? 0}</span>
           </div>
         ))}
       </div>
 
       <div className="mt-6 space-y-2 border-t border-white/10 pt-5">
-        <p className="text-xs uppercase tracking-[0.16em] text-stone-500">Crear</p>
+        <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Crear</p>
         <Button variant="secondary" className="w-full" onClick={onCreateTask}>
           Nueva tarea
         </Button>
@@ -42,7 +42,7 @@ export function CalendarSidebar({
         </Button>
       </div>
 
-      <p className="mt-6 text-xs leading-5 text-stone-600">
+      <p className="mt-6 text-xs leading-5 text-stone-400">
         Arrastra cualquier evento a otro dia para reprogramarlo. Los cambios se guardan al soltar.
       </p>
     </Panel>

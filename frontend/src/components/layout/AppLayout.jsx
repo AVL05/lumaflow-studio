@@ -47,10 +47,10 @@ const navGroups = [
 const flatNav = navGroups.flatMap(([, items]) => items);
 
 const navLinkClass = ({ isActive }) =>
-  `block rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
+  `group relative flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
     isActive
-      ? "bg-stone-100 text-stone-950"
-      : "text-stone-400 hover:bg-white/[0.06] hover:text-stone-100"
+      ? "bg-amber-100 text-stone-950 shadow-[0_12px_32px_rgba(245,211,141,.14)]"
+      : "text-stone-400 hover:bg-white/[0.055] hover:text-stone-100"
   }`;
 
 export function AppLayout() {
@@ -66,6 +66,8 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[#090908] text-stone-100">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_24%_8%,rgba(196,141,72,.1),transparent_30rem),radial-gradient(circle_at_92%_16%,rgba(91,72,49,.12),transparent_26rem)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] [background-size:52px_52px]" />
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-stone-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-stone-950"
@@ -73,26 +75,37 @@ export function AppLayout() {
         Saltar al contenido
       </a>
 
-      <aside className="fixed inset-y-0 left-0 hidden w-72 overflow-y-auto border-r border-white/10 bg-[#0d0c0b]/95 p-5 lg:flex lg:flex-col">
-        <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-amber-200/70">LumaFlow</p>
-          <h2 className="mt-2 text-xl font-semibold">Studio</h2>
-          <p className="mt-3 text-xs leading-5 text-stone-500">Workflow fotografico profesional.</p>
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-80 overflow-y-auto border-r border-white/10 bg-[#0b0a09]/90 p-5 shadow-[30px_0_80px_rgba(0,0,0,.28)] backdrop-blur-xl lg:flex lg:flex-col">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(31,28,23,.9),rgba(15,14,12,.96))] p-5 shadow-2xl shadow-black/30">
+          <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-200/10 blur-2xl" />
+          <div className="relative flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-100 text-sm font-bold text-stone-950">
+              LF
+            </span>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-amber-200">LumaFlow</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight">Studio</h2>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-stone-400">
+            Suite privada para produccion fotografica, biblioteca y entregas.
+          </p>
         </div>
 
-        <nav aria-label="Navegacion principal" className="mt-8 space-y-6">
+        <nav aria-label="Navegacion principal" className="mt-8 space-y-7">
           {navGroups.map(([group, items]) => (
             <div key={group}>
               <p
                 id={`nav-${group}`}
-                className="px-3 pb-2 text-[10px] uppercase tracking-[0.2em] text-stone-600"
+                className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400"
               >
                 {group}
               </p>
-              <div className="space-y-1" role="group" aria-labelledby={`nav-${group}`}>
-                {items.map(([label, href]) => (
+              <div className="space-y-1.5" role="group" aria-labelledby={`nav-${group}`}>
+                {items.map(([label, href], index) => (
                   <NavLink key={href} to={href} className={navLinkClass}>
-                    {label}
+                    <span>{label}</span>
+                    <span className="text-xs opacity-80">{String(index + 1).padStart(2, "0")}</span>
                   </NavLink>
                 ))}
               </div>
@@ -100,12 +113,19 @@ export function AppLayout() {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm font-medium">{user?.name}</p>
-          <p className="mt-1 truncate text-xs text-stone-500">{user?.email}</p>
+        <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.035] p-4 shadow-[0_18px_60px_rgba(0,0,0,.2)]">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.07] text-sm font-semibold text-amber-100">
+              {user?.name?.slice(0, 1) ?? "U"}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">{user?.name}</p>
+              <p className="mt-1 truncate text-xs text-stone-400">{user?.email}</p>
+            </div>
+          </div>
           <Link
             to="/about-project"
-            className="mt-3 block text-xs text-amber-200/70 transition hover:text-amber-100"
+            className="mt-3 block text-xs text-amber-200 transition hover:text-amber-100"
           >
             Sobre el proyecto
           </Link>
@@ -115,13 +135,15 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-10 border-b border-white/10 bg-[#090908]/85 px-4 py-4 backdrop-blur md:px-8">
+      <div className="relative lg:pl-80">
+        <header className="sticky top-0 z-10 border-b border-white/10 bg-[#090908]/72 px-4 py-4 backdrop-blur-xl md:px-8">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Creative workflow</p>
-              <p className="truncate text-sm text-stone-300">
-                Planifica sesiones, organiza equipo y gestiona biblioteca.
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
+                Creative workflow
+              </p>
+              <p className="mt-1 truncate text-sm text-stone-200">
+                Produccion, clientes, biblioteca e IA local en un solo workspace.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -130,10 +152,10 @@ export function AppLayout() {
                 onClick={() => setSearchOpen(true)}
                 aria-label="Abrir busqueda global"
                 aria-keyshortcuts="Control+K"
-                className="hidden items-center gap-3 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-stone-400 transition hover:bg-white/[0.08] hover:text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 md:flex"
+                className="hidden items-center gap-3 rounded-xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-sm text-stone-400 shadow-[inset_0_1px_0_rgba(255,255,255,.04)] transition hover:border-amber-200/20 hover:bg-white/[0.09] hover:text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 md:flex"
               >
                 Buscar
-                <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-stone-400">
+                <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-xs text-stone-300">
                   Ctrl K
                 </kbd>
               </button>
@@ -154,8 +176,8 @@ export function AppLayout() {
                 key={href}
                 to={href}
                 className={({ isActive }) =>
-                  `whitespace-nowrap rounded-md px-3 py-2 text-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
-                    isActive ? "bg-stone-100 text-stone-950" : "bg-white/[0.04] text-stone-400"
+                  `whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
+                    isActive ? "bg-amber-100 text-stone-950" : "bg-white/[0.055] text-stone-400"
                   }`
                 }
               >
@@ -165,7 +187,7 @@ export function AppLayout() {
           </nav>
         </header>
 
-        <main id="contenido" className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+        <main id="contenido" className="mx-auto max-w-[92rem] px-4 py-8 md:px-8">
           <Outlet />
         </main>
       </div>

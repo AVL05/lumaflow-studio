@@ -17,7 +17,7 @@ export function ConversationSidebar({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">Conversaciones</h2>
-          <p className="mt-1 text-xs text-stone-500">Historial persistente</p>
+          <p className="mt-1 text-xs text-stone-400">Historial persistente</p>
         </div>
         <Button type="button" onClick={onNew}>
           Nueva
@@ -31,7 +31,7 @@ export function ConversationSidebar({
       />
       <div className="mt-4 space-y-2">
         {conversations.length === 0 ? (
-          <p className="text-sm text-stone-500">Sin conversaciones.</p>
+          <p className="text-sm text-stone-400">Sin conversaciones.</p>
         ) : (
           conversations.map((conversation) => (
             <ConversationCard

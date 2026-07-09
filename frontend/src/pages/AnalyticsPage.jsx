@@ -121,7 +121,7 @@ export function AnalyticsPage() {
             />
           </div>
 
-          <p className="text-xs text-stone-600">
+          <p className="text-xs text-stone-400">
             Rango analizado: {data.range.from} → {data.range.to}. Exportacion PDF prevista para la
             siguiente fase; CSV y JSON ya disponibles desde el backend.
           </p>

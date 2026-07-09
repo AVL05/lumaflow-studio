@@ -13,7 +13,7 @@ export function ServiceCard({ name, description, check }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-stone-50">{name}</h2>
-          <p className="mt-1 text-xs text-stone-500">{description}</p>
+          <p className="mt-1 text-xs text-stone-400">{description}</p>
         </div>
         <Badge variant={tones[status] ?? "neutral"}>{labels[status] ?? status}</Badge>
       </div>
@@ -21,13 +21,13 @@ export function ServiceCard({ name, description, check }) {
       <dl className="mt-5 space-y-2 text-sm">
         {latency !== undefined ? (
           <div className="flex justify-between gap-3">
-            <dt className="text-stone-500">Latencia</dt>
+            <dt className="text-stone-400">Latencia</dt>
             <dd className="tabular-nums text-stone-300">{latency} ms</dd>
           </div>
         ) : null}
         {Object.entries(details).map(([key, value]) => (
           <div key={key} className="flex justify-between gap-3">
-            <dt className="text-stone-500">{key}</dt>
+            <dt className="text-stone-400">{key}</dt>
             <dd className="max-w-[60%] truncate text-right text-stone-300">
               {typeof value === "boolean" ? (value ? "si" : "no") : String(value)}
             </dd>

@@ -13,7 +13,7 @@ export function ReminderCard({ reminder, onEdit, onDelete, onComplete }) {
         </Badge>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 text-sm text-stone-500">
+      <div className="mt-4 flex flex-wrap gap-2 text-sm text-stone-400">
         <span className="tabular-nums">{reminder.remind_at}</span>
         <span>· {labelFor(reminderTypes, reminder.type)}</span>
         {reminder.is_due ? <span className="text-amber-200">· vence pronto</span> : null}

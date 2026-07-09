@@ -106,4 +106,4 @@ Nunca commitear `.env`. Solo los `.env.example`.
 - `GET /api/system` — detalle autenticado (latencias, driver, versiones, modelo de IA). Lo consume la pagina `/app/system`.
 - `GET /up` — sonda nativa de Laravel.
 
-`degraded` significa que solo Ollama esta caido: la aplicacion funciona sin IA.
+`degraded` significa que solo la compatibilidad Ollama backend esta caida. La SPA puede seguir usando WebGPU si el navegador lo soporta.

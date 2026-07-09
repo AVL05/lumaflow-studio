@@ -4,6 +4,8 @@ import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { lazyRoute } from "./lazyRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { ForgotPasswordPage } from "../pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "../pages/ResetPasswordPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { SessionsPage } from "../pages/SessionsPage";
 import { GearPage } from "../pages/GearPage";
@@ -28,6 +30,8 @@ export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/app/dashboard" replace />, errorElement },
   { path: "/login", element: <LoginPage />, errorElement },
   { path: "/register", element: <RegisterPage />, errorElement },
+  { path: "/forgot-password", element: <ForgotPasswordPage />, errorElement },
+  { path: "/reset-password", element: <ResetPasswordPage />, errorElement },
   {
     path: "/about-project",
     element: lazyRoute(() => import("../pages/AboutProjectPage"), "AboutProjectPage"),

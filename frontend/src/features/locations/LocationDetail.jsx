@@ -50,13 +50,13 @@ export function LocationDetail({ location, onCopy }) {
                 location.sessions.map((session) => (
                   <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
                     <p className="text-sm text-stone-100">{session.name}</p>
-                    <p className="mt-1 text-xs text-stone-500">
+                    <p className="mt-1 text-xs text-stone-400">
                       {session.date} · {session.status}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-stone-500">Sin sesiones asociadas todavia.</p>
+                <p className="text-sm text-stone-400">Sin sesiones asociadas todavia.</p>
               )}
             </div>
           </Card>
@@ -71,7 +71,7 @@ function TagBlock({ title, items }) {
 
   return (
     <div className="mt-6">
-      <p className="mb-2 text-xs uppercase tracking-[0.16em] text-stone-500">{title}</p>
+      <p className="mb-2 text-xs uppercase tracking-[0.16em] text-stone-400">{title}</p>
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
           <Badge key={item}>{item}</Badge>

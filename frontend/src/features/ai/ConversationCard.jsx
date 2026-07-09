@@ -8,9 +8,9 @@ export function ConversationCard({ conversation, active, onSelect, onRename, onD
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-stone-100">{conversation.title}</p>
-          <p className="mt-1 text-xs text-stone-500">{conversation.messages_count ?? 0} mensajes</p>
+          <p className="mt-1 text-xs text-stone-400">{conversation.messages_count ?? 0} mensajes</p>
         </div>
-        <div className="flex gap-2 text-xs text-stone-500">
+        <div className="flex gap-2 text-xs text-stone-400">
           <span
             onClick={(event) => {
               event.stopPropagation();

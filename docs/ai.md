@@ -1,21 +1,19 @@
 # Capa de IA
 
-El asistente corre sobre **Ollama en local**. Ningun dato sale de la maquina del usuario. No hay proveedores externos ni claves de API.
+La experiencia principal de IA corre con **WebGPU en el navegador** mediante WebLLM. Ningun prompt necesita salir a proveedores externos ni requiere claves de API. El backend conserva los servicios de Ollama como compatibilidad local avanzada para quien quiera ejecutar la API de IA desde servidor.
 
 ## Cadena
 
 ```
-AiController
+frontend/features/ai/webGpuAi.js
    │
-   ├─► AiContextService     arma un contexto compacto desde los datos del usuario
-   │                        y lo trunca a `ollama.max_context`
-   │
-   ├─► PromptBuilderService system prompt en espanol; para tareas estructuradas
-   │                        emite `jsonTask` con `required_schema`
-   │
-   └─► OllamaService        chat() texto libre
-                            json() fuerza `format: json` y reintenta extraer el
-                            objeto por regex si el modelo mete ruido
+   ├─► WebGPU support      detecta `navigator.gpu`
+   ├─► WebLLM engine       carga el modelo bajo demanda
+   ├─► chat streaming      genera respuesta incremental en cliente
+   └─► JSON tasks          pide JSON estricto y extrae el objeto si el modelo mete ruido
+
+Backend opcional:
+AiController -> PromptBuilderService -> OllamaService
 ```
 
 ## Servicios
@@ -24,7 +22,8 @@ AiController
 |---|---|
 | `AiContextService` | Resume sesiones (10), equipo (20), presets (16), fotos (18), albumes (10), localizaciones (16), clientes (12), entregas (12) y etiquetas (30). Si el JSON supera el presupuesto, recorta por bloques hasta encajar |
 | `PromptBuilderService` | System prompt y plantillas de tarea |
-| `OllamaService` | Transporte HTTP, reintentos, parseo de JSON |
+| `webGpuAi.js` | Inferencia WebGPU en navegador, carga de modelo y parseo JSON |
+| `OllamaService` | Transporte HTTP, reintentos y parseo de JSON para compatibilidad backend |
 | `PhotoAnalysisService` | Analisis de una foto con su EXIF |
 | `PresetGeneratorService` | Genera un preset editable y lo persiste |
 | `RecommendationService` | Recomienda equipo existente; lista aparte lo que falta |
@@ -32,7 +31,9 @@ AiController
 
 ## Contrato
 
-**Fallo de Ollama = 503.** `OllamaService` lanza `RuntimeException` cuando el modelo no responde. Cada endpoint de IA lo captura y devuelve HTTP 503 con `{message}`. El resto de la aplicacion sigue operativa. `HealthService` marca el sistema como `degraded`, no como `down`.
+**WebGPU requerido en la SPA.** Si `navigator.gpu` no existe, el centro de IA informa que WebGPU no esta disponible en ese navegador. El resto de la aplicacion sigue operativa.
+
+**Fallo de Ollama = 503 en endpoints legacy.** `OllamaService` lanza `RuntimeException` cuando el modelo no responde. Cada endpoint backend de IA lo captura y devuelve HTTP 503 con `{message}`. `HealthService` marca el sistema como `degraded`, no como `down`.
 
 **Tareas estructuradas.** `jsonTask` anade al system prompt `"Devuelve exclusivamente JSON valido. Sin markdown."` y pasa un `required_schema`, los rangos numericos y los valores permitidos. Al anadir una tarea nueva: seguir el patron `jsonTask` + un Resource dedicado.
 
@@ -44,6 +45,12 @@ AiController
 
 ## Configuracion
 
+`frontend/.env`:
+
+| Variable | Default | Uso |
+|---|---|---|
+| `VITE_WEBGPU_AI_MODEL` | `Llama-3.2-1B-Instruct-q4f16_1-MLC` | Modelo WebLLM cargado bajo demanda en el navegador |
+
 `config/ollama.php`:
 
 | Variable | Default | Uso |
@@ -53,7 +60,7 @@ AiController
 | `OLLAMA_TIMEOUT` | `30` | Timeout de inferencia |
 | `OLLAMA_MAX_CONTEXT` | `12000` | Presupuesto de caracteres del contexto |
 
-La sonda de estado (`/api/ai/status`) **no** usa `OLLAMA_TIMEOUT`: tiene un timeout propio de 3 s y se cachea 15 s. Antes, el dashboard esperaba hasta 30 s por carga cuando Ollama estaba caido.
+La sonda de estado (`/api/ai/status`) **no** usa `OLLAMA_TIMEOUT`: tiene un timeout propio de 3 s y se cachea 15 s. Solo representa el proveedor backend opcional.
 
 ## Rate limiting
 
@@ -61,6 +68,7 @@ La sonda de estado (`/api/ai/status`) **no** usa `OLLAMA_TIMEOUT`: tiene un time
 
 ## Limitaciones actuales
 
-- **Sin streaming real.** `streamingAvailable()` devuelve `true`, pero no hay chunked ni SSE. La UI solo simula progresion de la respuesta.
+- **Primera carga pesada.** El modelo WebLLM se descarga bajo demanda y puede tardar en la primera ejecucion.
+- **Dependencia de navegador/hardware.** WebGPU requiere navegador compatible y GPU disponible.
 - **Sin vision.** El analisis de fotos razona sobre EXIF y metadata, no sobre pixeles. El prompt lo dice explicitamente.
 - Ver [roadmap.md](roadmap.md).

@@ -43,7 +43,7 @@ backend/app/
 | `ExportService` | `COLUMNS` define que se exporta. CSV en streaming, JSON como adjunto. |
 | `ChecklistService` | Plantillas, duplicado, reordenacion transaccional. |
 | `TaskSummaryService` | Totales de tareas compartidos por dashboard y pagina de tareas. |
-| `HealthService` | Sondas de API, MySQL, storage, cache y Ollama. |
+| `HealthService` | Sondas de API, MySQL, storage, cache y compatibilidad Ollama. |
 | Cadena de IA | Ver [ai.md](ai.md). |
 
 ## Seguridad

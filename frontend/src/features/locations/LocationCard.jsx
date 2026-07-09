@@ -17,7 +17,7 @@ export function LocationCard({ location, onEdit, onDelete }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="font-semibold">{location.name}</h2>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-stone-400">
               {[location.city, location.country].filter(Boolean).join(", ") || "Sin ciudad"}
             </p>
           </div>
@@ -27,7 +27,7 @@ export function LocationCard({ location, onEdit, onDelete }) {
           {location.best_time || "Sin mejor hora"} ·{" "}
           {labelFor(accessDifficulties, location.access_difficulty)}
         </p>
-        <p className="mt-2 text-sm text-stone-500">
+        <p className="mt-2 text-sm text-stone-400">
           {location.rating ? `Rating ${location.rating}/5` : "Sin valorar"} ·{" "}
           {location.sessions_count ?? 0} sesiones
         </p>

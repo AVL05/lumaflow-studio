@@ -8,7 +8,7 @@ const stack = [
   ["Frontend", "React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet"],
   ["Backend", "Laravel 13, PHP 8.3+, Sanctum, PHPUnit, Pint"],
   ["Datos", "MySQL 8, Eloquent, migraciones agrupadas por fase"],
-  ["IA", "Ollama local (llama3.1 por defecto), sin proveedores externos"],
+  ["IA", "WebGPU en navegador con WebLLM; Ollama queda como compatibilidad backend opcional"],
   ["Infra", "Docker Compose: frontend, backend, MySQL, phpMyAdmin y Ollama opcional"],
 ];
 
@@ -44,8 +44,8 @@ const decisions = [
     "La analitica no carga colecciones en memoria: agrupa y cuenta en SQL, y el calendario normaliza cuatro fuentes en un unico shape de evento.",
   ],
   [
-    "Ollama es opcional y degrada",
-    "Si el modelo local no responde, la API devuelve 503 solo en los endpoints de IA y el resto de la aplicacion sigue funcionando.",
+    "IA local en navegador",
+    "La experiencia principal usa WebGPU en el cliente. Si el navegador no lo soporta, la aplicacion informa el limite sin tumbar el resto del producto.",
   ],
 ];
 
@@ -62,8 +62,8 @@ export function AboutProjectPage() {
       <header className="border-b border-white/10 px-4 py-5 md:px-8">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-amber-200/70">LumaFlow</p>
-            <p className="text-sm text-stone-400">Studio</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-amber-200">LumaFlow</p>
+            <p className="text-sm text-stone-300">Studio</p>
           </div>
           <Link to="/app/dashboard">
             <Button variant="secondary">Entrar a la app</Button>
@@ -73,7 +73,7 @@ export function AboutProjectPage() {
 
       <main className="mx-auto max-w-5xl space-y-12 px-4 py-12 md:px-8">
         <section>
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-amber-200/70">
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-amber-200">
             Sobre el proyecto
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-stone-50">
@@ -83,8 +83,8 @@ export function AboutProjectPage() {
             LumaFlow Studio nace de una pregunta concreta: un fotografo profesional trabaja con
             sesiones, clientes, equipo, presets, localizaciones y miles de archivos, pero suele
             gestionarlo todo en hojas de calculo dispersas. Este proyecto reune ese flujo completo
-            en una sola aplicacion full-stack, con un asistente de IA que corre en local y solo
-            razona sobre los datos reales del usuario.
+            en una sola aplicacion full-stack, con un asistente de IA que corre en el navegador con
+            WebGPU y solo razona sobre los datos reales del usuario.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
             Es una release privada de portfolio: no busca ser un SaaS, sino demostrar arquitectura,
@@ -100,7 +100,7 @@ export function AboutProjectPage() {
                 key={area}
                 className="flex flex-col gap-2 p-4 sm:flex-row sm:items-baseline sm:gap-6"
               >
-                <span className="w-24 shrink-0 text-xs uppercase tracking-[0.16em] text-stone-500">
+                <span className="w-24 shrink-0 text-xs uppercase tracking-[0.16em] text-stone-400">
                   {area}
                 </span>
                 <span className="text-sm text-stone-300">{detail}</span>
@@ -140,7 +140,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             {modules.map(([name, detail]) => (
               <Card key={name} className="p-5">
                 <h3 className="font-medium text-stone-50">{name}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-500">{detail}</p>
+                <p className="mt-2 text-sm leading-6 text-stone-400">{detail}</p>
               </Card>
             ))}
           </div>
@@ -149,12 +149,10 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
         <section>
           <h2 className="text-lg font-semibold text-stone-100">Integracion de IA</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-400">
-            El asistente corre sobre Ollama en la maquina del usuario. Ningun dato sale del equipo.
-            Un servicio de contexto arma un resumen compacto de sesiones, equipo, presets, fotos y
-            clientes, lo trunca a un presupuesto de tokens y lo entrega junto a un prompt de sistema
-            que restringe el ambito a la fotografia y prohibe inventar datos. Las tareas
-            estructuradas (generar un preset, planificar una sesion, recomendar equipo) piden JSON
-            estricto y se validan contra un esquema antes de persistirse.
+            El asistente principal corre con WebGPU en el navegador mediante WebLLM. Ningun prompt
+            necesita salir a un proveedor externo. El backend conserva servicios compatibles con
+            Ollama para ejecucion local avanzada, pero la experiencia de la SPA no depende de tener
+            Ollama instalado.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {[
@@ -177,7 +175,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             {decisions.map(([title, rationale]) => (
               <Panel key={title} className="p-5">
                 <h3 className="text-sm font-medium text-stone-100">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-500">{rationale}</p>
+                <p className="mt-2 text-sm leading-6 text-stone-400">{rationale}</p>
               </Panel>
             ))}
           </div>
@@ -185,7 +183,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
 
         <section>
           <h2 className="text-lg font-semibold text-stone-100">Capturas</h2>
-          <p className="mt-3 text-sm text-stone-500">
+          <p className="mt-3 text-sm text-stone-400">
             Pendientes de preparar el material visual del portfolio.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -199,7 +197,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             ].map((label) => (
               <div
                 key={label}
-                className="grid aspect-[16/10] place-items-center rounded-lg border border-dashed border-white/15 bg-white/[0.02] text-xs text-stone-600"
+                className="grid aspect-[16/10] place-items-center rounded-lg border border-dashed border-white/15 bg-white/[0.02] text-xs text-stone-400"
               >
                 {label}
               </div>
@@ -216,7 +214,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
               </a>
             ))}
           </div>
-          <p className="mt-4 text-xs text-stone-600">
+          <p className="mt-4 text-xs text-stone-400">
             LinkedIn y portfolio son marcadores de posicion hasta que existan las URL definitivas.
           </p>
         </section>

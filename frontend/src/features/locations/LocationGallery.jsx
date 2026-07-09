@@ -7,7 +7,7 @@ export function LocationGallery({ photos = [], coverPhoto }) {
     <Card className="p-5">
       <h2 className="font-semibold">Fotografias del spot</h2>
       {items.length === 0 ? (
-        <p className="mt-4 text-sm text-stone-500">Sin fotografias asociadas.</p>
+        <p className="mt-4 text-sm text-stone-400">Sin fotografias asociadas.</p>
       ) : (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((photo) => (

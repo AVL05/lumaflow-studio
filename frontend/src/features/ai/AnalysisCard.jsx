@@ -11,7 +11,7 @@ export function AnalysisCard({ analysis }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold">Analisis fotografico</h2>
-          <p className="mt-1 text-sm text-stone-500">{analysis.summary}</p>
+          <p className="mt-1 text-sm text-stone-400">{analysis.summary}</p>
         </div>
         <ScoreBadge score={analysis.score} />
       </div>
@@ -46,7 +46,7 @@ function List({ title, items = [] }) {
 
   return (
     <div className="mt-5">
-      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">{title}</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-stone-400">{title}</p>
       <ul className="mt-2 space-y-1 text-sm text-stone-400">
         {items.map((item) => (
           <li key={item}>- {item}</li>

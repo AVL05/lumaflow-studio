@@ -4,7 +4,7 @@ export function Pagination({ meta, onPage }) {
   if (!meta || meta.last_page <= 1) return null;
 
   return (
-    <div className="mt-6 flex items-center justify-between gap-3 text-sm text-stone-500">
+    <div className="mt-6 flex items-center justify-between gap-3 text-sm text-stone-400">
       <span>
         Pagina {meta.current_page} de {meta.last_page}
       </span>

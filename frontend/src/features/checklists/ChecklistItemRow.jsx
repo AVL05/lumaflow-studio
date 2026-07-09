@@ -21,7 +21,7 @@ export function ChecklistItemRow({
       onDrop={onDrop}
       className="group flex cursor-grab items-center gap-3 rounded-md border border-transparent px-2 py-1.5 transition hover:border-white/[0.08] hover:bg-white/[0.03] active:cursor-grabbing"
     >
-      <span aria-hidden className="text-xs text-stone-700 group-hover:text-stone-500">
+      <span aria-hidden className="text-xs text-stone-400 group-hover:text-stone-400">
         ::
       </span>
       <Checkbox
@@ -30,7 +30,7 @@ export function ChecklistItemRow({
         aria-label={item.title}
       />
       <span
-        className={`flex-1 text-sm ${item.is_completed ? "text-stone-600 line-through" : "text-stone-200"}`}
+        className={`flex-1 text-sm ${item.is_completed ? "text-stone-400 line-through" : "text-stone-200"}`}
       >
         {item.title}
       </span>
@@ -38,7 +38,7 @@ export function ChecklistItemRow({
         type="button"
         onClick={() => onRemove(item)}
         aria-label={`Eliminar ${item.title}`}
-        className="rounded px-2 text-xs text-stone-600 opacity-0 transition hover:text-red-300 group-hover:opacity-100"
+        className="rounded px-2 text-xs text-stone-400 opacity-0 transition hover:text-red-300 group-hover:opacity-100"
       >
         Quitar
       </button>

@@ -15,7 +15,7 @@ export const CalendarDay = memo(function CalendarDay({ cursor, events, onMove, o
 
       {untimed.length > 0 ? (
         <div className="mt-4 space-y-1.5 rounded-md border border-dashed border-white/10 p-2">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">Sin hora</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Sin hora</p>
           {untimed.map((event) => (
             <CalendarEvent key={event.id} event={event} onSelect={onSelect} />
           ))}
@@ -33,7 +33,7 @@ export const CalendarDay = memo(function CalendarDay({ cursor, events, onMove, o
               onMove={(payload) => onMove({ ...payload, time: hour })}
               className="grid grid-cols-[64px_1fr] gap-3 rounded border border-transparent px-1 py-1.5 hover:border-white/[0.06]"
             >
-              <span className="pt-0.5 text-xs tabular-nums text-stone-600">{hour}</span>
+              <span className="pt-0.5 text-xs tabular-nums text-stone-400">{hour}</span>
               <div className="min-h-6 space-y-1">
                 {slotEvents.map((event) => (
                   <CalendarEvent key={event.id} event={event} onSelect={onSelect} />

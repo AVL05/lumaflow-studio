@@ -4,7 +4,7 @@ LumaFlow Studio son dos aplicaciones independientes en un monorepo. No comparten
 
 ```
 lumaflow-studio/
-├── backend/     API Laravel 13 (REST, Sanctum, MySQL, Ollama)
+├── backend/     API Laravel 13 (REST, Sanctum, MySQL, compatibilidad Ollama)
 ├── frontend/    SPA React 19 (Vite, Tailwind 4)
 ├── docs/        esta documentacion
 └── docker-compose.yml
@@ -52,7 +52,7 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **La agregacion ocurre en la base de datos.** `AnalyticsService` agrupa y cuenta en SQL en vez de cargar colecciones en memoria. El coste es acoplarse a MySQL (`DATE_FORMAT`, `JSON_EXTRACT`), que es el unico motor soportado.
 
-**Ollama es opcional y degrada.** Si el modelo local no responde, `OllamaService` lanza `RuntimeException`, los endpoints de IA devuelven 503 y el resto de la aplicacion sigue funcionando. `HealthService` marca el sistema como `degraded`, nunca como `down`, cuando solo falla la IA.
+**La IA principal corre en WebGPU.** La SPA carga WebLLM bajo demanda y ejecuta la inferencia en el navegador. Ollama queda como compatibilidad backend opcional: si no responde, `HealthService` marca el sistema como `degraded`, nunca como `down`.
 
 ## Limites conscientes
 

@@ -17,7 +17,7 @@ export function NotificationCenter({ open, onClose }) {
   return (
     <Modal open={open} title="Notificaciones" onClose={onClose}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-stone-400">
           {unread} sin leer de {items.length}
         </p>
         <div className="flex gap-2">

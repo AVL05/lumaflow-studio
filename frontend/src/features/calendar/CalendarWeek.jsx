@@ -25,7 +25,7 @@ export const CalendarWeek = memo(function CalendarWeek({
         >
           <div className="mb-2 flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
+              <p className="text-xs uppercase tracking-[0.16em] text-stone-400">
                 {weekdayLabels[index]}
               </p>
               <p
@@ -38,7 +38,7 @@ export const CalendarWeek = memo(function CalendarWeek({
               type="button"
               aria-label={`Crear evento el ${iso}`}
               onClick={() => onCreate?.(iso)}
-              className="rounded px-1 text-sm text-stone-600 transition hover:bg-white/[0.08] hover:text-stone-200"
+              className="rounded px-1 text-sm text-stone-400 transition hover:bg-white/[0.08] hover:text-stone-200"
             >
               +
             </button>

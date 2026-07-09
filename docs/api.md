@@ -27,7 +27,7 @@ Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 ind
 | GET | `/system` | si | Detalle: latencias, driver, version, modelo de IA |
 | GET | `/up` | no | Sonda nativa de Laravel |
 
-`status` global: `up` (todo bien), `degraded` (solo Ollama caido), `down` (alguna dependencia critica).
+`status` global: `up` (todo bien), `degraded` (solo compatibilidad Ollama backend caida), `down` (alguna dependencia critica).
 
 ## Recursos
 
@@ -100,7 +100,7 @@ Una combinacion no soportada devuelve 422.
 
 ### IA
 
-`throttle:20,1` adicional sobre los endpoints de inferencia. Si Ollama no responde, devuelven **503** con `{message}`.
+`throttle:20,1` adicional sobre los endpoints backend de inferencia. La SPA usa WebGPU en navegador; si se llaman los endpoints legacy y Ollama no responde, devuelven **503** con `{message}`.
 
 | Metodo | Ruta | Notas |
 |---|---|---|
@@ -120,4 +120,4 @@ Una combinacion no soportada devuelve 422.
 | 404 | No existe **o no es tuyo** |
 | 422 | Validacion fallida, o accion masiva no soportada |
 | 429 | Rate limit |
-| 503 | Ollama no disponible (solo en endpoints de IA) |
+| 503 | Ollama no disponible (solo en endpoints backend legacy de IA) |

@@ -51,7 +51,7 @@ export function ChecklistCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold text-stone-50">{checklist.name}</h3>
-          <p className="mt-1 text-xs text-stone-500">
+          <p className="mt-1 text-xs text-stone-400">
             {checklist.completed_items_count ?? 0} de {checklist.items_count ?? 0} completados
           </p>
         </div>

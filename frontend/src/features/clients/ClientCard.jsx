@@ -10,7 +10,7 @@ export function ClientCard({ client, onEdit, onDelete }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold">{client.name}</h2>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-stone-400">
             {client.company || client.email || "Sin empresa/email"}
           </p>
         </div>

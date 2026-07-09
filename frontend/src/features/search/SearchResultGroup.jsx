@@ -1,7 +1,7 @@
 export function SearchResultGroup({ group, activeId, onSelect }) {
   return (
     <div>
-      <p className="px-2 py-1.5 text-[11px] uppercase tracking-[0.18em] text-stone-600">
+      <p className="px-2 py-1.5 text-xs uppercase tracking-[0.18em] text-stone-400">
         {group.label}
       </p>
       <ul>
@@ -20,10 +20,10 @@ export function SearchResultGroup({ group, activeId, onSelect }) {
               >
                 <span className="truncate text-sm text-stone-100">{item.title}</span>
                 {item.subtitle ? (
-                  <span className="truncate text-xs text-stone-600">{item.subtitle}</span>
+                  <span className="truncate text-xs text-stone-400">{item.subtitle}</span>
                 ) : null}
                 {item.meta ? (
-                  <span className="ml-auto shrink-0 text-[11px] text-stone-600">{item.meta}</span>
+                  <span className="ml-auto shrink-0 text-xs text-stone-400">{item.meta}</span>
                 ) : null}
               </button>
             </li>

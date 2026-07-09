@@ -28,7 +28,7 @@ export const CalendarAgenda = memo(function CalendarAgenda({ events, onSelect })
             >
               {dayLabel(iso)}
             </h3>
-            <span className="text-xs text-stone-600">{byDate[iso].length} eventos</span>
+            <span className="text-xs text-stone-400">{byDate[iso].length} eventos</span>
           </div>
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {byDate[iso].map((event) => (

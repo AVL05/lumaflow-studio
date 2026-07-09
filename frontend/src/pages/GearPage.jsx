@@ -176,7 +176,7 @@ export function GearPage() {
                       </div>
                       <div>
                         <h2 className="font-semibold">{item.name}</h2>
-                        <p className="mt-1 text-sm text-stone-500">
+                        <p className="mt-1 text-sm text-stone-400">
                           {[item.brand, item.model].filter(Boolean).join(" ") || "Sin marca/modelo"}
                         </p>
                       </div>

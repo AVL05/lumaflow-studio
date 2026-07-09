@@ -68,8 +68,8 @@ export function TasksPage() {
       .catch(() => toast.error("No se pudieron cargar sesiones y clientes."));
   }, [toast]);
 
-  // Endpoint dedicado: antes se cargaba el dashboard entero (incluida la sonda
-  // de Ollama) solo para leer estos cuatro totales.
+  // Endpoint dedicado: antes se cargaba el dashboard entero solo para leer estos
+  // cuatro totales.
   const refreshSummary = useCallback(() => {
     tasksApi
       .summary()

@@ -15,7 +15,7 @@ export function PresetCard({ preset, onDetail, onEdit, onDuplicate, onDelete }) 
           />
           <div>
             <h2 className="font-semibold text-stone-50">{preset.name}</h2>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-stone-400">
               {labelFor(presetCategories, preset.category)} · {labelFor(presetStyles, preset.style)}
             </p>
           </div>
@@ -25,10 +25,10 @@ export function PresetCard({ preset, onDetail, onEdit, onDuplicate, onDelete }) 
       <div className="mt-5">
         <PresetPreview preset={preset} />
       </div>
-      <p className="mt-5 line-clamp-2 text-sm text-stone-500">
+      <p className="mt-5 line-clamp-2 text-sm text-stone-400">
         {preset.recommended_use || preset.description || "Sin uso recomendado."}
       </p>
-      <p className="mt-3 text-xs text-stone-600">
+      <p className="mt-3 text-xs text-stone-400">
         v{preset.version} · {new Date(preset.created_at).toLocaleDateString()}
       </p>
       <div className="mt-5 flex flex-wrap gap-2">

@@ -12,7 +12,7 @@ export function LocationStats({ location }) {
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map(([label, value]) => (
         <Card key={label} className="p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-stone-500">{label}</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-stone-400">{label}</p>
           <p className="mt-2 text-lg font-semibold text-stone-100">{value}</p>
         </Card>
       ))}

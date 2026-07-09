@@ -25,7 +25,7 @@ function WidgetCard({ title, action, children }) {
 }
 
 function Empty({ text }) {
-  return <p className="text-sm text-stone-500">{text}</p>;
+  return <p className="text-sm text-stone-400">{text}</p>;
 }
 
 export function AgendaWidget({ events }) {
@@ -33,7 +33,7 @@ export function AgendaWidget({ events }) {
     <WidgetCard
       title="Agenda de hoy"
       action={
-        <Link to="/app/calendar" className="text-xs text-amber-200/80 hover:text-amber-100">
+        <Link to="/app/calendar" className="text-xs text-amber-200 hover:text-amber-100">
           Calendario
         </Link>
       }
@@ -46,7 +46,7 @@ export function AgendaWidget({ events }) {
             <li key={event.id} className="flex items-center gap-3 rounded-md bg-white/[0.04] p-3">
               <span className={`h-2 w-2 shrink-0 rounded-full ${sourceDots[event.source]}`} />
               <span className="min-w-0 flex-1 truncate text-sm text-stone-200">{event.title}</span>
-              <span className="shrink-0 text-xs tabular-nums text-stone-500">
+              <span className="shrink-0 text-xs tabular-nums text-stone-400">
                 {event.time ?? "--:--"}
               </span>
             </li>
@@ -62,13 +62,13 @@ export function PendingTasksWidget({ tasks, summary }) {
     <WidgetCard
       title="Tareas pendientes"
       action={
-        <Link to="/app/tasks" className="text-xs text-amber-200/80 hover:text-amber-100">
+        <Link to="/app/tasks" className="text-xs text-amber-200 hover:text-amber-100">
           Ver todas
         </Link>
       }
     >
       {summary ? (
-        <p className="mb-3 text-xs text-stone-500">
+        <p className="mb-3 text-xs text-stone-400">
           {summary.open} abiertas · {summary.overdue} vencidas · {summary.dueToday} para hoy
         </p>
       ) : null}
@@ -85,7 +85,7 @@ export function PendingTasksWidget({ tasks, summary }) {
                   {labelFor(taskPriorities, task.priority)}
                 </Badge>
               </div>
-              <p className={`mt-1 text-xs ${task.is_overdue ? "text-red-300" : "text-stone-500"}`}>
+              <p className={`mt-1 text-xs ${task.is_overdue ? "text-red-300" : "text-stone-400"}`}>
                 {task.due_date ?? "Sin fecha"} · {labelFor(taskStatuses, task.status)}
               </p>
             </li>
@@ -101,7 +101,7 @@ export function RemindersWidget({ reminders }) {
     <WidgetCard
       title="Recordatorios"
       action={
-        <Link to="/app/reminders" className="text-xs text-amber-200/80 hover:text-amber-100">
+        <Link to="/app/reminders" className="text-xs text-amber-200 hover:text-amber-100">
           Gestionar
         </Link>
       }
@@ -113,7 +113,7 @@ export function RemindersWidget({ reminders }) {
           {reminders.map((reminder) => (
             <li key={reminder.id} className="rounded-md bg-white/[0.04] p-3">
               <p className="truncate text-sm text-stone-200">{reminder.message}</p>
-              <p className="mt-1 text-xs tabular-nums text-stone-500">{reminder.remind_at}</p>
+              <p className="mt-1 text-xs tabular-nums text-stone-400">{reminder.remind_at}</p>
             </li>
           ))}
         </ul>
@@ -136,7 +136,7 @@ export function MonthlyProgressWidget({ progress }) {
           ["Mes", progress.month],
         ].map(([label, value]) => (
           <div key={label}>
-            <dt className="text-xs uppercase tracking-[0.14em] text-stone-600">{label}</dt>
+            <dt className="text-xs uppercase tracking-[0.14em] text-stone-400">{label}</dt>
             <dd className="mt-1 text-stone-200">{value}</dd>
           </div>
         ))}
@@ -158,7 +158,7 @@ export function FavoriteGearWidget({ gear }) {
     <WidgetCard
       title="Equipo favorito"
       action={
-        <Link to="/app/gear" className="text-xs text-amber-200/80 hover:text-amber-100">
+        <Link to="/app/gear" className="text-xs text-amber-200 hover:text-amber-100">
           Inventario
         </Link>
       }
@@ -187,7 +187,7 @@ export function TopLocationsWidget({ locations }) {
     <WidgetCard
       title="Localizaciones mas utilizadas"
       action={
-        <Link to="/app/locations" className="text-xs text-amber-200/80 hover:text-amber-100">
+        <Link to="/app/locations" className="text-xs text-amber-200 hover:text-amber-100">
           Mapa
         </Link>
       }
@@ -202,7 +202,7 @@ export function TopLocationsWidget({ locations }) {
               className="flex items-center justify-between gap-3 rounded-md bg-white/[0.04] p-3"
             >
               <span className="min-w-0 truncate text-sm text-stone-200">{location.name}</span>
-              <span className="shrink-0 text-xs tabular-nums text-stone-500">
+              <span className="shrink-0 text-xs tabular-nums text-stone-400">
                 {location.sessions_count ?? 0} sesiones
               </span>
             </li>

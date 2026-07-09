@@ -27,7 +27,7 @@ export const TaskCard = memo(function TaskCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h2
-              className={`font-semibold ${done ? "text-stone-500 line-through" : "text-stone-50"}`}
+              className={`font-semibold ${done ? "text-stone-400 line-through" : "text-stone-50"}`}
             >
               {task.title}
             </h2>
@@ -36,11 +36,11 @@ export const TaskCard = memo(function TaskCard({
             </Badge>
           </div>
 
-          <p className="mt-2 line-clamp-2 text-sm text-stone-500">
+          <p className="mt-2 line-clamp-2 text-sm text-stone-400">
             {task.description || "Sin descripcion."}
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-stone-400">
             <Badge variant={toneFor(taskStatuses, task.status)}>
               {labelFor(taskStatuses, task.status)}
             </Badge>

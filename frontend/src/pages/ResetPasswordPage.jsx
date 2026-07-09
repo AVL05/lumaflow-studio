@@ -1,23 +1,28 @@
-import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { authApi } from "../api/auth";
+import { getApiError } from "../api/client";
 import { Button } from "../components/ui/Button";
 import { Field, inputClass } from "../components/ui/Field";
 import { ErrorState } from "../components/states/ErrorState";
-import { getApiError } from "../api/client";
 import { AuthShell } from "../features/auth/AuthShell";
 import { useAuth } from "../features/auth/AuthContext";
 
-export function RegisterPage() {
-  const { register, isAuthenticated } = useAuth();
+export function ResetPasswordPage() {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token") ?? "";
+  const emailFromLink = searchParams.get("email") ?? "";
   const [form, setForm] = useState({
-    name: "",
-    email: "",
+    email: emailFromLink,
     password: "",
     password_confirmation: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const missingToken = useMemo(() => token.trim() === "", [token]);
 
   if (isAuthenticated) {
     return <Navigate to="/app/dashboard" replace />;
@@ -29,10 +34,10 @@ export function RegisterPage() {
     setError("");
 
     try {
-      await register(form);
-      navigate("/app/dashboard");
+      await authApi.resetPassword({ ...form, token });
+      navigate("/login?password_reset=1", { replace: true });
     } catch (err) {
-      setError(getApiError(err, "No se pudo crear la cuenta."));
+      setError(getApiError(err, "No se pudo actualizar el password."));
     } finally {
       setLoading(false);
     }
@@ -40,47 +45,38 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      eyebrow="Nuevo workspace"
-      title="Configura tu estudio"
-      description="Crea un entorno privado para centralizar sesiones, clientes, localizaciones, equipo y entregas."
+      eyebrow="Nuevo password"
+      title="Define un acceso nuevo"
+      description="El enlace solo puede usarse una vez y caduca por seguridad."
       footer={
         <>
-          Ya tienes cuenta?{" "}
+          Volver a{" "}
           <Link className="font-medium text-stone-200 transition hover:text-amber-100" to="/login">
-            Entrar
+            iniciar sesion
           </Link>
         </>
       }
     >
       <form className="space-y-4" onSubmit={submit}>
+        {missingToken ? <ErrorState message="El enlace de recuperacion no contiene token." /> : null}
         {error ? <ErrorState message={error} /> : null}
-        <Field label="Nombre">
-          <input
-            className={inputClass}
-            autoComplete="name"
-            placeholder="Alex Vicente"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-        </Field>
         <Field label="Email">
           <input
             className={inputClass}
             type="email"
             autoComplete="email"
-            placeholder="alex@studio.com"
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(event) => setForm({ ...form, email: event.target.value })}
           />
         </Field>
-        <Field label="Password">
+        <Field label="Nuevo password">
           <input
             className={inputClass}
             type="password"
             autoComplete="new-password"
             placeholder="Minimo 8 caracteres"
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={(event) => setForm({ ...form, password: event.target.value })}
           />
         </Field>
         <Field label="Confirmar password">
@@ -90,11 +86,13 @@ export function RegisterPage() {
             autoComplete="new-password"
             placeholder="Repite el password"
             value={form.password_confirmation}
-            onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, password_confirmation: event.target.value })
+            }
           />
         </Field>
-        <Button className="mt-2 w-full py-3" disabled={loading}>
-          {loading ? "Creando..." : "Crear cuenta"}
+        <Button className="mt-2 w-full py-3" disabled={loading || missingToken}>
+          {loading ? "Guardando..." : "Actualizar password"}
         </Button>
       </form>
     </AuthShell>

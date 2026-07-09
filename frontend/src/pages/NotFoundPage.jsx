@@ -12,7 +12,7 @@ export function NotFoundPage({ asErrorBoundary = false }) {
   return (
     <div className="grid min-h-screen place-items-center bg-[#090908] px-4 text-stone-100">
       <div className="max-w-md text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.24em] text-amber-200/70">
+        <p className="text-xs font-medium uppercase tracking-[0.24em] text-amber-200">
           {isCrash ? "Error inesperado" : "Error 404"}
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">

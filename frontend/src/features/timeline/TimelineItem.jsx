@@ -37,9 +37,9 @@ export function TimelineItem({ activity, last }) {
           <p className="text-sm text-stone-200">
             {activity.description || labelFor(activityTypes, activity.type)}
           </p>
-          <span className="text-xs text-stone-600">{formatDate(activity.created_at)}</span>
+          <span className="text-xs text-stone-400">{formatDate(activity.created_at)}</span>
         </div>
-        <p className="mt-0.5 text-xs text-stone-600">
+        <p className="mt-0.5 text-xs text-stone-400">
           {labelFor(activityTypes, activity.type)} · {activity.subject_type}
         </p>
       </div>

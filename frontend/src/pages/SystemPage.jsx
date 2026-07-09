@@ -13,8 +13,8 @@ const services = [
   ["api", "API", "Aplicacion Laravel que sirve la REST API."],
   ["database", "Base de datos", "Conexion MySQL y esquema de la aplicacion."],
   ["storage", "Storage", "Disco publico donde viven las fotografias."],
-  ["cache", "Cache", "Store usado por el rate limiting y el estado de Ollama."],
-  ["ollama", "Ollama", "Inferencia local del asistente fotografico. Opcional."],
+  ["cache", "Cache", "Store usado por el rate limiting y sondas de estado."],
+  ["ollama", "Ollama backend", "Compatibilidad opcional; la SPA usa WebGPU en navegador."],
 ];
 
 const overall = {
@@ -61,12 +61,12 @@ export function SystemPage() {
         <div className="space-y-6">
           <Panel className="flex flex-wrap items-center justify-between gap-3 p-5">
             <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-stone-500">Estado global</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Estado global</p>
               <p className="mt-2 text-sm text-stone-300">{message}</p>
             </div>
             <div className="flex items-center gap-3">
               <Badge variant={tone}>{data.status}</Badge>
-              <span className="text-xs tabular-nums text-stone-600">
+              <span className="text-xs tabular-nums text-stone-400">
                 {new Date(data.timestamp).toLocaleTimeString("es-ES")}
               </span>
             </div>
@@ -85,9 +85,9 @@ export function SystemPage() {
             )}
           </div>
 
-          <p className="text-xs text-stone-600">
-            Se refresca cada 30 segundos. Ollama es opcional: si no responde, el sistema queda
-            degradado pero la aplicacion sigue operativa sin funciones de IA.
+          <p className="text-xs text-stone-400">
+            Se refresca cada 30 segundos. Ollama es opcional: si no responde, el backend queda
+            degradado, pero la experiencia principal de IA usa WebGPU en el navegador.
           </p>
         </div>
       ) : null}

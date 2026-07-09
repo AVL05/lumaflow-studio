@@ -6,7 +6,7 @@ Estado a fecha de la release v1 (fase 10). Lo que sigue no esta implementado; lo
 
 | Tema | Detalle |
 |---|---|
-| Streaming de IA | `OllamaService::streamingAvailable()` devuelve `true` pero no hay chunked ni SSE. La UI simula la progresion de la respuesta |
+| Persistencia de chat WebGPU | La inferencia principal corre en navegador; falta persistir conversaciones WebGPU en backend o IndexedDB |
 | Analisis de fotos | Razona sobre EXIF y metadata, no sobre pixeles. Sin modelo de vision |
 | Recordatorios | Se muestran en calendario y dashboard, pero no se envian. No hay colas ni jobs |
 | Exportacion PDF | `ExportService` acepta `csv` y `json`. El contrato esta preparado; el formato `pdf` se rechaza en validacion |
@@ -19,7 +19,7 @@ Estado a fecha de la release v1 (fase 10). Lo que sigue no esta implementado; lo
 
 **Corto plazo**
 
-- Streaming HTTP incremental real (chunked/SSE) en `/ai/chat`, con la UI ya preparada.
+- Persistencia de conversaciones WebGPU y exportacion desde historial local.
 - Kanban de tareas con drag & drop entre columnas de estado, reutilizando `DayDropZone`.
 - UI de comparacion before/after sobre `photo_comparisons`.
 - Cache de `/api/analytics` con invalidacion por mutacion.

@@ -316,11 +316,11 @@ export function CalendarPage() {
             onCreateReminder={() => openReminder(cursor)}
           />
           <Panel className="p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-stone-500">Rango consultado</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Rango consultado</p>
             <p className="mt-2 text-sm tabular-nums text-stone-300">
               {range.from} → {range.to}
             </p>
-            <p className="mt-3 text-xs text-stone-600">{events.length} eventos cargados</p>
+            <p className="mt-3 text-xs text-stone-400">{events.length} eventos cargados</p>
           </Panel>
         </div>
       </div>

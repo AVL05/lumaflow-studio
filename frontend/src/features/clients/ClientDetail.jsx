@@ -8,7 +8,7 @@ export function ClientDetail({ client }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">{client.name}</h1>
-          <p className="mt-2 text-sm text-stone-500">{client.company || "Sin empresa"}</p>
+          <p className="mt-2 text-sm text-stone-400">{client.company || "Sin empresa"}</p>
         </div>
         <StatusBadge options={clientStatuses} value={client.status} />
       </div>

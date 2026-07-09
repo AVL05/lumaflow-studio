@@ -8,7 +8,7 @@ export function DeliveryDetail({ delivery }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">{delivery.title}</h1>
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-stone-400">
             {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesion"}
           </p>
         </div>

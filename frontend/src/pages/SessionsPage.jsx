@@ -194,7 +194,7 @@ export function SessionsPage() {
                     />
                     <div className="min-w-0">
                       <h2 className="font-semibold text-stone-50">{session.name}</h2>
-                      <p className="mt-1 text-sm text-stone-500">
+                      <p className="mt-1 text-sm text-stone-400">
                         {session.client_name || "Sin cliente"} ·{" "}
                         {session.location?.name || session.location_name || "Sin localizacion"}
                       </p>
@@ -210,7 +210,7 @@ export function SessionsPage() {
                   <span>{labelFor(sessionTypes, session.session_type)}</span>
                   <span>{session.photos_count ?? 0} fotos</span>
                 </div>
-                <p className="mt-4 line-clamp-2 text-sm text-stone-500">
+                <p className="mt-4 line-clamp-2 text-sm text-stone-400">
                   {session.description || session.notes || "Sin descripcion."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">

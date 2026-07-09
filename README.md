@@ -7,7 +7,7 @@
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
 [![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)](https://www.mysql.com)
-[![Ollama](https://img.shields.io/badge/Ollama-local-000000)](https://ollama.com)
+[![WebGPU](https://img.shields.io/badge/WebGPU-local-111827)](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
 [![License](https://img.shields.io/badge/License-MIT-amber)](LICENSE)
 
 [Documentacion tecnica](docs/) · [API](docs/api.md) · [Arquitectura](docs/architecture.md) · [Despliegue](docs/deployment.md)
@@ -41,7 +41,7 @@ Es una release privada de portfolio. No busca ser un SaaS, sino demostrar arquit
 | Frontend | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet |
 | Backend | Laravel 13, PHP 8.3+, Sanctum (tokens Bearer) |
 | Datos | MySQL 8, Eloquent |
-| IA | Ollama local (`llama3.1` por defecto) |
+| IA | WebGPU en navegador con WebLLM; Ollama backend opcional |
 | Calidad | PHPUnit, Pint, Vitest, Testing Library, oxlint, Prettier |
 | Infra | Docker Compose (frontend, backend, MySQL, phpMyAdmin, Ollama opcional) |
 
@@ -87,11 +87,11 @@ Detalle completo en [docs/architecture.md](docs/architecture.md).
 | **Busqueda global** | `Ctrl/Cmd + K`. Nueve grupos, resultados agrupados, navegacion por teclado |
 | **Notificaciones** | Centro persistido en BD, contador global, marcado y limpieza |
 | **Asistente IA** | Chat con contexto, analisis de fotos, generacion de presets, planes de sesion, recomendador de equipo |
-| **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y Ollama |
+| **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y compatibilidad Ollama |
 
 ## Instalacion
 
-Requisitos: PHP 8.3+, Composer, Node 22+, MySQL 8. Ollama es opcional.
+Requisitos: PHP 8.3+, Composer, Node 22+, MySQL 8. Para IA en la SPA hace falta un navegador con WebGPU. Ollama es opcional.
 
 ```bash
 git clone https://github.com/AVL05/lumaflow-studio.git
@@ -157,7 +157,12 @@ OLLAMA_TIMEOUT=30
 OLLAMA_MAX_CONTEXT=12000
 ```
 
-**`frontend/.env`**: `VITE_API_URL=http://localhost:8000/api`
+**`frontend/.env`**:
+
+```env
+VITE_API_URL=http://localhost:8000/api
+VITE_WEBGPU_AI_MODEL=Llama-3.2-1B-Instruct-q4f16_1-MLC
+```
 
 ## Scripts
 
@@ -199,11 +204,9 @@ lumaflow-studio/
 
 ## IA
 
-El asistente corre sobre **Ollama en local**: ningun dato sale del equipo, no hay claves de API ni proveedores externos.
+El asistente principal corre con **WebGPU en el navegador** mediante WebLLM: no hay claves de API ni proveedores externos. El modelo se carga bajo demanda la primera vez que el usuario usa el centro de IA.
 
-`AiContextService` arma un resumen compacto de las sesiones, equipo, presets, fotos y clientes del usuario y lo trunca a un presupuesto de caracteres. `PromptBuilderService` lo entrega junto a un system prompt que restringe el ambito a la fotografia y **prohibe inventar datos**. Las tareas estructuradas (generar un preset, planificar una sesion, recomendar equipo) exigen JSON estricto contra un esquema.
-
-El historial de conversacion se reconstruye en el servidor, nunca se acepta del cliente. Los prompts jamas se escriben en los logs. Si Ollama no responde, los endpoints de IA devuelven 503 y el resto de la aplicacion sigue funcionando.
+El backend conserva servicios Ollama como compatibilidad local avanzada para endpoints de IA, pero la SPA no depende de tener Ollama instalado. Las tareas estructuradas (generar un preset, planificar una sesion, recomendar equipo) piden JSON estricto y se parsean en el cliente.
 
 Detalle en [docs/ai.md](docs/ai.md).
 
@@ -240,7 +243,7 @@ Proyecto personal de portfolio; no se buscan contribuciones externas. Si aun asi
 
 Diseno y desarrollo: **Alex Vicente Lopez**.
 
-Construido sobre [Laravel](https://laravel.com), [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Recharts](https://recharts.org), [Leaflet](https://leafletjs.com) y [Ollama](https://ollama.com). Mapas base de [CARTO](https://carto.com) sobre datos de [OpenStreetMap](https://www.openstreetmap.org).
+Construido sobre [Laravel](https://laravel.com), [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Recharts](https://recharts.org), [Leaflet](https://leafletjs.com) y [WebLLM](https://webllm.mlc.ai/). Mapas base de [CARTO](https://carto.com) sobre datos de [OpenStreetMap](https://www.openstreetmap.org).
 
 ## Licencia
 

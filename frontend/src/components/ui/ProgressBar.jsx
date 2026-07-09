@@ -3,7 +3,7 @@ export function ProgressBar({ value = 0, label }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-xs text-stone-500">
+      <div className="flex items-center justify-between text-xs text-stone-400">
         <span>{label ?? "Progreso"}</span>
         <span className="tabular-nums text-stone-300">{clamped}%</span>
       </div>

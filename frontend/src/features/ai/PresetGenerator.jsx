@@ -85,7 +85,7 @@ export function PresetGenerator({ onGenerate, loading, preset }) {
             <span className="h-4 w-4 rounded-full" style={{ backgroundColor: preset.color }} />
             <div>
               <p className="font-medium">{preset.name}</p>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-stone-400">
                 {preset.style} · {preset.category}
               </p>
             </div>

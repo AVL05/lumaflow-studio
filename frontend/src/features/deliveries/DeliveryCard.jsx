@@ -10,7 +10,7 @@ export function DeliveryCard({ delivery, onEdit, onDelete }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold">{delivery.title}</h2>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-stone-400">
             {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesion"}
           </p>
         </div>

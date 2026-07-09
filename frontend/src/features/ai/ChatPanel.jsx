@@ -21,7 +21,7 @@ export function ChatPanel({
           <h2 className="text-lg font-semibold">
             {conversation?.title || "Asistente fotografico"}
           </h2>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-stone-400">
             Planificacion, composicion, iluminacion, edicion y organizacion con tus datos.
           </p>
         </div>

@@ -126,13 +126,13 @@ export function GlobalSearch({ open, onOpen, onClose }) {
           ) : null}
 
           {!loading && term.trim().length < 2 ? (
-            <p className="px-2 py-6 text-center text-sm text-stone-600">
+            <p className="px-2 py-6 text-center text-sm text-stone-400">
               Escribe al menos dos caracteres. Usa las flechas y Enter para navegar.
             </p>
           ) : null}
 
           {!loading && result && result.total === 0 ? (
-            <p className="px-2 py-6 text-center text-sm text-stone-600">
+            <p className="px-2 py-6 text-center text-sm text-stone-400">
               Sin resultados para &ldquo;{result.term}&rdquo;.
             </p>
           ) : null}
@@ -149,7 +149,7 @@ export function GlobalSearch({ open, onOpen, onClose }) {
             : null}
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-[11px] text-stone-600">
+        <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-stone-400">
           <span>Ctrl/Cmd + K para abrir o cerrar</span>
           <span>{result?.total ?? 0} resultados</span>
         </div>

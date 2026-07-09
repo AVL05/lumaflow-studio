@@ -402,14 +402,14 @@ const PhotoCard = memo(function PhotoCard({
             />
             <div className="min-w-0">
               <h2 className="truncate font-medium">{photo.title || "Sin titulo"}</h2>
-              <p className="mt-1 text-xs text-stone-500">
+              <p className="mt-1 text-xs text-stone-400">
                 {formatBytes(photo.file_size)} · {photo.exif_summary?.camera_model || "Sin camara"}
               </p>
             </div>
           </div>
           {photo.is_favorite ? <Badge variant="warm">Fav</Badge> : null}
         </div>
-        <p className="mt-3 text-sm text-stone-500">
+        <p className="mt-3 text-sm text-stone-400">
           {photo.category || "Sin categoria"} · {photo.session?.name || "Sin sesion"}
         </p>
         <div className="mt-3 flex flex-wrap gap-1">
@@ -448,7 +448,7 @@ function PhotoQuickPreview({ photo }) {
       <div className="space-y-5">
         <div>
           <p className="text-sm text-stone-400">{photo.description || "Sin descripcion."}</p>
-          <p className="mt-2 text-xs text-stone-500">
+          <p className="mt-2 text-xs text-stone-400">
             {photo.category || "Sin categoria"} · {photo.taken_at || "Sin fecha"}
           </p>
         </div>

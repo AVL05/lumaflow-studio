@@ -4,7 +4,7 @@ import { StreamingMessage } from "./StreamingMessage";
 export function MessageList({ messages, loading }) {
   if (messages.length === 0) {
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-stone-400">
         Inicia una conversacion sobre sesiones, equipo, presets, biblioteca u organizacion.
       </p>
     );
@@ -33,8 +33,8 @@ export function MessageList({ messages, loading }) {
         </div>
       ))}
       {loading ? (
-        <div className="max-w-[85%] rounded-lg border border-white/10 bg-white/[0.04] p-4 text-sm text-stone-500">
-          Ollama procesando...
+        <div className="max-w-[85%] rounded-lg border border-white/10 bg-white/[0.04] p-4 text-sm text-stone-400">
+          IA local procesando...
         </div>
       ) : null}
     </div>
