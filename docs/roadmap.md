@@ -1,13 +1,13 @@
 # Roadmap
 
-Estado a fecha de la release v1 (fase 10). Lo que sigue no esta implementado; lo que esta implementado no aparece aqui.
+Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que sigue no esta implementado; lo que esta implementado no aparece aqui.
 
 ## Deuda conocida
 
 | Tema | Detalle |
 |---|---|
 | Persistencia de chat WebGPU | La inferencia principal corre en navegador; falta persistir conversaciones WebGPU en backend o IndexedDB |
-| Exportacion PDF | `ExportService` acepta `csv` y `json`. El contrato esta preparado; el formato `pdf` se rechaza en validacion |
+| Exportacion general | Presupuestos y facturas tienen PDF. `ExportService` mantiene CSV/JSON para listados y analitica |
 | Analitica | `/api/analytics` hace varias consultas por carga, sin cache. Aceptable con volumenes de portfolio |
 | Tests frontend | Tests sobre hooks, utilidades del calendario y componentes criticos. Sin cobertura de paginas completas |
 
@@ -23,12 +23,12 @@ Estado a fecha de la release v1 (fase 10). Lo que sigue no esta implementado; lo
 
 - Exportacion PDF de planes de sesion, conversaciones de IA e informes de analitica.
 - Contratos y aprobacion formal de entregas por parte del cliente.
-- Galeria publica por entrega, con enlace firmado y caducidad.
+- Caducidad configurable de tokens del portal y descargas originales en lote.
 
 **Largo plazo**
 
 - Multi-usuario por estudio: roles, permisos y recursos compartidos. Hoy el aislamiento es estrictamente por `user_id`.
-- Facturacion.
+- Pagos online y conciliacion de facturas.
 
 ## Fuera de alcance
 

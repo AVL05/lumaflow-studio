@@ -14,7 +14,7 @@ frontend/src/
 │   └── layout/    AppLayout
 ├── features/      UI por dominio: calendar, tasks, checklists, timeline,
 │                  notifications, search, analytics, dashboard,
-│                  locations, ai, auth, clients, deliveries
+│                  locations, ai, auth, clients, deliveries, gallery
 ├── hooks/         usePaginatedResource, useResource, useSelection,
 │                  useHotkey, useDebouncedValue, usePersistedState
 ├── pages/         composicion, una por ruta
@@ -53,7 +53,11 @@ ToastProvider          avisos efimeros
 
 ## Rutas
 
-Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayout`. Publicas: `/login`, `/register`, `/about-project`. Cualquier otra ruta cae en `NotFoundPage`, que hace tambien de `errorElement` (sustituye la pantalla de desarrollo de React Router, que filtraba stack traces).
+Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayout`, incluidas `/quotes`, `/invoices` y `/presets`. Publicas: `/login`, `/register`, `/about-project`, `/book/:slug` y `/deliver/:token`. Cualquier otra ruta cae en `NotFoundPage`, que hace tambien de `errorElement`.
+
+## PWA
+
+`vite-plugin-pwa` genera manifest y service worker con actualizacion automatica. El shell, estilos e iconos se precargan; el chunk `lib-*` de WebLLM se excluye deliberadamente porque supera 6 MB y debe seguir bajo demanda. Las imagenes visitadas usan una cache runtime acotada a 120 entradas/30 dias.
 
 `CalendarPage`, `AnalyticsPage` y `AboutProjectPage` se cargan con `lazyRoute()` para sacar Recharts y el calendario del bundle inicial. Mantener ese patron al anadir paginas pesadas.
 

@@ -72,6 +72,26 @@ class User extends Authenticatable
         return $this->hasMany(Delivery::class);
     }
 
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function presets(): HasMany
+    {
+        return $this->hasMany(Preset::class);
+    }
+
+    public function deliveryImages(): HasMany
+    {
+        return $this->hasMany(DeliveryImage::class);
+    }
+
     public function aiAnalyses(): HasMany
     {
         return $this->hasMany(AiAnalysis::class);

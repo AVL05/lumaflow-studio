@@ -97,6 +97,22 @@ export const paymentStatuses = [
   { value: "paid", label: "Pagado", tone: "green" },
 ];
 
+export const quoteStatuses = [
+  { value: "draft", label: "Borrador", tone: "neutral" },
+  { value: "sent", label: "Enviado", tone: "warm" },
+  { value: "accepted", label: "Aceptado", tone: "green" },
+  { value: "rejected", label: "Rechazado", tone: "red" },
+  { value: "expired", label: "Caducado", tone: "red" },
+];
+
+export const invoiceStatuses = [
+  { value: "draft", label: "Borrador", tone: "neutral" },
+  { value: "sent", label: "Enviada", tone: "warm" },
+  { value: "paid", label: "Pagada", tone: "green" },
+  { value: "overdue", label: "Vencida", tone: "red" },
+  { value: "cancelled", label: "Cancelada", tone: "neutral" },
+];
+
 export const bookingRequestStatuses = [
   { value: "new", label: "Nueva", tone: "warm" },
   { value: "contacted", label: "Contactada", tone: "neutral" },

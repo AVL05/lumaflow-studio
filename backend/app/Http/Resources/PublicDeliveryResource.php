@@ -27,6 +27,7 @@ class PublicDeliveryResource extends JsonResource
             'amount_paid' => $this->amount_paid,
             'client_message' => $this->client_message,
             'client_responded_at' => $this->client_responded_at?->toISOString(),
+            'images' => DeliveryImageResource::collection($this->whenLoaded('images')),
         ];
     }
 }

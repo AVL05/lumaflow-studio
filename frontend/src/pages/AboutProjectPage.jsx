@@ -6,16 +6,19 @@ import { Panel } from "../components/ui/Panel";
 
 const stack = [
   ["Frontend", "React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet"],
-  ["Backend", "Laravel 13, PHP 8.3+, Sanctum, PHPUnit, Pint"],
+  ["Backend", "Laravel 13, PHP 8.3+, Sanctum, Dompdf, PHPUnit, Pint"],
   ["Datos", "MySQL 8, Eloquent, migraciones agrupadas por fase"],
   ["IA", "WebGPU en navegador con WebLLM; Ollama queda como compatibilidad backend opcional"],
-  ["Infra", "Docker Compose: frontend, backend, MySQL, phpMyAdmin y Ollama opcional"],
+  ["Infra", "PWA y Docker Compose: frontend, backend, MySQL, phpMyAdmin y Ollama opcional"],
 ];
 
 const modules = [
   ["Sesiones", "CRUD con cliente, tipo, estado, localizacion, checklists y timeline."],
   ["Localizaciones", "Mapa Leaflet, coordenadas, acceso, permisos, clima y equipo sugerido."],
   ["Clientes y entregas", "CRM ligero conectado a sesiones, presupuestos y galerias."],
+  ["Negocio", "Presupuestos, facturas PDF, vencimientos y estados de cobro."],
+  ["Galerias", "Carga multiple, portal privado y seleccion de favoritas del cliente."],
+  ["Presets", "Configuraciones de camara vinculadas al inventario real."],
   ["Workflow", "Calendario con drag & drop, tareas y notificaciones."],
   ["Analitica", "KPIs y graficas calculadas sobre datos reales del usuario."],
   ["Asistente IA", "Chat con contexto, planes de sesion y recomendacion de equipo."],
@@ -44,11 +47,9 @@ const decisions = [
   ],
 ];
 
-// Placeholders: sustituir por las URL reales antes de publicar el portfolio.
 const links = [
   ["GitHub", "https://github.com/AVL05/lumaflow-studio"],
-  ["LinkedIn", "https://www.linkedin.com/in/tu-perfil"],
-  ["Portfolio", "https://tu-portfolio.example.com"],
+  ["Portfolio", "https://aleviclop.dev"],
 ];
 
 export function AboutProjectPage() {
@@ -76,10 +77,10 @@ export function AboutProjectPage() {
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-400">
             LumaFlow Studio nace de una pregunta concreta: un fotografo profesional trabaja con
-            sesiones, clientes, equipo y localizaciones, pero suele
-            gestionarlo todo en hojas de calculo dispersas. Este proyecto reune ese flujo completo
-            en una sola aplicacion full-stack, con un asistente de IA que corre en el navegador con
-            WebGPU y solo razona sobre los datos reales del usuario.
+            sesiones, clientes, equipo y localizaciones, pero suele gestionarlo todo en hojas de
+            calculo dispersas. Este proyecto reune ese flujo completo en una sola aplicacion
+            full-stack, con un asistente de IA que corre en el navegador con WebGPU y solo razona
+            sobre los datos reales del usuario.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
             Es una release privada de portfolio: no busca ser un SaaS, sino demostrar arquitectura,
@@ -150,11 +151,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             Ollama instalado.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            {[
-              "Chat con contexto",
-              "Planes de sesion",
-              "Recomendador de equipo",
-            ].map((item) => (
+            {["Chat con contexto", "Planes de sesion", "Recomendador de equipo"].map((item) => (
               <Badge key={item} variant="warm">
                 {item}
               </Badge>

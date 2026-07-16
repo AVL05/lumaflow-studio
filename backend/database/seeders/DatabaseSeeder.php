@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\Session;
 use App\Models\User;
 use App\Services\ChecklistService;
+use App\Services\CommercialDocumentService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -145,6 +146,32 @@ class DatabaseSeeder extends Seeder
             'private_notes' => 'Preparar seleccion final y preset cinematico suave.',
             'public_token' => Str::random(40),
         ]);
+
+        $user->presets()->create([
+            'gear_item_id' => $user->gearItems()->where('category', 'camera')->value('id'),
+            'name' => 'Producto limpio',
+            'category' => 'Producto',
+            'iso' => '100',
+            'aperture' => 'f/8',
+            'shutter_speed' => '1/160',
+            'white_balance' => '5600K',
+            'notes' => 'Base neutra para flash de estudio y control de reflejos.',
+        ]);
+
+        $documents = app(CommercialDocumentService::class);
+        $quote = $documents->createQuote($user, [
+            'client_id' => $client->id,
+            'session_id' => $delivery->session_id,
+            'tax_rate' => 21,
+            'valid_until' => now()->addDays(20)->toDateString(),
+            'notes' => 'Incluye produccion, retoque y licencia digital.',
+            'items' => [
+                ['description' => 'Produccion fotografica de producto', 'quantity' => 1, 'unit_price' => 800],
+                ['description' => 'Retoque premium', 'quantity' => 20, 'unit_price' => 20],
+            ],
+        ]);
+        $quote->update(['status' => 'accepted']);
+        $documents->createInvoice($user, $quote, ['due_date' => now()->addDays(30)->toDateString()]);
 
         $user->bookingRequests()->create([
             'name' => 'Laura Gimenez',

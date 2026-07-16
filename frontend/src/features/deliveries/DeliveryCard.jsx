@@ -29,10 +29,10 @@ export function DeliveryCard({ delivery, onEdit, onDelete }) {
       <div className="mt-5 space-y-2 text-sm text-stone-400">
         <p>Fecha: {delivery.delivery_date || "Sin fecha"}</p>
         <div className="flex items-center gap-2">
-          <span>
-            Presupuesto: {delivery.budget ? `${delivery.budget} EUR` : "Sin presupuesto"}
-          </span>
-          {delivery.budget ? <StatusBadge options={paymentStatuses} value={delivery.payment_status} /> : null}
+          <span>Presupuesto: {delivery.budget ? `${delivery.budget} EUR` : "Sin presupuesto"}</span>
+          {delivery.budget ? (
+            <StatusBadge options={paymentStatuses} value={delivery.payment_status} />
+          ) : null}
         </div>
         {delivery.client_message ? (
           <p className="rounded-md border border-amber-200/20 bg-amber-200/[0.06] px-3 py-2 text-amber-100">

@@ -2,7 +2,7 @@
 
 # LumaFlow Studio
 
-**Plataforma full-stack de gestion del flujo de trabajo para fotografos, con asistente de IA que corre en local.**
+**Plataforma full-stack de gestion del flujo de trabajo para fotografos, con asistente de IA y modelos WebGPU locales.**
 
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
@@ -24,26 +24,28 @@ Es una release privada de portfolio. No busca ser un SaaS, sino demostrar arquit
 
 ## Capturas
 
-> Pendientes de preparar el material visual. La pagina `/about-project` incluye los marcadores de posicion.
-
 | Dashboard | Calendario | Analitica |
 |---|---|---|
-| _pendiente_ | _pendiente_ | _pendiente_ |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Calendario](docs/screenshots/calendar.png) | ![Analitica](docs/screenshots/analytics.png) |
 
-| Biblioteca | Localizaciones | Asistente IA |
+| Presupuestos | Facturas | Presets |
 |---|---|---|
-| _pendiente_ | _pendiente_ | _pendiente_ |
+| ![Presupuestos](docs/screenshots/quotes.png) | ![Facturas](docs/screenshots/invoices.png) | ![Presets](docs/screenshots/presets.png) |
+
+| Galeria y entregas | Localizaciones | Asistente IA |
+|---|---|---|
+| ![Galeria](docs/screenshots/gallery.png) | ![Localizaciones](docs/screenshots/locations.png) | ![Asistente IA](docs/screenshots/ai-assistant.png) |
 
 ## Stack
 
 | Capa | Tecnologia |
 |---|---|
-| Frontend | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet |
-| Backend | Laravel 13, PHP 8.3+, Sanctum (tokens Bearer) |
+| Frontend | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet, PWA |
+| Backend | Laravel 13, PHP 8.3+, Sanctum (tokens Bearer), Dompdf |
 | Datos | MySQL 8, Eloquent |
-| IA | WebGPU en navegador con WebLLM; Ollama backend opcional |
+| IA | WebGPU en navegador con WebLLM y modelos instalables; Ollama backend opcional |
 | Calidad | PHPUnit, Pint, Vitest, Testing Library, oxlint, Prettier |
-| Infra | Docker Compose (frontend, backend, MySQL, phpMyAdmin, Ollama opcional) |
+| Infra | PWA + Docker Compose (frontend, backend, MySQL, phpMyAdmin, Ollama opcional) |
 
 ## Arquitectura
 
@@ -80,11 +82,15 @@ Detalle completo en [docs/architecture.md](docs/architecture.md).
 | **Checklists** | Plantillas por tipo (equipo, preparacion, edicion, entrega), items reordenables, progreso en porcentaje, duplicado |
 | **Localizaciones** | Mapa Leaflet, coordenadas, acceso, permisos, coste, clima, estaciones, equipo recomendado |
 | **Clientes y entregas** | CRM ligero conectado a sesiones, presupuestos y galerias |
+| **Presupuestos y facturas** | Conceptos, IVA, estados, numeracion por estudio y documentos PDF |
+| **Galeria de cliente** | Carga multiple, portal privado, aprobacion y seleccion de favoritas |
+| **Presets** | Ajustes de camara reutilizables y vinculados al equipo real |
 | **Analitica** | KPIs y graficas Recharts sobre datos reales, tablas comparativas, rangos de fechas |
 | **Busqueda global** | `Ctrl/Cmd + K`. Resultados agrupados, navegacion por teclado |
 | **Notificaciones** | Centro persistido en BD, contador global, marcado y limpieza |
 | **Asistente IA** | Chat con contexto, planes de sesion, recomendador de equipo |
 | **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y compatibilidad Ollama |
+| **PWA** | Aplicacion instalable con shell offline; los modelos WebGPU siguen bajo demanda |
 
 ## Instalacion
 
@@ -188,6 +194,7 @@ lumaflow-studio/
 │   │   ├── Services/
 │   │   └── Support/AuditLog.php
 │   ├── database/{migrations, seeders}
+│   ├── resources/views/pdf
 │   ├── routes/api.php
 │   ├── tests/{Feature, Unit}
 │   └── Dockerfile
@@ -201,7 +208,7 @@ lumaflow-studio/
 
 ## IA
 
-El asistente principal corre con **WebGPU en el navegador** mediante WebLLM: no hay claves de API ni proveedores externos. El modelo se carga bajo demanda la primera vez que el usuario usa el centro de IA.
+El asistente principal corre con **WebGPU en el navegador** mediante WebLLM: no hay claves de API ni proveedores externos. El usuario puede instalar varios modelos recomendados, comparar perfil/descarga/VRAM, activar el que prefiera y desinstalar los que ya no quiera mantener cacheados. El modulo de IA se carga bajo demanda para no penalizar el resto de la SPA.
 
 El backend conserva servicios Ollama como compatibilidad local avanzada para endpoints de IA, pero la SPA no depende de tener Ollama instalado. Las tareas estructuradas (planificar una sesion, recomendar equipo) piden JSON estricto y se parsean en el cliente.
 
@@ -215,7 +222,7 @@ cd backend && php artisan test --filter=AuthTest
 cd frontend && npm run test:coverage
 ```
 
-42 tests de backend (auth, CRUD, permisos, workflow, salud, policies) y 33 de frontend (hooks, utilidades del calendario, `Modal`, `TaskCard`, `ProtectedRoute`).
+56 tests de backend (auth, CRUD, permisos, workflow, facturacion, galerias, salud y policies) y 33 de frontend (hooks, utilidades del calendario y componentes criticos).
 
 `phpunit.xml` apunta a SQLite en memoria. Si tu PHP no trae `pdo_sqlite`:
 
@@ -225,7 +232,7 @@ DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
 
 ## Roadmap
 
-Lo que **no** esta implementado, y por que, en [docs/roadmap.md](docs/roadmap.md). Resumen: streaming real de IA, envio de recordatorios con colas, exportacion PDF, comparacion before/after y kanban de tareas.
+Lo que **no** esta implementado, y por que, en [docs/roadmap.md](docs/roadmap.md). Resumen: streaming real de IA, persistencia del chat WebGPU, contratos, comparacion before/after y kanban de tareas.
 
 ## Contribucion
 

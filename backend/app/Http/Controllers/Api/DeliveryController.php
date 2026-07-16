@@ -31,7 +31,7 @@ class DeliveryController extends Controller
             ->with(['client', 'session'])
             ->search(request('search'))
             ->status(request('status'))
-            ->when(request('client_id'), fn($query) => $query->where('client_id', request('client_id')))
+            ->when(request('client_id'), fn ($query) => $query->where('client_id', request('client_id')))
             ->orderBy($sort, $direction)
             ->paginate(min((int) request('per_page', 12), 48));
 
@@ -43,7 +43,7 @@ class DeliveryController extends Controller
         $delivery = request()->user()->deliveries()->create($request->validated());
         $this->activity->log($request->user(), $delivery, ActivityLogger::CREATED, "Entrega creada: {$delivery->title}");
 
-        return new DeliveryResource($delivery->load(['client', 'session']));
+        return new DeliveryResource($delivery->load(['client', 'session', 'images']));
     }
 
     public function show(Delivery $delivery): DeliveryResource
@@ -94,7 +94,7 @@ class DeliveryController extends Controller
             return;
         }
 
-        $portalUrl = rtrim(config('app.frontend_url'), '/') . "/deliver/{$delivery->public_token}";
+        $portalUrl = rtrim(config('app.frontend_url'), '/')."/deliver/{$delivery->public_token}";
 
         try {
             Mail::to($delivery->client->email)->send(new DeliveryReadyMail($delivery, $portalUrl));

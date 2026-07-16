@@ -63,6 +63,18 @@ export function ClientPortalPage() {
     }
   }
 
+  async function favorite(image) {
+    setSaving(true);
+    setError("");
+    try {
+      setDelivery(await publicApi.favoriteImage(token, image.id));
+    } catch (err) {
+      setError(getApiError(err, "No se pudo guardar la selección."));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (notFound) {
     return (
       <PublicShell>
@@ -79,7 +91,10 @@ export function ClientPortalPage() {
     );
   }
 
-  const [paymentLabel, paymentTone] = paymentLabels[delivery.payment_status] ?? ["Sin datos", "neutral"];
+  const [paymentLabel, paymentTone] = paymentLabels[delivery.payment_status] ?? [
+    "Sin datos",
+    "neutral",
+  ];
   const canRespond = !["approved", "archived"].includes(delivery.status);
 
   return (
@@ -102,7 +117,9 @@ export function ClientPortalPage() {
         </div>
         <p className="mt-2 text-sm text-stone-400">
           {delivery.session_name ? `Sesion: ${delivery.session_name} · ` : ""}
-          {delivery.delivery_date ? `Fecha de entrega: ${delivery.delivery_date}` : "Sin fecha de entrega"}
+          {delivery.delivery_date
+            ? `Fecha de entrega: ${delivery.delivery_date}`
+            : "Sin fecha de entrega"}
         </p>
 
         {delivery.budget ? (
@@ -137,9 +154,48 @@ export function ClientPortalPage() {
           >
             <Button>Ver galeria completa</Button>
           </a>
+        ) : null}
+
+        {delivery.images?.length ? (
+          <section className="mt-8">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+                  Tu galería
+                </p>
+                <h2 className="mt-2 text-xl font-semibold">Selecciona tus favoritas</h2>
+              </div>
+              <p className="text-xs text-stone-400">
+                {delivery.images.filter((image) => image.client_favorite).length} seleccionadas
+              </p>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {delivery.images.map((image) => (
+                <button
+                  key={image.id}
+                  type="button"
+                  disabled={saving}
+                  onClick={() => favorite(image)}
+                  className={`group relative overflow-hidden rounded-xl border text-left transition ${image.client_favorite ? "border-amber-200 ring-2 ring-amber-200/20" : "border-white/10 hover:border-white/25"}`}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.filename}
+                    className="aspect-[4/3] w-full object-cover"
+                    loading="lazy"
+                  />
+                  <span
+                    className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-semibold shadow-lg ${image.client_favorite ? "bg-amber-200 text-stone-950" : "bg-black/70 text-white"}`}
+                  >
+                    {image.client_favorite ? "Favorita" : "Seleccionar"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
         ) : (
           <p className="mt-6 text-sm text-stone-400">
-            El estudio todavia no ha compartido el enlace de la galeria.
+            El estudio todavía no ha publicado fotografías en esta entrega.
           </p>
         )}
 

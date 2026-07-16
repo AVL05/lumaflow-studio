@@ -46,9 +46,7 @@ export function DeliveryDetail({ delivery }) {
       </div>
       {delivery.client_message ? (
         <div className="mt-6 rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-amber-200">
-            Mensaje del cliente
-          </p>
+          <p className="text-xs uppercase tracking-[0.16em] text-amber-200">Mensaje del cliente</p>
           <p className="mt-2 text-sm leading-6 text-stone-300">{delivery.client_message}</p>
         </div>
       ) : null}

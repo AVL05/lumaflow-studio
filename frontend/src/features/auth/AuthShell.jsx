@@ -157,9 +157,7 @@ export function AuthShell({ eyebrow = "Acceso privado", title, description, foot
                 <div className="rounded-md border border-white/10 bg-[#15130f] p-6 sm:p-8">
                   <div className="mb-7 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-amber-200">
-                        {eyebrow}
-                      </p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-amber-200">{eyebrow}</p>
                       <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
                         {title}
                       </h2>

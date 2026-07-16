@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['user_id', 'name', 'category', 'brand', 'model', 'weight_grams', 'condition', 'purchase_date', 'purchase_price', 'notes', 'is_favorite'])]
 class GearItem extends Model
@@ -48,5 +49,10 @@ class GearItem extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function presets(): HasMany
+    {
+        return $this->hasMany(Preset::class);
     }
 }

@@ -4,7 +4,7 @@
 
 LumaFlow Studio is split into two applications:
 
-- `backend/`: Laravel 13 REST API with Sanctum auth, controllers, form requests, resources, services, models, policies, migrations, seeders, storage, and PHPUnit tests. It serves no HTML: there is no Blade, no Vite and no `resources/` directory.
+- `backend/`: Laravel 13 REST API with Sanctum auth, controllers, form requests, resources, services, models, policies, migrations, seeders, storage, and PHPUnit tests. It serves no application HTML; Blade is limited to PDF templates in `resources/views/pdf/`.
 - `frontend/`: React 19 + Vite SPA written in JavaScript, with pages in `src/pages/`, API clients in `src/api/`, shared providers/router in `src/app/`, reusable feature UI in `src/features/`, hooks in `src/hooks/`, styles in `src/styles/`, and Vitest tests next to the code they cover.
 - `docs/`: technical documentation (architecture, api, database, frontend, backend, ai, deployment, roadmap). Keep it in sync with contract changes.
 - Root `README.md`: setup, modules, scripts and Docker reference.

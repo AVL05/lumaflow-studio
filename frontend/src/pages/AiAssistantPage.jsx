@@ -10,12 +10,20 @@ import { AiHistory } from "../features/ai/AiHistory";
 import { ChatPanel } from "../features/ai/ChatPanel";
 import { ConversationSidebar } from "../features/ai/ConversationSidebar";
 import { GearRecommendation } from "../features/ai/GearRecommendation";
+import { ModelManager } from "../features/ai/ModelManager";
 import { SessionPlanner } from "../features/ai/SessionPlanner";
 import {
   createLocalConversation,
+  getActiveWebGpuModel,
+  getBrowserStorageEstimate,
+  getWebGpuModels,
   getWebGpuSupport,
+  installWebGpuModel,
+  listInstalledWebGpuModels,
   runWebGpuChat,
   runWebGpuJson,
+  setActiveWebGpuModel,
+  uninstallWebGpuModel,
 } from "../features/ai/webGpuAi";
 
 const gearSchema = {
@@ -54,14 +62,21 @@ export function AiAssistantPage() {
   const [loading, setLoading] = useState("");
   const [loadingText, setLoadingText] = useState("");
   const [error, setError] = useState("");
+  const [activeModelId, setActiveModelId] = useState(getActiveWebGpuModel);
+  const [installedModelIds, setInstalledModelIds] = useState([]);
+  const [busyModelId, setBusyModelId] = useState("");
+  const [storageEstimate, setStorageEstimate] = useState(null);
   const abortRef = useRef(null);
 
   const messages = useMemo(() => activeConversation?.messages ?? [], [activeConversation]);
+  const webGpuModels = useMemo(() => getWebGpuModels(), []);
 
   const loadConversations = useCallback(async () => {
     try {
       const response = await aiApi.history({ search, per_page: 30 });
-      setConversations(filterLocalConversations(readLocalConversations(), search).concat(response.data));
+      setConversations(
+        filterLocalConversations(readLocalConversations(), search).concat(response.data),
+      );
     } catch {
       setConversations(filterLocalConversations(readLocalConversations(), search));
     }
@@ -86,9 +101,27 @@ export function AiAssistantPage() {
     }
   }, []);
 
+  const refreshInstalledModels = useCallback(async () => {
+    try {
+      const [installed, storage] = await Promise.all([
+        listInstalledWebGpuModels(),
+        getBrowserStorageEstimate(),
+      ]);
+      setInstalledModelIds(installed);
+      setStorageEstimate(storage);
+    } catch {
+      setInstalledModelIds([]);
+      setStorageEstimate(null);
+    }
+  }, []);
+
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
+
+  useEffect(() => {
+    refreshInstalledModels();
+  }, [refreshInstalledModels]);
 
   useEffect(() => {
     const timer = window.setTimeout(loadConversations, 250);
@@ -193,13 +226,61 @@ export function AiAssistantPage() {
     }
   }
 
+  async function installModel(modelId) {
+    setError("");
+    setBusyModelId(modelId);
+    setLoadingText("Preparando descarga del modelo...");
+    try {
+      const selectedModel = await installWebGpuModel(modelId, updateWebGpuProgress);
+      setActiveModelId(selectedModel);
+      await refreshInstalledModels();
+      setStatus({ ...getWebGpuSupport(), streaming_supported: true });
+    } catch (err) {
+      setError(err.message || "No se pudo instalar el modelo WebGPU.");
+    } finally {
+      setBusyModelId("");
+      setLoadingText("");
+    }
+  }
+
+  async function selectModel(modelId) {
+    setError("");
+    try {
+      const selectedModel = setActiveWebGpuModel(modelId);
+      setActiveModelId(selectedModel);
+      setStatus({ ...getWebGpuSupport(), streaming_supported: true });
+    } catch (err) {
+      setError(err.message || "No se pudo activar el modelo WebGPU.");
+    }
+  }
+
+  async function uninstallModel(modelId) {
+    if (!window.confirm("Desinstalar este modelo del navegador?")) return;
+
+    setError("");
+    setBusyModelId(modelId);
+    setLoadingText("Eliminando modelo local...");
+    try {
+      await uninstallWebGpuModel(modelId);
+      const selectedModel = getActiveWebGpuModel();
+      setActiveModelId(selectedModel);
+      await refreshInstalledModels();
+      setStatus({ ...getWebGpuSupport(), streaming_supported: true });
+    } catch (err) {
+      setError(err.message || "No se pudo desinstalar el modelo WebGPU.");
+    } finally {
+      setBusyModelId("");
+      setLoadingText("");
+    }
+  }
+
   function updateWebGpuProgress(progress) {
     setLoadingText(progress.text || "");
     setStatus((current) => ({
       ...current,
       available: true,
       provider: "webgpu",
-      model: current?.model || getWebGpuSupport().model,
+      model: getActiveWebGpuModel(),
       loadingText: progress.text,
       streaming_supported: true,
     }));
@@ -262,6 +343,18 @@ export function AiAssistantPage() {
 
       <div className="space-y-6">
         <AiDashboard status={{ ...status, loadingText }} dashboard={dashboard} />
+
+        <ModelManager
+          models={webGpuModels}
+          activeModelId={activeModelId}
+          installedModelIds={installedModelIds}
+          busyModelId={busyModelId}
+          loadingText={loadingText}
+          storageEstimate={storageEstimate}
+          onInstall={installModel}
+          onSelect={selectModel}
+          onUninstall={uninstallModel}
+        />
 
         <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
           <ConversationSidebar
@@ -343,5 +436,7 @@ function filterLocalConversations(conversations, search) {
 }
 
 function isLocalConversation(conversation) {
-  return conversation?.provider === "webgpu" || String(conversation?.id ?? "").startsWith("webgpu-");
+  return (
+    conversation?.provider === "webgpu" || String(conversation?.id ?? "").startsWith("webgpu-")
+  );
 }

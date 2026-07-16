@@ -58,7 +58,9 @@ export function ResetPasswordPage() {
       }
     >
       <form className="space-y-4" onSubmit={submit}>
-        {missingToken ? <ErrorState message="El enlace de recuperacion no contiene token." /> : null}
+        {missingToken ? (
+          <ErrorState message="El enlace de recuperacion no contiene token." />
+        ) : null}
         {error ? <ErrorState message={error} /> : null}
         <Field label="Email">
           <input
@@ -86,9 +88,7 @@ export function ResetPasswordPage() {
             autoComplete="new-password"
             placeholder="Repite el password"
             value={form.password_confirmation}
-            onChange={(event) =>
-              setForm({ ...form, password_confirmation: event.target.value })
-            }
+            onChange={(event) => setForm({ ...form, password_confirmation: event.target.value })}
           />
         </Field>
         <Button className="mt-2 w-full py-3" disabled={loading || missingToken}>

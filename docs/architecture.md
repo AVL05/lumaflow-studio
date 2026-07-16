@@ -46,7 +46,11 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **404 en lugar de 403.** Devolver 403 sobre un recurso ajeno confirma que existe. Las policies de `app/Policies` extienden `OwnedResourcePolicy` y devuelven `false`; el metodo `authorizeOwnership()` del controlador base traduce ese `false` en un 404. Los recursos anteriores a la fase 9 hacen lo mismo con un `ensureOwnership()` privado.
 
-**La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar (el resumen de tareas lo consumen el dashboard y la pagina de tareas a traves de `TaskSummaryService`).
+**La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `CommercialDocumentService`, `DeliveryGalleryService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar reglas.
+
+**Una entrega es tambien su galeria.** Las fotografias se relacionan con `Delivery` y reutilizan su token publico, aprobacion y portal. No existe un segundo agregado `Gallery` que pueda desincronizarse de la entrega comercial.
+
+**Los modelos WebGPU no forman parte del precache PWA.** El shell es instalable y funciona offline, pero el chunk pesado de WebLLM se descarga solo al abrir el asistente.
 
 **Relaciones morficas sin clave foranea.** `activities` apunta a Session, Task, Client o Delivery. Al no haber FK, el trait `Concerns\CleansUpWorkflowRelations` la limpia en el evento `deleting`. Por eso `BulkActionService::delete()` borra modelo a modelo: un `whereIn()->delete()` por query builder saltaria el evento y dejaria huerfanos.
 
@@ -57,6 +61,6 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 ## Limites conscientes
 
 - Sin streaming real de IA: `streamingAvailable()` devuelve `true` pero no hay chunked/SSE; la UI solo simula progresion.
-- Sin exportacion PDF: `ExportService` solo acepta `csv` y `json`.
+- El exportador generico sigue limitado a CSV/JSON; presupuestos y facturas disponen de PDF especifico mediante Dompdf.
 
 Ver [roadmap.md](roadmap.md).

@@ -346,7 +346,8 @@ export function DashboardPage() {
                 <span className="text-emerald-100">WebGPU en navegador</span>
               </p>
               <p className="mt-2 text-xs text-stone-400">
-                Ollama backend opcional: {dashboard.ollamaStatus.available ? "disponible" : "inactivo"}
+                Ollama backend opcional:{" "}
+                {dashboard.ollamaStatus.available ? "disponible" : "inactivo"}
               </p>
             </Card>
             <Card className="p-5">

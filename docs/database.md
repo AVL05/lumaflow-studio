@@ -17,6 +17,8 @@ Agrupadas por fase, no una por tabla:
 | `2026_07_08_000008_create_ai_conversations_and_session_plans` | `ai_conversations`, `ai_messages`, `ai_analyses`, `ai_session_plans` |
 | `2026_07_08_091226_create_personal_access_tokens_table` | Sanctum |
 | `2026_07_08_000009_create_workflow_tables` | `tasks`, `checklists`, `checklist_items`, `activities`, `notifications` |
+| `2026_07_09_000001_add_client_portal_features` | Portal, reservas y tokens publicos |
+| `2026_07_16_000001_consolidate_raw_manager_features` | `quotes`, `quote_items`, `invoices`, `presets`, `delivery_images` |
 
 ## Modelo de dominio
 
@@ -24,9 +26,11 @@ Agrupadas por fase, no una por tabla:
 users ──┬── sessions ──┬── checklists ── checklist_items
         │              ├── tasks
         │              └── ai_session_plans
-        ├── gear_items
+        ├── gear_items ── presets
         ├── locations
-        ├── clients ── deliveries ── sessions (nullable)
+        ├── clients ──┬── deliveries ── delivery_images
+        │             ├── quotes ── quote_items ── invoice
+        │             └── invoices
         ├── ai_conversations ── ai_messages
         ├── ai_analyses
         ├── notifications
@@ -53,7 +57,7 @@ Toda tabla de dominio tiene `user_id` con `cascadeOnDelete`. Es la unica fronter
 
 ## Seeder
 
-Un unico `DatabaseSeeder`. Crea `test@example.com` (password `password`) con dos sesiones, equipo, dos localizaciones, un cliente, una entrega, cuatro tareas, tres checklists, actividad y notificaciones.
+Un unico `DatabaseSeeder`. Crea `test@example.com` (password `password`) con dos sesiones, equipo, preset, dos localizaciones, cliente, entrega, presupuesto aceptado, factura, cuatro tareas, tres checklists, actividad y notificaciones.
 
 ```bash
 php artisan migrate:fresh --seed --force

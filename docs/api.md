@@ -40,7 +40,20 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 | Locations | `apiResource /locations` | `search`, `city`, `type`, `access_difficulty`, `access_mode`, `favorite`, `latitude`, `longitude`, `radius_km` |
 | Clients | `apiResource /clients` | `search`, `status`, `sort`, `direction` |
 | Deliveries | `apiResource /deliveries` | `search`, `status`, `client_id` |
+| Quotes | `apiResource /quotes`, `PATCH /quotes/{quote}/status`, `GET /quotes/{quote}/pdf` | `search`, `status`, `sort`, `direction` |
+| Invoices | `GET/POST /invoices`, `PATCH /invoices/{invoice}/status`, `GET /invoices/{invoice}/pdf` | `status` |
+| Presets | `apiResource /presets` sin `show` | `search`, `category` |
 | Tasks | `apiResource /tasks` + `GET /tasks/summary` | `search`, `status`, `priority`, `due_from`, `due_to`, `session_id`, `client_id`, `open` |
+
+### Galeria de entregas
+
+| Metodo | Ruta | Notas |
+|---|---|---|
+| POST | `/deliveries/{delivery}/images` | Multipart `images[]`, maximo 50 JPEG/PNG/WebP de 15 MB |
+| DELETE | `/deliveries/{delivery}/images/{image}` | Elimina registro y archivo del disco publico |
+| POST | `/public/deliveries/{token}/images/{image}/favorite` | Alterna la seleccion del cliente mediante token opaco |
+
+Los PDF de presupuestos y facturas son documentos descargables autenticados. No forman parte del exportador generico CSV/JSON.
 
 ### Checklists
 
@@ -81,7 +94,7 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 
 Una combinacion no soportada devuelve 422.
 
-**Recursos exportables**: `sessions`, `clients`, `deliveries`, `tasks`, `gear`, `locations`. Formatos `csv` y `json` (PDF esta en el roadmap).
+**Recursos exportables**: `sessions`, `clients`, `deliveries`, `tasks`, `gear`, `locations`. Formatos genericos `csv` y `json`.
 
 ### IA
 

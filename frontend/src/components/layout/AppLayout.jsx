@@ -22,6 +22,7 @@ const navGroups = [
     [
       ["Sesiones", "/app/sessions"],
       ["Equipo", "/app/gear"],
+      ["Presets", "/app/presets"],
       ["Localizaciones", "/app/locations"],
     ],
   ],
@@ -30,6 +31,8 @@ const navGroups = [
     [
       ["Clientes", "/app/clients"],
       ["Entregas", "/app/deliveries"],
+      ["Presupuestos", "/app/quotes"],
+      ["Facturas", "/app/invoices"],
       ["Solicitudes", "/app/booking-requests"],
       ["AI Assistant", "/app/ai-assistant"],
     ],

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { deliveriesApi } from "../api/deliveries";
 import { getApiError } from "../api/client";
@@ -7,18 +7,25 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { Skeleton } from "../components/ui/Skeleton";
 import { ErrorState } from "../components/states/ErrorState";
 import { DeliveryDetail } from "../features/deliveries/DeliveryDetail";
+import { DeliveryGallery } from "../features/deliveries/DeliveryGallery";
 
 export function DeliveryDetailPage() {
   const { id } = useParams();
   const [delivery, setDelivery] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    deliveriesApi
-      .show(id)
-      .then(setDelivery)
-      .catch((err) => setError(getApiError(err)));
+  const load = useCallback(async () => {
+    try {
+      setDelivery(await deliveriesApi.show(id));
+      setError("");
+    } catch (err) {
+      setError(getApiError(err));
+    }
   }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <>
@@ -34,7 +41,12 @@ export function DeliveryDetailPage() {
       />
       {error ? <ErrorState message={error} /> : null}
       {!delivery && !error ? <Skeleton className="h-80" /> : null}
-      {delivery ? <DeliveryDetail delivery={delivery} /> : null}
+      {delivery ? (
+        <>
+          <DeliveryDetail delivery={delivery} />
+          <DeliveryGallery delivery={delivery} onChange={load} />
+        </>
+      ) : null}
     </>
   );
 }

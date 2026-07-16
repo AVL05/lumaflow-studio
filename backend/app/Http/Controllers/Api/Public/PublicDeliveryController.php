@@ -52,8 +52,17 @@ class PublicDeliveryController extends Controller
         return new PublicDeliveryResource($delivery->fresh());
     }
 
+    public function favorite(string $token, int $image): PublicDeliveryResource
+    {
+        $delivery = $this->find($token);
+        $deliveryImage = $delivery->images()->findOrFail($image);
+        $deliveryImage->update(['client_favorite' => ! $deliveryImage->client_favorite]);
+
+        return new PublicDeliveryResource($delivery->fresh()->load(['user', 'client', 'session', 'images']));
+    }
+
     private function find(string $token): Delivery
     {
-        return Delivery::query()->where('public_token', $token)->with(['user', 'client', 'session'])->firstOrFail();
+        return Delivery::query()->where('public_token', $token)->with(['user', 'client', 'session', 'images'])->firstOrFail();
     }
 }

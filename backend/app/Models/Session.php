@@ -66,6 +66,16 @@ class Session extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function checklists(): HasMany
     {
         return $this->hasMany(Checklist::class)->orderBy('position')->orderBy('id');

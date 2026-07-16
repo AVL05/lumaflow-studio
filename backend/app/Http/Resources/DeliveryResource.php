@@ -26,6 +26,7 @@ class DeliveryResource extends JsonResource
             'public_token' => $this->public_token,
             'client_message' => $this->client_message,
             'client_responded_at' => $this->client_responded_at?->toISOString(),
+            'images' => DeliveryImageResource::collection($this->whenLoaded('images')),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

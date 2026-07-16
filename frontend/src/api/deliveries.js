@@ -7,4 +7,11 @@ export const deliveriesApi = {
   create: (payload) => apiClient.post("/deliveries", payload).then((res) => res.data.data),
   update: (id, payload) => apiClient.put(`/deliveries/${id}`, payload).then((res) => res.data.data),
   remove: (id) => apiClient.delete(`/deliveries/${id}`),
+  uploadImages: (id, images) => {
+    const data = new FormData();
+    images.forEach((image) => data.append("images[]", image));
+    return apiClient.post(`/deliveries/${id}/images`, data).then((res) => res.data.data);
+  },
+  removeImage: (deliveryId, imageId) =>
+    apiClient.delete(`/deliveries/${deliveryId}/images/${imageId}`),
 };

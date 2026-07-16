@@ -12,7 +12,11 @@ export function AiDashboard({ status, dashboard }) {
         value={usage.conversations ?? 0}
         detail="Historial guardado"
       />
-      <InsightCard label="Recomendaciones" value={usage.analyses ?? 0} detail="Equipo recomendado" />
+      <InsightCard
+        label="Recomendaciones"
+        value={usage.analyses ?? 0}
+        detail="Equipo recomendado"
+      />
       <InsightCard
         label="Sesiones optimizadas"
         value={usage.optimizedSessions ?? 0}

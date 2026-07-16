@@ -15,8 +15,10 @@ import { DeliveriesPage } from "../pages/DeliveriesPage";
 import { DeliveryDetailPage } from "../pages/DeliveryDetailPage";
 import { LocationsPage } from "../pages/LocationsPage";
 import { LocationDetailPage } from "../pages/LocationDetailPage";
-import { AiAssistantPage } from "../pages/AiAssistantPage";
 import { TasksPage } from "../pages/TasksPage";
+import { QuotesPage } from "../pages/QuotesPage";
+import { InvoicesPage } from "../pages/InvoicesPage";
+import { PresetsPage } from "../pages/PresetsPage";
 import { BookingRequestsPage } from "../pages/BookingRequestsPage";
 import { BookingPage } from "../pages/BookingPage";
 import { ClientPortalPage } from "../pages/ClientPortalPage";
@@ -60,14 +62,20 @@ export const router = createBrowserRouter([
       },
       { path: "sessions", element: <SessionsPage /> },
       { path: "gear", element: <GearPage /> },
+      { path: "presets", element: <PresetsPage /> },
       { path: "clients", element: <ClientsPage /> },
       { path: "clients/:id", element: <ClientDetailPage /> },
       { path: "deliveries", element: <DeliveriesPage /> },
       { path: "deliveries/:id", element: <DeliveryDetailPage /> },
+      { path: "quotes", element: <QuotesPage /> },
+      { path: "invoices", element: <InvoicesPage /> },
       { path: "booking-requests", element: <BookingRequestsPage /> },
       { path: "locations", element: <LocationsPage /> },
       { path: "locations/:id", element: <LocationDetailPage /> },
-      { path: "ai-assistant", element: <AiAssistantPage /> },
+      {
+        path: "ai-assistant",
+        element: lazyRoute(() => import("../pages/AiAssistantPage"), "AiAssistantPage"),
+      },
       { path: "system", element: <SystemPage /> },
     ],
   },

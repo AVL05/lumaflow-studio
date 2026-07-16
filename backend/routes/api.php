@@ -12,14 +12,18 @@ use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DeliveryImageController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\GearItemController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PresetController;
 use App\Http\Controllers\Api\Public\PublicBookingController;
 use App\Http\Controllers\Api\Public\PublicCalendarController;
 use App\Http\Controllers\Api\Public\PublicDeliveryController;
+use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SystemController;
@@ -44,6 +48,7 @@ Route::middleware('throttle:30,1')->group(function (): void {
     Route::get('/public/deliveries/{token}', [PublicDeliveryController::class, 'show']);
     Route::post('/public/deliveries/{token}/approve', [PublicDeliveryController::class, 'approve']);
     Route::post('/public/deliveries/{token}/request-changes', [PublicDeliveryController::class, 'requestChanges']);
+    Route::post('/public/deliveries/{token}/images/{image}/favorite', [PublicDeliveryController::class, 'favorite']);
     Route::get('/public/calendar/{token}', [PublicCalendarController::class, 'feed']);
 });
 
@@ -58,6 +63,17 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
     Route::apiResource('locations', LocationController::class);
     Route::apiResource('clients', ClientController::class);
     Route::apiResource('deliveries', DeliveryController::class);
+    Route::post('/deliveries/{delivery}/images', [DeliveryImageController::class, 'store']);
+    Route::delete('/deliveries/{delivery}/images/{image}', [DeliveryImageController::class, 'destroy']);
+    Route::apiResource('quotes', QuoteController::class);
+    Route::patch('/quotes/{quote}/status', [QuoteController::class, 'updateStatus']);
+    Route::get('/quotes/{quote}/pdf', [QuoteController::class, 'pdf']);
+    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::post('/invoices', [InvoiceController::class, 'store']);
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
+    Route::apiResource('presets', PresetController::class)->except('show');
 
     Route::get('/ai/status', [AiController::class, 'status']);
 
