@@ -41,8 +41,8 @@ export function RegisterPage() {
   return (
     <AuthShell
       eyebrow="Nuevo workspace"
-      title="Configura tu estudio"
-      description="Crea un entorno privado para centralizar sesiones, clientes, localizaciones, equipo y entregas."
+      title="Crea tu cuenta"
+      description="Configura las credenciales de tu espacio de trabajo."
       footer={
         <>
           Ya tienes cuenta?{" "}

@@ -36,8 +36,8 @@ export function LoginPage() {
 
   return (
     <AuthShell
-      title="Accede a tu workspace"
-      description="Continua desde el ultimo punto de produccion: agenda, entregas, biblioteca y decisiones pendientes."
+      title="Inicia sesión"
+      description="Accede a tu espacio de trabajo."
       footer={
         <>
           No tienes cuenta?{" "}
