@@ -8,7 +8,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     dockerCommand: php artisan serve --host=0.0.0.0 --port=10000
-    healthCheckPath: /api/health
+    healthCheckPath: /up
     envVars:
       - key: PORT
         value: 10000
