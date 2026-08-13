@@ -28,6 +28,15 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'studio_name' => fn (array $attributes) => $attributes['name'],
+            'photography_specialties' => ['portrait'],
+            'country' => 'ES',
+            'currency' => 'EUR',
+            'onboarding_goal' => 'organize_sessions',
+            'onboarding_completed_at' => now(),
+            'getting_started_choice' => 'existing_account',
+            'getting_started_completed_at' => now(),
+            'bookings_enabled_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -40,6 +49,32 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function withoutOnboarding(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'studio_name' => null,
+            'photography_specialties' => null,
+            'country' => null,
+            'currency' => null,
+            'onboarding_goal' => null,
+            'onboarding_completed_at' => null,
+            'getting_started_choice' => null,
+            'getting_started_completed_at' => null,
+            'sample_workspace_activated_at' => null,
+            'bookings_enabled_at' => null,
+        ]);
+    }
+
+    public function withoutGettingStarted(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'getting_started_choice' => null,
+            'getting_started_completed_at' => null,
+            'sample_workspace_activated_at' => null,
+            'bookings_enabled_at' => null,
         ]);
     }
 }

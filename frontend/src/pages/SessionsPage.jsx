@@ -24,6 +24,7 @@ import { ErrorState } from "../components/states/ErrorState";
 import { ChecklistPanel } from "../features/checklists/ChecklistPanel";
 import { SessionTimeline } from "../features/timeline/SessionTimeline";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { useSelection } from "../hooks/useSelection";
 import { useToast } from "../features/notifications/ToastContext";
 import { LocationSelector } from "../features/locations/LocationSelector";
@@ -31,6 +32,7 @@ import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 import { labelFor, sessionStatuses, sessionTypes, toneForStatus } from "../utils/catalogs";
 
 const defaults = {
+  job_id: "",
   name: "",
   location_id: "",
   date: "",
@@ -73,10 +75,12 @@ export function SessionsPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm(defaults);
+    setForm({ ...defaults, job_id: new URLSearchParams(window.location.search).get("job_id") ?? "" });
     setFormError("");
     setFormOpen(true);
   }
+
+  useCreateIntent(openCreate);
 
   function openEdit(session) {
     setEditing(session);
@@ -418,6 +422,7 @@ function SessionSummary({ session }) {
 
 function normalizeSession(form) {
   return {
+    job_id: form.job_id ? Number(form.job_id) : null,
     name: form.name,
     location_id: form.location_id || null,
     date: form.date,

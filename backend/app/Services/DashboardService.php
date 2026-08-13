@@ -23,6 +23,7 @@ class DashboardService
         private readonly OllamaService $ollama,
         private readonly CalendarService $calendar,
         private readonly TaskSummaryService $taskSummary,
+        private readonly ActivationService $activation,
     ) {}
 
     public function forUser(User $user): array
@@ -149,6 +150,7 @@ class DashboardService
                 ->latest()
                 ->limit(8)
                 ->get(),
+            'activation' => $this->activation->forUser($user),
         ];
     }
 

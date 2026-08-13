@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
+use App\Models\Job;
 use App\Models\Location;
 use App\Models\Session;
 use App\Models\Task;
@@ -13,10 +14,11 @@ use App\Models\User;
 class SearchService
 {
     public const GROUPS = [
-        'sessions', 'clients', 'gear', 'locations', 'tasks', 'deliveries',
+        'jobs', 'sessions', 'clients', 'gear', 'locations', 'tasks', 'deliveries',
     ];
 
     private const LABELS = [
+        'jobs' => 'Trabajos',
         'sessions' => 'Sesiones',
         'clients' => 'Clientes',
         'gear' => 'Equipo',
@@ -62,6 +64,9 @@ class SearchService
     private function resolve(string $group, User $user, string $term, int $limit): array
     {
         return match ($group) {
+            'jobs' => Job::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+                ->map(fn (Job $item) => $this->item('jobs', $item->id, $item->title, $item->event_date?->toDateString(), "/app/jobs/{$item->id}", $item->status))->all(),
+
             'sessions' => Session::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
                 ->map(fn (Session $item) => $this->item('sessions', $item->id, $item->name, $item->client_name ?? $item->location_name, '/app/sessions', $item->status))->all(),
 

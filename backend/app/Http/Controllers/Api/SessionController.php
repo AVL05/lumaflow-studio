@@ -7,6 +7,7 @@ use App\Http\Requests\SessionRequest;
 use App\Http\Resources\SessionResource;
 use App\Models\Session;
 use App\Services\ActivityLogger;
+use App\Services\JobTransitionService;
 use App\Services\NotificationService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -15,6 +16,7 @@ class SessionController extends Controller
     public function __construct(
         private readonly ActivityLogger $activity,
         private readonly NotificationService $notifications,
+        private readonly JobTransitionService $jobs,
     ) {}
 
     public function index(): AnonymousResourceCollection
@@ -55,6 +57,13 @@ class SessionController extends Controller
 
         $previousStatus = $session->status;
         $session->update($request->validated());
+
+        $targetJobStatus = match ($session->status) {
+            'confirmed' => 'preparation', 'completed', 'editing' => 'editing', 'delivered' => 'delivered', default => null,
+        };
+        if ($targetJobStatus) {
+            $this->jobs->advance($session->job, $targetJobStatus, "Sesión actualizada a {$session->status}");
+        }
 
         if ($previousStatus === $session->status) {
             $this->activity->log($request->user(), $session, ActivityLogger::UPDATED, 'Sesion editada');

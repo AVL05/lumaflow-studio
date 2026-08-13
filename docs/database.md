@@ -19,11 +19,19 @@ Agrupadas por fase, no una por tabla:
 | `2026_07_08_000009_create_workflow_tables` | `tasks`, `checklists`, `checklist_items`, `activities`, `notifications` |
 | `2026_07_09_000001_add_client_portal_features` | Portal, reservas y tokens publicos |
 | `2026_07_16_000001_consolidate_raw_manager_features` | `quotes`, `quote_items`, `invoices`, `presets`, `delivery_images` |
+| `2026_08_13_000001_add_onboarding_to_users_table` | Estudio, especialidades, pais, moneda, prioridad y finalizacion del onboarding |
+| `2026_08_13_000002_add_activation_to_users_table` | Primer paso, muestra opcional y activacion de reservas |
+| `2026_08_13_000003_create_jobs_domain` | Trabajos fotograficos, pipeline, contratos, equipo y enlaces con el resto del dominio |
 
 ## Modelo de dominio
 
 ```
-users ──┬── sessions ──┬── checklists ── checklist_items
+users ──┬── photography_jobs ──┬── sessions ── checklists ── checklist_items
+        │                      ├── tasks
+        │                      ├── quotes ── invoice
+        │                      ├── deliveries ── delivery_images
+        │                      └── gear_items (N:M)
+        ├── sessions ──┬── checklists ── checklist_items
         │              ├── tasks
         │              └── ai_session_plans
         ├── gear_items ── presets
@@ -38,6 +46,12 @@ users ──┬── sessions ──┬── checklists ── checklist_items
 ```
 
 Toda tabla de dominio tiene `user_id` con `cascadeOnDelete`. Es la unica frontera de aislamiento entre usuarios.
+
+La tabla fisica se llama `photography_jobs` para no colisionar con `jobs`, reservada por las colas de Laravel. `Job::$table` conserva el nombre de dominio y la API publica usa `/jobs`. Las relaciones existentes incorporan `job_id` nullable para migrar sin perder datos; la migracion agrupa entregas y sesiones anteriores en trabajos.
+
+`users` conserva el nombre personal en `name` y la identidad comercial en `studio_name`. `photography_specialties` es JSON; `country` usa ISO 3166-1 alfa-2 y `currency` ISO 4217. Las cuentas anteriores a la migracion quedan verificadas y con onboarding completado para no perder acceso; las nuevas comienzan con ambos estados pendientes.
+
+La activacion guarda `getting_started_choice`, `getting_started_completed_at`, `sample_workspace_activated_at` y `bookings_enabled_at`. Los datos demo se crean una sola vez. Las cuentas anteriores se marcan con acceso inicial completado y reservas habilitadas para no romper enlaces ya publicados.
 
 ## Tablas de la fase 9
 

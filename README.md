@@ -1,259 +1,238 @@
 <div align="center">
 
+<img src="frontend/public/logo+texto.png" alt="LumaFlow Studio" width="420" />
+
 # LumaFlow Studio
 
-**Plataforma full-stack de gestion del flujo de trabajo para fotografos, con asistente de IA y modelos WebGPU locales.**
+**Gestiona todo tu estudio fotográfico desde un único lugar.**
+
+Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conectados en un mismo flujo.
+
+**Beta pública gratuita · Sin tarjeta**
+
+[Probar LumaFlow](https://lumaflow.aleviclop.dev/register) · [Explorar demo](https://lumaflow.aleviclop.dev/demo) · [Casos de uso](https://lumaflow.aleviclop.dev/features) · [Precio](https://lumaflow.aleviclop.dev/pricing) · [Privacidad](https://lumaflow.aleviclop.dev/privacy) · [Ver documentación](docs/) · [Estado del servicio](https://lumaflow-api.aleviclop.dev/api/health)
 
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
-[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)](https://www.mysql.com)
-[![WebGPU](https://img.shields.io/badge/WebGPU-local-111827)](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
-[![License](https://img.shields.io/badge/License-MIT-amber)](LICENSE)
-
-[Documentacion tecnica](docs/) · [API](docs/api.md) · [Arquitectura](docs/architecture.md) · [Despliegue](docs/deployment.md)
+[![MySQL](https://img.shields.io/badge/MySQL-compatible-4479A1)](https://www.mysql.com)
+[![WebGPU](https://img.shields.io/badge/IA-WebGPU_local-111827)](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
+[![License](https://img.shields.io/badge/License-MIT-d4b06a)](LICENSE)
 
 </div>
 
 ---
 
-## Descripcion
+## Qué es LumaFlow
 
-Un fotografo profesional trabaja con sesiones, clientes, equipo y localizaciones, pero suele gestionarlo todo en hojas de calculo dispersas. LumaFlow Studio reune ese flujo completo en una sola aplicacion: planificacion, produccion, CRM ligero, entregas, analitica y un asistente de IA que **solo razona sobre los datos reales del usuario y nunca sale de su maquina**.
+LumaFlow Studio es una plataforma de gestión para fotógrafos y pequeños estudios. Reúne la operación diaria y la relación con el cliente sin obligarte a mantener calendarios, hojas de cálculo, documentos y galerías desconectados.
 
-Es una release privada de portfolio. No busca ser un SaaS, sino demostrar arquitectura, criterio tecnico y acabado de producto sobre un dominio con reglas propias.
+El producto está en **beta pública**. Puedes crear una cuenta y utilizar las funcionalidades actuales de forma gratuita, sin introducir una tarjeta. Todavía no existe un plan de pago ni un proceso de cobro.
 
-## Capturas
+El objetivo de esta etapa es validar el flujo con usuarios reales, detectar qué módulos aportan más valor y mejorar el producto antes de definir límites o planes futuros.
 
-| Dashboard | Calendario | Analitica |
-|---|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Calendario](docs/screenshots/calendar.png) | ![Analitica](docs/screenshots/analytics.png) |
+## Pruébalo sin registrarte
 
-| Presupuestos | Facturas | Presets |
-|---|---|---|
-| ![Presupuestos](docs/screenshots/quotes.png) | ![Facturas](docs/screenshots/invoices.png) | ![Presets](docs/screenshots/presets.png) |
+La [demo interactiva](https://lumaflow.aleviclop.dev/demo) utiliza datos ficticios y no persiste cambios. Permite recorrer una jornada de trabajo, consultar clientes, explorar la agenda y probar la selección de favoritas de una entrega.
 
-| Galeria y entregas | Localizaciones | Asistente IA |
-|---|---|---|
-| ![Galeria](docs/screenshots/gallery.png) | ![Localizaciones](docs/screenshots/locations.png) | ![Asistente IA](docs/screenshots/ai-assistant.png) |
+| Resumen                     | Agenda                      | Cliente y entrega                     |
+| --------------------------- | --------------------------- | ------------------------------------- |
+| Métricas y trabajo en curso | Sesiones, tareas y entregas | Actividad comercial y galería privada |
 
-## Stack
+No consulta información de producción ni comparte datos entre usuarios.
 
-| Capa | Tecnologia |
-|---|---|
-| Frontend | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet, PWA |
-| Backend | Laravel 13, PHP 8.3+, Sanctum (tokens Bearer), Dompdf |
-| Datos | MySQL 8, Eloquent |
-| IA | WebGPU en navegador con WebLLM y modelos instalables; Ollama backend opcional |
-| Calidad | PHPUnit, Pint, Vitest, Testing Library, oxlint, Prettier |
-| Infra | PWA + Docker Compose (frontend, backend, MySQL, phpMyAdmin, Ollama opcional) |
+## Un flujo completo para el estudio
+
+1. **Recibe reservas.** Centraliza solicitudes y datos iniciales del cliente.
+2. **Controla el trabajo.** Reúne cliente, presupuesto, contrato, pago, sesión, tareas, equipo, galería y entrega en un único proyecto.
+3. **Gestiona el negocio.** Crea presupuestos, controla estados y genera facturas PDF.
+4. **Produce y da seguimiento.** Consulta agenda, notificaciones, progreso y actividad.
+5. **Entrega.** Publica una galería privada para revisión, favoritas y aprobación.
+6. **Analiza.** Revisa ingresos, carga de trabajo y evolución del estudio con datos reales.
+
+## Capturas reales
+
+| Dashboard                                                | Calendario                                               | Analítica                                                |
+| -------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| ![Dashboard de LumaFlow](docs/screenshots/dashboard.png) | ![Calendario de LumaFlow](docs/screenshots/calendar.png) | ![Analítica de LumaFlow](docs/screenshots/analytics.png) |
+
+| Presupuestos                                             | Facturas                                               | Galería del cliente                                          |
+| -------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Presupuestos en LumaFlow](docs/screenshots/quotes.png) | ![Facturas en LumaFlow](docs/screenshots/invoices.png) | ![Galería privada en LumaFlow](docs/screenshots/gallery.png) |
+
+| Localizaciones                                                | Presets                                              | IA local                                                          |
+| ------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| ![Localizaciones en LumaFlow](docs/screenshots/locations.png) | ![Presets en LumaFlow](docs/screenshots/presets.png) | ![Asistente local de LumaFlow](docs/screenshots/ai-assistant.png) |
+
+## Funcionalidades actuales
+
+| Área                        | Funcionalidades                                                               |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| **Dashboard**               | Agenda, tareas pendientes, progreso mensual, actividad y métricas del estudio |
+| **Calendario**              | Mes, semana, día, agenda y lista; reprogramación mediante drag and drop       |
+| **Trabajos**                | Pipeline, workflows por especialidad, contrato, pagos y timeline unificado    |
+| **Sesiones**                | Cliente, tipo, estado, localización, checklist y timeline                     |
+| **Tareas y checklists**     | Prioridades, vencimientos, acciones masivas y plantillas reutilizables        |
+| **Clientes**                | CRM ligero conectado a trabajos, presupuestos, facturas y entregas            |
+| **Reservas**                | Solicitudes públicas vinculadas a disponibilidad y seguimiento interno        |
+| **Presupuestos y facturas** | Conceptos, IVA, estados, numeración por estudio y PDF                         |
+| **Entregas**                | Portal privado, carga múltiple, favoritas y aprobación del cliente            |
+| **Equipo y presets**        | Inventario y ajustes de cámara reutilizables                                  |
+| **Localizaciones**          | Mapa, acceso, permisos, coste, clima y equipo recomendado                     |
+| **Analítica**               | KPIs y gráficas calculados sobre la actividad real                            |
+| **IA local**                | Chat contextual, planes de sesión y recomendación de equipo                   |
+| **PWA**                     | Aplicación instalable con shell offline                                       |
+
+## Privacidad e IA local
+
+La experiencia principal de inteligencia artificial se ejecuta en el navegador mediante WebGPU y WebLLM:
+
+- no requiere claves de proveedores externos;
+- el usuario instala y elige un modelo compatible;
+- los datos usados como contexto pertenecen a su propia cuenta;
+- la ausencia de IA no bloquea el resto de la aplicación;
+- Ollama queda disponible como compatibilidad local avanzada del backend.
+
+Consulta [docs/ai.md](docs/ai.md) para conocer modelos, requisitos y limitaciones.
+
+## Estado de la beta
+
+La beta actual es gratuita y no solicita tarjeta. Esto significa:
+
+- acceso a todos los módulos disponibles hoy;
+- demo pública sin registro;
+- evolución frecuente del producto;
+- posibilidad de cambios de interfaz y contrato durante la beta;
+- sin compromiso sobre precios o límites futuros hasta que se publiquen expresamente.
+
+LumaFlow ya funciona como producto desplegado, pero sigue siendo experimental. No debe considerarse todavía un servicio crítico ni utilizarse como única copia de documentos o fotografías.
 
 ## Arquitectura
 
-Dos aplicaciones independientes en un monorepo. No comparten codigo ni build: se comunican solo por HTTP.
+El repositorio contiene dos aplicaciones independientes que se comunican por HTTP:
 
-```
-routes/api.php  ->  Api\XController  ->  XRequest (validacion)
-                          │
-                          ▼
-                   App\Services\*  (logica de dominio)
-                          │
-                          ▼
-                 Modelo + scopes  ->  XResource (serializacion)
-
-frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/
+```text
+frontend/src/api/*.js  ->  hooks  ->  features  ->  pages
+                              |
+                              v
+routes/api.php  ->  Controller  ->  FormRequest  ->  Service
+                                              |
+                                              v
+                                      Model + Resource
 ```
 
-Tres decisiones que explican casi todo el codigo:
+Principios principales:
 
-- **Multi-tenancy por `user_id`.** Sin middleware magico: cada consulta parte del scope `ownedBy()` y cada creacion cuelga de la relacion del usuario.
-- **404 en lugar de 403.** Un 403 sobre un recurso ajeno confirmaria que existe.
-- **La logica vive en servicios.** Los controladores son delgados y testeables.
+- **Aislamiento por usuario.** Cada consulta parte de `ownedBy()`.
+- **404 para recursos ajenos.** No se confirma la existencia de información de otra cuenta.
+- **Controladores delgados.** La lógica de dominio vive en servicios.
+- **API y SPA separadas.** El frontend utiliza tokens Bearer de Sanctum.
+- **IA bajo demanda.** WebLLM no penaliza la carga inicial de la aplicación.
 
-Detalle completo en [docs/architecture.md](docs/architecture.md).
+Más detalle en [docs/architecture.md](docs/architecture.md).
 
-## Modulos
+## Stack
 
-| Modulo | Que hace |
-|---|---|
-| **Dashboard** | Metricas reales, agenda del dia, tareas pendientes, progreso mensual, timeline de actividad |
-| **Calendario** | Vistas mes, semana, dia, agenda y lista. Drag & drop para reprogramar sesiones, entregas y tareas |
-| **Sesiones** | CRUD con cliente, tipo, estado, localizacion, checklists tipadas y timeline automatico |
-| **Tareas** | Prioridad, estado, fecha limite, relacion con sesion y cliente, resumen de vencidas, acciones masivas |
-| **Checklists** | Plantillas por tipo (equipo, preparacion, edicion, entrega), items reordenables, progreso en porcentaje, duplicado |
-| **Localizaciones** | Mapa Leaflet, coordenadas, acceso, permisos, coste, clima, estaciones, equipo recomendado |
-| **Clientes y entregas** | CRM ligero conectado a sesiones, presupuestos y galerias |
-| **Presupuestos y facturas** | Conceptos, IVA, estados, numeracion por estudio y documentos PDF |
-| **Galeria de cliente** | Carga multiple, portal privado, aprobacion y seleccion de favoritas |
-| **Presets** | Ajustes de camara reutilizables y vinculados al equipo real |
-| **Analitica** | KPIs y graficas Recharts sobre datos reales, tablas comparativas, rangos de fechas |
-| **Busqueda global** | `Ctrl/Cmd + K`. Resultados agrupados, navegacion por teclado |
-| **Notificaciones** | Centro persistido en BD, contador global, marcado y limpieza |
-| **Asistente IA** | Chat con contexto, planes de sesion, recomendador de equipo |
-| **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y compatibilidad Ollama |
-| **PWA** | Aplicacion instalable con shell offline; los modelos WebGPU siguen bajo demanda |
+| Capa            | Tecnología                                                                |
+| --------------- | ------------------------------------------------------------------------- |
+| Frontend        | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet, PWA    |
+| Backend         | Laravel 13, PHP 8.3+, Sanctum, Dompdf                                     |
+| Datos           | MySQL compatible, Eloquent                                                |
+| IA              | WebGPU, WebLLM y Ollama opcional                                          |
+| Calidad         | PHPUnit, Pint, Vitest, Testing Library, oxlint y Prettier                 |
+| Infraestructura | Vercel, Render, TiDB Cloud, almacenamiento S3 compatible y Docker Compose |
 
-## Instalacion local con recarga inmediata
+## Desarrollo local
 
-Requisitos: PHP 8.3+, Composer, Node 22+ y pnpm 10+. Para IA en la SPA hace falta un navegador con WebGPU. Ollama es opcional. MySQL y Docker no son necesarios para desarrollo local: el arranque usa SQLite.
+Requisitos: PHP 8.3+, Composer, Node 22+ y pnpm 10+.
 
 ```bash
 git clone https://github.com/AVL05/lumaflow-studio.git
 cd lumaflow-studio
-```
-
-```bash
 pnpm run start
 ```
 
-Es el único comando necesario. En el primer arranque y cuando cambien los manifiestos:
+`pnpm run start` prepara SQLite, instala dependencias cuando hace falta y levanta:
 
-- instala las dependencias pnpm y Composer;
-- crea `backend/.env` si falta y conserva su clave en arranques posteriores;
-- crea `backend/database/database.sqlite`;
-- configura SQLite, cache y sesiones solo para el proceso local;
-- ejecuta migraciones y crea el enlace de storage;
-- levanta Laravel en `http://localhost:8000` y Vite en `http://localhost:5173`.
+| Servicio             | URL                          |
+| -------------------- | ---------------------------- |
+| Landing y aplicación | `http://localhost:5173`      |
+| Demo interactiva     | `http://localhost:5173/demo` |
+| API Laravel          | `http://localhost:8000/api`  |
 
-Los cambios en React, JavaScript y CSS aparecen inmediatamente mediante HMR. Los cambios PHP se aplican en la siguiente petición, sin reiniciar el comando. Pulsa `Ctrl+C` para detener ambos servicios.
+React, JavaScript y CSS utilizan HMR. Los cambios PHP se aplican en la siguiente petición. No necesitas Docker ni MySQL para empezar.
 
-Después abre `http://localhost:5173/register` y crea tu cuenta local.
+El alta local sigue `crear cuenta -> verificar email -> configurar estudio -> elegir primer paso -> dashboard`. Tras el onboarding puedes crear el primer trabajo, cargar un workspace ficticio o importar clientes mediante CSV. Como `pnpm run start` usa correo por log, copia el enlace de verificacion desde `backend/storage/logs/laravel.log`.
 
-## Docker
+El dashboard incorpora un checklist de activacion 0/5 basado en datos reales: estudio configurado, primer cliente, primer trabajo, reservas activadas y primera sesion. LumaFlow solo muestra el estado **Estudio operativo** cuando existe una entrega completada o se activa un enlace publico de reservas; los datos de ejemplo nunca completan ese hito.
+
+Dentro del producto, la navegación prioriza Inicio, Trabajos, Calendario y Clientes. El botón global `+ Crear` abre clientes, trabajos, sesiones, presupuestos, facturas, tareas o entregas desde cualquier módulo. `Ctrl/Cmd + K` abre búsqueda y comandos; `Ctrl/Cmd + L` abre Luma con el contexto de la pantalla actual. En móvil, esas cuatro rutas forman una barra inferior y el resto queda bajo **Más**.
+
+### Docker
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-| Servicio | URL |
-|---|---|
-| Frontend | http://localhost:8080 |
-| Backend | http://localhost:8000 |
-| phpMyAdmin | http://localhost:8081 |
+| Servicio   | URL                     |
+| ---------- | ----------------------- |
+| Frontend   | `http://localhost:8080` |
+| Backend    | `http://localhost:8000` |
+| phpMyAdmin | `http://localhost:8081` |
 
-Con el modelo de IA en contenedor:
+Consulta [docs/deployment.md](docs/deployment.md) para Docker, producción y despliegue automático.
 
-```bash
-docker compose --profile ollama up --build
-docker compose exec ollama ollama pull llama3.1
-```
+## Variables principales
 
-Sin ese perfil, el backend usa el Ollama del host. Detalles en [docs/deployment.md](docs/deployment.md).
-
-## Variables
-
-Ninguna contiene secretos reales; son valores de desarrollo. Los `.env` nunca se commitean.
-
-**Raiz** (`.env`, solo para Docker): `APP_KEY`, `DB_*`, `FRONTEND_URLS`, `VITE_API_URL`, `OLLAMA_*`, `SEED_DATABASE`.
-
-**`backend/.env`**:
-
-```env
-APP_NAME="LumaFlow Studio"
-APP_URL=http://localhost:8000
-FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
-
-DB_CONNECTION=mysql
-DB_DATABASE=lumaflow_studio
-DB_USERNAME=root
-DB_PASSWORD=
-
-FILESYSTEM_DISK=public
-OLLAMA_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=llama3.1
-OLLAMA_TIMEOUT=30
-OLLAMA_MAX_CONTEXT=12000
-```
-
-**`frontend/.env`**:
+`frontend/.env`:
 
 ```env
 VITE_API_URL=http://localhost:8000/api
 VITE_WEBGPU_AI_MODEL=Llama-3.2-1B-Instruct-q4f16_1-MLC
 ```
 
-## Scripts
+`backend/.env` contiene la conexión de datos, orígenes permitidos, almacenamiento y compatibilidad Ollama. Nunca se versionan credenciales ni archivos `.env`; solo `.env.example`.
 
-Desde la raiz:
-
-| Script | Que hace |
-|---|---|
-| `pnpm run start` | Prepara SQLite y levanta Laravel + Vite con recarga inmediata |
-| `pnpm run dev` | Alias de `start` |
-| `pnpm run build` | Build de produccion del frontend |
-| `pnpm run lint` | oxlint + `pint --test` |
-| `pnpm run format` | Prettier + Pint |
-| `pnpm run test` | PHPUnit + Vitest |
-| `pnpm run setup` | Instalacion manual completa |
-| `pnpm run docker:up` / `docker:down` / `docker:reset` | Ciclo de vida de Docker |
-
-## Estructura
-
-```
-lumaflow-studio/
-├── backend/
-│   ├── app/
-│   │   ├── Http/{Controllers/Api, Requests, Resources}
-│   │   ├── Models/{, Concerns}
-│   │   ├── Policies/
-│   │   ├── Services/
-│   │   └── Support/AuditLog.php
-│   ├── database/{migrations, seeders}
-│   ├── resources/views/pdf
-│   ├── routes/api.php
-│   ├── tests/{Feature, Unit}
-│   └── Dockerfile
-├── frontend/
-│   ├── src/{api, app, components, features, hooks, pages, styles, test}
-│   └── Dockerfile
-├── docs/
-├── docker-compose.yml
-└── LICENSE
-```
-
-## IA
-
-El asistente principal corre con **WebGPU en el navegador** mediante WebLLM: no hay claves de API ni proveedores externos. El usuario puede instalar varios modelos recomendados, comparar perfil/descarga/VRAM, activar el que prefiera y desinstalar los que ya no quiera mantener cacheados. El modulo de IA se carga bajo demanda para no penalizar el resto de la SPA.
-
-El backend conserva servicios Ollama como compatibilidad local avanzada para endpoints de IA, pero la SPA no depende de tener Ollama instalado. Las tareas estructuradas (planificar una sesion, recomendar equipo) piden JSON estricto y se parsean en el cliente.
-
-Detalle en [docs/ai.md](docs/ai.md).
-
-## Testing
+## Calidad
 
 ```bash
-pnpm run test                                   # todo
-cd backend && php artisan test --filter=AuthTest
-pnpm --dir frontend run test:coverage
+pnpm run lint
+pnpm run test
+pnpm run build
 ```
 
-56 tests de backend (auth, CRUD, permisos, workflow, facturacion, galerias, salud y policies) y 33 de frontend (hooks, utilidades del calendario y componentes criticos).
-
-`phpunit.xml` apunta a SQLite en memoria. Si tu PHP no trae `pdo_sqlite`:
-
-```bash
-DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
-```
+La automatización de GitHub ejecuta formato, lint, tests, build PWA e imágenes Docker. Después del despliegue, un smoke test comprueba la landing, el favicon y el estado de la API.
 
 ## Roadmap
 
-Lo que **no** esta implementado, y por que, en [docs/roadmap.md](docs/roadmap.md). Resumen: streaming real de IA, persistencia del chat WebGPU, contratos, comparacion before/after y kanban de tareas.
+Las siguientes fases priorizan:
 
-## Contribucion
+- persistencia del chat WebGPU;
+- contratos y aprobaciones formales;
+- caducidad de galerías y descarga en lote;
+- roles y colaboración por estudio;
+- pagos y conciliación de facturas;
+- definición de límites y planes después de validar el uso real.
 
-Proyecto personal de portfolio; no se buscan contribuciones externas. Si aun asi quieres proponer un cambio:
+El estado completo está en [docs/roadmap.md](docs/roadmap.md).
 
-1. Abre un issue describiendo el problema antes de escribir codigo.
-2. Respeta las convenciones: `vendor/bin/pint` en backend, `pnpm run lint && pnpm run format` en frontend.
-3. Anade tests para el comportamiento que cambies.
-4. Commits en imperativo, con el ambito por delante: `feat(calendar): ...`, `fix(auth): ...`.
+## Open source y contribuciones
 
-## Creditos
+LumaFlow es un producto experimental open source con licencia MIT. El repositorio también documenta decisiones de arquitectura y sirve como trabajo de portfolio, pero el producto se diseña para uso real y aprendizaje con usuarios.
 
-Diseno y desarrollo: **Alex Vicente Lopez**.
+Antes de proponer un cambio:
 
-Construido sobre [Laravel](https://laravel.com), [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Recharts](https://recharts.org), [Leaflet](https://leafletjs.com) y [WebLLM](https://webllm.mlc.ai/). Mapas base de [CARTO](https://carto.com) sobre datos de [OpenStreetMap](https://www.openstreetmap.org).
+1. abre un issue explicando el problema o caso de uso;
+2. evita incluir información real de clientes o credenciales;
+3. ejecuta lint, tests y build;
+4. mantén los cambios compatibles con la arquitectura actual.
 
-## Licencia
+## Seguridad
 
-[MIT](LICENSE).
+- No publiques `.env`, tokens, correos, prompts ni respuestas de IA.
+- No uses datos reales en issues, demos o capturas.
+- Reporta vulnerabilidades de forma privada al responsable del repositorio.
+
+## Licencia y autoría
+
+[MIT](LICENSE). Diseñado y desarrollado por [Alex Vicente López](https://aleviclop.dev).

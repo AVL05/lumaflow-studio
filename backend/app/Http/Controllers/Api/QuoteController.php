@@ -7,13 +7,14 @@ use App\Http\Requests\QuoteRequest;
 use App\Http\Resources\QuoteResource;
 use App\Models\Quote;
 use App\Services\CommercialDocumentService;
+use App\Services\JobTransitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
 
 class QuoteController extends Controller
 {
-    public function __construct(private readonly CommercialDocumentService $documents) {}
+    public function __construct(private readonly CommercialDocumentService $documents, private readonly JobTransitionService $jobs) {}
 
     public function index(): AnonymousResourceCollection
     {
@@ -51,6 +52,13 @@ class QuoteController extends Controller
         $this->ensureOwnership($quote);
         $data = $request->validate(['status' => ['required', Rule::in(['draft', 'sent', 'accepted', 'rejected', 'expired'])]]);
         $quote->update($data);
+        if ($quote->status === 'sent') {
+            $this->jobs->advance($quote->job, 'quoted', 'Presupuesto enviado');
+        }
+        if ($quote->status === 'accepted') {
+            $quote->job?->update(['contract_status' => $quote->job->contract_status === 'not_required' ? 'draft' : $quote->job->contract_status]);
+            $this->jobs->advance($quote->job, 'contract_pending', 'Presupuesto aceptado; contrato pendiente');
+        }
 
         return new QuoteResource($quote->refresh()->load(['client', 'session', 'items', 'invoice']));
     }

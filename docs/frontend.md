@@ -51,9 +51,23 @@ ToastProvider          avisos efimeros
 
 `ToastContext` y `NotificationsContext` son cosas distintas: el primero son toasts en memoria, el segundo el centro de notificaciones persistidas en BD.
 
+`AuthContext` conserva tambien `email_verified`, `onboarding_completed` y `getting_started_completed`. `getAuthDestination()` es la unica regla de redireccion: `/verify-email`, `/onboarding`, `/getting-started` o `/app/dashboard`. `ProtectedRoute` aplica la misma secuencia antes de montar el producto.
+
 ## Rutas
 
-Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayout`, incluidas `/quotes`, `/invoices` y `/presets`. Publicas: `/login`, `/register`, `/about-project`, `/book/:slug` y `/deliver/:token`. Cualquier otra ruta cae en `NotFoundPage`, que hace tambien de `errorElement`.
+La ruta `/` muestra la landing publica del producto y `/demo` ofrece una demostracion interactiva con datos ficticios que no consulta la API ni persiste cambios. `/features` presenta casos de uso, `/pricing` explica las condiciones economicas de la beta y `/privacy` documenta visualmente el flujo de datos e IA local; `/security` redirige a esta ultima. El alta continua por `/register` -> `/verify-email` -> `/onboarding` -> `/getting-started` -> `/app/dashboard`. La ultima pantalla permite abrir trabajos, cargar datos de ejemplo persistentes o ir al importador CSV. Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayout`, incluidas `/quotes`, `/invoices` y `/presets`. Tambien son publicas `/login`, `/about-project`, `/book/:slug` y `/deliver/:token`. Cualquier otra ruta cae en `NotFoundPage`, que hace tambien de `errorElement`.
+
+`ActivationPanel` muestra progreso 0/5, permite activar reservas o datos de ejemplo y sustituye el checklist por un estado operativo persistente al alcanzar el primer valor real. `ClientImportPanel` acepta CSV con coma o punto y coma, cabeceras españolas o inglesas y una previsualizacion antes de enviar el lote.
+
+## Navegacion y acciones globales
+
+`AppLayout` limita la barra lateral a cuatro destinos principales y tres grupos: Negocio, Produccion y Herramientas. Analitica sigue disponible desde la paleta de comandos, Luma sustituye el acceso fijo a AI Assistant y `/app/system` redirige a `/app/settings/advanced`. La ruta `/app/settings` contiene la configuracion diaria; la infraestructura queda en su seccion avanzada.
+
+En pantallas pequeñas se usa una bottom navigation fija con Inicio, Trabajos, Calendario, Clientes y Mas. `/app/jobs` muestra el pipeline horizontal y `/app/jobs/:id` concentra cliente, negocio, contrato, produccion, tareas, entregas y timeline. `GlobalCreateMenu` navega con `?create=1`; `useCreateIntent` abre el formulario correspondiente incluso si el usuario ya estaba en ese modulo. Los CTA del detalle propagan `job_id` para que los nuevos recursos queden conectados.
+
+`GlobalSearch` combina resultados de negocio con comandos como crear cliente, ir al calendario o abrir configuracion. Conserva navegacion por flechas, Enter, Escape y `Ctrl/Cmd + K`. `LumaAssistant` abre con `Ctrl/Cmd + L`, identifica la ruta activa y entrega ese contexto a `/app/ai-assistant` como prompt inicial. La inferencia sigue siendo local mediante WebGPU cuando el usuario instala un modelo.
+
+Las paginas comerciales usan capturas reales servidas desde `public/product/`, comparten cabecera y pie desde `components/marketing/` y mantienen enlaces directos a autenticacion. No necesitan datos de la API para renderizar.
 
 ## PWA
 

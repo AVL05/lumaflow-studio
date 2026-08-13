@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,9 +14,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'studio_name', 'photography_specialties', 'country', 'currency', 'onboarding_goal'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -50,6 +50,11 @@ class User extends Authenticatable
     public function sessions(): HasMany
     {
         return $this->hasMany(Session::class);
+    }
+
+    public function jobs(): HasMany
+    {
+        return $this->hasMany(Job::class);
     }
 
     public function gearItems(): HasMany
@@ -145,6 +150,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'photography_specialties' => 'array',
+            'onboarding_completed_at' => 'datetime',
+            'getting_started_completed_at' => 'datetime',
+            'sample_workspace_activated_at' => 'datetime',
+            'bookings_enabled_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

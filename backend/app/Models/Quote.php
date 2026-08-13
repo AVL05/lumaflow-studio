@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['user_id', 'client_id', 'session_id', 'quote_number', 'status', 'issue_date', 'valid_until', 'subtotal', 'tax_rate', 'tax_amount', 'total', 'notes'])]
+#[Fillable(['user_id', 'job_id', 'client_id', 'session_id', 'quote_number', 'status', 'issue_date', 'valid_until', 'subtotal', 'tax_rate', 'tax_amount', 'total', 'notes'])]
 class Quote extends Model
 {
     use HasFactory;
@@ -42,6 +42,11 @@ class Quote extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function job(): BelongsTo
+    {
+        return $this->belongsTo(Job::class);
     }
 
     public function client(): BelongsTo

@@ -6,9 +6,10 @@ import { ErrorState } from "../components/states/ErrorState";
 import { getApiError } from "../api/client";
 import { AuthShell } from "../features/auth/AuthShell";
 import { useAuth } from "../features/auth/AuthContext";
+import { getAuthDestination } from "../features/auth/getAuthDestination";
 
 export function RegisterPage() {
-  const { register, isAuthenticated } = useAuth();
+  const { register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -20,7 +21,7 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   if (isAuthenticated) {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to={getAuthDestination(user)} replace />;
   }
 
   async function submit(event) {
@@ -29,8 +30,11 @@ export function RegisterPage() {
     setError("");
 
     try {
-      await register(form);
-      navigate("/app/dashboard");
+      const result = await register(form);
+      navigate("/verify-email", {
+        replace: true,
+        state: { verificationEmailSent: result.verification_email_sent },
+      });
     } catch (err) {
       setError(getApiError(err, "No se pudo crear la cuenta."));
     } finally {
@@ -40,9 +44,9 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      eyebrow="Nuevo workspace"
+      eyebrow="Crea tu cuenta"
       title="Crea tu cuenta"
-      description="Configura las credenciales de tu espacio de trabajo."
+      description="Primero tus credenciales. Después configuraremos el estudio contigo."
       footer={
         <>
           Ya tienes cuenta?{" "}
@@ -54,11 +58,11 @@ export function RegisterPage() {
     >
       <form className="space-y-4" onSubmit={submit}>
         {error ? <ErrorState message={error} /> : null}
-        <Field label="Nombre">
+        <Field label="Tu nombre">
           <input
             className={inputClass}
             autoComplete="name"
-            placeholder="Alex Vicente"
+            placeholder="Cómo debemos llamarte"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />

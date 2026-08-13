@@ -48,8 +48,19 @@ const decisions = [
 ];
 
 const links = [
+  ["Producto", "https://lumaflow.aleviclop.dev"],
+  ["Demo", "https://lumaflow.aleviclop.dev/demo"],
   ["GitHub", "https://github.com/AVL05/lumaflow-studio"],
-  ["Portfolio", "https://aleviclop.dev"],
+  ["Autor", "https://aleviclop.dev"],
+];
+
+const screenshots = [
+  ["Dashboard", "/product/dashboard.png"],
+  ["Calendario", "/product/calendar.png"],
+  ["Analitica", "/product/analytics.png"],
+  ["Galeria", "/product/gallery.png"],
+  ["Localizaciones", "/product/locations.png"],
+  ["Asistente IA", "/product/ai-assistant.png"],
 ];
 
 export function AboutProjectPage() {
@@ -61,8 +72,8 @@ export function AboutProjectPage() {
             <p className="text-xs uppercase tracking-[0.24em] text-amber-200">LumaFlow</p>
             <p className="text-sm text-stone-300">Studio</p>
           </div>
-          <Link to="/app/dashboard">
-            <Button variant="secondary">Entrar a la app</Button>
+          <Link to="/register">
+            <Button>Empezar gratis</Button>
           </Link>
         </div>
       </header>
@@ -73,18 +84,17 @@ export function AboutProjectPage() {
             Sobre el proyecto
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-stone-50">
-            Un sistema de gestion completo para fotografos
+            Todo tu estudio fotografico en un unico lugar
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-400">
-            LumaFlow Studio nace de una pregunta concreta: un fotografo profesional trabaja con
-            sesiones, clientes, equipo y localizaciones, pero suele gestionarlo todo en hojas de
-            calculo dispersas. Este proyecto reune ese flujo completo en una sola aplicacion
-            full-stack, con un asistente de IA que corre en el navegador con WebGPU y solo razona
-            sobre los datos reales del usuario.
+            LumaFlow Studio conecta clientes, trabajos, reservas, presupuestos, facturas, sesiones y
+            entregas en una sola aplicacion. El objetivo es reducir herramientas desconectadas y
+            ofrecer una lectura clara de lo que necesita atencion en el estudio.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
-            Es una release privada de portfolio: no busca ser un SaaS, sino demostrar arquitectura,
-            criterio tecnico y acabado de producto sobre un dominio con reglas propias.
+            El producto esta en beta publica gratuita y no solicita tarjeta. Esta etapa sirve para
+            validar el flujo con fotografos reales antes de definir limites o planes futuros. El
+            codigo es open source y tambien documenta el proceso tecnico del producto.
           </p>
         </section>
 
@@ -173,24 +183,15 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
 
         <section>
           <h2 className="text-lg font-semibold text-stone-100">Capturas</h2>
-          <p className="mt-3 text-sm text-stone-400">
-            Pendientes de preparar el material visual del portfolio.
-          </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              "Dashboard",
-              "Calendario",
-              "Analitica",
-              "Biblioteca",
-              "Localizaciones",
-              "Asistente IA",
-            ].map((label) => (
-              <div
+            {screenshots.map(([label, src]) => (
+              <figure
                 key={label}
-                className="grid aspect-[16/10] place-items-center rounded-lg border border-dashed border-white/15 bg-white/[0.02] text-xs text-stone-400"
+                className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]"
               >
-                {label}
-              </div>
+                <img src={src} alt={`${label} de LumaFlow Studio`} loading="lazy" />
+                <figcaption className="px-3 py-2 text-xs text-stone-400">{label}</figcaption>
+              </figure>
             ))}
           </div>
         </section>
@@ -205,7 +206,7 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             ))}
           </div>
           <p className="mt-4 text-xs text-stone-400">
-            LinkedIn y portfolio son marcadores de posicion hasta que existan las URL definitivas.
+            Beta publica gratuita. Los limites o precios futuros se comunicaran antes de aplicarse.
           </p>
         </section>
       </main>

@@ -12,7 +12,7 @@ import { useResource } from "../hooks/useResource";
 
 const services = [
   ["api", "API", "Aplicacion Laravel que sirve la REST API."],
-  ["database", "Base de datos", "Conexion MySQL y esquema de la aplicacion."],
+  ["database", "Base de datos", "Conexión y esquema de datos de la aplicación."],
   ["storage", "Storage", "Disco publico donde viven las fotografias."],
   ["cache", "Cache", "Store usado por el rate limiting y sondas de estado."],
   ["ollama", "Ollama backend", "Compatibilidad opcional; la SPA usa WebGPU en navegador."],
@@ -52,7 +52,7 @@ export function SystemPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Operations"
+        eyebrow="Configuración avanzada"
         title="Estado del sistema"
         description="Sondas en vivo de la API, la base de datos, el storage, la cache y el modelo de IA local."
         action={

@@ -17,6 +17,7 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 import { Textarea } from "../components/ui/Textarea";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { invoiceStatuses } from "../utils/catalogs";
 
 export function InvoicesPage() {
@@ -34,6 +35,14 @@ export function InvoicesPage() {
       .then((response) => setQuotes(response.data.filter((quote) => !quote.invoice_id)))
       .catch(() => setQuotes([]));
   }, [resource.items]);
+
+  function openCreate() {
+    setForm({ quote_id: "", issue_date: "", due_date: "", notes: "" });
+    setError("");
+    setOpen(true);
+  }
+
+  useCreateIntent(openCreate);
 
   async function submit(event) {
     event.preventDefault();
@@ -87,13 +96,7 @@ export function InvoicesPage() {
         title="Facturación"
         description="Emite facturas desde presupuestos aceptados y controla vencimientos y cobros."
         action={
-          <Button
-            onClick={() => {
-              setForm({ quote_id: "", issue_date: "", due_date: "", notes: "" });
-              setError("");
-              setOpen(true);
-            }}
-          >
+          <Button onClick={openCreate}>
             Nueva factura
           </Button>
         }

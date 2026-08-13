@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../../components/branding/BrandLogo";
 
-export function AuthShell({ eyebrow = "Acceso privado", title, description, footer, children }) {
+export function AuthShell({ eyebrow = "Acceso a LumaFlow", title, description, footer, children }) {
   return (
     <main className="relative min-h-dvh overflow-x-hidden bg-[#090908] text-stone-100">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(196,141,72,0.14),transparent_32rem),linear-gradient(180deg,#0d0c0a_0%,#090908_60%)]" />

@@ -26,12 +26,36 @@ export function AuthProvider({ children }) {
     const data = await authApi.login(payload);
     localStorage.setItem("lumaflow_token", data.token);
     setUser(data.user);
+    return data.user;
   }
 
   async function register(payload) {
     const data = await authApi.register(payload);
     localStorage.setItem("lumaflow_token", data.token);
     setUser(data.user);
+    return data;
+  }
+
+  async function refreshUser() {
+    const refreshed = await authApi.me();
+    setUser(refreshed);
+    return refreshed;
+  }
+
+  async function resendVerification() {
+    return authApi.resendVerification();
+  }
+
+  async function completeOnboarding(payload) {
+    const completed = await authApi.completeOnboarding(payload);
+    setUser(completed);
+    return completed;
+  }
+
+  async function completeGettingStarted(choice) {
+    const completed = await authApi.completeGettingStarted(choice);
+    setUser(completed);
+    return completed;
   }
 
   async function logout() {
@@ -50,6 +74,10 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       login,
       register,
+      refreshUser,
+      resendVerification,
+      completeOnboarding,
+      completeGettingStarted,
       logout,
     }),
     [user, booting],

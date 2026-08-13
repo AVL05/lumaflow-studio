@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { clientsApi } from "../api/clients";
 import { getApiError } from "../api/client";
 import { Button } from "../components/ui/Button";
@@ -13,8 +14,10 @@ import { EmptyState } from "../components/states/EmptyState";
 import { ErrorState } from "../components/states/ErrorState";
 import { ClientCard } from "../features/clients/ClientCard";
 import { ClientForm } from "../features/clients/ClientForm";
+import { ClientImportPanel } from "../features/clients/ClientImportPanel";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { clientStatuses } from "../utils/catalogs";
 
 const defaults = {
@@ -28,6 +31,7 @@ const defaults = {
 };
 
 export function ClientsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const toast = useToast();
   const resource = usePaginatedResource(clientsApi.list, {
     per_page: 12,
@@ -40,6 +44,7 @@ export function ClientsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [importOpen, setImportOpen] = useState(searchParams.get("import") === "1");
 
   function openCreate() {
     setEditing(null);
@@ -47,6 +52,8 @@ export function ClientsPage() {
     setFormError("");
     setFormOpen(true);
   }
+
+  useCreateIntent(openCreate);
 
   function openEdit(client) {
     setEditing(client);
@@ -85,13 +92,35 @@ export function ClientsPage() {
     await resource.refresh();
   }
 
+  function closeImport() {
+    setImportOpen(false);
+    if (searchParams.has("import")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("import");
+      setSearchParams(next, { replace: true });
+    }
+  }
+
+  async function imported(result) {
+    toast.success(`${result.imported} clientes importados${result.skipped ? ` · ${result.skipped} omitidos` : ""}.`);
+    closeImport();
+    await resource.refresh();
+  }
+
   return (
     <>
       <PageHeader
         eyebrow="CRM"
         title="Clientes"
         description="Gestiona leads, clientes activos y contactos listos para entregas fotograficas."
-        action={<Button onClick={openCreate}>Nuevo cliente</Button>}
+        action={
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setImportOpen(true)}>
+              Importar CSV
+            </Button>
+            <Button onClick={openCreate}>Nuevo cliente</Button>
+          </div>
+        }
       />
 
       <div className="mb-6 grid gap-3 lg:grid-cols-[1fr_180px_160px_140px]">
@@ -161,6 +190,9 @@ export function ClientsPage() {
           error={formError}
           saving={saving}
         />
+      </Modal>
+      <Modal open={importOpen} title="Importar clientes" onClose={closeImport}>
+        <ClientImportPanel onImported={imported} />
       </Modal>
       <ConfirmDialog
         open={Boolean(deleting)}

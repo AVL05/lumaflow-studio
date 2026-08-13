@@ -37,6 +37,7 @@ class DashboardResource extends JsonResource
             'monthlyProgress' => $this->resource['monthlyProgress'],
             'favoriteGear' => GearItemResource::collection($this->resource['favoriteGear']),
             'timeline' => ActivityResource::collection($this->resource['timeline']),
+            'activation' => $this->resource['activation'],
         ];
     }
 }

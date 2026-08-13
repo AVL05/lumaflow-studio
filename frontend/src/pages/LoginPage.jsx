@@ -6,9 +6,10 @@ import { ErrorState } from "../components/states/ErrorState";
 import { getApiError } from "../api/client";
 import { AuthShell } from "../features/auth/AuthShell";
 import { useAuth } from "../features/auth/AuthContext";
+import { getAuthDestination } from "../features/auth/getAuthDestination";
 
 export function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -16,7 +17,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   if (isAuthenticated) {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to={getAuthDestination(user)} replace />;
   }
 
   async function submit(event) {
@@ -25,8 +26,8 @@ export function LoginPage() {
     setError("");
 
     try {
-      await login(form);
-      navigate("/app/dashboard");
+      const authenticatedUser = await login(form);
+      navigate(getAuthDestination(authenticatedUser));
     } catch (err) {
       setError(getApiError(err, "No se pudo iniciar sesion."));
     } finally {

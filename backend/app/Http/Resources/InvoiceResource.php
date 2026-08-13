@@ -11,6 +11,7 @@ class InvoiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'job_id' => $this->job_id,
             'quote_id' => $this->quote_id,
             'client_id' => $this->client_id,
             'client' => new ClientResource($this->whenLoaded('client')),

@@ -44,12 +44,21 @@ backend/app/
 | `ChecklistService` | Plantillas, duplicado, reordenacion transaccional. |
 | `TaskSummaryService` | Totales de tareas compartidos por dashboard y pagina de tareas. |
 | `HealthService` | Sondas de API, MySQL, storage, cache y compatibilidad Ollama. |
+| `OnboardingService` | Persiste preferencias iniciales y reserva un slug unico para el estudio. |
+| `GettingStartedService` | Persiste la opcion posterior al onboarding y activa la muestra cuando corresponde. |
+| `SampleWorkspaceService` | Crea datos ficticios transaccionales e idempotentes para explorar el producto. |
+| `ActivationService` | Calcula el checklist 0/5, activa reservas y detecta el primer valor real. |
+| `JobWorkflowService` | Expone pipeline y plantillas por especialidad; genera las tareas iniciales. |
+| `JobTransitionService` | Avanza trabajos por eventos comerciales y de produccion sin regresiones. |
+| `ClientImportService` | Importa clientes en lote y omite duplicados por email dentro del usuario. |
 | Cadena de IA | Ver [ai.md](ai.md). |
 
 ## Seguridad
 
 - **Rate limiting**: `throttle:10,1` en `/register` y `/login`; `throttle:180,1` en toda la API autenticada; `throttle:20,1` adicional en los endpoints de inferencia.
 - **Sesion unica**: `login` borra los tokens previos del usuario antes de emitir uno nuevo.
+- **Verificacion de email**: `User` implementa `MustVerifyEmail`; el enlace temporal firmado caduca en 60 minutos.
+- **Acceso gradual**: una cuenta sin verificar solo puede consultar su estado, reenviar el email o cerrar sesion. Los recursos de producto exigen tambien onboarding completado.
 - **Enumeracion de cuentas**: el error de credenciales es identico exista o no el email.
 - **Historial de IA**: no se acepta del cliente. Se reconstruye desde la conversacion persistida para que no se pueda inyectar contexto falso.
 - **CORS**: `config/cors.php` lee `FRONTEND_URLS`. `supports_credentials` es `false` porque la SPA usa tokens, no cookies.
@@ -60,7 +69,7 @@ Canal `lumaflow` (diario, en `storage/logs/lumaflow.log`). Se escribe solo a tra
 
 | Evento | Contexto |
 |---|---|
-| `auth.registered`, `auth.login`, `auth.logout` | `user_id` |
+| `auth.registered`, `auth.login`, `auth.logout`, `auth.email_verified`, `auth.onboarding_completed` | `user_id` |
 | `auth.failed` | `email_hash` (sha256 truncado, nunca el email) |
 | `ai.failed` | `operation`, `reason`. Nunca el prompt ni la respuesta. |
 | `api.exception` | clase, mensaje, fichero, metodo, ruta, `user_id` |

@@ -17,9 +17,11 @@ import { DeliveryCard } from "../features/deliveries/DeliveryCard";
 import { DeliveryForm } from "../features/deliveries/DeliveryForm";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { deliveryStatuses } from "../utils/catalogs";
 
 const defaults = {
+  job_id: "",
   client_id: "",
   session_id: "",
   title: "",
@@ -65,10 +67,13 @@ export function DeliveriesPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm(defaults);
+    const params = new URLSearchParams(window.location.search);
+    setForm({ ...defaults, job_id: params.get("job_id") ?? "", client_id: params.get("client_id") ?? "" });
     setFormError("");
     setFormOpen(true);
   }
+
+  useCreateIntent(openCreate);
 
   function openEdit(delivery) {
     setEditing(delivery);
@@ -118,9 +123,9 @@ export function DeliveriesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Delivery"
+        eyebrow="Flujo comercial"
         title="Entregas"
-        description="Controla galerias, presupuesto, cliente, sesion asociada y estado de aprobacion."
+        description="Controla cada encargo desde el cliente y la sesión hasta la entrega y aprobación."
         action={<Button onClick={openCreate}>Nueva entrega</Button>}
       />
 
@@ -161,7 +166,7 @@ export function DeliveriesPage() {
       ) : resource.items.length === 0 ? (
         <EmptyState
           title="Sin entregas"
-          description="Crea entregas para conectar cliente, sesion, presupuesto y galeria."
+          description="Prepara una galería o entrega para un trabajo y compártela con el cliente."
           action={<Button onClick={openCreate}>Crear entrega</Button>}
         />
       ) : (
@@ -198,7 +203,7 @@ export function DeliveriesPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar entrega"
-        description="Esta accion elimina la entrega, pero no elimina cliente, sesion ni fotos."
+        description="Esta acción elimina la entrega, pero no elimina cliente, sesión ni fotos."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />
@@ -208,6 +213,7 @@ export function DeliveriesPage() {
 
 function normalizeDelivery(form) {
   return {
+    job_id: form.job_id ? Number(form.job_id) : null,
     client_id: Number(form.client_id),
     session_id: form.session_id ? Number(form.session_id) : null,
     title: form.title,

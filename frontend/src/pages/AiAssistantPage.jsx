@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { aiApi } from "../api/ai";
 import { getApiError } from "../api/client";
 import { dashboardApi } from "../api/dashboard";
@@ -50,6 +51,7 @@ const planSchema = {
 const WEBGPU_HISTORY_KEY = "lumaflow_webgpu_conversations";
 
 export function AiAssistantPage() {
+  const location = useLocation();
   const [status, setStatus] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -70,6 +72,13 @@ export function AiAssistantPage() {
 
   const messages = useMemo(() => activeConversation?.messages ?? [], [activeConversation]);
   const webGpuModels = useMemo(() => getWebGpuModels(), []);
+
+  useEffect(() => {
+    const initialPrompt = location.state?.initialPrompt?.trim();
+    if (!initialPrompt) return;
+    const pageContext = location.state?.pageContext || "LumaFlow";
+    setInput(`Contexto de la pantalla: ${pageContext}.\n\n${initialPrompt}`);
+  }, [location.key, location.state]);
 
   const loadConversations = useCallback(async () => {
     try {
@@ -331,9 +340,9 @@ export function AiAssistantPage() {
   return (
     <>
       <PageHeader
-        eyebrow="IA local"
-        title="Centro inteligente fotografico"
-        description="WebGPU ejecuta la IA en tu navegador para planificar sesiones y recomendar equipo usando solo tus datos."
+        eyebrow="Luma"
+        title="Asistente del estudio"
+        description="IA local con contexto de clientes, producción y de la pantalla desde la que abriste Luma."
       />
       {error ? (
         <div className="mb-5">

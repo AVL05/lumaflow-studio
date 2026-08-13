@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: "LumaFlow Studio",
         short_name: "LumaFlow",
-        description: "Sistema operativo privado para estudios fotográficos.",
+        description: "Gestión integral para fotógrafos y estudios en una beta pública gratuita.",
         theme_color: "#090908",
         background_color: "#090908",
         display: "standalone",

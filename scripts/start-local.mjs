@@ -77,6 +77,7 @@ const localEnvironment = {
   CACHE_STORE: "file",
   QUEUE_CONNECTION: "sync",
   FILESYSTEM_DISK: "public",
+  MAIL_MAILER: "log",
   VITE_API_URL: "http://localhost:8000/api",
 };
 
@@ -116,6 +117,7 @@ try {
 process.stdout.write("\n[local] LumaFlow listo\n");
 process.stdout.write("[local] Web: http://localhost:5173\n");
 process.stdout.write("[local] API: http://localhost:8000/api/health\n");
+process.stdout.write("[local] Emails de prueba: backend/storage/logs/laravel.log\n");
 process.stdout.write("[local] Pulsa Ctrl+C para detener ambos procesos.\n\n");
 
 const processes = [

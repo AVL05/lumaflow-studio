@@ -1,65 +1,43 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { BrandLogo } from "../branding/BrandLogo";
 import { useAuth } from "../../features/auth/AuthContext";
+import { LumaAssistant } from "../../features/ai/LumaAssistant";
+import { GlobalCreateMenu } from "../../features/navigation/GlobalCreateMenu";
 import { NotificationBell } from "../../features/notifications/NotificationBell";
 import { NotificationCenter } from "../../features/notifications/NotificationCenter";
 import { GlobalSearch } from "../../features/search/GlobalSearch";
-import { usePersistedState } from "../../hooks/usePersistedState";
 
-const navGroups = [
-  [
-    "Workflow",
-    [
-      ["Dashboard", "/app/dashboard"],
-      ["Calendario", "/app/calendar"],
-      ["Tareas", "/app/tasks"],
-      ["Analitica", "/app/analytics"],
-    ],
-  ],
-  [
-    "Produccion",
-    [
-      ["Sesiones", "/app/sessions"],
-      ["Equipo", "/app/gear"],
-      ["Presets", "/app/presets"],
-      ["Localizaciones", "/app/locations"],
-    ],
-  ],
-  [
-    "Negocio",
-    [
-      ["Clientes", "/app/clients"],
-      ["Entregas", "/app/deliveries"],
-      ["Presupuestos", "/app/quotes"],
-      ["Facturas", "/app/invoices"],
-      ["Solicitudes", "/app/booking-requests"],
-      ["AI Assistant", "/app/ai-assistant"],
-    ],
-  ],
-  ["Sistema", [["Estado", "/app/system"]]],
+const primaryNav = [
+  ["Inicio", "/app/dashboard"],
+  ["Trabajos", "/app/jobs"],
+  ["Calendario", "/app/calendar"],
+  ["Clientes", "/app/clients"],
 ];
 
-const flatNav = navGroups.flatMap(([, items]) => items);
+const navGroups = [
+  ["Negocio", [["Presupuestos", "/app/quotes"], ["Facturas", "/app/invoices"], ["Reservas", "/app/booking-requests"]]],
+  ["Producción", [["Sesiones", "/app/sessions"], ["Entregas", "/app/deliveries"], ["Equipo", "/app/gear"], ["Localizaciones", "/app/locations"]]],
+  ["Herramientas", [["Tareas", "/app/tasks"], ["Presets", "/app/presets"]]],
+];
+
+const pageNames = [...primaryNav, ...navGroups.flatMap(([, items]) => items), ["Configuración", "/app/settings"]];
 
 const navLinkClass = ({ isActive }) =>
-  `group relative flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
-    isActive
-      ? "bg-amber-100 text-stone-950 shadow-[0_12px_32px_rgba(245,211,141,.14)]"
-      : "text-stone-400 hover:bg-white/[0.055] hover:text-stone-100"
-  }`;
+  `flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${isActive ? "bg-amber-100 text-stone-950 shadow-[0_10px_28px_rgba(245,211,141,.12)]" : "text-stone-400 hover:bg-white/[0.055] hover:text-stone-100"}`;
 
 export function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = usePersistedState("sidebar-collapsed-groups", {});
+  const [createOpen, setCreateOpen] = useState(false);
+  const [lumaOpen, setLumaOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  function toggleGroup(group) {
-    setCollapsedGroups((current) => ({ ...current, [group]: !current[group] }));
-  }
+  const currentPage = pageNames.find(([, path]) => location.pathname.startsWith(path))?.[0] ?? "LumaFlow";
 
   async function handleLogout() {
     await logout();
@@ -67,158 +45,70 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090908] text-stone-100">
+    <div className="min-h-[100dvh] bg-[#090908] pb-20 text-stone-100 lg:pb-0">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_24%_8%,rgba(196,141,72,.1),transparent_30rem),radial-gradient(circle_at_92%_16%,rgba(91,72,49,.12),transparent_26rem)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] [background-size:52px_52px]" />
-      <a
-        href="#contenido"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-stone-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-stone-950"
-      >
-        Saltar al contenido
-      </a>
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-stone-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-stone-950">Saltar al contenido</a>
 
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-80 overflow-y-auto border-r border-white/10 bg-[#0b0a09]/90 p-5 shadow-[30px_0_80px_rgba(0,0,0,.28)] backdrop-blur-xl lg:flex lg:flex-col">
-        <div className="relative shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(31,28,23,.9),rgba(15,14,12,.96))] p-5 shadow-2xl shadow-black/30">
-          <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-200/10 blur-2xl" />
-          <div className="relative flex items-center gap-3">
-            <BrandLogo className="h-11 w-11 rounded-xl" />
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-amber-200">LumaFlow</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight">Studio</h2>
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 overflow-y-auto border-r border-white/10 bg-[#0b0a09]/92 px-4 py-5 shadow-[24px_0_70px_rgba(0,0,0,.24)] backdrop-blur-xl lg:flex lg:flex-col">
+        <Link to="/app/dashboard" className="flex items-center gap-3 rounded-xl px-2 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60">
+          <BrandLogo className="size-10 rounded-xl" />
+          <div><p className="text-sm font-semibold text-stone-50">LumaFlow</p><p className="mt-0.5 text-xs text-stone-500">{user?.studio_name || "Studio"}</p></div>
+        </Link>
+
+        <nav aria-label="Navegación principal" className="mt-7">
+          <div className="space-y-1">{primaryNav.map(([label, href]) => <NavLink key={href} to={href} className={navLinkClass}>{label}</NavLink>)}</div>
+          {navGroups.map(([group, items]) => (
+            <div key={group} className="mt-6">
+              <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-600">{group}</p>
+              <div className="mt-2 space-y-1">{items.map(([label, href]) => <NavLink key={href} to={href} className={navLinkClass}>{label}</NavLink>)}</div>
             </div>
-          </div>
-          <p className="relative mt-4 text-xs leading-5 text-stone-400">
-            Suite privada para produccion fotografica, biblioteca y entregas.
-          </p>
-        </div>
-
-        <nav aria-label="Navegacion principal" className="mt-8 space-y-5">
-          {navGroups.map(([group, items]) => {
-            const collapsed = Boolean(collapsedGroups[group]);
-
-            return (
-              <div key={group}>
-                <button
-                  type="button"
-                  id={`nav-${group}`}
-                  onClick={() => toggleGroup(group)}
-                  aria-expanded={!collapsed}
-                  className="flex w-full items-center justify-between rounded-lg px-3 pb-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400 transition hover:text-stone-100"
-                >
-                  {group}
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`}
-                  >
-                    <path
-                      d="M5 7.5 10 12.5 15 7.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {collapsed ? null : (
-                  <div className="space-y-1.5" role="group" aria-labelledby={`nav-${group}`}>
-                    {items.map(([label, href]) => (
-                      <NavLink key={href} to={href} className={navLinkClass}>
-                        <span>{label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          ))}
         </nav>
 
-        <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.035] p-4 shadow-[0_18px_60px_rgba(0,0,0,.2)]">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.07] text-sm font-semibold text-amber-100">
-              {user?.name?.slice(0, 1) ?? "U"}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{user?.name}</p>
-              <p className="mt-1 truncate text-xs text-stone-400">{user?.email}</p>
-            </div>
+        <div className="mt-auto pt-6">
+          <NavLink to="/app/settings" className={navLinkClass}>Configuración</NavLink>
+          <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/[0.07] text-sm font-semibold text-amber-100">{user?.name?.slice(0, 1) ?? "U"}</span>
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{user?.name}</p><Link to="/about-project" className="text-xs text-stone-500 hover:text-amber-100">Sobre LumaFlow</Link></div>
+            <button type="button" onClick={handleLogout} className="rounded-lg px-2 py-1.5 text-xs text-stone-500 hover:bg-white/[0.06] hover:text-stone-100">Salir</button>
           </div>
-          <Link
-            to="/about-project"
-            className="mt-3 block text-xs text-amber-200 transition hover:text-amber-100"
-          >
-            Sobre el proyecto
-          </Link>
-          <Button variant="secondary" className="mt-4 w-full" onClick={handleLogout}>
-            Cerrar sesion
-          </Button>
         </div>
       </aside>
 
-      <div className="relative lg:pl-80">
-        <header className="sticky top-0 z-10 border-b border-white/10 bg-[#090908]/72 px-4 py-4 backdrop-blur-xl md:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
-                Creative workflow
-              </p>
-              <p className="mt-1 truncate text-sm text-stone-200">
-                Produccion, clientes, biblioteca e IA local en un solo workspace.
-              </p>
-            </div>
+      <div className="relative lg:pl-72">
+        <header className="sticky top-0 z-10 border-b border-white/10 bg-[#090908]/82 px-4 py-3 backdrop-blur-xl md:px-8">
+          <div className="flex min-h-12 items-center justify-between gap-3">
+            <div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-100">{currentPage}</p><p className="mt-0.5 hidden text-xs text-stone-500 sm:block">{user?.studio_name || "Tu estudio fotográfico"}</p></div>
             <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Abrir busqueda global"
-                aria-keyshortcuts="Control+K"
-                className="hidden items-center gap-3 rounded-xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-sm text-stone-400 shadow-[inset_0_1px_0_rgba(255,255,255,.04)] transition hover:border-amber-200/20 hover:bg-white/[0.09] hover:text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 md:flex"
-              >
-                Buscar
-                <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-xs text-stone-300">
-                  Ctrl K
-                </kbd>
-              </button>
+              <Button className="whitespace-nowrap" onClick={() => setCreateOpen(true)}>+ Crear</Button>
+              <button type="button" onClick={() => setSearchOpen(true)} aria-label="Abrir búsqueda y comandos" aria-keyshortcuts="Control+K" className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-sm text-stone-400 hover:border-amber-200/20 hover:bg-white/[0.08] hover:text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 md:flex">Buscar <kbd className="text-xs text-stone-500">Ctrl K</kbd></button>
+              <button type="button" onClick={() => setLumaOpen(true)} aria-label="Abrir Luma" aria-keyshortcuts="Control+L" className="flex items-center gap-2 rounded-xl border border-amber-200/15 bg-amber-100/[0.055] p-1.5 pr-3 text-sm font-semibold text-amber-100 hover:border-amber-200/30 hover:bg-amber-100/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60"><BrandLogo className="size-7 rounded-lg" /><span className="hidden sm:inline">Luma</span></button>
               <NotificationBell onOpen={() => setNotificationsOpen(true)} />
-              <div className="lg:hidden">
-                <Button variant="secondary" onClick={handleLogout}>
-                  Salir
-                </Button>
-              </div>
             </div>
           </div>
-          <nav
-            aria-label="Navegacion movil"
-            className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden"
-          >
-            {flatNav.map(([label, href]) => (
-              <NavLink
-                key={href}
-                to={href}
-                className={({ isActive }) =>
-                  `whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${
-                    isActive ? "bg-amber-100 text-stone-950" : "bg-white/[0.055] text-stone-400"
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
         </header>
 
-        <main id="contenido" className="mx-auto max-w-[92rem] px-4 py-8 md:px-8">
-          <Outlet />
-        </main>
+        <main id="contenido" className="mx-auto max-w-[92rem] px-4 py-7 md:px-8"><Outlet /></main>
       </div>
 
-      <GlobalSearch
-        open={searchOpen}
-        onOpen={() => setSearchOpen(true)}
-        onClose={() => setSearchOpen(false)}
-      />
+      <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-white/10 bg-[#0b0a09]/96 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden">
+        {primaryNav.map(([label, href]) => <MobileLink key={href} label={label} href={href} />)}
+        <button type="button" onClick={() => setMoreOpen(true)} className="rounded-lg px-1 py-2 text-xs font-medium text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60">Más</button>
+      </nav>
+
+      {moreOpen ? <MobileMore onClose={() => setMoreOpen(false)} onLogout={handleLogout} /> : null}
+      <GlobalSearch open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={() => setSearchOpen(false)} onOpenLuma={() => { setSearchOpen(false); setLumaOpen(true); }} />
+      <GlobalCreateMenu open={createOpen} onClose={() => setCreateOpen(false)} />
+      <LumaAssistant open={lumaOpen} onOpen={() => setLumaOpen(true)} onClose={() => setLumaOpen(false)} />
       <NotificationCenter open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </div>
   );
+}
+
+function MobileLink({ label, href }) {
+  return <NavLink to={href} className={({ isActive }) => `rounded-lg px-1 py-2 text-center text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 ${isActive ? "bg-amber-100 text-stone-950" : "text-stone-400"}`}>{label}</NavLink>;
+}
+
+function MobileMore({ onClose, onLogout }) {
+  return <div className="fixed inset-0 z-[70] flex items-end bg-black/65 lg:hidden" onClick={onClose}><div role="dialog" aria-modal="true" aria-label="Más navegación" className="w-full rounded-t-2xl border-t border-white/10 bg-[#12110f] p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><h2 className="font-semibold">Más</h2><button type="button" onClick={onClose} className="rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-white/[0.06]">Cerrar</button></div><div className="mt-3 grid grid-cols-2 gap-2">{navGroups.flatMap(([, items]) => items).map(([label, href]) => <NavLink key={href} to={href} onClick={onClose} className="rounded-xl border border-white/10 p-3 text-sm text-stone-300 hover:bg-white/[0.05]">{label}</NavLink>)}<NavLink to="/app/settings" onClick={onClose} className="rounded-xl border border-white/10 p-3 text-sm text-stone-300 hover:bg-white/[0.05]">Configuración</NavLink><button type="button" onClick={onLogout} className="rounded-xl border border-white/10 p-3 text-left text-sm text-stone-400 hover:bg-white/[0.05]">Cerrar sesión</button></div></div></div>;
 }

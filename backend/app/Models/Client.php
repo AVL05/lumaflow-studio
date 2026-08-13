@@ -45,6 +45,11 @@ class Client extends Model
         return $this->hasMany(Delivery::class);
     }
 
+    public function jobs(): HasMany
+    {
+        return $this->hasMany(Job::class);
+    }
+
     public function quotes(): HasMany
     {
         return $this->hasMany(Quote::class);

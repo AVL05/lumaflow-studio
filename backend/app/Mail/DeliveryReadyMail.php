@@ -24,7 +24,7 @@ class DeliveryReadyMail extends Mailable
             ->with([
                 'delivery' => $this->delivery,
                 'portalUrl' => $this->portalUrl,
-                'studioName' => $this->delivery->user->name,
+                'studioName' => $this->delivery->user->studio_name ?? $this->delivery->user->name,
                 'clientName' => $this->delivery->client->name,
             ]);
     }

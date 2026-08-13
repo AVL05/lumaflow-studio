@@ -4,12 +4,12 @@ Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que si
 
 ## Deuda conocida
 
-| Tema | Detalle |
-|---|---|
-| Persistencia de chat WebGPU | La inferencia principal corre en navegador; falta persistir conversaciones WebGPU en backend o IndexedDB |
-| Exportacion general | Presupuestos y facturas tienen PDF. `ExportService` mantiene CSV/JSON para listados y analitica |
-| Analitica | `/api/analytics` hace varias consultas por carga, sin cache. Aceptable con volumenes de portfolio |
-| Tests frontend | Tests sobre hooks, utilidades del calendario y componentes criticos. Sin cobertura de paginas completas |
+| Tema                        | Detalle                                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Persistencia de chat WebGPU | La inferencia principal corre en navegador; falta persistir conversaciones WebGPU en backend o IndexedDB      |
+| Exportacion general         | Presupuestos y facturas tienen PDF. `ExportService` mantiene CSV/JSON para listados y analitica               |
+| Analitica                   | `/api/analytics` hace varias consultas por carga, sin cache. Aceptable durante la beta con volumen controlado |
+| Tests frontend              | Tests sobre hooks, utilidades del calendario y componentes criticos. Sin cobertura de paginas completas       |
 
 ## Proximas fases
 
@@ -30,6 +30,8 @@ Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que si
 - Multi-usuario por estudio: roles, permisos y recursos compartidos. Hoy el aislamiento es estrictamente por `user_id`.
 - Pagos online y conciliacion de facturas.
 
-## Fuera de alcance
+## Criterio de producto
 
-Este proyecto es una release privada de portfolio. No busca ser un SaaS multi-tenant ni sustituir a Lightroom. Las decisiones de arquitectura estan tomadas para demostrar criterio tecnico sobre un dominio real, no para escalar a miles de usuarios.
+LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales antes de definir limites, precios o colaboracion multiusuario.
+
+El aislamiento actual es por usuario. Antes de escalar el servicio deben completarse roles por estudio, observabilidad, copias de seguridad, politicas de retencion y una estrategia de capacidad verificable.

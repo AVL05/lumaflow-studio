@@ -11,6 +11,7 @@ class DeliveryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'job_id' => $this->job_id,
             'client_id' => $this->client_id,
             'client' => new ClientResource($this->whenLoaded('client')),
             'session_id' => $this->session_id,

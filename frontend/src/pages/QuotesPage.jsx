@@ -21,10 +21,12 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 import { Textarea } from "../components/ui/Textarea";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { quoteStatuses } from "../utils/catalogs";
 
 const emptyItem = { description: "", quantity: 1, unit_price: "" };
 const defaults = {
+  job_id: "",
   client_id: "",
   session_id: "",
   issue_date: "",
@@ -64,14 +66,18 @@ export function QuotesPage() {
 
   function create() {
     setEditing(null);
-    setForm({ ...defaults, items: [{ ...emptyItem }] });
+    const params = new URLSearchParams(window.location.search);
+    setForm({ ...defaults, job_id: params.get("job_id") ?? "", client_id: params.get("client_id") ?? "", items: [{ ...emptyItem }] });
     setError("");
     setOpen(true);
   }
 
+  useCreateIntent(create);
+
   function edit(quote) {
     setEditing(quote);
     setForm({
+      job_id: quote.job_id ? String(quote.job_id) : "",
       client_id: String(quote.client_id),
       session_id: quote.session_id ? String(quote.session_id) : "",
       issue_date: quote.issue_date ?? "",
@@ -95,6 +101,7 @@ export function QuotesPage() {
     try {
       const payload = {
         ...form,
+        job_id: form.job_id ? Number(form.job_id) : null,
         client_id: Number(form.client_id),
         session_id: form.session_id ? Number(form.session_id) : null,
         issue_date: form.issue_date || null,

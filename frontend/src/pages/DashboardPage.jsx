@@ -18,16 +18,23 @@ import {
   PendingTasksWidget,
   TopLocationsWidget,
 } from "../features/dashboard/WorkflowWidgets";
+import { ActivationPanel } from "../features/dashboard/ActivationPanel";
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    dashboardApi
+  async function loadDashboard() {
+    return dashboardApi
       .summary()
       .then(setDashboard)
       .catch((err) => setError(getApiError(err)));
+  }
+
+  useEffect(() => {
+    loadDashboard();
+    // La carga inicial solo debe ejecutarse al montar la pagina.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -42,6 +49,7 @@ export function DashboardPage() {
         <DashboardSkeleton />
       ) : (
         <div className="space-y-6">
+          <ActivationPanel activation={dashboard.activation} onRefresh={loadDashboard} />
           <Card className="p-6 md:p-7">
             <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
               <div>
@@ -49,7 +57,9 @@ export function DashboardPage() {
                   Estado operativo
                 </p>
                 <h2 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-stone-50 text-balance">
-                  Tu estudio esta listo para organizar produccion, entrega y archivo.
+                  {dashboard.activation.operational
+                    ? "Tu estudio ya está operativo y preparado para crecer."
+                    : "Tu estudio está listo para organizar producción, entrega y archivo."}
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400">
                   El dashboard resume lo que requiere atencion: agenda inmediata, tareas abiertas,

@@ -23,10 +23,12 @@ import { TaskForm } from "../features/tasks/TaskForm";
 import { TaskSummary } from "../features/tasks/TaskSummary";
 import { useHotkey } from "../hooks/useHotkey";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
+import { useCreateIntent } from "../hooks/useCreateIntent";
 import { useSelection } from "../hooks/useSelection";
 import { taskPriorities, taskStatuses } from "../utils/catalogs";
 
 const defaults = {
+  job_id: "",
   title: "",
   description: "",
   priority: "medium",
@@ -88,10 +90,13 @@ export function TasksPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm(defaults);
+    const params = new URLSearchParams(window.location.search);
+    setForm({ ...defaults, job_id: params.get("job_id") ?? "", client_id: params.get("client_id") ?? "" });
     setFormError("");
     setFormOpen(true);
   }
+
+  useCreateIntent(openCreate);
 
   // Estables para que TaskCard (memoizada) no se re-renderice en cada seleccion.
   const openEdit = useCallback((task) => {
@@ -308,6 +313,7 @@ export function TasksPage() {
 
 function normalizeTask(form) {
   return {
+    job_id: form.job_id ? Number(form.job_id) : null,
     title: form.title,
     description: form.description || null,
     priority: form.priority,

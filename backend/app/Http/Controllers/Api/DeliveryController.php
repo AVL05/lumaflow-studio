@@ -8,6 +8,7 @@ use App\Http\Resources\DeliveryResource;
 use App\Mail\DeliveryReadyMail;
 use App\Models\Delivery;
 use App\Services\ActivityLogger;
+use App\Services\JobTransitionService;
 use App\Services\NotificationService;
 use App\Support\AuditLog;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -19,6 +20,7 @@ class DeliveryController extends Controller
     public function __construct(
         private readonly ActivityLogger $activity,
         private readonly NotificationService $notifications,
+        private readonly JobTransitionService $jobs,
     ) {}
 
     public function index(): AnonymousResourceCollection
@@ -59,6 +61,12 @@ class DeliveryController extends Controller
 
         $previousStatus = $delivery->status;
         $delivery->update($request->validated());
+        $targetJobStatus = match ($delivery->status) {
+            'pending' => 'review', 'delivered', 'approved' => 'delivered', 'archived' => 'closed', default => null,
+        };
+        if ($targetJobStatus) {
+            $this->jobs->advance($delivery->job, $targetJobStatus, "Entrega actualizada a {$delivery->status}");
+        }
         $this->activity->logStatusChange($request->user(), $delivery, $previousStatus, $delivery->status);
 
         if ($previousStatus !== $delivery->status && in_array($delivery->status, ['delivered', 'approved'], true)) {

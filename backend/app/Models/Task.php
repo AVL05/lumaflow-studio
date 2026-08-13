@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position'])]
+#[Fillable(['user_id', 'job_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position'])]
 class Task extends Model
 {
     use CleansUpWorkflowRelations, HasFactory;
@@ -66,6 +66,11 @@ class Task extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function job(): BelongsTo
+    {
+        return $this->belongsTo(Job::class);
     }
 
     public function session(): BelongsTo

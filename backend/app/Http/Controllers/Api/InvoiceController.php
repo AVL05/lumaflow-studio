@@ -7,13 +7,14 @@ use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\Quote;
 use App\Services\CommercialDocumentService;
+use App\Services\JobTransitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private readonly CommercialDocumentService $documents) {}
+    public function __construct(private readonly CommercialDocumentService $documents, private readonly JobTransitionService $jobs) {}
 
     public function index(): AnonymousResourceCollection
     {
@@ -52,6 +53,9 @@ class InvoiceController extends Controller
         $data = $request->validate(['status' => ['required', Rule::in(['draft', 'sent', 'paid', 'overdue', 'cancelled'])]]);
         $data['payment_date'] = $data['status'] === 'paid' ? now()->toDateString() : null;
         $invoice->update($data);
+        if ($invoice->status === 'paid') {
+            $this->jobs->advance($invoice->job, 'confirmed', 'Pago registrado; trabajo confirmado');
+        }
 
         return new InvoiceResource($invoice->refresh()->load(['client', 'session']));
     }

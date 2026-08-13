@@ -10,7 +10,7 @@ class PublicStudioResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->name,
+            'name' => $this->studio_name ?? $this->name,
         ];
     }
 }

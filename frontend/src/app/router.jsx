@@ -4,6 +4,9 @@ import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { lazyRoute } from "./lazyRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { EmailVerificationPage } from "../pages/EmailVerificationPage";
+import { OnboardingPage } from "../pages/OnboardingPage";
+import { GettingStartedPage } from "../pages/GettingStartedPage";
 import { ForgotPasswordPage } from "../pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "../pages/ResetPasswordPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -23,14 +26,42 @@ import { BookingRequestsPage } from "../pages/BookingRequestsPage";
 import { BookingPage } from "../pages/BookingPage";
 import { ClientPortalPage } from "../pages/ClientPortalPage";
 import { SystemPage } from "../pages/SystemPage";
+import { SettingsPage } from "../pages/SettingsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { LandingPage } from "../pages/LandingPage";
+import { JobsPage } from "../pages/JobsPage";
+import { JobDetailPage } from "../pages/JobDetailPage";
 
 const errorElement = <NotFoundPage asErrorBoundary />;
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/app/dashboard" replace />, errorElement },
+  { path: "/", element: <LandingPage />, errorElement },
+  {
+    path: "/demo",
+    element: lazyRoute(() => import("../pages/DemoPage"), "DemoPage"),
+    errorElement,
+  },
+  {
+    path: "/features",
+    element: lazyRoute(() => import("../pages/FeaturesPage"), "FeaturesPage"),
+    errorElement,
+  },
+  {
+    path: "/pricing",
+    element: lazyRoute(() => import("../pages/PricingPage"), "PricingPage"),
+    errorElement,
+  },
+  {
+    path: "/privacy",
+    element: lazyRoute(() => import("../pages/PrivacyPage"), "PrivacyPage"),
+    errorElement,
+  },
+  { path: "/security", element: <Navigate to="/privacy" replace />, errorElement },
   { path: "/login", element: <LoginPage />, errorElement },
   { path: "/register", element: <RegisterPage />, errorElement },
+  { path: "/verify-email", element: <EmailVerificationPage />, errorElement },
+  { path: "/onboarding", element: <OnboardingPage />, errorElement },
+  { path: "/getting-started", element: <GettingStartedPage />, errorElement },
   { path: "/forgot-password", element: <ForgotPasswordPage />, errorElement },
   { path: "/reset-password", element: <ResetPasswordPage />, errorElement },
   {
@@ -51,6 +82,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
       { path: "dashboard", element: <DashboardPage /> },
+      { path: "jobs", element: <JobsPage /> },
+      { path: "jobs/:id", element: <JobDetailPage /> },
       {
         path: "calendar",
         element: lazyRoute(() => import("../pages/CalendarPage"), "CalendarPage"),
@@ -76,7 +109,9 @@ export const router = createBrowserRouter([
         path: "ai-assistant",
         element: lazyRoute(() => import("../pages/AiAssistantPage"), "AiAssistantPage"),
       },
-      { path: "system", element: <SystemPage /> },
+      { path: "system", element: <Navigate to="/app/settings/advanced" replace /> },
+      { path: "settings", element: <SettingsPage /> },
+      { path: "settings/advanced", element: <SystemPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

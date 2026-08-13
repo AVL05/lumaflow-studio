@@ -15,6 +15,7 @@ class QuoteRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('user_id', $this->user()->id)],
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', $this->user()->id)],
             'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('user_id', $this->user()->id)],
             'issue_date' => ['nullable', 'date'],

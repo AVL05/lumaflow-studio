@@ -1,15 +1,15 @@
 # Despliegue
 
-## Demo publica gratuita
+## Beta publica gratuita
 
-La topologia de portfolio usa servicios con limite de gasto cero:
+La beta publica usa servicios con limite de gasto cero mientras se valida el producto:
 
-| Capa | Servicio | URL |
-|---|---|---|
-| SPA | Vercel | `https://lumaflow.aleviclop.dev` |
-| API Laravel | Render (free web service) | `https://lumaflow-api.aleviclop.dev` |
-| Base de datos | TiDB Cloud Starter, MySQL compatible | Privada, TLS obligatorio |
-| Galerias | Storage S3 compatible con plan gratuito | Privada, servida por URL publica |
+| Capa          | Servicio                                | URL                                  |
+| ------------- | --------------------------------------- | ------------------------------------ |
+| SPA           | Vercel                                  | `https://lumaflow.aleviclop.dev`     |
+| API Laravel   | Render (free web service)               | `https://lumaflow-api.aleviclop.dev` |
+| Base de datos | TiDB Cloud Starter, MySQL compatible    | Privada, TLS obligatorio             |
+| Galerias      | Storage S3 compatible con plan gratuito | Privada, servida por URL publica     |
 
 `render.yaml` define el servicio backend. Los valores marcados con `sync: false`
 son secretos y se introducen en Render; nunca se guardan en Git. El limite mensual
@@ -30,7 +30,7 @@ de almacenamiento gratuito y no al repositorio.
 Cada `push` o merge a `main` inicia el ciclo de entrega:
 
 1. GitHub Actions instala las dependencias desde los lockfiles.
-2. Ejecuta formato, lint, 56 tests backend, 33 tests frontend y build PWA.
+2. Ejecuta formato, lint, tests backend, tests frontend y build PWA.
 3. Construye las imágenes Docker de frontend y backend para detectar fallos del entorno de despliegue.
 4. Vercel despliega automáticamente `frontend/` con Node 22.
 5. Render espera a que los checks de GitHub terminen correctamente antes de desplegar la API.
@@ -55,13 +55,13 @@ cp .env.example .env
 docker compose up --build
 ```
 
-| Servicio | Puerto | Notas |
-|---|---|---|
-| frontend | 8080 | Build estatico servido por nginx, con fallback SPA |
-| backend | 8000 | `php artisan serve` tras esperar a MySQL, migrar y enlazar storage |
-| mysql | 3306 | Volumen `mysql-data` |
-| phpmyadmin | 8081 | |
-| ollama | 11434 | Solo con `--profile ollama` |
+| Servicio   | Puerto | Notas                                                              |
+| ---------- | ------ | ------------------------------------------------------------------ |
+| frontend   | 8080   | Build estatico servido por nginx, con fallback SPA                 |
+| backend    | 8000   | `php artisan serve` tras esperar a MySQL, migrar y enlazar storage |
+| mysql      | 3306   | Volumen `mysql-data`                                               |
+| phpmyadmin | 8081   |                                                                    |
+| ollama     | 11434  | Solo con `--profile ollama`                                        |
 
 Con el perfil de IA:
 
@@ -102,17 +102,19 @@ Este único comando ejecuta `scripts/start-local.mjs`, que:
 
 Vite aplica HMR a React, JavaScript y CSS. Laravel lee de nuevo los archivos PHP en cada petición. No hay que reconstruir ni reiniciar al editar. `Ctrl+C` detiene ambos procesos.
 
+En local, los emails se escriben en `backend/storage/logs/laravel.log`. Tras registrarte, abre el enlace firmado que aparece en ese archivo para continuar con el onboarding.
+
 Las variables locales se inyectan solo en los procesos iniciados. No se sobrescriben credenciales existentes de MySQL, Docker o producción.
 
 Para empezar con una base limpia, abre `http://localhost:5173/register` y crea la primera cuenta.
 
 ### URLs locales
 
-| Servicio | URL |
-|---|---|
-| SPA con HMR | `http://localhost:5173` |
-| API Laravel | `http://localhost:8000/api` |
-| Salud | `http://localhost:8000/api/health` |
+| Servicio    | URL                                |
+| ----------- | ---------------------------------- |
+| SPA con HMR | `http://localhost:5173`            |
+| API Laravel | `http://localhost:8000/api`        |
+| Salud       | `http://localhost:8000/api/health` |
 
 ## Variables
 
@@ -142,6 +144,14 @@ OLLAMA_MODEL=llama3.1
 OLLAMA_TIMEOUT=30
 OLLAMA_MAX_CONTEXT=12000
 LUMAFLOW_LOG_LEVEL=info
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.tu-proveedor.com
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=noreply@tu-dominio.com
+MAIL_FROM_NAME="LumaFlow Studio"
 ```
 
 `frontend/.env`:
@@ -164,6 +174,7 @@ Nunca commitear `.env`. Solo los `.env.example`.
 - [ ] Backup del volumen de MySQL y del storage publico.
 - [ ] `CACHE_STORE` real (database o redis): el rate limiting depende de el.
 - [ ] Rotacion de `storage/logs/lumaflow.log` (canal diario, 14 dias por defecto).
+- [ ] SMTP configurado y entrega real de verificacion probada fuera de spam.
 
 ## Monitorizacion
 

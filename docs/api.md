@@ -14,10 +14,18 @@ Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 ind
 
 | Metodo | Ruta | Auth | Notas |
 |---|---|---|---|
-| POST | `/register` | no | `throttle:10,1`. Devuelve 201 con `{user, token}` |
+| POST | `/register` | no | Crea una cuenta sin verificar, envia el email y devuelve `{user, token}` |
 | POST | `/login` | no | `throttle:10,1`. Mismo error exista o no el email |
 | POST | `/logout` | si | Revoca el token en uso |
-| GET | `/user` | si | Usuario autenticado |
+| GET | `/user` | si | Estado de verificacion, onboarding y preferencias del usuario |
+| GET | `/email/verify/{id}/{hash}` | firma temporal | Verifica el email y redirige a la SPA |
+| POST | `/email/verification-notification` | si | Reenvia el enlace, `throttle:6,1` |
+| POST | `/onboarding` | si, email verificado | Guarda estudio, especialidades, pais, moneda y primera prioridad |
+| POST | `/getting-started` | si | Elige `create_first_job`, `sample_workspace` o `import_clients` |
+
+Los recursos de producto requieren email verificado y onboarding completado. Una cuenta pendiente puede usar `/user`, `/logout`, el reenvio de verificacion y `/onboarding` cuando corresponda. El enlace de email caduca a los 60 minutos y su firma impide alterar el usuario o el hash.
+
+`sample_workspace` crea de forma idempotente clientes, trabajos, sesiones, tareas, localizacion y entrega ficticios. No genera estados entregados ni activa reservas, por lo que no falsea el hito operativo.
 
 ## Salud y sistema
 
@@ -35,6 +43,7 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 
 | Recurso | Rutas | Filtros de `index` |
 |---|---|---|
+| Jobs | `apiResource /jobs`, `GET /jobs/workflows` | `search`, `status`, `specialty` |
 | Sessions | `apiResource /sessions` | `search`, `status`, `type`, `sort`, `direction` |
 | Gear | `apiResource /gear` | `search`, `category`, `condition`, `favorite` |
 | Locations | `apiResource /locations` | `search`, `city`, `type`, `access_difficulty`, `access_mode`, `favorite`, `latitude`, `longitude`, `radius_km` |
@@ -67,9 +76,14 @@ Los PDF de presupuestos y facturas son documentos descargables autenticados. No 
 
 ### Workflow
 
+`/jobs` es el agregado central. Su detalle incluye cliente, localizacion, equipo, sesiones, presupuestos, facturas, tareas, entregas y timeline. Pipeline: `lead → quoted → contract_pending → confirmed → preparation → shoot → editing → review → delivered → closed`; `cancelled` queda fuera del avance normal. Aceptar un presupuesto avanza a contrato, pagar una factura confirma el trabajo y los estados de sesion/entrega adelantan produccion sin permitir regresiones automaticas.
+
 | Metodo | Ruta | Notas |
 |---|---|---|
 | GET | `/dashboard` | Metricas, agenda del dia, tareas, progreso mensual, timeline |
+| POST | `/activation/bookings` | Activa el enlace publico de reservas y devuelve el checklist actualizado |
+| POST | `/activation/sample-workspace` | Carga una unica vez los datos ficticios opcionales |
+| POST | `/clients/import` | Importa hasta 250 clientes y omite emails existentes |
 | GET | `/calendar` | Requiere `from` y `to`. Opcional `sources=session,delivery,task` |
 | PATCH | `/calendar/move` | `{source, source_id, date, time?}`. Reprogramacion por drag & drop |
 | GET | `/activities` | Feed global. Filtro `type` |
@@ -113,7 +127,9 @@ Una combinacion no soportada devuelve 422.
 | Codigo | Significado |
 |---|---|
 | 401 | Sin token, o token revocado |
+| 403 | Email sin verificar o firma invalida |
 | 404 | No existe **o no es tuyo** |
+| 409 | Onboarding pendiente (`code: onboarding_required`) |
 | 422 | Validacion fallida, o accion masiva no soportada |
 | 429 | Rate limit |
 | 503 | Ollama no disponible (solo en endpoints backend legacy de IA) |

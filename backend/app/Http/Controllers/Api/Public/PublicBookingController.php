@@ -15,14 +15,14 @@ class PublicBookingController extends Controller
 
     public function show(string $slug): PublicStudioResource
     {
-        $user = User::query()->where('studio_slug', $slug)->firstOrFail();
+        $user = User::query()->where('studio_slug', $slug)->whereNotNull('bookings_enabled_at')->firstOrFail();
 
         return new PublicStudioResource($user);
     }
 
     public function store(BookingRequestStoreRequest $request, string $slug): JsonResponse
     {
-        $user = User::query()->where('studio_slug', $slug)->firstOrFail();
+        $user = User::query()->where('studio_slug', $slug)->whereNotNull('bookings_enabled_at')->firstOrFail();
 
         $booking = $user->bookingRequests()->create($request->validated() + ['status' => 'new']);
 

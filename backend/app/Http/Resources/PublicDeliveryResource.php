@@ -17,7 +17,7 @@ class PublicDeliveryResource extends JsonResource
         return [
             'title' => $this->title,
             'status' => $this->status,
-            'studio_name' => $this->user?->name,
+            'studio_name' => $this->user?->studio_name ?? $this->user?->name,
             'client_name' => $this->client?->name,
             'session_name' => $this->session?->name,
             'delivery_date' => $this->delivery_date?->toDateString(),

@@ -17,6 +17,7 @@ class CommercialDocumentService
         return DB::transaction(function () use ($user, $data): Quote {
             $totals = $this->totals($data['items'], (float) $data['tax_rate']);
             $quote = $user->quotes()->create([
+                'job_id' => $data['job_id'] ?? null,
                 'client_id' => $data['client_id'],
                 'session_id' => $data['session_id'] ?? null,
                 'quote_number' => $this->nextNumber(Quote::class, 'quote_number', 'PRE', $user->id),
@@ -42,6 +43,7 @@ class CommercialDocumentService
         return DB::transaction(function () use ($quote, $data): Quote {
             $totals = $this->totals($data['items'], (float) $data['tax_rate']);
             $quote->update([
+                'job_id' => $data['job_id'] ?? null,
                 'client_id' => $data['client_id'],
                 'session_id' => $data['session_id'] ?? null,
                 'issue_date' => $data['issue_date'] ?? $quote->issue_date,
@@ -66,6 +68,7 @@ class CommercialDocumentService
         }
 
         return DB::transaction(fn () => $user->invoices()->create([
+            'job_id' => $quote->job_id,
             'quote_id' => $quote->id,
             'client_id' => $quote->client_id,
             'session_id' => $quote->session_id,
