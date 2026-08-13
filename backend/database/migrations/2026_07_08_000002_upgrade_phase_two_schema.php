@@ -15,7 +15,9 @@ return new class extends Migration
             $table->string('client_name')->nullable()->after('notes');
         });
 
-        DB::statement("ALTER TABLE sessions MODIFY status ENUM('planned','confirmed','completed','editing','delivered','cancelled') DEFAULT 'planned'");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE sessions MODIFY status ENUM('planned','confirmed','completed','editing','delivered','cancelled') DEFAULT 'planned'");
+        }
 
         Schema::table('gear_items', function (Blueprint $table): void {
             $table->unsignedInteger('weight_grams')->nullable()->after('model');
@@ -24,7 +26,9 @@ return new class extends Migration
             $table->decimal('purchase_price', 10, 2)->nullable()->after('purchase_date');
         });
 
-        DB::statement("ALTER TABLE gear_items MODIFY category ENUM('camera','lens','filter','flash','light','tripod','gimbal','drone','gopro','mobile','accessory','battery','sd_card')");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE gear_items MODIFY category ENUM('camera','lens','filter','flash','light','tripod','gimbal','drone','gopro','mobile','accessory','battery','sd_card')");
+        }
     }
 
     public function down(): void
@@ -33,12 +37,16 @@ return new class extends Migration
             $table->dropColumn(['weight_grams', 'condition', 'purchase_date', 'purchase_price']);
         });
 
-        DB::statement("ALTER TABLE gear_items MODIFY category ENUM('camera','lens','filter','tripod','light','gopro','mobile','accessory','battery','sd_card')");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE gear_items MODIFY category ENUM('camera','lens','filter','tripod','light','gopro','mobile','accessory','battery','sd_card')");
+        }
 
         Schema::table('sessions', function (Blueprint $table): void {
             $table->dropColumn(['time', 'description', 'client_name']);
         });
 
-        DB::statement("ALTER TABLE sessions MODIFY status ENUM('planned','completed','editing','delivered') DEFAULT 'planned'");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE sessions MODIFY status ENUM('planned','completed','editing','delivered') DEFAULT 'planned'");
+        }
     }
 };

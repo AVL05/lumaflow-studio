@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: lumaflow-studio-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: php artisan serve --host=0.0.0.0 --port=10000
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: APP_NAME
+        value: LumaFlow Studio
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://lumaflow-api.aleviclop.dev
+      - key: ASSET_URL
+        value: https://lumaflow-api.aleviclop.dev
+      - key: FRONTEND_URLS
+        value: https://lumaflow.aleviclop.dev
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 4000
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: MYSQL_ATTR_SSL_CA
+        value: /etc/ssl/certs/ca-certificates.crt
+      - key: FILESYSTEM_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_URL
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: true
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: OLLAMA_URL
+        value: http://127.0.0.1:11434
+      - key: SEED_DATABASE
+        value: false

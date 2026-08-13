@@ -1,5 +1,30 @@
 # Despliegue
 
+## Demo publica gratuita
+
+La topologia de portfolio usa servicios con limite de gasto cero:
+
+| Capa | Servicio | URL |
+|---|---|---|
+| SPA | Vercel | `https://lumaflow.aleviclop.dev` |
+| API Laravel | Render (free web service) | `https://lumaflow-api.aleviclop.dev` |
+| Base de datos | TiDB Cloud Starter, MySQL compatible | Privada, TLS obligatorio |
+| Galerias | Storage S3 compatible con plan gratuito | Privada, servida por URL publica |
+
+`render.yaml` define el servicio backend. Los valores marcados con `sync: false`
+son secretos y se introducen en Render; nunca se guardan en Git. El limite mensual
+de TiDB debe permanecer en `0` para impedir cargos. Render puede suspender el
+servicio gratuito por inactividad, por lo que la primera peticion puede tardar.
+
+La SPA se construye con:
+
+```env
+VITE_API_URL=https://lumaflow-api.aleviclop.dev/api
+```
+
+El backend usa `FILESYSTEM_DISK=s3`; las credenciales corresponden al proveedor
+de almacenamiento gratuito y no al repositorio.
+
 ## Docker (recomendado)
 
 ```bash

@@ -63,7 +63,8 @@ class HealthService
     private function storage(): array
     {
         return $this->probe(function (): array {
-            $disk = Storage::disk('public');
+            $diskName = config('filesystems.default');
+            $disk = Storage::disk($diskName);
             $file = 'health/'.uniqid('probe_', true).'.txt';
 
             $disk->put($file, 'ok');
@@ -72,8 +73,11 @@ class HealthService
 
             abort_unless($readable, 500);
 
-            // is_link() no reconoce las junctions de Windows: basta con que la ruta exista.
-            return ['disk' => 'public', 'linked' => file_exists(public_path('storage'))];
+            // El enlace solo aplica al disco local publico; S3/R2 no lo necesita.
+            return [
+                'disk' => $diskName,
+                'linked' => $diskName === 'public' ? file_exists(public_path('storage')) : null,
+            ];
         });
     }
 

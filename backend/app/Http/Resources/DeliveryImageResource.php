@@ -13,7 +13,7 @@ class DeliveryImageResource extends JsonResource
         return [
             'id' => $this->id,
             'filename' => $this->filename,
-            'url' => Storage::disk('public')->url($this->path),
+            'url' => Storage::disk(config('filesystems.default'))->url($this->path),
             'mime_type' => $this->mime_type,
             'size' => $this->size,
             'position' => $this->position,

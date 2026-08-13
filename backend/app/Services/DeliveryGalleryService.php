@@ -14,9 +14,10 @@ class DeliveryGalleryService
     {
         $images = collect();
         $position = (int) ($delivery->images()->max('position') ?? 0);
+        $disk = config('filesystems.default');
 
         foreach ($files as $file) {
-            $path = $file->storeAs("deliveries/{$delivery->id}", Str::uuid().'.'.$file->extension(), 'public');
+            $path = $file->storeAs("deliveries/{$delivery->id}", Str::uuid().'.'.$file->extension(), $disk);
             $images->push($delivery->images()->create([
                 'user_id' => $delivery->user_id,
                 'filename' => $file->getClientOriginalName(),
@@ -32,7 +33,7 @@ class DeliveryGalleryService
 
     public function delete(DeliveryImage $image): void
     {
-        Storage::disk('public')->delete($image->path);
+        Storage::disk(config('filesystems.default'))->delete($image->path);
         $image->delete();
     }
 }

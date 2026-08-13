@@ -88,6 +88,7 @@ class CommercialWorkflowTest extends TestCase
 
     public function test_delivery_gallery_upload_public_favorite_and_delete(): void
     {
+        config(['filesystems.default' => 'public']);
         Storage::fake('public');
         $delivery = Delivery::create([
             'user_id' => $this->user->id,
