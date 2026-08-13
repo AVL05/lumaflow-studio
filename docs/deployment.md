@@ -60,19 +60,36 @@ docker compose down      # parar
 docker compose down -v   # parar y borrar volumenes (destruye la BD)
 ```
 
-## Local sin Docker
+## Desarrollo local con recarga inmediata
 
-Requisitos: PHP 8.3+, Composer, Node 22+, MySQL 8.
-
-```sql
-CREATE DATABASE lumaflow_studio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+Requisitos: PHP 8.3+, Composer, Node 22+ y pnpm 10+. No requiere Docker ni MySQL.
 
 ```bash
-npm install          # dependencias raiz (concurrently)
-npm run setup        # composer install + key + storage:link + migrate + npm install
-npm run start        # backend en :8000 y frontend en :5173, en una sola terminal
+pnpm run start
 ```
+
+Este único comando ejecuta `scripts/start-local.mjs`, que:
+
+1. comprueba que pnpm, PHP y Composer estén disponibles;
+2. sincroniza dependencias JavaScript y PHP;
+3. crea `backend/.env` y una `APP_KEY` solo si faltan;
+4. crea y migra `backend/database/database.sqlite`;
+5. aplica al proceso local `DB_CONNECTION=sqlite`, cache en archivos, cola síncrona y storage público;
+6. inicia Laravel en `http://localhost:8000` y Vite en `http://localhost:5173`.
+
+Vite aplica HMR a React, JavaScript y CSS. Laravel lee de nuevo los archivos PHP en cada petición. No hay que reconstruir ni reiniciar al editar. `Ctrl+C` detiene ambos procesos.
+
+Las variables locales se inyectan solo en los procesos iniciados. No se sobrescriben credenciales existentes de MySQL, Docker o producción.
+
+Para empezar con una base limpia, abre `http://localhost:5173/register` y crea la primera cuenta.
+
+### URLs locales
+
+| Servicio | URL |
+|---|---|
+| SPA con HMR | `http://localhost:5173` |
+| API Laravel | `http://localhost:8000/api` |
+| Salud | `http://localhost:8000/api/health` |
 
 ## Variables
 

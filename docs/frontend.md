@@ -65,7 +65,7 @@ Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayo
 
 - Componentes `PascalCase.jsx` con **export nombrado**, nunca default.
 - Hooks `useThing.js`. Modulos de api por recurso.
-- Formato con Prettier (`npm run format`), lint con **oxlint** (no ESLint).
+- Formato con Prettier (`pnpm run format`), lint con **oxlint** (no ESLint).
 - La UI esta en espanol y sin tildes en muchos strings. Seguir el estilo del archivo que se toca.
 - Tailwind v4 via `@tailwindcss/vite`: **no hay `tailwind.config.js`**, los tokens viven en `src/styles/main.css`.
 
@@ -90,11 +90,11 @@ Todas las rutas de producto cuelgan de `/app/*` bajo `ProtectedRoute` + `AppLayo
 ## Comandos
 
 ```bash
-npm install
-npm run dev
-npm run lint          # oxlint
-npm run format        # prettier --write src
-npm run test          # vitest
-npm run test:coverage
-npm run build
+pnpm install
+pnpm run dev
+pnpm run lint          # oxlint
+pnpm run format        # prettier --write src
+pnpm run test          # vitest
+pnpm run test:coverage
+pnpm run build
 ```

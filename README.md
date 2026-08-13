@@ -92,26 +92,31 @@ Detalle completo en [docs/architecture.md](docs/architecture.md).
 | **Estado del sistema** | `/app/system`: sondas en vivo de API, MySQL, storage, cache y compatibilidad Ollama |
 | **PWA** | Aplicacion instalable con shell offline; los modelos WebGPU siguen bajo demanda |
 
-## Instalacion
+## Instalacion local con recarga inmediata
 
-Requisitos: PHP 8.3+, Composer, Node 22+, MySQL 8. Para IA en la SPA hace falta un navegador con WebGPU. Ollama es opcional.
+Requisitos: PHP 8.3+, Composer, Node 22+ y pnpm 10+. Para IA en la SPA hace falta un navegador con WebGPU. Ollama es opcional. MySQL y Docker no son necesarios para desarrollo local: el arranque usa SQLite.
 
 ```bash
 git clone https://github.com/AVL05/lumaflow-studio.git
 cd lumaflow-studio
 ```
 
-```sql
-CREATE DATABASE lumaflow_studio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
 ```bash
-npm install     # dependencias raiz
-npm run setup   # composer install, APP_KEY, storage:link, migrate, npm install
-npm run start   # backend :8000 y frontend :5173, en una sola terminal
+pnpm run start
 ```
 
-Usuario de ejemplo tras sembrar (`php artisan db:seed`): `test@example.com` / `password`.
+Es el único comando necesario. En el primer arranque y cuando cambien los manifiestos:
+
+- instala las dependencias pnpm y Composer;
+- crea `backend/.env` si falta y conserva su clave en arranques posteriores;
+- crea `backend/database/database.sqlite`;
+- configura SQLite, cache y sesiones solo para el proceso local;
+- ejecuta migraciones y crea el enlace de storage;
+- levanta Laravel en `http://localhost:8000` y Vite en `http://localhost:5173`.
+
+Los cambios en React, JavaScript y CSS aparecen inmediatamente mediante HMR. Los cambios PHP se aplican en la siguiente petición, sin reiniciar el comando. Pulsa `Ctrl+C` para detener ambos servicios.
+
+Después abre `http://localhost:5173/register` y crea tu cuenta local.
 
 ## Docker
 
@@ -173,14 +178,14 @@ Desde la raiz:
 
 | Script | Que hace |
 |---|---|
-| `npm run start` | Backend + frontend en una sola terminal |
-| `npm run dev` | Alias de `start` |
-| `npm run build` | Build de produccion del frontend |
-| `npm run lint` | oxlint + `pint --test` |
-| `npm run format` | Prettier + Pint |
-| `npm run test` | PHPUnit + Vitest |
-| `npm run setup` | Instalacion completa |
-| `npm run docker:up` / `docker:down` / `docker:reset` | Ciclo de vida de Docker |
+| `pnpm run start` | Prepara SQLite y levanta Laravel + Vite con recarga inmediata |
+| `pnpm run dev` | Alias de `start` |
+| `pnpm run build` | Build de produccion del frontend |
+| `pnpm run lint` | oxlint + `pint --test` |
+| `pnpm run format` | Prettier + Pint |
+| `pnpm run test` | PHPUnit + Vitest |
+| `pnpm run setup` | Instalacion manual completa |
+| `pnpm run docker:up` / `docker:down` / `docker:reset` | Ciclo de vida de Docker |
 
 ## Estructura
 
@@ -217,9 +222,9 @@ Detalle en [docs/ai.md](docs/ai.md).
 ## Testing
 
 ```bash
-npm run test                                    # todo
+pnpm run test                                   # todo
 cd backend && php artisan test --filter=AuthTest
-cd frontend && npm run test:coverage
+pnpm --dir frontend run test:coverage
 ```
 
 56 tests de backend (auth, CRUD, permisos, workflow, facturacion, galerias, salud y policies) y 33 de frontend (hooks, utilidades del calendario y componentes criticos).
@@ -239,7 +244,7 @@ Lo que **no** esta implementado, y por que, en [docs/roadmap.md](docs/roadmap.md
 Proyecto personal de portfolio; no se buscan contribuciones externas. Si aun asi quieres proponer un cambio:
 
 1. Abre un issue describiendo el problema antes de escribir codigo.
-2. Respeta las convenciones: `vendor/bin/pint` en backend, `npm run lint && npm run format` en frontend.
+2. Respeta las convenciones: `vendor/bin/pint` en backend, `pnpm run lint && pnpm run format` en frontend.
 3. Anade tests para el comportamiento que cambies.
 4. Commits en imperativo, con el ambito por delante: `feat(calendar): ...`, `fix(auth): ...`.
 
