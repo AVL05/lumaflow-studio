@@ -59,7 +59,7 @@ services:
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
         value: database
       - key: LOG_CHANNEL
