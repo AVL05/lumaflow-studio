@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm --dir frontend run format:check
+
+      - name: Lint
+        run: pnpm --dir frontend run lint
+
+      - name: Test
+        run: pnpm --dir frontend run test
+
+      - name: Build PWA
+        run: pnpm --dir frontend run build
+        env:
+          VITE_API_URL: https://lumaflow-api.aleviclop.dev/api
+
+  backend:
+    name: Backend quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, zip, pdo_sqlite
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --working-dir=backend --no-interaction --prefer-dist
+
+      - name: Prepare Laravel
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Check PHP style
+        working-directory: backend
+        run: php vendor/bin/pint --test
+
+      - name: Test
+        working-directory: backend
+        run: php artisan test
+
+  containers:
+    name: Deployment images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build --file backend/Dockerfile backend
+
+      - name: Build frontend image
+        run: docker build --file frontend/Dockerfile .

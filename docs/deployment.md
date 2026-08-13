@@ -25,6 +25,29 @@ VITE_API_URL=https://lumaflow-api.aleviclop.dev/api
 El backend usa `FILESYSTEM_DISK=s3`; las credenciales corresponden al proveedor
 de almacenamiento gratuito y no al repositorio.
 
+## Despliegue automático y controles
+
+Cada `push` o merge a `main` inicia el ciclo de entrega:
+
+1. GitHub Actions instala las dependencias desde los lockfiles.
+2. Ejecuta formato, lint, 56 tests backend, 33 tests frontend y build PWA.
+3. Construye las imágenes Docker de frontend y backend para detectar fallos del entorno de despliegue.
+4. Vercel despliega automáticamente `frontend/` con Node 22.
+5. Render espera a que los checks de GitHub terminen correctamente antes de desplegar la API.
+6. Al finalizar un despliegue, y además cada seis horas, se comprueban el login público y `/api/health`.
+
+Los workflows están en `.github/workflows/ci.yml` y
+`.github/workflows/production-smoke.yml`. Un fallo queda visible en la pestaña
+**Actions** del repositorio y evita que Render publique ese commit. Vercel mantiene
+el último despliegue correcto si su build falla.
+
+Configuración del proyecto Vercel:
+
+- Root Directory: `frontend`
+- Framework: Vite
+- Node.js: 22.x
+- Variable de producción: `VITE_API_URL=https://lumaflow-api.aleviclop.dev/api`
+
 ## Docker (recomendado)
 
 ```bash

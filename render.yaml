@@ -4,11 +4,13 @@ services:
     runtime: docker
     plan: free
     region: frankfurt
+    branch: main
+    autoDeployTrigger: checksPass
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
     dockerCommand: php artisan serve --host=0.0.0.0 --port=10000
-    healthCheckPath: /up
+    healthCheckPath: /api/health
     envVars:
       - key: PORT
         value: 10000

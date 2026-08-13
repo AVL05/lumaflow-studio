@@ -1,0 +1,47 @@
+name: Production Smoke Checks
+
+on:
+  deployment_status:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: production-smoke
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Production health
+    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --retry 12 --retry-delay 15 --retry-all-errors \
+            https://lumaflow.aleviclop.dev/login \
+            --output /tmp/lumaflow-login.html
+          grep -q 'id="root"' /tmp/lumaflow-login.html
+          grep -q '/favicon-32x32.png' /tmp/lumaflow-login.html
+
+      - name: Check API and dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --retry 12 --retry-delay 15 --retry-all-errors \
+            https://lumaflow-api.aleviclop.dev/api/health \
+            --output /tmp/lumaflow-health.json
+          jq -e '
+            .status != "down" and
+            .checks.api.status == "up" and
+            .checks.database.status == "up" and
+            .checks.storage.status == "up" and
+            .checks.cache.status == "up"
+          ' /tmp/lumaflow-health.json
