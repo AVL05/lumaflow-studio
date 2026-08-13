@@ -7,6 +7,7 @@ import { Card } from "../components/ui/Card";
 import { Field, inputClass } from "../components/ui/Field";
 import { Textarea } from "../components/ui/Textarea";
 import { ErrorState } from "../components/states/ErrorState";
+import { BrandLogo } from "../components/branding/BrandLogo";
 
 const defaults = {
   name: "",
@@ -158,9 +159,7 @@ function PublicShell({ children, studioName }) {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(196,141,72,0.14),transparent_30rem),linear-gradient(145deg,#090908_0%,#12100d_48%,#080807_100%)]" />
       <div className="relative mx-auto flex min-h-dvh w-full max-w-2xl flex-col justify-center px-4 py-10">
         <Link to="/" className="mx-auto mb-8 flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-amber-200 text-sm font-semibold text-stone-950">
-            LF
-          </span>
+          <BrandLogo className="h-9 w-9 rounded-md" />
           <span className="text-sm font-semibold tracking-tight text-stone-50">
             {studioName ? `${studioName} · LumaFlow Studio` : "LumaFlow Studio"}
           </span>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
+import { BrandLogo } from "../branding/BrandLogo";
 import { useAuth } from "../../features/auth/AuthContext";
 import { NotificationBell } from "../../features/notifications/NotificationBell";
 import { NotificationCenter } from "../../features/notifications/NotificationCenter";
@@ -80,9 +81,7 @@ export function AppLayout() {
         <div className="relative shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(31,28,23,.9),rgba(15,14,12,.96))] p-5 shadow-2xl shadow-black/30">
           <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-200/10 blur-2xl" />
           <div className="relative flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-100 text-sm font-bold text-stone-950">
-              LF
-            </span>
+            <BrandLogo className="h-11 w-11 rounded-xl" />
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-amber-200">LumaFlow</p>
               <h2 className="mt-1 text-2xl font-semibold tracking-tight">Studio</h2>
