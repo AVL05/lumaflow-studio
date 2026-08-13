@@ -103,7 +103,9 @@ export function ActivationPanel({ activation, onRefresh }) {
               disabled={Boolean(busy)}
               onClick={activateSample}
             >
-              {busy === "sample" ? "Preparando ejemplo..." : "Prefiero explorar con datos de ejemplo"}
+              {busy === "sample"
+                ? "Preparando ejemplo..."
+                : "Prefiero explorar con datos de ejemplo"}
             </button>
           ) : null}
           {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
@@ -130,7 +132,13 @@ export function ActivationPanel({ activation, onRefresh }) {
                   className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] p-3 hover:border-amber-200/25 hover:bg-white/[0.06]"
                 >
                   <StepMark completed={step.completed} />
-                  <span className={step.completed ? "text-sm text-stone-500 line-through" : "text-sm text-stone-200"}>
+                  <span
+                    className={
+                      step.completed
+                        ? "text-sm text-stone-500 line-through"
+                        : "text-sm text-stone-200"
+                    }
+                  >
                     {step.label}
                   </span>
                 </Link>

@@ -11,15 +11,17 @@ const options = [
     value: "create_first_job",
     index: "01",
     title: "Crear mi primer trabajo",
-      description: "Crea el encargo central y controla cliente, presupuesto, sesión, tareas y entrega.",
-      destination: "/app/jobs",
+    description:
+      "Crea el encargo central y controla cliente, presupuesto, sesión, tareas y entrega.",
+    destination: "/app/jobs",
     accent: "Recomendado para empezar",
   },
   {
     value: "sample_workspace",
     index: "02",
     title: "Explorar con datos de ejemplo",
-    description: "Carga clientes, sesiones, tareas y una entrega ficticia. Nada se marca como completado.",
+    description:
+      "Carga clientes, sesiones, tareas y una entrega ficticia. Nada se marca como completado.",
     destination: "/app/dashboard",
     accent: "Vista completa en segundos",
   },
@@ -90,7 +92,10 @@ export function GettingStartedPage() {
                   {option.accent}
                 </span>
               </span>
-              <span aria-hidden="true" className="text-xl text-stone-600 group-hover:text-amber-100">
+              <span
+                aria-hidden="true"
+                className="text-xl text-stone-600 group-hover:text-amber-100"
+              >
                 →
               </span>
             </div>

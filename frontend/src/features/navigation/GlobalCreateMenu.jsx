@@ -33,7 +33,11 @@ export function GlobalCreateMenu({ open, onClose }) {
             <h2 className="font-semibold text-stone-50">Crear</h2>
             <p className="mt-1 text-xs text-stone-400">Empieza desde cualquier pantalla.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-white/[0.06] hover:text-stone-100">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-white/[0.06] hover:text-stone-100"
+          >
             Cerrar
           </button>
         </div>

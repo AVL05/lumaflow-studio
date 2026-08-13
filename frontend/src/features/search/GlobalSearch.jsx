@@ -22,7 +22,14 @@ const commands = [
   ["Abrir configuración", "/app/settings", "Navegación"],
   ["Abrir estado avanzado", "/app/settings/advanced", "Configuración"],
   ["Preguntar a Luma", null, "Asistente global", "luma"],
-].map(([title, url, subtitle, action], id) => ({ id, group: "commands", title, url, subtitle, action }));
+].map(([title, url, subtitle, action], id) => ({
+  id,
+  group: "commands",
+  title,
+  url,
+  subtitle,
+  action,
+}));
 
 /** Buscador unificado con atajo Ctrl/Cmd + K y navegacion por teclado. */
 export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
@@ -41,7 +48,9 @@ export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
 
   const commandGroup = useMemo(() => {
     const query = term.trim().toLocaleLowerCase("es");
-    const items = commands.filter((item) => !query || `${item.title} ${item.subtitle}`.toLocaleLowerCase("es").includes(query));
+    const items = commands.filter(
+      (item) => !query || `${item.title} ${item.subtitle}`.toLocaleLowerCase("es").includes(query),
+    );
     return { group: "commands", label: "Acciones", items };
   }, [term]);
   const flat = useMemo(
@@ -154,9 +163,15 @@ export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
             </div>
           ) : null}
 
-          {commandGroup.items.length ? <SearchResultGroup group={commandGroup} activeId={activeId} onSelect={go} /> : null}
+          {commandGroup.items.length ? (
+            <SearchResultGroup group={commandGroup} activeId={activeId} onSelect={go} />
+          ) : null}
 
-          {!loading && term.trim().length > 0 && term.trim().length < 2 ? <p className="px-2 py-3 text-xs text-stone-500">Escribe dos caracteres para buscar también en tus datos.</p> : null}
+          {!loading && term.trim().length > 0 && term.trim().length < 2 ? (
+            <p className="px-2 py-3 text-xs text-stone-500">
+              Escribe dos caracteres para buscar también en tus datos.
+            </p>
+          ) : null}
 
           {!loading && result && result.total === 0 ? (
             <p className="px-2 py-6 text-center text-sm text-stone-400">

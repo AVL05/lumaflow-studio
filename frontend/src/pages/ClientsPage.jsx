@@ -102,7 +102,9 @@ export function ClientsPage() {
   }
 
   async function imported(result) {
-    toast.success(`${result.imported} clientes importados${result.skipped ? ` · ${result.skipped} omitidos` : ""}.`);
+    toast.success(
+      `${result.imported} clientes importados${result.skipped ? ` · ${result.skipped} omitidos` : ""}.`,
+    );
     closeImport();
     await resource.refresh();
   }

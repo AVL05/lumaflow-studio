@@ -67,7 +67,12 @@ export function QuotesPage() {
   function create() {
     setEditing(null);
     const params = new URLSearchParams(window.location.search);
-    setForm({ ...defaults, job_id: params.get("job_id") ?? "", client_id: params.get("client_id") ?? "", items: [{ ...emptyItem }] });
+    setForm({
+      ...defaults,
+      job_id: params.get("job_id") ?? "",
+      client_id: params.get("client_id") ?? "",
+      items: [{ ...emptyItem }],
+    });
     setError("");
     setOpen(true);
   }

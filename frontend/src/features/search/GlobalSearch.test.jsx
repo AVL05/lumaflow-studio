@@ -9,12 +9,7 @@ describe("GlobalSearch", () => {
     const onOpenLuma = vi.fn();
     render(
       <MemoryRouter>
-        <GlobalSearch
-          open
-          onOpen={() => {}}
-          onClose={() => {}}
-          onOpenLuma={onOpenLuma}
-        />
+        <GlobalSearch open onOpen={() => {}} onClose={() => {}} onOpenLuma={onOpenLuma} />
       </MemoryRouter>,
     );
 

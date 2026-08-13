@@ -20,8 +20,6 @@ describe("getAuthDestination", () => {
         onboarding_completed: true,
         getting_started_completed: true,
       }),
-    ).toBe(
-      "/app/dashboard",
-    );
+    ).toBe("/app/dashboard");
   });
 });

@@ -68,7 +68,11 @@ export function DeliveriesPage() {
   function openCreate() {
     setEditing(null);
     const params = new URLSearchParams(window.location.search);
-    setForm({ ...defaults, job_id: params.get("job_id") ?? "", client_id: params.get("client_id") ?? "" });
+    setForm({
+      ...defaults,
+      job_id: params.get("job_id") ?? "",
+      client_id: params.get("client_id") ?? "",
+    });
     setFormError("");
     setFormOpen(true);
   }

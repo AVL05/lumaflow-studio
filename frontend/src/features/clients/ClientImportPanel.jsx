@@ -46,8 +46,8 @@ export function ClientImportPanel({ onImported }) {
           Archivo CSV
         </label>
         <p className="mt-2 text-xs leading-5 text-stone-400">
-          Primera fila: nombre, email, teléfono, empresa y notas. Solo nombre es obligatorio.
-          Máximo 250 contactos. Los emails ya existentes se omiten.
+          Primera fila: nombre, email, teléfono, empresa y notas. Solo nombre es obligatorio. Máximo
+          250 contactos. Los emails ya existentes se omiten.
         </p>
         <input
           id="client-csv"

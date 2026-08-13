@@ -95,11 +95,7 @@ export function InvoicesPage() {
         eyebrow="Negocio"
         title="Facturación"
         description="Emite facturas desde presupuestos aceptados y controla vencimientos y cobros."
-        action={
-          <Button onClick={openCreate}>
-            Nueva factura
-          </Button>
-        }
+        action={<Button onClick={openCreate}>Nueva factura</Button>}
       />
       <div className="mb-6 max-w-xs">
         <Select

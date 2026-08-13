@@ -23,14 +23,16 @@ export function parseClientCsv(text) {
 
   if (indexes.name === -1) throw new Error('No encontramos la columna obligatoria "nombre".');
 
-  const rows = matrix.slice(1).map((values) =>
-    Object.fromEntries(
-      Object.entries(indexes).map(([key, index]) => [
-        key,
-        index >= 0 ? values[index]?.trim() || null : null,
-      ]),
-    ),
-  );
+  const rows = matrix
+    .slice(1)
+    .map((values) =>
+      Object.fromEntries(
+        Object.entries(indexes).map(([key, index]) => [
+          key,
+          index >= 0 ? values[index]?.trim() || null : null,
+        ]),
+      ),
+    );
 
   if (rows.some((row) => !row.name)) throw new Error("Hay filas sin nombre de cliente.");
   return rows;

@@ -75,7 +75,10 @@ export function SessionsPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ ...defaults, job_id: new URLSearchParams(window.location.search).get("job_id") ?? "" });
+    setForm({
+      ...defaults,
+      job_id: new URLSearchParams(window.location.search).get("job_id") ?? "",
+    });
     setFormError("");
     setFormOpen(true);
   }

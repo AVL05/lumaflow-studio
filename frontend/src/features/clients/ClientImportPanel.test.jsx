@@ -4,7 +4,9 @@ import { parseClientCsv } from "./clientCsv";
 describe("parseClientCsv", () => {
   it("acepta cabeceras españolas, comillas y campos opcionales", () => {
     expect(
-      parseClientCsv('Nombre,Correo,Teléfono,Empresa,Notas\n"Ana, Pérez",ana@example.com,600123123,AP,"Boda, junio"'),
+      parseClientCsv(
+        'Nombre,Correo,Teléfono,Empresa,Notas\n"Ana, Pérez",ana@example.com,600123123,AP,"Boda, junio"',
+      ),
     ).toEqual([
       {
         name: "Ana, Pérez",
