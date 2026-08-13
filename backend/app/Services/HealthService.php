@@ -99,7 +99,16 @@ class HealthService
     private function ollamaProbe(): array
     {
         $started = microtime(true);
-        $status = $this->ollama->status();
+
+        try {
+            $status = $this->ollama->status();
+        } catch (Throwable $exception) {
+            return [
+                'status' => 'degraded',
+                'error' => class_basename($exception),
+                'latency_ms' => $this->elapsed($started),
+            ];
+        }
 
         return [
             'status' => $status['available'] ? 'up' : 'degraded',
