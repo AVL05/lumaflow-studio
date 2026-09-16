@@ -74,7 +74,7 @@ return [
         ],
 
         /*
-         * Canal de dominio de LumaFlow: auth, uploads, IA y excepciones de API.
+         * Canal de dominio de LumaFlow: auth, entregas, IA y excepciones de API.
          * Se escribe solo desde App\Support\AuditLog, que sanea el contexto.
          */
         'lumaflow' => [

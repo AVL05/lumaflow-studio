@@ -20,6 +20,8 @@ class PublicDeliveryResource extends JsonResource
             'studio_name' => $this->user?->studio_name ?? $this->user?->name,
             'client_name' => $this->client?->name,
             'session_name' => $this->session?->name,
+            'session_type' => $this->session?->session_type,
+            'session_date' => $this->session?->date?->toDateString(),
             'delivery_date' => $this->delivery_date?->toDateString(),
             'gallery_url' => $this->gallery_url,
             'gallery_provider' => $this->gallery_provider,

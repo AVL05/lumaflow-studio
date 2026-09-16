@@ -19,7 +19,7 @@ class DeliveryReadyMail extends Mailable
     public function build(): self
     {
         return $this
-            ->subject("Tu galeria de \"{$this->delivery->title}\" esta lista")
+            ->subject("Tu sesion \"{$this->delivery->title}\" esta lista")
             ->view('emails.delivery-ready')
             ->with([
                 'delivery' => $this->delivery,

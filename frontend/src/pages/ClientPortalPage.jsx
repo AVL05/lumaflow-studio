@@ -9,13 +9,32 @@ import { Field, inputClass } from "../components/ui/Field";
 import { Textarea } from "../components/ui/Textarea";
 import { ErrorState } from "../components/states/ErrorState";
 import { BrandLogo } from "../components/branding/BrandLogo";
-import { deliveryStatuses } from "../utils/catalogs";
+import { sessionTypes } from "../utils/catalogs";
 
 const paymentLabels = {
   pending: ["Pago pendiente", "red"],
   partial: ["Pago parcial", "warm"],
   paid: ["Pagado", "green"],
 };
+
+const statusHeadings = {
+  draft: "Tu entrega se está preparando",
+  pending: "Tu entrega está en camino",
+  delivered: "Tu sesión está lista",
+  approved: "Entrega aprobada · Gracias",
+  archived: "Entrega archivada",
+};
+
+function formatLongDate(value) {
+  if (!value) return "";
+  const [year, month, day] = String(value).split("-").map(Number);
+  if (!year || !month || !day) return String(value);
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
+}
 
 export function ClientPortalPage() {
   const { token } = useParams();
@@ -25,6 +44,8 @@ export function ClientPortalPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [showChangesForm, setShowChangesForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function load() {
     publicApi
@@ -64,10 +85,21 @@ export function ClientPortalPage() {
     }
   }
 
+  async function copyPassword() {
+    if (!delivery?.gallery_password) return;
+    try {
+      await navigator.clipboard.writeText(delivery.gallery_password);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("No se pudo copiar la contraseña.");
+    }
+  }
+
   if (notFound) {
     return (
       <PublicShell>
-        <ErrorState message="Este enlace de galeria no existe o ha caducado." />
+        <ErrorState message="Este enlace de entrega no existe o ha caducado." />
       </PublicShell>
     );
   }
@@ -75,7 +107,7 @@ export function ClientPortalPage() {
   if (!delivery) {
     return (
       <PublicShell>
-        <Card className="p-8 text-center text-sm text-stone-400">Cargando tu galeria...</Card>
+        <Card className="p-8 text-center text-sm text-stone-400">Cargando tu entrega...</Card>
       </PublicShell>
     );
   }
@@ -85,34 +117,88 @@ export function ClientPortalPage() {
     "neutral",
   ];
   const canRespond = !["approved", "archived"].includes(delivery.status);
+  const sessionTypeLabel = sessionTypes.find((type) => type.value === delivery.session_type)?.label;
+  const eventDate = formatLongDate(delivery.session_date ?? delivery.delivery_date);
+  const sessionLine = [sessionTypeLabel, eventDate].filter(Boolean).join(" · ");
 
   return (
     <PublicShell studioName={delivery.studio_name}>
-      <Card className="p-6 sm:p-8">
-        {error ? (
-          <div className="mb-5">
-            <ErrorState message={error} />
-          </div>
+      {error ? (
+        <div className="mb-5">
+          <ErrorState message={error} />
+        </div>
+      ) : null}
+
+      <Card className="p-6 text-center sm:p-10">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
+          {statusHeadings[delivery.status] ?? "Tu entrega"}
+        </p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-50">
+          {delivery.client_name || delivery.title}
+        </h1>
+        {sessionLine ? <p className="mt-2 text-sm text-stone-400">{sessionLine}</p> : null}
+        {delivery.title && delivery.client_name ? (
+          <p className="mt-1 text-xs text-stone-500">{delivery.title}</p>
         ) : null}
 
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
-          {delivery.studio_name}
-        </p>
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight text-stone-50">{delivery.title}</h1>
-          <span className="rounded-md border px-2.5 py-1 text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,.05)] border-white/10 bg-white/[0.05] text-stone-300">
-            {deliveryStatuses.find((s) => s.value === delivery.status)?.label ?? delivery.status}
-          </span>
+        <div className="mt-8">
+          {delivery.gallery_url ? (
+            <a href={delivery.gallery_url} target="_blank" rel="noreferrer" className="inline-flex">
+              <Button>Ver fotografías</Button>
+            </a>
+          ) : (
+            <p className="text-sm text-stone-400">
+              El estudio todavía no ha compartido el enlace de tu galería.
+            </p>
+          )}
         </div>
-        <p className="mt-2 text-sm text-stone-400">
-          {delivery.session_name ? `Sesion: ${delivery.session_name} · ` : ""}
-          {delivery.delivery_date
-            ? `Fecha de entrega: ${delivery.delivery_date}`
-            : "Sin fecha de entrega"}
-        </p>
 
+        {delivery.gallery_url ? (
+          <dl className="mx-auto mt-6 max-w-sm space-y-2 text-sm">
+            {delivery.gallery_provider ? (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-stone-500">Proveedor</dt>
+                <dd className="font-medium text-stone-200">{delivery.gallery_provider}</dd>
+              </div>
+            ) : null}
+            {delivery.gallery_password ? (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-stone-500">Contraseña</dt>
+                <dd className="flex items-center gap-2 font-medium text-stone-200">
+                  <span>{showPassword ? delivery.gallery_password : "•••••••"}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="text-xs font-semibold text-amber-200 hover:text-amber-100"
+                  >
+                    {showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copyPassword}
+                    className="text-xs font-semibold text-amber-200 hover:text-amber-100"
+                  >
+                    {copied ? "Copiada" : "Copiar"}
+                  </button>
+                </dd>
+              </div>
+            ) : null}
+            {delivery.gallery_expires_at ? (
+              <p className="pt-1 text-xs text-stone-500">
+                Enlace disponible hasta el {formatLongDate(delivery.gallery_expires_at)}.
+              </p>
+            ) : null}
+          </dl>
+        ) : null}
+
+        <p className="mx-auto mt-6 max-w-sm text-xs leading-5 text-stone-500">
+          Tus fotografías viven en tu galería externa y nunca pasan por nuestros servidores.
+        </p>
+      </Card>
+
+      <Card className="mt-4 p-6 sm:p-8">
         {delivery.budget ? (
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Presupuesto</p>
               <p className="mt-2 text-lg font-semibold tabular-nums text-stone-50">
@@ -134,46 +220,6 @@ export function ClientPortalPage() {
           </div>
         ) : null}
 
-        <section className="mt-6 rounded-xl border border-white/10 bg-black/20 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
-            Tu galería {delivery.gallery_provider ? `· ${delivery.gallery_provider}` : ""}
-          </p>
-          {delivery.gallery_url ? (
-            <>
-              <a
-                href={delivery.gallery_url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex"
-              >
-                <Button>Abrir galería externa</Button>
-              </a>
-              <p className="mt-3 max-w-full truncate text-xs text-stone-500">
-                {delivery.gallery_url}
-              </p>
-              {delivery.gallery_password ? (
-                <p className="mt-2 text-sm text-stone-300">
-                  Contraseña de la galería:{" "}
-                  <span className="font-semibold text-stone-50">{delivery.gallery_password}</span>
-                </p>
-              ) : null}
-              {delivery.gallery_expires_at ? (
-                <p className="mt-1 text-xs text-stone-400">
-                  Enlace disponible hasta el {delivery.gallery_expires_at}.
-                </p>
-              ) : null}
-              <p className="mt-3 text-xs text-stone-500">
-                Revisa y selecciona tus fotos allí. Cuando termines, vuelve aquí para aprobar la
-                entrega o pedir cambios.
-              </p>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-stone-400">
-              El estudio todavía no ha compartido el enlace de tu galería.
-            </p>
-          )}
-        </section>
-
         {delivery.client_message ? (
           <div className="mt-6 rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-amber-200">
@@ -184,7 +230,7 @@ export function ClientPortalPage() {
         ) : null}
 
         {canRespond ? (
-          <div className="mt-8 flex flex-wrap gap-3 border-t border-white/10 pt-6">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Button onClick={approve} disabled={saving}>
               Aprobar entrega
             </Button>
@@ -197,9 +243,7 @@ export function ClientPortalPage() {
             </Button>
           </div>
         ) : (
-          <p className="mt-8 border-t border-white/10 pt-6 text-sm text-emerald-100">
-            Ya has aprobado esta entrega. Gracias.
-          </p>
+          <p className="mt-6 text-sm text-emerald-100">Ya has aprobado esta entrega. Gracias.</p>
         )}
 
         {showChangesForm ? (
@@ -219,6 +263,13 @@ export function ClientPortalPage() {
           </form>
         ) : null}
       </Card>
+
+      <footer className="mt-8 text-center">
+        {delivery.studio_name ? (
+          <p className="text-sm text-stone-400">Entregado por {delivery.studio_name}</p>
+        ) : null}
+        <p className="mt-1 text-xs text-stone-600">Powered by LumaFlow</p>
+      </footer>
     </PublicShell>
   );
 }

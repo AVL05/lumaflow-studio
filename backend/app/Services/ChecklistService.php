@@ -13,7 +13,7 @@ class ChecklistService
         'gear' => ['Camara y baterias', 'Objetivos', 'Tarjetas SD formateadas', 'Tripode', 'Iluminacion', 'Filtros'],
         'preparation' => ['Confirmar hora con cliente', 'Revisar localizacion', 'Comprobar prevision meteorologica', 'Preparar moodboard', 'Firmar cesion de imagen'],
         'editing' => ['Importar y respaldar RAW', 'Seleccion inicial', 'Aplicar preset base', 'Retoque de piel', 'Exportar alta resolucion', 'Exportar redes sociales'],
-        'delivery' => ['Preparar galeria', 'Revisar seleccion final', 'Subir entrega', 'Enviar enlace al cliente', 'Solicitar aprobacion'],
+        'delivery' => ['Pegar enlace de la galeria externa', 'Comprobar contraseña y caducidad', 'Enviar portal al cliente', 'Solicitar aprobacion'],
         'custom' => [],
     ];
 

@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\GearItem;
 use App\Models\Quote;
+use App\Models\Session;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -86,9 +87,17 @@ class CommercialWorkflowTest extends TestCase
 
     public function test_delivery_external_gallery_and_public_approval(): void
     {
+        $session = Session::create([
+            'user_id' => $this->user->id,
+            'name' => 'Boda Laura y Pablo',
+            'date' => '2026-09-14',
+            'session_type' => 'wedding',
+            'status' => 'completed',
+        ]);
         $delivery = Delivery::create([
             'user_id' => $this->user->id,
             'client_id' => $this->client->id,
+            'session_id' => $session->id,
             'title' => 'Entrega editorial',
             'status' => 'delivered',
             'gallery_url' => 'https://pixieset.com/example/editorial',
@@ -101,7 +110,9 @@ class CommercialWorkflowTest extends TestCase
         $this->getJson("/api/public/deliveries/{$delivery->public_token}")
             ->assertOk()
             ->assertJsonPath('data.gallery_url', 'https://pixieset.com/example/editorial')
-            ->assertJsonPath('data.gallery_provider', 'Pixieset');
+            ->assertJsonPath('data.gallery_provider', 'Pixieset')
+            ->assertJsonPath('data.session_type', 'wedding')
+            ->assertJsonPath('data.session_date', '2026-09-14');
 
         // Subir fotos ya no existe: la API no ofrece endpoint de imagenes.
         $this->postJson("/api/deliveries/{$delivery->id}/images", [])

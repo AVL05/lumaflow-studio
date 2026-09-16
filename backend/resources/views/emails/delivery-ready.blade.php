@@ -15,25 +15,28 @@
         </tr>
         <tr>
             <td style="font-size:22px;font-weight:600;padding-bottom:12px;color:#fafaf9;">
-                Hola {{ $clientName }}, tu galeria ya esta lista
+                Hola {{ $clientName }}, tu sesion esta lista
             </td>
         </tr>
         <tr>
             <td style="font-size:14px;line-height:22px;color:#a8a29e;padding-bottom:24px;">
-                La entrega <strong style="color:#e7e5e4;">{{ $delivery->title }}</strong> ha sido marcada como lista por {{ $studioName }}. Puedes revisarla, ver el estado del pago y aprobarla desde tu portal privado.
+                La entrega <strong style="color:#e7e5e4;">{{ $delivery->title }}</strong> ya esta disponible. Tus fotografias estan en tu galeria externa@if($delivery->gallery_provider) ({{ $delivery->gallery_provider }})@endif: abre el enlace, revisalas y aprueba la entrega desde tu pagina privada. Tus originales nunca pasan por nuestros servidores.
             </td>
         </tr>
         <tr>
             <td style="padding-bottom:24px;">
                 <a href="{{ $portalUrl }}" style="display:inline-block;background:#f5d38d;color:#1c1917;font-weight:600;font-size:14px;padding:12px 20px;border-radius:8px;text-decoration:none;">
-                    Ver mi galeria
+                    Ver fotografias
                 </a>
             </td>
         </tr>
         @if($delivery->gallery_url)
         <tr>
             <td style="font-size:13px;color:#78716c;padding-bottom:8px;">
-                Enlace directo a la galeria: <a href="{{ $delivery->gallery_url }}" style="color:#f5d38d;">{{ $delivery->gallery_url }}</a>
+                Enlace directo a tu galeria externa: <a href="{{ $delivery->gallery_url }}" style="color:#f5d38d;">{{ $delivery->gallery_url }}</a>
+                @if($delivery->gallery_password)
+                <br>Contraseña: {{ $delivery->gallery_password }}
+                @endif
             </td>
         </tr>
         @endif
