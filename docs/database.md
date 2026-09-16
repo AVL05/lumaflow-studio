@@ -18,7 +18,8 @@ Agrupadas por fase, no una por tabla:
 | `2026_07_08_091226_create_personal_access_tokens_table` | Sanctum |
 | `2026_07_08_000009_create_workflow_tables` | `tasks`, `checklists`, `checklist_items`, `activities`, `notifications` |
 | `2026_07_09_000001_add_client_portal_features` | Portal, reservas y tokens publicos |
-| `2026_07_16_000001_consolidate_raw_manager_features` | `quotes`, `quote_items`, `invoices`, `presets`, `delivery_images` |
+| `2026_07_16_000001_consolidate_raw_manager_features` | `quotes`, `quote_items`, `invoices`, `presets` |
+| `2026_09_16_000001_delivery_external_gallery` | Elimina `delivery_images`; `deliveries` suma `gallery_provider`, `gallery_password`, `gallery_expires_at` y amplia `gallery_url` a 2048 |
 | `2026_08_13_000001_add_onboarding_to_users_table` | Estudio, especialidades, pais, moneda, prioridad y finalizacion del onboarding |
 | `2026_08_13_000002_add_activation_to_users_table` | Primer paso, muestra opcional y activacion de reservas |
 | `2026_08_13_000003_create_jobs_domain` | Trabajos fotograficos, pipeline, contratos, equipo y enlaces con el resto del dominio |
@@ -29,14 +30,14 @@ Agrupadas por fase, no una por tabla:
 users ──┬── photography_jobs ──┬── sessions ── checklists ── checklist_items
         │                      ├── tasks
         │                      ├── quotes ── invoice
-        │                      ├── deliveries ── delivery_images
+        │                      ├── deliveries (enlace externo, sin originales)
         │                      └── gear_items (N:M)
         ├── sessions ──┬── checklists ── checklist_items
         │              ├── tasks
         │              └── ai_session_plans
         ├── gear_items ── presets
         ├── locations
-        ├── clients ──┬── deliveries ── delivery_images
+        ├── clients ──┬── deliveries (enlace externo, sin originales)
         │             ├── quotes ── quote_items ── invoice
         │             └── invoices
         ├── ai_conversations ── ai_messages

@@ -7,7 +7,6 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { Skeleton } from "../components/ui/Skeleton";
 import { ErrorState } from "../components/states/ErrorState";
 import { DeliveryDetail } from "../features/deliveries/DeliveryDetail";
-import { DeliveryGallery } from "../features/deliveries/DeliveryGallery";
 
 export function DeliveryDetailPage() {
   const { id } = useParams();
@@ -41,12 +40,7 @@ export function DeliveryDetailPage() {
       />
       {error ? <ErrorState message={error} /> : null}
       {!delivery && !error ? <Skeleton className="h-80" /> : null}
-      {delivery ? (
-        <>
-          <DeliveryDetail delivery={delivery} />
-          <DeliveryGallery delivery={delivery} onChange={load} />
-        </>
-      ) : null}
+      {delivery ? <DeliveryDetail delivery={delivery} /> : null}
     </>
   );
 }

@@ -54,13 +54,13 @@ Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, link
 | Presets | `apiResource /presets` sin `show` | `search`, `category` |
 | Tasks | `apiResource /tasks` + `GET /tasks/summary` | `search`, `status`, `priority`, `due_from`, `due_to`, `session_id`, `client_id`, `open` |
 
-### Galeria de entregas
+### Entregas por enlace externo
 
-| Metodo | Ruta | Notas |
-|---|---|---|
-| POST | `/deliveries/{delivery}/images` | Multipart `images[]`, maximo 50 JPEG/PNG/WebP de 15 MB |
-| DELETE | `/deliveries/{delivery}/images/{image}` | Elimina registro y archivo del disco publico |
-| POST | `/public/deliveries/{token}/images/{image}/favorite` | Alterna la seleccion del cliente mediante token opaco |
+`Delivery` no aloja originales. Guarda `gallery_url` (max 2048), `gallery_provider` (Pixieset,
+Pic-Time, Lightroom, Drive, Dropbox, OneDrive, WeTransfer u otro), `gallery_password` opcional y
+`gallery_expires_at` opcional, junto a estado, `client_message` y `client_responded_at` para la
+aprobacion. El portal publico (`/public/deliveries/{token}`) muestra el enlace y la contraseña
+para que el cliente revise en su galeria y vuelva a aprobar o pedir cambios.
 
 Los PDF de presupuestos y facturas son documentos descargables autenticados. No forman parte del exportador generico CSV/JSON.
 

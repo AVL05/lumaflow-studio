@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['user_id', 'job_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
+#[Fillable(['user_id', 'job_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'gallery_provider', 'gallery_password', 'gallery_expires_at', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
 class Delivery extends Model
 {
     use CleansUpWorkflowRelations, HasFactory;
@@ -29,6 +28,7 @@ class Delivery extends Model
             'budget' => 'decimal:2',
             'amount_paid' => 'decimal:2',
             'delivery_date' => 'date',
+            'gallery_expires_at' => 'date',
             'client_responded_at' => 'datetime',
         ];
     }
@@ -76,10 +76,5 @@ class Delivery extends Model
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');
-    }
-
-    public function images(): HasMany
-    {
-        return $this->hasMany(DeliveryImage::class)->orderBy('position')->orderBy('id');
     }
 }

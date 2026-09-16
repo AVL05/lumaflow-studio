@@ -23,11 +23,13 @@ class DeliveryResource extends JsonResource
             'amount_paid' => $this->amount_paid,
             'delivery_date' => $this->delivery_date?->toDateString(),
             'gallery_url' => $this->gallery_url,
+            'gallery_provider' => $this->gallery_provider,
+            'gallery_password' => $this->gallery_password,
+            'gallery_expires_at' => $this->gallery_expires_at?->toDateString(),
             'private_notes' => $this->private_notes,
             'public_token' => $this->public_token,
             'client_message' => $this->client_message,
             'client_responded_at' => $this->client_responded_at?->toISOString(),
-            'images' => DeliveryImageResource::collection($this->whenLoaded('images')),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

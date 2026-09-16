@@ -87,7 +87,7 @@ class JobController extends Controller
 
     private function loadJob(Job $job): Job
     {
-        return $job->load(['client', 'location', 'gearItems', 'sessions.location', 'quotes.client', 'quotes.items', 'quotes.invoice', 'invoices.client', 'tasks', 'deliveries.client', 'deliveries.images', 'activities']);
+        return $job->load(['client', 'location', 'gearItems', 'sessions.location', 'quotes.client', 'quotes.items', 'quotes.invoice', 'invoices.client', 'tasks', 'deliveries.client', 'activities']);
     }
 
     private function ensureOwnership(Request $request, Job $job): void

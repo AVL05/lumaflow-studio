@@ -65,12 +65,3 @@ export const demoClients = [
     note: "Han solicitado una selección breve para impresión.",
   },
 ];
-
-export const demoPhotos = [
-  { id: 1, name: "CM-014.jpg", tone: "from-stone-500 to-stone-800", favorite: true },
-  { id: 2, name: "CM-027.jpg", tone: "from-amber-900 to-stone-900", favorite: false },
-  { id: 3, name: "CM-041.jpg", tone: "from-neutral-600 to-zinc-950", favorite: true },
-  { id: 4, name: "CM-063.jpg", tone: "from-yellow-950 to-neutral-800", favorite: false },
-  { id: 5, name: "CM-078.jpg", tone: "from-stone-700 to-amber-950", favorite: false },
-  { id: 6, name: "CM-092.jpg", tone: "from-zinc-500 to-stone-900", favorite: false },
-];

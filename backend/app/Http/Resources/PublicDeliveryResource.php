@@ -22,12 +22,14 @@ class PublicDeliveryResource extends JsonResource
             'session_name' => $this->session?->name,
             'delivery_date' => $this->delivery_date?->toDateString(),
             'gallery_url' => $this->gallery_url,
+            'gallery_provider' => $this->gallery_provider,
+            'gallery_password' => $this->gallery_password,
+            'gallery_expires_at' => $this->gallery_expires_at?->toDateString(),
             'budget' => $this->budget,
             'payment_status' => $this->payment_status,
             'amount_paid' => $this->amount_paid,
             'client_message' => $this->client_message,
             'client_responded_at' => $this->client_responded_at?->toISOString(),
-            'images' => DeliveryImageResource::collection($this->whenLoaded('images')),
         ];
     }
 }

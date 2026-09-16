@@ -92,11 +92,6 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(Preset::class);
     }
 
-    public function deliveryImages(): HasMany
-    {
-        return $this->hasMany(DeliveryImage::class);
-    }
-
     public function aiAnalyses(): HasMany
     {
         return $this->hasMany(AiAnalysis::class);

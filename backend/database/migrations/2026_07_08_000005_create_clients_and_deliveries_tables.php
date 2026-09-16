@@ -32,7 +32,7 @@ return new class extends Migration
             $table->enum('status', ['draft', 'pending', 'delivered', 'approved', 'archived'])->default('draft');
             $table->decimal('budget', 10, 2)->nullable();
             $table->date('delivery_date')->nullable();
-            $table->string('gallery_url')->nullable();
+            $table->string('gallery_url', 2048)->nullable();
             $table->text('private_notes')->nullable();
             $table->timestamps();
 

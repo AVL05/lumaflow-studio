@@ -80,26 +80,10 @@ return new class extends Migration
             $table->index(['user_id', 'category']);
         });
 
-        Schema::create('delivery_images', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('delivery_id')->constrained()->cascadeOnDelete();
-            $table->string('filename');
-            $table->string('path');
-            $table->string('mime_type', 100);
-            $table->unsignedBigInteger('size');
-            $table->unsignedInteger('position')->default(0);
-            $table->boolean('client_favorite')->default(false);
-            $table->timestamps();
-
-            $table->index(['delivery_id', 'position']);
-            $table->index(['delivery_id', 'client_favorite']);
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('delivery_images');
         Schema::dropIfExists('presets');
         Schema::dropIfExists('invoices');
         Schema::dropIfExists('quote_items');

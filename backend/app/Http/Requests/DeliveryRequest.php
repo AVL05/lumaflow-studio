@@ -24,7 +24,10 @@ class DeliveryRequest extends FormRequest
             'payment_status' => ['nullable', Rule::in(['pending', 'partial', 'paid'])],
             'amount_paid' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'delivery_date' => ['nullable', 'date'],
-            'gallery_url' => ['nullable', 'url', 'max:255'],
+            'gallery_url' => ['nullable', 'url', 'max:2048'],
+            'gallery_provider' => ['nullable', 'string', 'max:50'],
+            'gallery_password' => ['nullable', 'string', 'max:255'],
+            'gallery_expires_at' => ['nullable', 'date', 'after_or_equal:today'],
             'private_notes' => ['nullable', 'string', 'max:3000'],
         ];
     }

@@ -9,7 +9,9 @@ La beta publica usa servicios con limite de gasto cero mientras se valida el pro
 | SPA           | Vercel                                  | `https://lumaflow.aleviclop.dev`     |
 | API Laravel   | Render (free web service)               | `https://lumaflow-api.aleviclop.dev` |
 | Base de datos | TiDB Cloud Starter, MySQL compatible    | Privada, TLS obligatorio             |
-| Galerias      | Storage S3 compatible con plan gratuito | Privada, servida por URL publica     |
+
+Las entregas no alojan originales: solo guardan enlace externo, proveedor, contraseña y
+caducidad. No hay bucket S3 de galerias ni costes de almacenamiento/transferencia.
 
 `render.yaml` define el servicio backend. Los valores marcados con `sync: false`
 son secretos y se introducen en Render; nunca se guardan en Git. El limite mensual
@@ -22,8 +24,7 @@ La SPA se construye con:
 VITE_API_URL=https://lumaflow-api.aleviclop.dev/api
 ```
 
-El backend usa `FILESYSTEM_DISK=s3`; las credenciales corresponden al proveedor
-de almacenamiento gratuito y no al repositorio.
+El backend usa `FILESYSTEM_DISK=public` en local. No se requiere S3: no hay originales que alojar.
 
 ## Despliegue automático y controles
 
@@ -171,7 +172,7 @@ Nunca commitear `.env`. Solo los `.env.example`.
 - [ ] `php artisan config:cache route:cache view:cache`.
 - [ ] `composer install --no-dev --optimize-autoloader`.
 - [ ] HTTPS terminado en el proxy: los tokens Bearer viajan en cabecera.
-- [ ] Backup del volumen de MySQL y del storage publico.
+- [ ] Backup del volumen de MySQL.
 - [ ] `CACHE_STORE` real (database o redis): el rate limiting depende de el.
 - [ ] Rotacion de `storage/logs/lumaflow.log` (canal diario, 14 dias por defecto).
 - [ ] SMTP configurado y entrega real de verificacion probada fuera de spam.

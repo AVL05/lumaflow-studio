@@ -143,6 +143,8 @@ class DatabaseSeeder extends Seeder
             'amount_paid' => 400,
             'delivery_date' => now()->addDays(10)->toDateString(),
             'gallery_url' => 'https://example.com/gallery/producto-premium',
+            'gallery_provider' => 'Pixieset',
+            'gallery_expires_at' => now()->addDays(30)->toDateString(),
             'private_notes' => 'Preparar seleccion final y preset cinematico suave.',
             'public_token' => Str::random(40),
         ]);

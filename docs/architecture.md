@@ -46,9 +46,9 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **404 en lugar de 403.** Devolver 403 sobre un recurso ajeno confirma que existe. Las policies de `app/Policies` extienden `OwnedResourcePolicy` y devuelven `false`; el metodo `authorizeOwnership()` del controlador base traduce ese `false` en un 404. Los recursos anteriores a la fase 9 hacen lo mismo con un `ensureOwnership()` privado.
 
-**La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `CommercialDocumentService`, `DeliveryGalleryService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar reglas.
+**La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `CommercialDocumentService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar reglas.
 
-**Una entrega es tambien su galeria.** Las fotografias se relacionan con `Delivery` y reutilizan su token publico, aprobacion y portal. No existe un segundo agregado `Gallery` que pueda desincronizarse de la entrega comercial.
+**Una entrega es un enlace externo + seguimiento.** LumaFlow no aloja originales: `Delivery` guarda `gallery_url`, `gallery_provider`, `gallery_password` y `gallery_expires_at` junto a estado, aprobacion y portal del cliente. Tus fotografías siguen donde tú decides; LumaFlow guarda bytes, no gigabytes.
 
 **Los modelos WebGPU no forman parte del precache PWA.** El shell es instalable y funciona offline, pero el chunk pesado de WebLLM se descarga solo al abrir el asistente.
 

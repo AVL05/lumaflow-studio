@@ -31,6 +31,9 @@ const defaults = {
   amount_paid: "",
   delivery_date: "",
   gallery_url: "",
+  gallery_provider: "",
+  gallery_password: "",
+  gallery_expires_at: "",
   private_notes: "",
 };
 
@@ -170,7 +173,7 @@ export function DeliveriesPage() {
       ) : resource.items.length === 0 ? (
         <EmptyState
           title="Sin entregas"
-          description="Prepara una galería o entrega para un trabajo y compártela con el cliente."
+          description="Registra el enlace externo de tu galería y sigue la aprobación del cliente."
           action={<Button onClick={openCreate}>Crear entrega</Button>}
         />
       ) : (
@@ -207,7 +210,7 @@ export function DeliveriesPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar entrega"
-        description="Esta acción elimina la entrega, pero no elimina cliente, sesión ni fotos."
+        description="Esta acción elimina el seguimiento de la entrega. Tus fotos siguen en tu galería externa."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />
@@ -227,6 +230,9 @@ function normalizeDelivery(form) {
     amount_paid: form.amount_paid === "" ? 0 : Number(form.amount_paid),
     delivery_date: form.delivery_date || null,
     gallery_url: form.gallery_url || null,
+    gallery_provider: form.gallery_provider || null,
+    gallery_password: form.gallery_password || null,
+    gallery_expires_at: form.gallery_expires_at || null,
     private_notes: form.private_notes || null,
   };
 }

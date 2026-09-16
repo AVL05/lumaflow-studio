@@ -40,9 +40,34 @@ export function DeliveryDetail({ delivery }) {
           <span className="text-stone-100">Estado de pago:</span>{" "}
           <StatusBadge options={paymentStatuses} value={delivery.payment_status} />
         </p>
-        <p className="md:col-span-2">
-          <span className="text-stone-100">Galeria:</span> {delivery.gallery_url || "Sin URL"}
-        </p>
+        <div className="md:col-span-2 rounded-xl border border-white/10 bg-black/20 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+            Galería externa {delivery.gallery_provider ? `· ${delivery.gallery_provider}` : ""}
+          </p>
+          {delivery.gallery_url ? (
+            <a
+              href={delivery.gallery_url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-block max-w-full truncate text-sm text-amber-100 underline underline-offset-4"
+            >
+              {delivery.gallery_url}
+            </a>
+          ) : (
+            <p className="mt-2 text-sm text-stone-400">Sin enlace externo.</p>
+          )}
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-stone-400">
+            {delivery.gallery_password ? (
+              <span>Contraseña: {delivery.gallery_password}</span>
+            ) : null}
+            {delivery.gallery_expires_at ? (
+              <span>Caduca: {delivery.gallery_expires_at}</span>
+            ) : null}
+          </div>
+          <p className="mt-2 text-xs text-stone-500">
+            Tus fotografías siguen donde tú decides. LumaFlow no almacena tus originales.
+          </p>
+        </div>
       </div>
       {delivery.client_message ? (
         <div className="mt-6 rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-4">

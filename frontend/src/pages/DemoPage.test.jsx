@@ -26,8 +26,7 @@ describe("DemoPage", () => {
     expect(screen.getByRole("heading", { name: "Atelier Norte" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Entrega" }));
-    expect(screen.getByText("2 favoritas")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Añadir CM-027.jpg de favoritas" }));
-    expect(screen.getByText("3 favoritas")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Entrega por enlace externo" })).toBeInTheDocument();
+    expect(screen.getByText(/LumaFlow no aloja originales/)).toBeInTheDocument();
   });
 });

@@ -277,12 +277,12 @@ export function LandingPage() {
                 Una entrega que también cuida tu marca.
               </h2>
               <p className="mt-5 text-base leading-7 text-stone-400">
-                Comparte un portal privado, recoge favoritos y mantén el estado comercial de cada
-                entrega en el mismo lugar.
+                Comparte el enlace de tu galería externa y mantén el estado comercial y la
+                aprobación de cada entrega en el mismo lugar. Sin alojar originales.
               </p>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-300">
-                <span>Enlace protegido</span>
-                <span>Selección de favoritas</span>
+                <span>Enlace externo</span>
+                <span>Contraseña y caducidad</span>
                 <span>Aprobación del cliente</span>
               </div>
             </div>
@@ -315,7 +315,7 @@ export function LandingPage() {
               <div className="mt-10 grid gap-3 text-sm text-stone-300 sm:grid-cols-2">
                 <p>Todos los módulos actuales</p>
                 <p>IA WebGPU en el navegador</p>
-                <p>Galerías privadas</p>
+                <p>Entregas por enlace externo</p>
                 <p>PWA instalable</p>
               </div>
             </div>

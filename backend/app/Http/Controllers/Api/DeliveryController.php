@@ -45,7 +45,7 @@ class DeliveryController extends Controller
         $delivery = request()->user()->deliveries()->create($request->validated());
         $this->activity->log($request->user(), $delivery, ActivityLogger::CREATED, "Entrega creada: {$delivery->title}");
 
-        return new DeliveryResource($delivery->load(['client', 'session', 'images']));
+        return new DeliveryResource($delivery->load(['client', 'session']));
     }
 
     public function show(Delivery $delivery): DeliveryResource

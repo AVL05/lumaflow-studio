@@ -97,6 +97,17 @@ export const paymentStatuses = [
   { value: "paid", label: "Pagado", tone: "green" },
 ];
 
+export const galleryProviders = [
+  { value: "Pixieset", label: "Pixieset" },
+  { value: "Pic-Time", label: "Pic-Time" },
+  { value: "Lightroom", label: "Lightroom Gallery" },
+  { value: "Google Drive", label: "Google Drive" },
+  { value: "Dropbox", label: "Dropbox" },
+  { value: "OneDrive", label: "OneDrive" },
+  { value: "WeTransfer", label: "WeTransfer" },
+  { value: "Otro", label: "Otro / enlace propio" },
+];
+
 export const quoteStatuses = [
   { value: "draft", label: "Borrador", tone: "neutral" },
   { value: "sent", label: "Enviado", tone: "warm" },

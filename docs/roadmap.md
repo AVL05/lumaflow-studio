@@ -23,7 +23,7 @@ Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que si
 
 - Exportacion PDF de planes de sesion, conversaciones de IA e informes de analitica.
 - Contratos y aprobacion formal de entregas por parte del cliente.
-- Caducidad configurable de tokens del portal y descargas originales en lote.
+- Caducidad configurable de tokens del portal (la caducidad del enlace externo ya existe en `gallery_expires_at`).
 
 **Largo plazo**
 

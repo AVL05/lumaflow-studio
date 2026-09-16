@@ -64,18 +64,6 @@ export function ClientPortalPage() {
     }
   }
 
-  async function favorite(image) {
-    setSaving(true);
-    setError("");
-    try {
-      setDelivery(await publicApi.favoriteImage(token, image.id));
-    } catch (err) {
-      setError(getApiError(err, "No se pudo guardar la selección."));
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (notFound) {
     return (
       <PublicShell>
@@ -146,59 +134,45 @@ export function ClientPortalPage() {
           </div>
         ) : null}
 
-        {delivery.gallery_url ? (
-          <a
-            href={delivery.gallery_url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex"
-          >
-            <Button>Ver galeria completa</Button>
-          </a>
-        ) : null}
-
-        {delivery.images?.length ? (
-          <section className="mt-8">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
-                  Tu galería
-                </p>
-                <h2 className="mt-2 text-xl font-semibold">Selecciona tus favoritas</h2>
-              </div>
-              <p className="text-xs text-stone-400">
-                {delivery.images.filter((image) => image.client_favorite).length} seleccionadas
-              </p>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {delivery.images.map((image) => (
-                <button
-                  key={image.id}
-                  type="button"
-                  disabled={saving}
-                  onClick={() => favorite(image)}
-                  className={`group relative overflow-hidden rounded-xl border text-left transition ${image.client_favorite ? "border-amber-200 ring-2 ring-amber-200/20" : "border-white/10 hover:border-white/25"}`}
-                >
-                  <img
-                    src={image.url}
-                    alt={image.filename}
-                    className="aspect-[4/3] w-full object-cover"
-                    loading="lazy"
-                  />
-                  <span
-                    className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-semibold shadow-lg ${image.client_favorite ? "bg-amber-200 text-stone-950" : "bg-black/70 text-white"}`}
-                  >
-                    {image.client_favorite ? "Favorita" : "Seleccionar"}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <p className="mt-6 text-sm text-stone-400">
-            El estudio todavía no ha publicado fotografías en esta entrega.
+        <section className="mt-6 rounded-xl border border-white/10 bg-black/20 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+            Tu galería {delivery.gallery_provider ? `· ${delivery.gallery_provider}` : ""}
           </p>
-        )}
+          {delivery.gallery_url ? (
+            <>
+              <a
+                href={delivery.gallery_url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex"
+              >
+                <Button>Abrir galería externa</Button>
+              </a>
+              <p className="mt-3 max-w-full truncate text-xs text-stone-500">
+                {delivery.gallery_url}
+              </p>
+              {delivery.gallery_password ? (
+                <p className="mt-2 text-sm text-stone-300">
+                  Contraseña de la galería:{" "}
+                  <span className="font-semibold text-stone-50">{delivery.gallery_password}</span>
+                </p>
+              ) : null}
+              {delivery.gallery_expires_at ? (
+                <p className="mt-1 text-xs text-stone-400">
+                  Enlace disponible hasta el {delivery.gallery_expires_at}.
+                </p>
+              ) : null}
+              <p className="mt-3 text-xs text-stone-500">
+                Revisa y selecciona tus fotos allí. Cuando termines, vuelve aquí para aprobar la
+                entrega o pedir cambios.
+              </p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-stone-400">
+              El estudio todavía no ha compartido el enlace de tu galería.
+            </p>
+          )}
+        </section>
 
         {delivery.client_message ? (
           <div className="mt-6 rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-4">

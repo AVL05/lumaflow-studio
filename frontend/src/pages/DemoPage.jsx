@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../components/branding/BrandLogo";
-import { demoAgenda, demoClients, demoPhotos, demoWeek } from "../features/demo/demoData";
+import { demoAgenda, demoClients, demoWeek } from "../features/demo/demoData";
 
 const views = [
   ["overview", "Resumen"],
@@ -305,53 +305,37 @@ function DemoClients() {
 }
 
 function DemoDelivery() {
-  const [photos, setPhotos] = useState(demoPhotos);
-  const favoriteCount = photos.filter((photo) => photo.favorite).length;
-
-  function toggleFavorite(id) {
-    setPhotos((current) =>
-      current.map((photo) => (photo.id === id ? { ...photo, favorite: !photo.favorite } : photo)),
-    );
-  }
-
   return (
     <>
       <DemoHeader
         eyebrow="Portal del cliente"
-        title="Galería para revisar y aprobar"
-        description="Marca fotografías como favoritas para probar una entrega privada desde la perspectiva del cliente."
+        title="Entrega por enlace externo"
+        description="LumaFlow no aloja originales. Registras el enlace de Pixieset, Drive o tu galería y sigues la aprobación."
       />
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#11100e] p-4">
-        <div>
-          <p className="text-sm font-semibold">Retrato editorial de Clara</p>
-          <p className="mt-1 text-xs text-stone-500">Selección ficticia · 6 fotografías</p>
+      <div className="rounded-xl border border-white/10 bg-[#11100e] p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+          Galería externa · Pixieset
+        </p>
+        <p className="mt-2 text-sm font-semibold">Retrato editorial de Clara</p>
+        <p className="mt-1 truncate text-xs text-stone-500">
+          https://pixieset.com/estudio-prisma/clara-editorial
+        </p>
+        <p className="mt-2 text-xs text-stone-400">
+          Contraseña: clara-2026 · Disponible hasta el 30/09
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-lg bg-amber-100 px-4 py-2 text-sm font-semibold text-stone-950">
+            Abrir galería externa
+          </span>
+          <span className="rounded-lg border border-white/10 px-4 py-2 text-sm text-stone-300">
+            Aprobar entrega
+          </span>
         </div>
-        <p aria-live="polite" className="text-sm font-semibold text-amber-200">
-          {favoriteCount} favoritas
+        <p className="mt-4 text-xs leading-5 text-stone-500">
+          Tus fotografías siguen donde tú decides. LumaFlow guarda solo el enlace, la contraseña y
+          el estado de aprobación: bytes, no gigabytes.
         </p>
       </div>
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3" aria-label="Galería ficticia">
-        {photos.map((photo) => (
-          <button
-            key={photo.id}
-            type="button"
-            aria-pressed={photo.favorite}
-            aria-label={`${photo.favorite ? "Quitar" : "Añadir"} ${photo.name} de favoritas`}
-            onClick={() => toggleFavorite(photo.id)}
-            className="group overflow-hidden rounded-xl border border-white/10 bg-[#11100e] text-left transition hover:border-amber-200/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
-          >
-            <span
-              className={`block aspect-[4/3] bg-gradient-to-br ${photo.tone} transition duration-300 group-hover:scale-[1.02]`}
-            />
-            <span className="flex items-center justify-between gap-3 p-3 text-xs">
-              <span className="text-stone-400">{photo.name}</span>
-              <span className={photo.favorite ? "text-amber-200" : "text-stone-600"}>
-                {photo.favorite ? "Favorita" : "Seleccionar"}
-              </span>
-            </span>
-          </button>
-        ))}
-      </section>
     </>
   );
 }

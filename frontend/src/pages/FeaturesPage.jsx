@@ -34,10 +34,10 @@ const useCases = [
     number: "04",
     title: "Controla tus entregas",
     description:
-      "Publica la galería, recoge favoritas y registra la aprobación sin separar la experiencia del cliente de la gestión interna.",
-    outcome: "Una entrega clara para el cliente y trazable para ti.",
+      "Registra el enlace de tu galería externa (Pixieset, Drive, Dropbox o tu web) y sigue la aprobación sin alojar gigabytes.",
+    outcome: "Tus fotos donde tú decides. LumaFlow guarda solo el enlace y el estado.",
     image: "/product/gallery.png",
-    alt: "Galería de entrega con selección de fotografías favoritas",
+    alt: "Entrega con enlace de galería externa y aprobación del cliente",
   },
 ];
 

@@ -11,8 +11,4 @@ export const publicApi = {
     apiClient
       .post(`/public/deliveries/${token}/request-changes`, { message })
       .then((res) => res.data.data),
-  favoriteImage: (token, imageId) =>
-    apiClient
-      .post(`/public/deliveries/${token}/images/${imageId}/favorite`)
-      .then((res) => res.data.data),
 };

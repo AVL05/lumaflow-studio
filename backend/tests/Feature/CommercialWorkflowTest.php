@@ -8,8 +8,6 @@ use App\Models\GearItem;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -86,25 +84,36 @@ class CommercialWorkflowTest extends TestCase
         $this->deleteJson("/api/presets/{$preset['id']}")->assertNoContent();
     }
 
-    public function test_delivery_gallery_upload_public_favorite_and_delete(): void
+    public function test_delivery_external_gallery_and_public_approval(): void
     {
-        config(['filesystems.default' => 'public']);
-        Storage::fake('public');
         $delivery = Delivery::create([
             'user_id' => $this->user->id,
             'client_id' => $this->client->id,
-            'title' => 'Galería editorial',
+            'title' => 'Entrega editorial',
             'status' => 'delivered',
+            'gallery_url' => 'https://pixieset.com/example/editorial',
+            'gallery_provider' => 'Pixieset',
+            'gallery_password' => 'secreta123',
+            'gallery_expires_at' => now()->addDays(30)->toDateString(),
         ]);
 
-        $image = $this->postJson("/api/deliveries/{$delivery->id}/images", [
-            'images' => [UploadedFile::fake()->image('foto.jpg', 1200, 800)],
-        ])->assertCreated()->json('data.0');
+        // El portal publico expone el enlace externo sin alojar originales.
+        $this->getJson("/api/public/deliveries/{$delivery->public_token}")
+            ->assertOk()
+            ->assertJsonPath('data.gallery_url', 'https://pixieset.com/example/editorial')
+            ->assertJsonPath('data.gallery_provider', 'Pixieset');
 
-        $this->postJson("/api/public/deliveries/{$delivery->public_token}/images/{$image['id']}/favorite")
-            ->assertOk()->assertJsonPath('data.images.0.client_favorite', true);
+        // Subir fotos ya no existe: la API no ofrece endpoint de imagenes.
+        $this->postJson("/api/deliveries/{$delivery->id}/images", [])
+            ->assertNotFound();
 
-        $this->deleteJson("/api/deliveries/{$delivery->id}/images/{$image['id']}")->assertNoContent();
-        $this->assertDatabaseMissing('delivery_images', ['id' => $image['id']]);
+        $this->postJson("/api/public/deliveries/{$delivery->public_token}/approve")
+            ->assertOk()->assertJsonPath('data.status', 'approved');
+
+        $this->assertDatabaseHas('deliveries', [
+            'id' => $delivery->id,
+            'status' => 'approved',
+            'gallery_url' => 'https://pixieset.com/example/editorial',
+        ]);
     }
 }

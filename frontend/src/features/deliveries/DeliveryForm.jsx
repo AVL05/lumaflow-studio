@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
 import { ErrorState } from "../../components/states/ErrorState";
-import { deliveryStatuses, paymentStatuses } from "../../utils/catalogs";
+import { deliveryStatuses, galleryProviders, paymentStatuses } from "../../utils/catalogs";
 
 export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error, saving }) {
   const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
@@ -79,14 +79,52 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
           onChange={(e) => setValue("delivery_date", e.target.value)}
         />
       </Field>
-      <div className="md:col-span-2">
-        <Field label="Gallery URL">
-          <Input
-            type="url"
-            value={form.gallery_url ?? ""}
-            onChange={(e) => setValue("gallery_url", e.target.value)}
-          />
-        </Field>
+      <div className="md:col-span-2 rounded-xl border border-white/10 bg-black/20 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+          Galería externa
+        </p>
+        <p className="mt-1 text-xs text-stone-400">
+          LumaFlow no aloja originales. Pega el enlace de Pixieset, Pic-Time, Drive, Dropbox o tu
+          propia web.
+        </p>
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <Field label="URL de la galería">
+            <Input
+              type="url"
+              placeholder="https://..."
+              value={form.gallery_url ?? ""}
+              onChange={(e) => setValue("gallery_url", e.target.value)}
+            />
+          </Field>
+          <Field label="Proveedor">
+            <Input
+              list="gallery-providers"
+              placeholder="Pixieset, Drive, Dropbox..."
+              value={form.gallery_provider ?? ""}
+              onChange={(e) => setValue("gallery_provider", e.target.value)}
+            />
+            <datalist id="gallery-providers">
+              {galleryProviders.map((provider) => (
+                <option key={provider.value} value={provider.value} />
+              ))}
+            </datalist>
+          </Field>
+          <Field label="Contraseña de la galería (opcional)">
+            <Input
+              type="text"
+              autoComplete="off"
+              value={form.gallery_password ?? ""}
+              onChange={(e) => setValue("gallery_password", e.target.value)}
+            />
+          </Field>
+          <Field label="Caducidad del enlace (opcional)">
+            <Input
+              type="date"
+              value={form.gallery_expires_at ?? ""}
+              onChange={(e) => setValue("gallery_expires_at", e.target.value)}
+            />
+          </Field>
+        </div>
       </div>
       <div className="md:col-span-2">
         <Field label="Notas privadas">
