@@ -6,6 +6,7 @@ LumaFlow Studio son dos aplicaciones independientes en un monorepo. No comparten
 lumaflow-studio/
 ├── backend/     API Laravel 13 (REST, Sanctum, MySQL, compatibilidad Ollama)
 ├── frontend/    SPA React 19 (Vite, Tailwind 4)
+├── e2e/         recorrido criticos con Playwright sobre ambos servicios
 ├── docs/        esta documentacion
 └── docker-compose.yml
 ```

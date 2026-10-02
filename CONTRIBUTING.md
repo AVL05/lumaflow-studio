@@ -37,6 +37,12 @@ LumaFlow Studio is developed with an issue-driven workflow. This repository is b
    pnpm run build
    ```
 
+   When the change touches a critical user journey, the frontend or the API contract, also run the end-to-end suite:
+
+   ```bash
+   pnpm run test:e2e
+   ```
+
    Use focused frontend/backend commands during iteration.
 
 5. **Open a Pull Request.**
@@ -103,6 +109,10 @@ Do not introduce TypeScript, Next.js or another state/data framework as incident
 The API uses Laravel 13, PHP 8.3+, Sanctum and Eloquent. Follow the established Controller → FormRequest → Service → Model/Resource architecture and `backend/AGENTS.md`.
 
 Foreign resources should resolve to `404` to avoid leaking existence.
+
+## Testing
+
+The repository has three test levels: PHPUnit for the API and domain services, Vitest + Testing Library for the SPA, and Playwright for critical user journeys. `docs/testing.md` describes the strategy, the E2E environment and the rules for writing E2E tests.
 
 ## Documentation
 
