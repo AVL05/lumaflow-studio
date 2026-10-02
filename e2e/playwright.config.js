@@ -36,7 +36,7 @@ export default defineConfig({
       stderr: "pipe",
     },
     {
-      command: `pnpm exec vite --host 127.0.0.1 --port ${frontendPort} --strictPort`,
+      command: `node node_modules/vite/bin/vite.js --host 127.0.0.1 --port ${frontendPort} --strictPort --no-open`,
       cwd: frontendDir,
       env: { VITE_API_URL: apiUrl },
       url: `${frontendUrl}/`,
