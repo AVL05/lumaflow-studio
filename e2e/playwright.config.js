@@ -29,7 +29,7 @@ export default defineConfig({
     {
       command: "node scripts/start-backend.mjs",
       cwd: e2eDir,
-      url: `${apiOrigin}/api/health`,
+      url: `${apiOrigin}/api/ready`,
       reuseExistingServer: false,
       timeout: 120_000,
       stdout: "pipe",

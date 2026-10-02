@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
+Route::get('/ready', \App\Http\Controllers\Api\ReadyController::class);
 
 // Endpoints sin autenticar: limite estricto para frenar fuerza bruta y registro masivo.
 Route::middleware('throttle:10,1')->group(function (): void {
