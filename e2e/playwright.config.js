@@ -39,7 +39,7 @@ export default defineConfig({
       command: `pnpm exec vite --host 127.0.0.1 --port ${frontendPort} --strictPort`,
       cwd: frontendDir,
       env: { VITE_API_URL: apiUrl },
-      url: frontendUrl,
+      url: `${frontendUrl}/`,
       reuseExistingServer: false,
       timeout: 180_000,
       stdout: "pipe",
