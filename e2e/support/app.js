@@ -12,7 +12,12 @@ function authHeaders(token) {
 
 /** Peticion autenticada contra la API usando la sesion de una pagina abierta. */
 export async function apiRequest(page, method, path, data) {
-  const token = await readAuthToken(page);
+  let token = await readAuthToken(page);
+
+  if (!token) {
+    await page.waitForFunction(() => window.localStorage.getItem("lumaflow_token"), { timeout: 5000 });
+    token = await readAuthToken(page);
+  }
 
   expect(token, "la pagina deberia tener una sesion iniciada").toBeTruthy();
 

@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\Public\PublicBookingController;
 use App\Http\Controllers\Api\Public\PublicCalendarController;
 use App\Http\Controllers\Api\Public\PublicDeliveryController;
 use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\ReadyController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SystemController;
@@ -36,7 +37,7 @@ use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
-Route::get('/ready', \App\Http\Controllers\Api\ReadyController::class);
+Route::get('/ready', ReadyController::class);
 
 // Endpoints sin autenticar: limite estricto para frenar fuerza bruta y registro masivo.
 Route::middleware('throttle:10,1')->group(function (): void {

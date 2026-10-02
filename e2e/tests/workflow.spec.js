@@ -37,7 +37,7 @@ test.describe("alta de cliente, trabajo y sesion", () => {
 
     const jobCard = ownerPage.getByRole("link", { name: new RegExp(jobTitle) });
     await expect(jobCard).toBeVisible();
-    await expect(jobCard).toContainText(clientName);
+    await expect(jobCard.getByText(clientName, { exact: true })).toBeVisible();
 
     await ownerPage.goto("/app/sessions");
     await ownerPage.getByRole("button", { name: "Nueva sesion" }).click();
