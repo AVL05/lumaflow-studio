@@ -146,11 +146,12 @@ Minimum expectations when an area changes:
 - authorization/ownership: success + foreign-user `404` coverage;
 - validation: invalid-input coverage for meaningful constraints;
 - frontend business logic: Vitest/Testing Library coverage for hooks, utilities and critical components;
+- cross-stack critical user journeys: Playwright coverage in `e2e/` as described in `docs/testing.md`;
 - regressions: add a test that would have failed before the fix whenever practical.
 
 Do not delete or weaken tests merely to make CI green.
 
-For cross-stack critical user journeys, prefer adding/maintaining E2E coverage once the Playwright suite is introduced.
+For cross-stack critical user journeys, prefer adding/maintaining E2E coverage in `e2e/`.
 
 ## 11. Required validation
 
@@ -175,6 +176,13 @@ Before a normal PR, run the checks relevant to the touched code. Before declarin
 pnpm run lint
 pnpm run test
 pnpm run build
+```
+
+When the change affects a critical user journey, the frontend, or the API contract, also run the Playwright suite:
+
+```bash
+pnpm run test:e2e:install   # once per machine, downloads Chromium
+pnpm run test:e2e
 ```
 
 Backend-only focused checks may use:
@@ -205,6 +213,7 @@ Update the relevant docs in the same PR when changing:
 - API contracts → `docs/api.md`;
 - persistence/schema concepts → database docs/migrations documentation;
 - AI behavior/models/privacy → `docs/ai.md`;
+- test strategy, E2E suite or CI coverage → `docs/testing.md`;
 - deployment/environment requirements → `docs/deployment.md` and `.env.example`;
 - implemented roadmap state → `docs/roadmap.md`;
 - contributor/agent workflow → `AGENTS.md`, `CONTRIBUTING.md`, `.github/` templates.

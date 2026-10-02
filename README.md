@@ -138,7 +138,7 @@ Más detalle en [docs/architecture.md](docs/architecture.md).
 | Backend         | Laravel 13, PHP 8.3+, Sanctum, Dompdf                                     |
 | Datos           | MySQL compatible, Eloquent                                                |
 | IA              | WebGPU, WebLLM y Ollama opcional                                          |
-| Calidad         | PHPUnit, Pint, Vitest, Testing Library, oxlint y Prettier                 |
+| Calidad         | PHPUnit, Pint, Vitest, Testing Library, Playwright, oxlint y Prettier     |
 | Infraestructura | Vercel, Render, TiDB Cloud, almacenamiento S3 compatible y Docker Compose |
 
 ## Desarrollo local
@@ -201,7 +201,13 @@ pnpm run test
 pnpm run build
 ```
 
-La automatización de GitHub ejecuta formato, lint, tests, build PWA e imágenes Docker. Después del despliegue, un smoke test comprueba la landing, el favicon y el estado de la API.
+Los recorridos críticos de usuario se cubren con Playwright sobre un entorno de pruebas propio (SQLite local, servidor de PHP y Vite), sin Docker:
+
+```bash
+pnpm run test:e2e
+```
+
+La automatización de GitHub ejecuta formato, lint, tests, build PWA, recorridos E2E e imágenes Docker. Después del despliegue, un smoke test comprueba la landing, el favicon y el estado de la API. Consulta [docs/testing.md](docs/testing.md) para conocer la estrategia de pruebas.
 
 ## Roadmap
 
