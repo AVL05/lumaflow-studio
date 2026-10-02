@@ -1,0 +1,88 @@
+name: Feature
+
+description: Nueva capacidad de producto o mejora funcional con valor para el usuario.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Define primero el problema y el resultado esperado. Evita convertir el issue en una lista de implementación sin contexto de producto.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema / contexto
+      description: ¿Qué problema real existe y quién lo tiene?
+      placeholder: Un fotógrafo necesita...
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Resultado esperado
+      description: Describe el comportamiento observable cuando la mejora esté terminada.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Alcance
+      description: Qué forma parte de este issue.
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Fuera de alcance
+      description: Qué NO se debe implementar en este issue.
+      placeholder: |
+        - ...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+      description: Condiciones concretas y verificables para considerar el issue terminado.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área principal
+      options:
+        - Frontend
+        - Backend
+        - Full-stack
+        - Infraestructura / CI
+        - IA local
+        - Documentación
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impacto técnico
+      options:
+        - label: Cambia contrato API
+        - label: Requiere migración de base de datos
+        - label: Afecta autorización / ownership / privacidad
+        - label: Requiere actualización de documentación
+        - label: Incluye cambios visibles de UI
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notas técnicas / referencias
+      description: Enlaces, diseños, archivos relevantes, decisiones previas o restricciones conocidas.

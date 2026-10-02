@@ -1,0 +1,82 @@
+name: Technical task
+
+description: Refactor, deuda técnica, testing, rendimiento, CI o mantenimiento sin nueva feature de producto.
+title: "chore: "
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto técnico
+      description: ¿Qué limitación, deuda o riesgo existe actualmente?
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objetivo
+      description: Resultado técnico que buscamos sin cambiar comportamiento fuera del alcance.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Alcance
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Fuera de alcance
+      placeholder: |
+        - No añadir nuevas features de producto
+        - ...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Categoría
+      options:
+        - Refactor
+        - Testing
+        - Performance
+        - Seguridad
+        - CI / CD
+        - Dependencias
+        - Documentación
+        - Observabilidad
+        - Base de datos
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Restricciones / impacto
+      options:
+        - label: Debe preservar comportamiento público actual
+        - label: Afecta contrato API
+        - label: Requiere migración de base de datos
+        - label: Afecta seguridad / ownership
+        - label: Requiere benchmark o evidencia antes/después
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidencia / referencias
+      description: Métricas, archivos implicados, profiler, logs sanitizados, documentación o decisiones anteriores.

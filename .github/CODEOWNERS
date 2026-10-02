@@ -1,0 +1,7 @@
+# Repository owner and final reviewer
+* @AVL05
+
+# High-risk areas
+/backend/ @AVL05
+/.github/ @AVL05
+/docs/ @AVL05

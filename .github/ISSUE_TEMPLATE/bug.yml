@@ -1,0 +1,92 @@
+name: Bug
+
+description: Comportamiento incorrecto, regresión o fallo reproducible.
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Descripción
+      description: ¿Qué está fallando?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamiento actual
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Entorno
+      options:
+        - Producción
+        - Local
+        - Demo pública
+        - CI / GitHub Actions
+        - Otro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área principal
+      options:
+        - Frontend
+        - Backend
+        - Full-stack
+        - Infraestructura / CI
+        - IA local
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidencia
+      description: Error, logs sanitizados, captura, vídeo o respuesta HTTP. No publiques secretos ni datos reales de clientes.
+
+  - type: checkboxes
+    id: risk
+    attributes:
+      label: Riesgo
+      options:
+        - label: Puede afectar datos de usuario
+        - label: Puede afectar autorización / aislamiento entre usuarios
+        - label: Puede afectar producción
+        - label: Es una regresión de comportamiento previamente funcional
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+      description: Incluye, cuando sea posible, el test de regresión que debe quedar cubierto.
+      placeholder: |
+        - [ ] El fallo ya no se reproduce
+        - [ ] Existe test de regresión
+        - [ ] No rompe el flujo relacionado
+    validations:
+      required: true
