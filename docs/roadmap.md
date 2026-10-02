@@ -27,11 +27,11 @@ Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que si
 
 **Largo plazo**
 
-- Multi-usuario por estudio: roles, permisos y recursos compartidos. Hoy el aislamiento es estrictamente por `user_id`.
+- Multi-usuario por estudio: roles, permisos y recursos compartidos. Fundacion de workspaces completada en #4 (un estudio personal por usuario, `workspace_id` aditivo, `user_id` conservado); el corte a colaboracion real pertenece al #5.
 - Pagos online y conciliacion de facturas.
 
 ## Criterio de producto
 
 LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales antes de definir limites, precios o colaboracion multiusuario.
 
-El aislamiento actual es por usuario. Antes de escalar el servicio deben completarse roles por estudio, observabilidad, copias de seguridad, politicas de retencion y una estrategia de capacidad verificable.
+El aislamiento se aplica por usuario con fundacion de workspace (Issue #4): cada usuario opera en su estudio personal y los recursos ajenos devuelven 404. Antes de escalar a colaboracion multiusuario (#5) deben completarse roles por estudio, observabilidad, copias de seguridad, politicas de retencion y una estrategia de capacidad verificable.

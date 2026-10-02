@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['ai_conversation_id', 'user_id', 'role', 'content', 'metadata'])]
+#[Fillable(['workspace_id', 'ai_conversation_id', 'user_id', 'role', 'content', 'metadata'])]
 class AiMessage extends Model
 {
-    use HasFactory;
+    use BelongsToWorkspace, HasFactory;
 
     protected function casts(): array
     {

@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'gear_item_id', 'name', 'category', 'iso', 'aperture', 'shutter_speed', 'white_balance', 'exposure_compensation', 'notes'])]
+#[Fillable(['user_id', 'workspace_id', 'gear_item_id', 'name', 'category', 'iso', 'aperture', 'shutter_speed', 'white_balance', 'exposure_compensation', 'notes'])]
 class Preset extends Model
 {
+    use BelongsToWorkspace;
+
     protected function casts(): array
     {
         return ['exposure_compensation' => 'decimal:1'];

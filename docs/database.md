@@ -23,6 +23,8 @@ Agrupadas por fase, no una por tabla:
 | `2026_08_13_000001_add_onboarding_to_users_table` | Estudio, especialidades, pais, moneda, prioridad y finalizacion del onboarding |
 | `2026_08_13_000002_add_activation_to_users_table` | Primer paso, muestra opcional y activacion de reservas |
 | `2026_08_13_000003_create_jobs_domain` | Trabajos fotograficos, pipeline, contratos, equipo y enlaces con el resto del dominio |
+| `2026_10_03_000001_create_workspaces_table` | `workspaces` + `users.current_workspace_id`, backfill de estudio personal |
+| `2026_10_03_000002_add_workspace_id_to_domain_tables` | `workspace_id` aditivo nullable en 18 tablas raiz, backfill desde el propietario |
 
 ## Modelo de dominio
 
@@ -46,13 +48,19 @@ users ──┬── photography_jobs ──┬── sessions ── checklist
         └── activities   (morph: subject)
 ```
 
-Toda tabla de dominio tiene `user_id` con `cascadeOnDelete`. Es la unica frontera de aislamiento entre usuarios.
+Toda tabla de dominio raiz tiene `user_id` con `cascadeOnDelete` y `workspace_id` aditivo nullable con `nullOnDelete`. Durante la transicion (Issue #4) `user_id` sigue siendo la frontera de aislamiento aplicada; `workspace_id` se rellena de forma consistente (trait `BelongsToWorkspace`, backfill en migracion) para preparar el corte completo del Issue #5. `quote_items` y `checklist_items` heredan ownership y no llevan `workspace_id` directo.
 
 La tabla fisica se llama `photography_jobs` para no colisionar con `jobs`, reservada por las colas de Laravel. `Job::$table` conserva el nombre de dominio y la API publica usa `/jobs`. Las relaciones existentes incorporan `job_id` nullable para migrar sin perder datos; la migracion agrupa entregas y sesiones anteriores en trabajos.
 
 `users` conserva el nombre personal en `name` y la identidad comercial en `studio_name`. `photography_specialties` es JSON; `country` usa ISO 3166-1 alfa-2 y `currency` ISO 4217. Las cuentas anteriores a la migracion quedan verificadas y con onboarding completado para no perder acceso; las nuevas comienzan con ambos estados pendientes.
 
 La activacion guarda `getting_started_choice`, `getting_started_completed_at`, `sample_workspace_activated_at` y `bookings_enabled_at`. Los datos demo se crean una sola vez. Las cuentas anteriores se marcan con acceso inicial completado y reservas habilitadas para no romper enlaces ya publicados.
+
+## Workspaces (fundacion, Issue #4)
+
+`workspaces`: `id`, `user_id` propietario (unique, `cascadeOnDelete`), `name`, `slug` unique. `users.current_workspace_id` apunta al estudio activo (nullable, `nullOnDelete`).
+
+Estrategia: migraciones aditivas, sin borrar `user_id` ni datos; `UserObserver::created` + `WorkspaceService::ensureForUser()` (idempotente) para altas; backfill en migracion para cuentas y recursos existentes (`UPDATE ... SET workspace_id = (SELECT current_workspace_id FROM users WHERE ...)` solo en NULL). Sin invitaciones, roles, selector ni billing. Tests en `tests/Feature/WorkspaceOwnershipTest.php`.
 
 ## Tablas de la fase 9
 
