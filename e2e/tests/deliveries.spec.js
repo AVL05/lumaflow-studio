@@ -23,7 +23,10 @@ test.describe("portal de entrega", () => {
     // El `label` envuelve el `select`, asi que su nombre accesible incluye las
     // opciones: se ancla el inicio para no confundirse con "Estado de pago".
     await deliveryDialog.getByLabel(/^Estado(?!\s)/).selectOption("delivered");
-    await deliveryDialog.getByLabel("Cliente").selectOption({ label: clientName });
+    const deliveryClientSelect = deliveryDialog.getByLabel("Cliente");
+    await expect(deliveryClientSelect.locator("option", { hasText: clientName })).toBeAttached();
+    await deliveryClientSelect.selectOption({ label: clientName });
+    await expect(deliveryClientSelect).not.toHaveValue("");
     await deliveryDialog.getByLabel("Presupuesto", { exact: true }).fill("1200");
     await deliveryDialog.getByLabel("Importe pagado").fill("1200");
     await deliveryDialog.getByLabel("Estado de pago").selectOption("paid");
@@ -63,10 +66,12 @@ test.describe("portal de entrega", () => {
     await visitorPage.getByRole("button", { name: "Aprobar entrega" }).click();
     await expect(visitorPage.getByText("Ya has aprobado esta entrega. Gracias.")).toBeVisible();
 
-    // La aprobacion queda registrada en el panel del estudio.
-    await expect(ownerPage.reload()).toBeTruthy();
+    // La aprobacion queda registrada en el panel del estudio: primero se
+    // comprueba por API (sin navegacion en curso) y despues se recarga la UI.
     const refreshed = await apiRequest(ownerPage, "GET", `/deliveries/${deliveryId}`);
     expect((await refreshed.json()).data.status).toBe("approved");
+
+    await ownerPage.reload();
     const card = ownerPage.getByRole("article").filter({ hasText: deliveryTitle });
     await expect(card.getByRole("heading", { name: deliveryTitle })).toBeVisible();
     await expect(card.getByText("Aprobado", { exact: true })).toBeVisible();

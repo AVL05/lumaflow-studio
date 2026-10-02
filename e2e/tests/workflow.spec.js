@@ -25,7 +25,13 @@ test.describe("alta de cliente, trabajo y sesion", () => {
 
     const jobDialog = ownerPage.getByRole("dialog");
     await jobDialog.getByLabel("Nombre del trabajo").fill(jobTitle);
-    await jobDialog.getByLabel("Cliente").selectOption({ label: clientName });
+    // Esperar a que el fetch de clientes de /app/jobs incluya el recien creado
+    // antes de seleccionar: evita mandar client_id vacio si el dialogo se abrio
+    // con la lista aun cargando.
+    const jobClientSelect = jobDialog.getByLabel("Cliente");
+    await expect(jobClientSelect.locator("option", { hasText: clientName })).toBeAttached();
+    await jobClientSelect.selectOption({ label: clientName });
+    await expect(jobClientSelect).not.toHaveValue("");
     await jobDialog.getByLabel("Fecha").fill(eventDate);
     // El `label` envuelve el `select`, asi que su nombre accesible incluye las
     // opciones: se ancla el inicio para no confundirse con "Workflow".
