@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\CleansUpWorkflowRelations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,10 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'job_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position'])]
+#[Fillable(['user_id', 'workspace_id', 'job_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position'])]
 class Task extends Model
 {
-    use CleansUpWorkflowRelations, HasFactory;
+    use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;
 
     public const STATUSES = ['todo', 'in_progress', 'waiting', 'completed', 'cancelled'];
 

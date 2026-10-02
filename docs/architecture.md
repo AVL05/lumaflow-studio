@@ -43,7 +43,7 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 ## Principios que sostienen el diseño
 
-**Multi-tenancy por `user_id`.** No hay tabla de tenants ni middleware de scoping global. Cada consulta parte del scope `ownedBy(request()->user()->id)`, y cada creacion cuelga de la relacion del usuario (`$request->user()->sessions()->create(...)`). Es explicito y auditable en cada controlador.
+**Multi-tenancy por workspace con compatibilidad `user_id`.** Existe tabla `workspaces`: cada usuario tiene un estudio personal (`users.current_workspace_id`) creado automaticamente al registrarse y por backfill para cuentas existentes. Las tablas raiz llevan `workspace_id` aditivo (nullable, `nullOnDelete`) ademas de `user_id`, que se conserva en esta fase. Cada consulta sigue partiendo del scope `ownedBy(request()->user()->id)` y cada creacion cuelga de la relacion del usuario; el trait `BelongsToWorkspace` rellena `workspace_id` desde el workspace actual. Es explicito y auditable en cada controlador. El corte completo a `workspace_id` como unica frontera pertenece al Issue #5.
 
 **404 en lugar de 403.** Devolver 403 sobre un recurso ajeno confirma que existe. Las policies de `app/Policies` extienden `OwnedResourcePolicy` y devuelven `false`; el metodo `authorizeOwnership()` del controlador base traduce ese `false` en un 404. Los recursos anteriores a la fase 9 hacen lo mismo con un `ensureOwnership()` privado.
 

@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'session_id', 'name', 'type', 'position'])]
+#[Fillable(['user_id', 'workspace_id', 'session_id', 'name', 'type', 'position'])]
 class Checklist extends Model
 {
-    use HasFactory;
+    use BelongsToWorkspace, HasFactory;
 
     public const TYPES = ['gear', 'preparation', 'editing', 'delivery', 'custom'];
 

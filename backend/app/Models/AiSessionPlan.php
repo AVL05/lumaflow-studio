@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'session_id', 'title', 'plan', 'summary'])]
+#[Fillable(['user_id', 'workspace_id', 'session_id', 'title', 'plan', 'summary'])]
 class AiSessionPlan extends Model
 {
-    use HasFactory;
+    use BelongsToWorkspace, HasFactory;
 
     protected function casts(): array
     {
