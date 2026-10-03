@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'workspace_id', 'name', 'city', 'country', 'latitude', 'longitude', 'type', 'best_time', 'access_difficulty', 'rating', 'is_favorite', 'access_mode', 'permissions_required', 'cost', 'google_maps_url', 'apple_maps_url', 'openstreetmap_url', 'recommended_weather', 'recommended_seasons', 'notes', 'tags', 'recommended_gear'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'name', 'city', 'country', 'latitude', 'longitude', 'type', 'best_time', 'access_difficulty', 'rating', 'is_favorite', 'access_mode', 'permissions_required', 'cost', 'google_maps_url', 'apple_maps_url', 'openstreetmap_url', 'recommended_weather', 'recommended_seasons', 'notes', 'tags', 'recommended_gear'])]
 class Location extends Model
 {
     use BelongsToWorkspace, HasFactory;

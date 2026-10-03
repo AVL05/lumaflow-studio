@@ -21,6 +21,7 @@ class SampleWorkspaceService
             }
 
             $location = $user->locations()->create([
+                'is_demo' => true,
                 'name' => 'Invernadero Botánico · Ejemplo',
                 'city' => 'Madrid',
                 'country' => 'España',
@@ -37,6 +38,7 @@ class SampleWorkspaceService
             ]);
 
             $client = $user->clients()->create([
+                'is_demo' => true,
                 'name' => 'Lucía y Mateo · Ejemplo',
                 'email' => 'lucia.mateo@example.test',
                 'phone' => '+34 600 000 001',
@@ -45,6 +47,7 @@ class SampleWorkspaceService
             ]);
 
             $brand = $user->clients()->create([
+                'is_demo' => true,
                 'name' => 'Alba Moreno · Ejemplo',
                 'email' => 'alba@example.test',
                 'company' => 'Casa Origen',
@@ -53,6 +56,7 @@ class SampleWorkspaceService
             ]);
 
             $weddingJob = $user->jobs()->create([
+                'is_demo' => true,
                 'client_id' => $client->id,
                 'location_id' => $location->id,
                 'title' => 'Boda Lucía + Mateo · Ejemplo',
@@ -67,6 +71,7 @@ class SampleWorkspaceService
             ]);
 
             $productJob = $user->jobs()->create([
+                'is_demo' => true,
                 'client_id' => $brand->id,
                 'title' => 'Campaña Casa Origen · Ejemplo',
                 'specialty' => 'product',
@@ -78,6 +83,7 @@ class SampleWorkspaceService
             ]);
 
             $wedding = $user->sessions()->create([
+                'is_demo' => true,
                 'job_id' => $weddingJob->id,
                 'location_id' => $location->id,
                 'name' => 'Preboda Lucía y Mateo · Ejemplo',
@@ -91,6 +97,7 @@ class SampleWorkspaceService
             ]);
 
             $product = $user->sessions()->create([
+                'is_demo' => true,
                 'job_id' => $productJob->id,
                 'name' => 'Campaña Casa Origen · Ejemplo',
                 'date' => now()->addDays(15)->toDateString(),
@@ -102,6 +109,7 @@ class SampleWorkspaceService
             ]);
 
             $user->deliveries()->create([
+                'is_demo' => true,
                 'job_id' => $weddingJob->id,
                 'client_id' => $client->id,
                 'session_id' => $wedding->id,
@@ -114,6 +122,7 @@ class SampleWorkspaceService
 
             $user->tasks()->createMany([
                 [
+                    'is_demo' => true,
                     'job_id' => $weddingJob->id,
                     'session_id' => $wedding->id,
                     'client_id' => $client->id,
@@ -123,6 +132,7 @@ class SampleWorkspaceService
                     'due_date' => now()->addDays(3)->toDateString(),
                 ],
                 [
+                    'is_demo' => true,
                     'job_id' => $productJob->id,
                     'session_id' => $product->id,
                     'client_id' => $brand->id,

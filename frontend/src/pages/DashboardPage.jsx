@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { dashboardApi } from "../api/dashboard";
 import { getApiError } from "../api/client";
 import { Badge } from "../components/ui/Badge";
@@ -19,6 +20,7 @@ import {
   TopLocationsWidget,
 } from "../features/dashboard/WorkflowWidgets";
 import { ActivationPanel } from "../features/dashboard/ActivationPanel";
+import { getNextAction } from "../features/dashboard/activation";
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
@@ -44,7 +46,7 @@ export function DashboardPage() {
         title="Dashboard"
         description="Metricas reales del workspace creativo: sesiones, equipo, clientes y actividad reciente."
       />
-      {error ? <ErrorState message={error} /> : null}
+      {error ? <ErrorState message={error} onRetry={loadDashboard} /> : null}
       {!dashboard ? (
         <DashboardSkeleton />
       ) : (
@@ -65,6 +67,17 @@ export function DashboardPage() {
                   El dashboard resume lo que requiere atencion: agenda inmediata, tareas abiertas,
                   entregas pendientes y actividad reciente del workspace.
                 </p>
+                {(() => {
+                  const next = getNextAction(dashboard.activation);
+                  return next ? (
+                    <Link
+                      to={next.href}
+                      className="mt-5 inline-flex rounded-lg bg-amber-200 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-100"
+                    >
+                      Siguiente paso: {next.label.toLowerCase()}
+                    </Link>
+                  ) : null;
+                })()}
               </div>
               <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                 {[

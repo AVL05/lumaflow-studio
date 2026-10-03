@@ -55,7 +55,7 @@ export function LoginPage() {
         {error ? <ErrorState message={error} /> : null}
         {searchParams.get("password_reset") === "1" ? (
           <div className="rounded-md border border-emerald-400/20 bg-emerald-500/10 p-3 text-sm text-emerald-100">
-            Password actualizado. Ya puedes iniciar sesion.
+            Password actualizado. Ya puedes iniciar sesión.
           </div>
         ) : null}
         <Field label="Email">
@@ -68,12 +68,12 @@ export function LoginPage() {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
         </Field>
-        <Field label="Password">
+        <Field label="Contraseña">
           <input
             className={inputClass}
             type="password"
             autoComplete="current-password"
-            placeholder="Password del workspace"
+            placeholder="Tu contraseña"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
@@ -83,7 +83,7 @@ export function LoginPage() {
             className="text-sm font-medium text-stone-400 transition hover:text-amber-100"
             to="/forgot-password"
           >
-            He olvidado mi password
+            He olvidado mi contraseña
           </Link>
         </div>
         <Button className="mt-2 w-full py-3" disabled={loading}>

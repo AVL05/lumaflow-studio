@@ -20,6 +20,7 @@ class SessionResource extends JsonResource
             'location_name' => $this->location_name,
             'session_type' => $this->session_type,
             'status' => $this->status,
+            'is_demo' => (bool) $this->is_demo,
             'description' => $this->description,
             'notes' => $this->notes,
             'client_name' => $this->client_name,

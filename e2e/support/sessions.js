@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import { accounts } from "./accounts.js";
 import { frontendUrl, sessionStateFile } from "./env.js";
 import { signIn } from "./app.js";
@@ -34,6 +34,22 @@ export async function prepareAuthenticatedSessions() {
 
       await signIn(page, account);
       await context.storageState({ path: sessionStateFile(name) });
+      await context.close();
+    }
+
+    // La cuenta recien llegada aun no completo el onboarding: su sesion se
+    // guarda en el punto del embudo donde continuara el test dedicado.
+    {
+      const context = await browser.newContext({ baseURL: frontendUrl });
+      const page = await context.newPage();
+
+      await page.goto("/login");
+      await page.getByLabel("Email").fill(accounts.newcomer.email);
+      await page.getByLabel("Contraseña").fill(accounts.newcomer.password);
+      await page.getByRole("button", { name: "Entrar" }).click();
+      await page.waitForURL("**/onboarding");
+      await expect(page.getByRole("heading", { name: "¿Cómo se llama tu estudio?" })).toBeVisible();
+      await context.storageState({ path: sessionStateFile("newcomer") });
       await context.close();
     }
   } finally {

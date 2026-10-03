@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 
 class GettingStartedRequest extends FormRequest
 {
-    public const CHOICES = ['create_first_job', 'sample_workspace', 'import_clients'];
+    public const CHOICES = ['create_first_job', 'sample_workspace', 'import_clients', 'later'];
 
     public function authorize(): bool
     {

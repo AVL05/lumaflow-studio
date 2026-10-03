@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['user_id', 'workspace_id', 'job_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'gallery_provider', 'gallery_password', 'gallery_expires_at', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'gallery_provider', 'gallery_password', 'gallery_expires_at', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
 class Delivery extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;

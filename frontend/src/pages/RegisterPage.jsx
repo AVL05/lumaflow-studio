@@ -26,6 +26,10 @@ export function RegisterPage() {
 
   async function submit(event) {
     event.preventDefault();
+    if (form.password !== form.password_confirmation) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
     setLoading(true);
     setError("");
 
@@ -61,6 +65,7 @@ export function RegisterPage() {
         <Field label="Tu nombre">
           <input
             className={inputClass}
+            required
             autoComplete="name"
             placeholder="Cómo debemos llamarte"
             value={form.name}
@@ -70,6 +75,7 @@ export function RegisterPage() {
         <Field label="Email">
           <input
             className={inputClass}
+            required
             type="email"
             autoComplete="email"
             placeholder="alex@studio.com"
@@ -77,22 +83,26 @@ export function RegisterPage() {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
         </Field>
-        <Field label="Password">
+        <Field label="Contraseña">
           <input
             className={inputClass}
+            required
+            minLength={8}
             type="password"
             autoComplete="new-password"
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
         </Field>
-        <Field label="Confirmar password">
+        <Field label="Confirmar contraseña">
           <input
             className={inputClass}
+            required
+            minLength={8}
             type="password"
             autoComplete="new-password"
-            placeholder="Repite el password"
+            placeholder="Repite la contraseña"
             value={form.password_confirmation}
             onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
           />

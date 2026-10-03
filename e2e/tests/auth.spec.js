@@ -9,8 +9,8 @@ test.describe("registro y acceso", () => {
     await page.goto("/register");
     await page.getByLabel("Tu nombre").fill("Estudio Nuevo E2E");
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password", { exact: true }).fill("lumaflow-e2e");
-    await page.getByLabel("Confirmar password").fill("lumaflow-e2e");
+    await page.getByLabel("Contraseña", { exact: true }).fill("lumaflow-e2e");
+    await page.getByLabel("Confirmar contraseña").fill("lumaflow-e2e");
     await page.getByRole("button", { name: "Crear cuenta" }).click();
 
     // El alta deja al estudio a la espera del enlace de verificacion.
@@ -52,12 +52,12 @@ test.describe("registro y acceso", () => {
   test("un estudio ya configurado inicia sesion y llega a su dashboard", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill(accounts.access.email);
-    await page.getByLabel("Password", { exact: true }).fill("password incorrecta");
+    await page.getByLabel("Contraseña", { exact: true }).fill("password incorrecta");
     await page.getByRole("button", { name: "Entrar" }).click();
 
     await expect(page.getByText("Las credenciales no son correctas.")).toBeVisible();
 
-    await page.getByLabel("Password", { exact: true }).fill(accounts.access.password);
+    await page.getByLabel("Contraseña", { exact: true }).fill(accounts.access.password);
     await page.getByRole("button", { name: "Entrar" }).click();
 
     await page.waitForURL("**/app/dashboard");
