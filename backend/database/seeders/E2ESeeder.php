@@ -56,5 +56,14 @@ class E2ESeeder extends Seeder
             'studio_slug' => 'estudio-e2e-invitado',
             'password' => $password,
         ]);
+
+        // El recorrido de onboarding parte de una cuenta verificada pero sin
+        // configurar, como un registro real tras verificar el email.
+        User::factory()->withoutOnboarding()->create([
+            'name' => 'Estudio E2E Nuevo',
+            'email' => (string) env('E2E_NEWCOMER_EMAIL', 'e2e.nuevo@lumaflow.test'),
+            'studio_slug' => 'estudio-e2e-nuevo',
+            'password' => $password,
+        ]);
     }
 }

@@ -45,7 +45,7 @@ export async function findResourceId(page, path, field, value) {
 export async function signIn(page, account) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(account.email);
-  await page.getByLabel("Password").fill(account.password);
+  await page.getByLabel("Contraseña").fill(account.password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/app/dashboard");
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();

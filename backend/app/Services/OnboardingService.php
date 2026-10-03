@@ -14,7 +14,7 @@ class OnboardingService
             $user->forceFill([
                 'studio_name' => $data['studio_name'],
                 'studio_slug' => $this->uniqueStudioSlug($data['studio_name'], $user->id),
-                'photography_specialties' => $data['photography_specialties'],
+                'photography_specialties' => $data['photography_specialties'] ?? [],
                 'country' => mb_strtoupper($data['country']),
                 'currency' => mb_strtoupper($data['currency']),
                 'onboarding_goal' => $data['onboarding_goal'],

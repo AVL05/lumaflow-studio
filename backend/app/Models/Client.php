@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'name', 'email', 'phone', 'company', 'instagram', 'notes', 'status'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'name', 'email', 'phone', 'company', 'instagram', 'notes', 'status'])]
 class Client extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;

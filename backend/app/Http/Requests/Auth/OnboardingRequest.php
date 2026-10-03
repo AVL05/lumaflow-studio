@@ -41,8 +41,8 @@ class OnboardingRequest extends FormRequest
     {
         return [
             'studio_name' => ['required', 'string', 'max:120'],
-            'photography_specialties' => ['required', 'array', 'min:1', 'max:5'],
-            'photography_specialties.*' => ['required', 'string', 'distinct', Rule::in(self::SPECIALTIES)],
+            'photography_specialties' => ['nullable', 'array', 'max:5'],
+            'photography_specialties.*' => ['string', 'distinct', Rule::in(self::SPECIALTIES)],
             'country' => ['required', 'string', 'size:2'],
             'currency' => ['required', 'string', Rule::in(self::CURRENCIES)],
             'onboarding_goal' => ['required', 'string', Rule::in(self::GOALS)],

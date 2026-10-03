@@ -13,6 +13,7 @@ class JobResource extends JsonResource
             'id' => $this->id, 'client_id' => $this->client_id, 'location_id' => $this->location_id,
             'title' => $this->title, 'specialty' => $this->specialty, 'workflow_key' => $this->workflow_key,
             'status' => $this->status, 'event_date' => $this->event_date?->toDateString(), 'description' => $this->description,
+            'is_demo' => (bool) $this->is_demo,
             'budget' => $this->budget, 'deposit_amount' => $this->deposit_amount,
             'contract_status' => $this->contract_status, 'contract_url' => $this->contract_url,
             'contract_signed_at' => $this->contract_signed_at?->toISOString(),

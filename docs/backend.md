@@ -47,7 +47,7 @@ backend/app/
 | `OnboardingService` | Persiste preferencias iniciales y reserva un slug unico para el estudio. |
 | `GettingStartedService` | Persiste la opcion posterior al onboarding y activa la muestra cuando corresponde. |
 | `SampleWorkspaceService` | Crea datos ficticios transaccionales e idempotentes para explorar el producto. |
-| `ActivationService` | Calcula el checklist 0/5, activa reservas y detecta el primer valor real. |
+| `ActivationService` | Calcula el checklist 0/5 solo con recursos reales (`is_demo = false`, alcance por membership), activa reservas y detecta el primer valor real. |
 | `JobWorkflowService` | Expone pipeline y plantillas por especialidad; genera las tareas iniciales. |
 | `JobTransitionService` | Avanza trabajos por eventos comerciales y de produccion sin regresiones. |
 | `ClientImportService` | Importa clientes en lote y omite duplicados por email dentro del usuario. |
