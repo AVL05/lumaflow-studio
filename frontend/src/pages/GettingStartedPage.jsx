@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getApiError } from "../api/client";
 import { ErrorState } from "../components/states/ErrorState";
+import { LoadingState } from "../components/states/LoadingState";
 import { OnboardingShell } from "../features/auth/OnboardingShell";
 import { useAuth } from "../features/auth/AuthContext";
 import { getAuthDestination } from "../features/auth/getAuthDestination";
@@ -33,6 +34,14 @@ const options = [
     destination: "/app/clients?import=1",
     accent: "Hasta 250 contactos",
   },
+  {
+    value: "later",
+    index: "04",
+    title: "Explorar por mi cuenta",
+    description: "Ve al panel y sigue la guía de primeros pasos a tu ritmo.",
+    destination: "/app/dashboard",
+    accent: "Sin prisa",
+  },
 ];
 
 export function GettingStartedPage() {
@@ -41,7 +50,7 @@ export function GettingStartedPage() {
   const [selected, setSelected] = useState("");
   const [error, setError] = useState("");
 
-  if (booting) return null;
+  if (booting) return <LoadingState label="Preparando tu estudio..." />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!user.email_verified || !user.onboarding_completed)
     return <Navigate to={getAuthDestination(user)} replace />;
@@ -62,10 +71,10 @@ export function GettingStartedPage() {
 
   return (
     <OnboardingShell
-      current={4}
-      total={4}
+      current={5}
+      total={5}
       title="¿Cómo quieres empezar?"
-      description="Elige una ruta. Después podrás usar las otras desde el producto."
+      description="Elige una ruta. Las demás siguen disponibles desde el producto."
     >
       {error ? <ErrorState message={error} /> : null}
       <div className="mt-2 grid gap-4">

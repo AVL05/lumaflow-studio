@@ -4,6 +4,7 @@ import { clientsApi } from "../api/clients";
 import { getApiError } from "../api/client";
 import { jobsApi } from "../api/jobs";
 import { Button } from "../components/ui/Button";
+import { DemoBadge } from "../components/ui/DemoBadge";
 import { Modal } from "../components/ui/Modal";
 import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState } from "../components/states/EmptyState";
@@ -80,13 +81,13 @@ export function JobsPage() {
       {error ? <ErrorState message={error} onRetry={load} /> : null}
       {!loading && !error && jobs.length === 0 ? (
         <EmptyState
-          title="Tu pipeline está listo"
-          description="Crea tu primer trabajo y LumaFlow preparará las tareas adecuadas a su especialidad."
-          action={<Button onClick={openCreate}>Crear primer trabajo</Button>}
+          title="Aún no tienes trabajos"
+          description="El trabajo organiza todo el encargo: sesiones, tareas y entregas. Crea el primero para ver el pipeline en acción."
+          action={<Button onClick={openCreate}>Crear mi primer trabajo</Button>}
         />
       ) : null}
       {loading ? <p className="text-sm text-stone-400">Cargando pipeline...</p> : null}
-      {!loading && jobs.length ? (
+      {!loading && !error && jobs.length ? (
         <div className="overflow-x-auto pb-4">
           <div className="grid min-w-[1600px] grid-flow-col auto-cols-[17rem] gap-3">
             {columns.map(([status, label]) => {
@@ -139,7 +140,10 @@ function JobCard({ job }) {
       to={`/app/jobs/${job.id}`}
       className="block rounded-xl border border-white/10 bg-[#15130f] p-4 transition hover:-translate-y-0.5 hover:border-amber-200/25 hover:bg-[#191610]"
     >
-      <p className="font-semibold text-stone-100">{job.title}</p>
+      <p className="font-semibold text-stone-100">
+        {job.title}
+        <DemoBadge show={job.is_demo} />
+      </p>
       <p className="mt-1 text-xs text-stone-500">{job.client?.name || "Cliente pendiente"}</p>
       <div className="mt-4 flex items-end justify-between gap-3">
         <div>

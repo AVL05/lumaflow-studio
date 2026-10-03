@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { ErrorState } from "../components/states/ErrorState";
+import { LoadingState } from "../components/states/LoadingState";
 import { Field, inputClass } from "../components/ui/Field";
 import { getApiError } from "../api/client";
 import { useAuth } from "../features/auth/AuthContext";
@@ -62,7 +63,7 @@ const stepCopy = [
   ],
   [
     "¿Qué tipo de fotografía haces?",
-    "Elige hasta cinco especialidades. Podrás cambiarlas más adelante.",
+    "Opcional: elige hasta cinco especialidades. Podrás cambiarlas más adelante.",
   ],
   ["¿Dónde trabajas y cómo cobras?", "Usaremos estos datos como referencia económica y regional."],
   ["¿Qué quieres resolver primero?", "Abriremos LumaFlow con una prioridad clara para tu estudio."],
@@ -82,7 +83,7 @@ export function OnboardingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (booting) return null;
+  if (booting) return <LoadingState label="Preparando tu estudio..." />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!user.email_verified) return <Navigate to="/verify-email" replace />;
   if (user.onboarding_completed) return <Navigate to={getAuthDestination(user)} replace />;
@@ -134,7 +135,7 @@ export function OnboardingPage() {
   return (
     <OnboardingShell
       current={step + 1}
-      total={stepCopy.length}
+      total={stepCopy.length + 1}
       title={stepCopy[step][0]}
       description={stepCopy[step][1]}
     >
@@ -269,8 +270,6 @@ export function OnboardingPage() {
 
 function validateStep(step, form) {
   if (step === 0 && form.studio_name.trim().length < 2) return "Escribe el nombre del estudio.";
-  if (step === 1 && form.photography_specialties.length === 0)
-    return "Elige al menos una especialidad.";
   if (step === 2 && (!form.country || !form.currency)) return "Selecciona país y moneda.";
   if (step === 3 && !form.onboarding_goal) return "Elige qué quieres resolver primero.";
   return "";

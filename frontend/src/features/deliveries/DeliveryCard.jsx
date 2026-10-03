@@ -4,13 +4,19 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { deliveryStatuses, paymentStatuses } from "../../utils/catalogs";
+import { DemoBadge } from "../../components/ui/DemoBadge";
 
 export function DeliveryCard({ delivery, onEdit, onDelete }) {
   const [copied, setCopied] = useState(false);
 
   async function copyPortalLink() {
     const url = `${window.location.origin}/deliver/${delivery.public_token}`;
-    await navigator.clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt("Copia el enlace del portal:", url);
+      return;
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   }
@@ -19,7 +25,10 @@ export function DeliveryCard({ delivery, onEdit, onDelete }) {
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-semibold">{delivery.title}</h2>
+          <h2 className="font-semibold">
+            {delivery.title}
+            <DemoBadge show={delivery.is_demo} />
+          </h2>
           <p className="mt-1 text-sm text-stone-400">
             {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesion"}
           </p>
