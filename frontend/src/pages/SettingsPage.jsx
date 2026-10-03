@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
 import { useAuth } from "../features/auth/AuthContext";
+import { WorkspaceMembers } from "../features/settings/WorkspaceMembers";
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -40,6 +41,11 @@ export function SettingsPage() {
           </Link>
         </Panel>
       </div>
+      <WorkspaceMembers
+        key={user?.current_workspace_id ?? "sin-estudio"}
+        currentUserId={user?.id}
+        currentRole={user?.workspace_role}
+      />
     </>
   );
 }

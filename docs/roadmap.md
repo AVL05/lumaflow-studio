@@ -27,7 +27,7 @@ Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que si
 
 **Largo plazo**
 
-- Multi-usuario por estudio: roles, permisos y recursos compartidos. Fundacion de workspaces completada en #4 (un estudio personal por usuario, `workspace_id` aditivo, `user_id` conservado); el corte a colaboracion real pertenece al #5.
+- Colaboracion basica por estudio (memberships owner/admin/member, invitaciones con token y caducidad) implementada; pendiente: permisos granulares, equipos, billing por asiento y SSO.
 - Pagos online y conciliacion de facturas.
 
 ## Criterio de producto
