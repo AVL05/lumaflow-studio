@@ -20,7 +20,7 @@ class CommercialDocumentService
                 'job_id' => $data['job_id'] ?? null,
                 'client_id' => $data['client_id'],
                 'session_id' => $data['session_id'] ?? null,
-                'quote_number' => $this->nextNumber(Quote::class, 'quote_number', 'PRE', $user->id),
+                'quote_number' => $this->nextNumber(Quote::class, 'quote_number', 'PRE', $user),
                 'status' => 'draft',
                 'issue_date' => $data['issue_date'] ?? now()->toDateString(),
                 'valid_until' => $data['valid_until'] ?? null,
@@ -72,7 +72,7 @@ class CommercialDocumentService
             'quote_id' => $quote->id,
             'client_id' => $quote->client_id,
             'session_id' => $quote->session_id,
-            'invoice_number' => $this->nextNumber(Invoice::class, 'invoice_number', 'FAC', $user->id),
+            'invoice_number' => $this->nextNumber(Invoice::class, 'invoice_number', 'FAC', $user),
             'status' => 'draft',
             'issue_date' => $data['issue_date'] ?? now()->toDateString(),
             'due_date' => $data['due_date'] ?? now()->addDays(30)->toDateString(),
@@ -117,10 +117,11 @@ class CommercialDocumentService
     }
 
     /** @param class-string<Model> $model */
-    private function nextNumber(string $model, string $column, string $prefix, int $userId): string
+    private function nextNumber(string $model, string $column, string $prefix, User $user): string
     {
         $year = now()->year;
-        $last = $model::query()->where('user_id', $userId)->where($column, 'like', "{$prefix}-{$year}-%")
+        $workspaceId = (int) ($user->getAttribute('current_workspace_id') ?? 0);
+        $last = $model::query()->where('workspace_id', $workspaceId)->where($column, 'like', "{$prefix}-{$year}-%")
             ->lockForUpdate()->orderByDesc('id')->value($column);
         $sequence = $last ? ((int) str($last)->afterLast('-')->toString()) + 1 : 1;
 

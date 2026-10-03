@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ActivityResource;
 use App\Models\Activity;
 use App\Models\Session;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ActivityController extends Controller
@@ -14,7 +15,7 @@ class ActivityController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $activities = Activity::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->type(request('type'))
             ->latest()
             ->paginate(min((int) request('per_page', 20), 60));
@@ -25,10 +26,10 @@ class ActivityController extends Controller
     /** Timeline cronologico de una sesion concreta. */
     public function session(Session $session): AnonymousResourceCollection
     {
-        abort_unless($session->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $session);
 
         $activities = Activity::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->forSubject($session->getMorphClass(), $session->id)
             ->orderByDesc('created_at')
             ->orderByDesc('id')

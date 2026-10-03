@@ -16,7 +16,7 @@ class ChecklistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('user_id', $this->user()->id)],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'name' => ['required', 'string', 'max:120'],
             'type' => ['required', Rule::in(Checklist::TYPES)],
             'use_template' => ['sometimes', 'boolean'],

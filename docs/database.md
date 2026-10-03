@@ -60,7 +60,15 @@ La activacion guarda `getting_started_choice`, `getting_started_completed_at`, `
 
 `workspaces`: `id`, `user_id` propietario (unique, `cascadeOnDelete`), `name`, `slug` unique. `users.current_workspace_id` apunta al estudio activo (nullable, `nullOnDelete`).
 
-Estrategia: migraciones aditivas, sin borrar `user_id` ni datos; `UserObserver::created` + `WorkspaceService::ensureForUser()` (idempotente) para altas; backfill en migracion para cuentas y recursos existentes (`UPDATE ... SET workspace_id = (SELECT current_workspace_id FROM users WHERE ...)` solo en NULL). Sin invitaciones, roles, selector ni billing. Tests en `tests/Feature/WorkspaceOwnershipTest.php`.
+Estrategia: migraciones aditivas, sin borrar `user_id` ni datos; `UserObserver::created` + `WorkspaceService::ensureForUser()` (idempotente) para altas; backfill en migracion para cuentas y recursos existentes (`UPDATE ... SET workspace_id = (SELECT current_workspace_id FROM users WHERE ...)` solo en NULL). Tests en `tests/Feature/WorkspaceOwnershipTest.php`.
+
+## Colaboracion (Issue #5)
+
+`workspace_memberships`: `workspace_id` + `user_id` + `role` (`owner/admin/member`), unique por pareja. Todo workspace conserva un owner (backfill desde `workspaces.user_id`). `workspace_invitations`: email, rol, hash SHA-256 del token (plano de 64 caracteres mostrado una sola vez), caducidad de 7 dias y estados `pending/accepted/revoked/expired`.
+
+La numeracion comercial (`quote_number`, `invoice_number`) es por workspace con uniques `(workspace_id, numero)`. `users.current_workspace_id` siempre apunta a un workspace con membership (reparacion al login, en `/user`, al aceptar y al retirar; `PUT /workspace/current` solo entre memberships). Sin selector general visible: la UI solo gestiona miembros del estudio actual.
+
+La numeracion comercial (`quote_number`, `invoice_number`) es por workspace con uniques `(workspace_id, numero)`. `users.current_workspace_id` siempre apunta a un workspace con membership (reparacion al login, en `/user`, al aceptar y al retirar; `PUT /workspace/current` solo entre memberships).
 
 ## Tablas de la fase 9
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
+use App\Models\Session;
 use Illuminate\Support\Facades\DB;
 
 class ChecklistService
@@ -20,8 +21,13 @@ class ChecklistService
     public function createWithTemplate(int $userId, array $attributes): Checklist
     {
         return DB::transaction(function () use ($userId, $attributes): Checklist {
+            $session = isset($attributes['session_id'])
+                ? Session::query()->find($attributes['session_id'])
+                : null;
+
             $checklist = Checklist::create([
                 'user_id' => $userId,
+                'workspace_id' => $session?->workspace_id,
                 'session_id' => $attributes['session_id'] ?? null,
                 'name' => $attributes['name'],
                 'type' => $attributes['type'],
@@ -43,6 +49,7 @@ class ChecklistService
         return DB::transaction(function () use ($checklist): Checklist {
             $copy = Checklist::create([
                 'user_id' => $checklist->user_id,
+                'workspace_id' => $checklist->workspace_id,
                 'session_id' => $checklist->session_id,
                 'name' => $checklist->name.' (copia)',
                 'type' => $checklist->type,

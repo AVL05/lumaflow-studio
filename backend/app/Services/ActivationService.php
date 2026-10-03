@@ -19,9 +19,9 @@ class ActivationService
         ];
 
         $completedWork = Delivery::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->whereIn('status', ['delivered', 'approved'])
-            ->exists() || Session::query()->ownedBy($user->id)->where('status', 'delivered')->exists();
+            ->exists() || Session::query()->accessibleBy($user)->where('status', 'delivered')->exists();
         $bookingReady = $user->bookings_enabled_at !== null;
 
         return [

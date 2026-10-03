@@ -46,5 +46,15 @@ class E2ESeeder extends Seeder
             'studio_slug' => 'estudio-e2e-acceso',
             'password' => $password,
         ]);
+
+        // El recorrido del estudio compartido invita a una cuenta ya operativa
+        // para no consumir los limites de registro/verificacion del backend.
+        User::factory()->create([
+            'name' => 'Estudio E2E Invitado',
+            'email' => (string) env('E2E_GUEST_EMAIL', 'e2e.invitado@lumaflow.test'),
+            'studio_name' => 'Estudio E2E Invitado',
+            'studio_slug' => 'estudio-e2e-invitado',
+            'password' => $password,
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -11,10 +12,10 @@ use Illuminate\Support\Facades\DB;
  */
 class TaskSummaryService
 {
-    public function forUser(int $userId): array
+    public function forUser(User $user): array
     {
         $totals = Task::query()
-            ->ownedBy($userId)
+            ->accessibleBy($user)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
@@ -26,9 +27,9 @@ class TaskSummaryService
                 ->map(fn (string $status) => ['status' => $status, 'total' => (int) ($totals[$status] ?? 0)])
                 ->values()
                 ->all(),
-            'open' => Task::query()->ownedBy($userId)->open()->count(),
-            'overdue' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', '<', $today)->count(),
-            'dueToday' => Task::query()->ownedBy($userId)->open()->whereDate('due_date', $today)->count(),
+            'open' => Task::query()->accessibleBy($user)->open()->count(),
+            'overdue' => Task::query()->accessibleBy($user)->open()->whereDate('due_date', '<', $today)->count(),
+            'dueToday' => Task::query()->accessibleBy($user)->open()->whereDate('due_date', $today)->count(),
         ];
     }
 }

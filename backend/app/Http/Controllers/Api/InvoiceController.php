@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Quote;
 use App\Services\CommercialDocumentService;
 use App\Services\JobTransitionService;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
@@ -18,9 +19,9 @@ class InvoiceController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        Invoice::query()->ownedBy(request()->user()->id)->whereIn('status', ['draft', 'sent'])
+        Invoice::query()->accessibleBy(request()->user())->whereIn('status', ['draft', 'sent'])
             ->whereNotNull('due_date')->where('due_date', '<', now()->toDateString())->update(['status' => 'overdue']);
-        $invoices = Invoice::query()->ownedBy(request()->user()->id)->with(['client', 'session'])
+        $invoices = Invoice::query()->accessibleBy(request()->user())->with(['client', 'session'])
             ->when(request('status'), fn ($query, $status) => $query->where('status', $status))
             ->orderByDesc('issue_date')->paginate(min((int) request('per_page', 12), 48));
 
@@ -30,12 +31,12 @@ class InvoiceController extends Controller
     public function store(Request $request): InvoiceResource
     {
         $data = $request->validate([
-            'quote_id' => ['required', Rule::exists('quotes', 'id')->where('user_id', $request->user()->id)],
+            'quote_id' => ['required', Rule::exists('quotes', 'id')->whereIn('workspace_id', $request->user()->workspaceIds())],
             'issue_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
-        $quote = Quote::query()->ownedBy($request->user()->id)->findOrFail($data['quote_id']);
+        $quote = Quote::query()->accessibleBy($request->user())->findOrFail($data['quote_id']);
 
         return new InvoiceResource($this->documents->createInvoice($request->user(), $quote, $data));
     }
@@ -69,6 +70,6 @@ class InvoiceController extends Controller
 
     private function ensureOwnership(Invoice $invoice): void
     {
-        abort_unless($invoice->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $invoice);
     }
 }

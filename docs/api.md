@@ -41,6 +41,22 @@ Los recursos de producto requieren email verificado y onboarding completado. Una
 
 Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, links, meta}`. Los recursos ajenos responden **404, no 403**.
 
+La frontera de autorizacion es la **membership del workspace** (`WorkspaceAuthorizer`): un usuario accede a un recurso solo si pertenece a su workspace, aunque no sea quien lo creo. `user_id` se conserva como creador/compatibilidad. Las notificaciones siguen siendo bandeja personal por `user_id`.
+
+### Estudio compartido
+
+| Metodo | Ruta | Quien | Notas |
+|---|---|---|---|
+| GET | `/workspace/members` | miembro+ | Miembros del workspace actual con rol |
+| PUT | `/workspace/current` | miembro+ | Cambia el workspace actual (solo con membership, ajeno → 404) |
+| DELETE | `/workspace/members/{user}` | segun reglas | Owner retira admin/member; admin retira member; member nada |
+| GET | `/workspace/invitations` | owner/admin | Pendientes del workspace actual |
+| POST | `/workspace/invitations` | owner/admin | `{email, role: admin\|member}`; owner invita admin/member, admin solo member. Devuelve el token una sola vez en `meta.token` |
+| DELETE | `/workspace/invitations/{invitation}` | owner/admin | Revoca pendientes |
+| POST | `/workspace/invitations/accept` | miembro potencial | `{token}`; crea la membership una sola vez, exige email coincidente |
+
+Permisos: **owner** accede, lista, invita (admin/member), revoca y retira; **admin** accede, lista, invita (member), revoca y retira member (nunca al owner, sin auto-elevacion); **member** trabaja con los recursos sin administrar miembros. Invitaciones con token aleatorio de 64 caracteres (hash SHA-256 en base), caducidad de 7 dias, un solo uso y estados `pending/accepted/revoked/expired`. El email de aviso queda como follow-up: el token se comparte desde la UI de configuracion.
+
 | Recurso | Rutas | Filtros de `index` |
 |---|---|---|
 | Jobs | `apiResource /jobs`, `GET /jobs/workflows` | `search`, `status`, `specialty` |

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LocationRequest;
 use App\Http\Resources\LocationResource;
 use App\Models\Location;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class LocationController extends Controller
@@ -19,7 +20,7 @@ class LocationController extends Controller
         $radius = request()->filled('radius_km') ? (float) request('radius_km') : null;
 
         $locations = Location::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->withCount('sessions')
             ->search(request('search'))
             ->city(request('city'))
@@ -67,6 +68,6 @@ class LocationController extends Controller
 
     private function ensureOwnership(Location $location): void
     {
-        abort_unless($location->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $location);
     }
 }

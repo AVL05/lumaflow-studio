@@ -57,13 +57,13 @@ class CalendarService
             'task' => Task::query(),
         };
 
-        return $query->ownedBy($user->id)->findOrFail($id);
+        return $query->accessibleBy($user)->findOrFail($id);
     }
 
     private function sessions(User $user, string $from, string $to): array
     {
         return Session::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->with('location:id,name,city')
             ->whereBetween('date', [$from, $to])
             ->get()
@@ -87,7 +87,7 @@ class CalendarService
     private function deliveries(User $user, string $from, string $to): array
     {
         return Delivery::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->with('client:id,name')
             ->whereNotNull('delivery_date')
             ->whereBetween('delivery_date', [$from, $to])
@@ -108,7 +108,7 @@ class CalendarService
     private function tasks(User $user, string $from, string $to): array
     {
         return Task::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->with(['session:id,name', 'client:id,name'])
             ->whereNotNull('due_date')
             ->whereBetween('due_date', [$from, $to])

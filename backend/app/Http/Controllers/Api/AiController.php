@@ -18,6 +18,7 @@ use App\Services\OllamaService;
 use App\Services\PromptBuilderService;
 use App\Services\RecommendationService;
 use App\Services\SessionPlannerService;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
@@ -92,7 +93,7 @@ class AiController extends Controller
     public function sessionPlan(AiSessionPlanRequest $request): AiSessionPlanResource|JsonResponse
     {
         $session = Session::query()
-            ->ownedBy($request->user()->id)
+            ->accessibleBy($request->user())
             ->findOrFail($request->integer('session_id'));
 
         try {
@@ -119,7 +120,7 @@ class AiController extends Controller
     {
         return AiConversationResource::collection(
             AiConversation::query()
-                ->ownedBy(request()->user()->id)
+                ->accessibleBy(request()->user())
                 ->search(request('search'))
                 ->withCount('messages')
                 ->orderByDesc('last_message_at')
@@ -155,7 +156,7 @@ class AiController extends Controller
     {
         if ($request->filled('conversation_id')) {
             return AiConversation::query()
-                ->ownedBy($request->user()->id)
+                ->accessibleBy($request->user())
                 ->findOrFail($request->integer('conversation_id'));
         }
 
@@ -167,6 +168,6 @@ class AiController extends Controller
 
     private function ensureConversationOwnership(AiConversation $conversation): void
     {
-        abort_unless($conversation->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $conversation);
     }
 }

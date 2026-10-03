@@ -23,7 +23,7 @@ class TaskController extends Controller
     /** Totales agregados para las tarjetas de la pagina de tareas. */
     public function summary(): JsonResponse
     {
-        return response()->json(['data' => $this->summaries->forUser(request()->user()->id)]);
+        return response()->json(['data' => $this->summaries->forUser(request()->user())]);
     }
 
     public function index(): AnonymousResourceCollection
@@ -32,7 +32,7 @@ class TaskController extends Controller
         $direction = request('direction') === 'desc' ? 'desc' : 'asc';
 
         $tasks = Task::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->with(['session:id,name', 'client:id,name'])
             ->search(request('search'))
             ->status(request('status'))

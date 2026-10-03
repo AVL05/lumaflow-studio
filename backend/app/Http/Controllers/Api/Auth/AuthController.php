@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\WorkspaceService;
 use App\Support\AuditLog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -55,6 +56,7 @@ class AuthController extends Controller
         // Sesion unica: emitir un token nuevo invalida los anteriores.
         $user->tokens()->delete();
         AuditLog::authSucceeded('login', $user->id);
+        app(WorkspaceService::class)->ensureCurrentWorkspace($user);
 
         return response()->json([
             'user' => new UserResource($user),
@@ -105,6 +107,11 @@ class AuthController extends Controller
 
     public function user(): UserResource
     {
-        return new UserResource(request()->user());
+        $user = request()->user();
+
+        // Repara el workspace actual si la membership se perdio (Issue #5).
+        app(WorkspaceService::class)->ensureCurrentWorkspace($user);
+
+        return new UserResource($user->refresh());
     }
 }

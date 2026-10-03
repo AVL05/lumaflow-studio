@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GearItemRequest;
 use App\Http\Resources\GearItemResource;
 use App\Models\GearItem;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GearItemController extends Controller
@@ -17,7 +18,7 @@ class GearItemController extends Controller
 
         return GearItemResource::collection(
             GearItem::query()
-                ->ownedBy(request()->user()->id)
+                ->accessibleBy(request()->user())
                 ->search(request('search'))
                 ->category(request('category'))
                 ->favorites(request('favorites'))
@@ -56,6 +57,6 @@ class GearItemController extends Controller
 
     private function ensureOwnership(GearItem $gearItem): void
     {
-        abort_unless($gearItem->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $gearItem);
     }
 }

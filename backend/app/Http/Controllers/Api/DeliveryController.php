@@ -10,6 +10,7 @@ use App\Models\Delivery;
 use App\Services\ActivityLogger;
 use App\Services\JobTransitionService;
 use App\Services\NotificationService;
+use App\Services\WorkspaceAuthorizer;
 use App\Support\AuditLog;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Mail;
@@ -29,7 +30,7 @@ class DeliveryController extends Controller
         $direction = request('direction') === 'asc' ? 'asc' : 'desc';
 
         $deliveries = Delivery::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->with(['client', 'session'])
             ->search(request('search'))
             ->status(request('status'))
@@ -113,6 +114,6 @@ class DeliveryController extends Controller
 
     private function ensureOwnership(Delivery $delivery): void
     {
-        abort_unless($delivery->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $delivery);
     }
 }

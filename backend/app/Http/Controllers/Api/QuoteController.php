@@ -8,6 +8,7 @@ use App\Http\Resources\QuoteResource;
 use App\Models\Quote;
 use App\Services\CommercialDocumentService;
 use App\Services\JobTransitionService;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class QuoteController extends Controller
     {
         $sort = in_array(request('sort'), ['issue_date', 'valid_until', 'total', 'status', 'created_at'], true) ? request('sort') : 'created_at';
         $direction = request('direction') === 'asc' ? 'asc' : 'desc';
-        $quotes = Quote::query()->ownedBy(request()->user()->id)
+        $quotes = Quote::query()->accessibleBy(request()->user())
             ->with(['client', 'session', 'items', 'invoice'])->search(request('search'))
             ->when(request('status'), fn ($query, $status) => $query->where('status', $status))
             ->orderBy($sort, $direction)->paginate(min((int) request('per_page', 12), 48));
@@ -81,6 +82,6 @@ class QuoteController extends Controller
 
     private function ensureOwnership(Quote $quote): void
     {
-        abort_unless($quote->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $quote);
     }
 }

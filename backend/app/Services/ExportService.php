@@ -55,12 +55,12 @@ class ExportService
     private function query(string $resource, User $user)
     {
         return match ($resource) {
-            'sessions' => Session::query()->ownedBy($user->id),
-            'clients' => Client::query()->ownedBy($user->id),
-            'deliveries' => Delivery::query()->ownedBy($user->id),
-            'tasks' => Task::query()->ownedBy($user->id),
-            'gear' => GearItem::query()->ownedBy($user->id),
-            'locations' => Location::query()->ownedBy($user->id),
+            'sessions' => Session::query()->accessibleBy($user),
+            'clients' => Client::query()->accessibleBy($user),
+            'deliveries' => Delivery::query()->accessibleBy($user),
+            'tasks' => Task::query()->accessibleBy($user),
+            'gear' => GearItem::query()->accessibleBy($user),
+            'locations' => Location::query()->accessibleBy($user),
         };
     }
 

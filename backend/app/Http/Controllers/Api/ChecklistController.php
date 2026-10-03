@@ -18,7 +18,7 @@ class ChecklistController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $checklists = Checklist::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->with('items')
             ->withCount(['items', 'completedItems'])
             ->when(request('session_id'), fn ($query) => $query->where('session_id', request('session_id')))

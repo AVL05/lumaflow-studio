@@ -88,7 +88,7 @@ class BulkActionService
 
     private function client(User $user, string $resource, array $ids, int $clientId): int
     {
-        Client::query()->ownedBy($user->id)->findOrFail($clientId);
+        Client::query()->accessibleBy($user)->findOrFail($clientId);
 
         return $this->scoped($resource, $user)->whereIn('id', $ids)->update(['client_id' => $clientId]);
     }
@@ -96,12 +96,12 @@ class BulkActionService
     private function scoped(string $resource, User $user): Builder
     {
         return match ($resource) {
-            'sessions' => Session::query()->ownedBy($user->id),
-            'tasks' => Task::query()->ownedBy($user->id),
-            'deliveries' => Delivery::query()->ownedBy($user->id),
-            'clients' => Client::query()->ownedBy($user->id),
-            'gear' => GearItem::query()->ownedBy($user->id),
-            'locations' => Location::query()->ownedBy($user->id),
+            'sessions' => Session::query()->accessibleBy($user),
+            'tasks' => Task::query()->accessibleBy($user),
+            'deliveries' => Delivery::query()->accessibleBy($user),
+            'clients' => Client::query()->accessibleBy($user),
+            'gear' => GearItem::query()->accessibleBy($user),
+            'locations' => Location::query()->accessibleBy($user),
         };
     }
 }

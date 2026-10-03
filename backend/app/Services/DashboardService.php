@@ -28,40 +28,35 @@ class DashboardService
 
     public function forUser(User $user): array
     {
-        $counts = User::query()
-            ->whereKey($user->id)
-            ->withCount(['sessions', 'gearItems', 'locations', 'clients', 'deliveries'])
-            ->firstOrFail();
-
         $sessionsByStatus = Session::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
 
         return [
-            'totalSessions' => $counts->sessions_count,
+            'totalSessions' => Session::query()->accessibleBy($user)->count(),
             'upcomingSessions' => Session::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->where('date', '>=', now()->toDateString())
                 ->orderBy('date')
                 ->orderBy('time')
                 ->limit(6)
                 ->get(),
             'sessionsByStatus' => $this->statusTotals($sessionsByStatus),
-            'totalGear' => $counts->gear_items_count,
-            'totalLocations' => $counts->locations_count,
-            'totalClients' => $counts->clients_count,
-            'activeClients' => Client::query()->ownedBy($user->id)->where('status', 'active')->count(),
-            'pendingDeliveries' => Delivery::query()->ownedBy($user->id)->where('status', 'pending')->count(),
-            'deliveredProjects' => Delivery::query()->ownedBy($user->id)->whereIn('status', ['delivered', 'approved'])->count(),
+            'totalGear' => GearItem::query()->accessibleBy($user)->count(),
+            'totalLocations' => Location::query()->accessibleBy($user)->count(),
+            'totalClients' => Client::query()->accessibleBy($user)->count(),
+            'activeClients' => Client::query()->accessibleBy($user)->where('status', 'active')->count(),
+            'pendingDeliveries' => Delivery::query()->accessibleBy($user)->where('status', 'pending')->count(),
+            'deliveredProjects' => Delivery::query()->accessibleBy($user)->whereIn('status', ['delivered', 'approved'])->count(),
             'latestLocations' => Location::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->latest()
                 ->limit(4)
                 ->get(),
             'favoriteLocations' => Location::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->where('is_favorite', true)
                 ->withCount('sessions')
                 ->orderByDesc('rating')
@@ -69,7 +64,7 @@ class DashboardService
                 ->limit(4)
                 ->get(),
             'topLocationCities' => Location::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->whereNotNull('city')
                 ->select('city', DB::raw('count(*) as total'))
                 ->groupBy('city')
@@ -77,7 +72,7 @@ class DashboardService
                 ->limit(5)
                 ->get(),
             'upcomingSessionsWithLocation' => Session::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->with('location')
                 ->where('date', '>=', now()->toDateString())
                 ->where(function ($query): void {
@@ -87,13 +82,13 @@ class DashboardService
                 ->limit(4)
                 ->get(),
             'recentClients' => Client::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->withCount('deliveries')
                 ->latest()
                 ->limit(4)
                 ->get(),
             'upcomingDeliveries' => Delivery::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->with(['client', 'session'])
                 ->whereNotNull('delivery_date')
                 ->whereDate('delivery_date', '>=', now()->toDateString())
@@ -101,12 +96,12 @@ class DashboardService
                 ->limit(4)
                 ->get(),
             'latestAiAnalysis' => AiAnalysis::query()
-                ->where('user_id', $user->id)
+                ->accessibleBy($user)
                 ->latest()
                 ->first(),
             'ollamaStatus' => $this->ollama->status(),
             'latestAiRecommendations' => AiAnalysis::query()
-                ->where('user_id', $user->id)
+                ->accessibleBy($user)
                 ->latest()
                 ->limit(3)
                 ->get()
@@ -116,37 +111,37 @@ class DashboardService
                     'created_at' => $analysis->created_at?->toISOString(),
                 ]),
             'aiUsage' => [
-                'conversations' => AiConversation::query()->ownedBy($user->id)->count(),
-                'analyses' => AiAnalysis::query()->where('user_id', $user->id)->count(),
-                'sessionPlans' => AiSessionPlan::query()->ownedBy($user->id)->count(),
-                'optimizedSessions' => AiSessionPlan::query()->ownedBy($user->id)->distinct()->count('session_id'),
+                'conversations' => AiConversation::query()->accessibleBy($user)->count(),
+                'analyses' => AiAnalysis::query()->accessibleBy($user)->count(),
+                'sessionPlans' => AiSessionPlan::query()->accessibleBy($user)->count(),
+                'optimizedSessions' => AiSessionPlan::query()->accessibleBy($user)->distinct()->count('session_id'),
             ],
             'latestAiSessionPlans' => AiSessionPlan::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->with('session')
                 ->latest()
                 ->limit(3)
                 ->get(),
             'todayAgenda' => $this->calendar->events($user, now()->toDateString(), now()->toDateString()),
             'pendingTasks' => Task::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->open()
                 ->with(['session:id,name', 'client:id,name'])
                 ->orderByRaw('due_date is null')
                 ->orderBy('due_date')
                 ->limit(6)
                 ->get(),
-            'taskSummary' => $this->taskSummary->forUser($user->id),
+            'taskSummary' => $this->taskSummary->forUser($user),
             'unreadNotifications' => Notification::query()->ownedBy($user->id)->unread()->count(),
-            'monthlyProgress' => $this->monthlyProgress($user->id),
+            'monthlyProgress' => $this->monthlyProgress($user),
             'favoriteGear' => GearItem::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->where('is_favorite', true)
                 ->orderBy('category')
                 ->limit(6)
                 ->get(),
             'timeline' => Activity::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->latest()
                 ->limit(8)
                 ->get(),
@@ -154,12 +149,12 @@ class DashboardService
         ];
     }
 
-    private function monthlyProgress(int $userId): array
+    private function monthlyProgress(User $user): array
     {
         $start = now()->startOfMonth();
         $end = now()->endOfMonth();
 
-        $sessions = Session::query()->ownedBy($userId)->whereBetween('date', [$start, $end]);
+        $sessions = Session::query()->accessibleBy($user)->whereBetween('date', [$start, $end]);
         $total = (clone $sessions)->count();
         $completed = (clone $sessions)->whereIn('status', ['completed', 'delivered'])->count();
 
@@ -168,8 +163,8 @@ class DashboardService
             'sessions' => $total,
             'completedSessions' => $completed,
             'completionRate' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
-            'deliveries' => Delivery::query()->ownedBy($userId)->whereBetween('delivery_date', [$start, $end])->count(),
-            'completedTasks' => Task::query()->ownedBy($userId)->where('status', 'completed')->whereBetween('completed_at', [$start, $end])->count(),
+            'deliveries' => Delivery::query()->accessibleBy($user)->whereBetween('delivery_date', [$start, $end])->count(),
+            'completedTasks' => Task::query()->accessibleBy($user)->where('status', 'completed')->whereBetween('completed_at', [$start, $end])->count(),
         ];
     }
 
