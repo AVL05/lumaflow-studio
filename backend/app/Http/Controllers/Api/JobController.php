@@ -8,6 +8,7 @@ use App\Http\Resources\JobResource;
 use App\Models\Job;
 use App\Services\ActivityLogger;
 use App\Services\JobWorkflowService;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Arr;
@@ -24,7 +25,7 @@ class JobController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $jobs = Job::query()->ownedBy($request->user()->id)->with(['client', 'location'])
+        $jobs = Job::query()->accessibleBy($request->user())->with(['client', 'location'])
             ->withCount(['tasks', 'tasks as open_tasks_count' => fn ($q) => $q->open(), 'sessions', 'deliveries'])
             ->search($request->string('search')->toString())
             ->when($request->status, fn ($q, $status) => $q->where('status', $status))
@@ -92,6 +93,6 @@ class JobController extends Controller
 
     private function ensureOwnership(Request $request, Job $job): void
     {
-        abort_unless($job->user_id === $request->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404($request->user(), $job);
     }
 }

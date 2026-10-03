@@ -3,10 +3,11 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Politica base para recursos con propiedad directa via user_id.
+ * Politica base para recursos del workspace (Issue #5).
  * Devuelve false en lugar de 403 explicito para que el controlador decida
  * el codigo de respuesta (el proyecto responde 404 para no filtrar existencia).
  */
@@ -39,6 +40,6 @@ abstract class OwnedResourcePolicy
 
     protected function owns(User $user, Model $model): bool
     {
-        return (int) $model->getAttribute('user_id') === $user->id;
+        return app(WorkspaceAuthorizer::class)->canAccess($user, $model);
     }
 }

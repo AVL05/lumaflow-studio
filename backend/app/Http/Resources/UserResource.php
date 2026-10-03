@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +27,10 @@ class UserResource extends JsonResource
             'getting_started_completed' => $this->getting_started_completed_at !== null,
             'sample_workspace_activated' => $this->sample_workspace_activated_at !== null,
             'bookings_enabled' => $this->bookings_enabled_at !== null,
+            'current_workspace_id' => $this->current_workspace_id,
+            'workspace_role' => $this->current_workspace_id
+                ? app(WorkspaceAuthorizer::class)->role($this->resource, (int) $this->current_workspace_id)
+                : null,
         ];
     }
 }

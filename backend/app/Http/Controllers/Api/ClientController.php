@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ClientRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ClientController extends Controller
@@ -16,7 +17,7 @@ class ClientController extends Controller
         $direction = request('direction') === 'asc' ? 'asc' : 'desc';
 
         $clients = Client::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->withCount('deliveries')
             ->search(request('search'))
             ->status(request('status'))
@@ -56,6 +57,6 @@ class ClientController extends Controller
 
     private function ensureOwnership(Client $client): void
     {
-        abort_unless($client->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $client);
     }
 }

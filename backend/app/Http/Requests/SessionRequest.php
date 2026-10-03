@@ -15,9 +15,9 @@ class SessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('user_id', $this->user()->id)],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'name' => ['required', 'string', 'max:160'],
-            'location_id' => ['nullable', Rule::exists('locations', 'id')->where('user_id', $this->user()->id)],
+            'location_id' => ['nullable', Rule::exists('locations', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'date' => ['required', 'date'],
             'time' => ['nullable', 'date_format:H:i'],
             'location_name' => ['nullable', 'string', 'max:160'],

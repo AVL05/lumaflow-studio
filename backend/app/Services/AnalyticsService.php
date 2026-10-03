@@ -32,20 +32,20 @@ class AnalyticsService
             'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
             'kpis' => $this->kpis($user, $from, $to),
             'sessionsByMonth' => $this->sessionsByMonth($user, $from, $to),
-            'sessionTypes' => $this->groupCount(Session::query()->ownedBy($user->id)->whereBetween('date', [$from, $to]), 'session_type'),
-            'projectStatus' => $this->groupCount(Delivery::query()->ownedBy($user->id), 'status'),
+            'sessionTypes' => $this->groupCount(Session::query()->accessibleBy($user)->whereBetween('date', [$from, $to]), 'session_type'),
+            'projectStatus' => $this->groupCount(Delivery::query()->accessibleBy($user), 'status'),
             'aiUsage' => $this->aiUsage($user, $from, $to),
-            'clientsByStatus' => $this->groupCount(Client::query()->ownedBy($user->id), 'status'),
-            'tasksByStatus' => $this->groupCount(Task::query()->ownedBy($user->id), 'status'),
+            'clientsByStatus' => $this->groupCount(Client::query()->accessibleBy($user), 'status'),
+            'tasksByStatus' => $this->groupCount(Task::query()->accessibleBy($user), 'status'),
             'topLocations' => $this->topLocations($user),
         ];
     }
 
     private function kpis(User $user, Carbon $from, Carbon $to): array
     {
-        $sessions = Session::query()->ownedBy($user->id)->whereBetween('date', [$from, $to]);
+        $sessions = Session::query()->accessibleBy($user)->whereBetween('date', [$from, $to]);
         $previousFrom = $from->copy()->subDays($from->diffInDays($to) + 1);
-        $previousSessions = Session::query()->ownedBy($user->id)->whereBetween('date', [$previousFrom, $from])->count();
+        $previousSessions = Session::query()->accessibleBy($user)->whereBetween('date', [$previousFrom, $from])->count();
         $currentSessions = (clone $sessions)->count();
 
         return [
@@ -53,19 +53,19 @@ class AnalyticsService
             'sessionsTrend' => $this->trend($currentSessions, $previousSessions),
             'completedSessions' => (clone $sessions)->whereIn('status', ['completed', 'delivered'])->count(),
             'revenue' => (float) Delivery::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->whereIn('status', ['delivered', 'approved'])
                 ->whereBetween('delivery_date', [$from, $to])
                 ->sum('budget'),
             'pipeline' => (float) Delivery::query()
-                ->ownedBy($user->id)
+                ->accessibleBy($user)
                 ->whereIn('status', ['draft', 'pending'])
                 ->sum('budget'),
-            'activeClients' => Client::query()->ownedBy($user->id)->where('status', 'active')->count(),
-            'openTasks' => Task::query()->ownedBy($user->id)->open()->count(),
-            'overdueTasks' => Task::query()->ownedBy($user->id)->open()->whereDate('due_date', '<', now()->toDateString())->count(),
-            'aiInteractions' => AiAnalysis::query()->where('user_id', $user->id)->whereBetween('created_at', [$from, $to])->count()
-                + AiConversation::query()->ownedBy($user->id)->whereBetween('created_at', [$from, $to])->count(),
+            'activeClients' => Client::query()->accessibleBy($user)->where('status', 'active')->count(),
+            'openTasks' => Task::query()->accessibleBy($user)->open()->count(),
+            'overdueTasks' => Task::query()->accessibleBy($user)->open()->whereDate('due_date', '<', now()->toDateString())->count(),
+            'aiInteractions' => AiAnalysis::query()->accessibleBy($user)->whereBetween('created_at', [$from, $to])->count()
+                + AiConversation::query()->accessibleBy($user)->whereBetween('created_at', [$from, $to])->count(),
         ];
     }
 
@@ -81,7 +81,7 @@ class AnalyticsService
     private function sessionsByMonth(User $user, Carbon $from, Carbon $to): array
     {
         $rows = Session::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->whereBetween('date', [$from, $to])
             ->selectRaw("DATE_FORMAT(date, '%Y-%m') as bucket, count(*) as total")
             ->groupBy('bucket')
@@ -92,9 +92,9 @@ class AnalyticsService
 
     private function aiUsage(User $user, Carbon $from, Carbon $to): array
     {
-        $analyses = $this->monthlyCount(AiAnalysis::query()->where('user_id', $user->id), $from, $to);
-        $conversations = $this->monthlyCount(AiConversation::query()->ownedBy($user->id), $from, $to);
-        $plans = $this->monthlyCount(AiSessionPlan::query()->ownedBy($user->id), $from, $to);
+        $analyses = $this->monthlyCount(AiAnalysis::query()->accessibleBy($user), $from, $to);
+        $conversations = $this->monthlyCount(AiConversation::query()->accessibleBy($user), $from, $to);
+        $plans = $this->monthlyCount(AiSessionPlan::query()->accessibleBy($user), $from, $to);
 
         return collect($this->months($from, $to))
             ->map(fn (string $month) => [
@@ -118,7 +118,7 @@ class AnalyticsService
     private function topLocations(User $user): array
     {
         return Location::query()
-            ->ownedBy($user->id)
+            ->accessibleBy($user)
             ->withCount('sessions')
             ->orderByDesc('sessions_count')
             ->orderByDesc('rating')

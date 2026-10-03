@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\WorkspaceAuthorizer;
 use App\Services\WorkspaceService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,15 @@ trait BelongsToWorkspace
     public function scopeInWorkspace($query, ?int $workspaceId)
     {
         return $query->when($workspaceId, fn ($builder) => $builder->where('workspace_id', $workspaceId));
+    }
+
+    /**
+     * Frontera de lectura del Issue #5: solo workspaces con membership.
+     * Sustituye a `ownedBy()` en listados de recursos compartidos.
+     */
+    public function scopeAccessibleBy($query, User $user)
+    {
+        return $query->whereIn('workspace_id', app(WorkspaceAuthorizer::class)->workspaceIds($user));
     }
 
     protected static function bootBelongsToWorkspace(): void

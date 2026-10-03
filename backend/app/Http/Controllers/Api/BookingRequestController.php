@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingRequestResource;
 use App\Http\Resources\ClientResource;
 use App\Models\BookingRequest;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,7 @@ class BookingRequestController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $bookings = BookingRequest::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->status(request('status'))
             ->latest()
             ->paginate(min((int) request('per_page', 20), 50));
@@ -64,6 +65,6 @@ class BookingRequestController extends Controller
 
     private function ensureOwnership(BookingRequest $bookingRequest): void
     {
-        abort_unless($bookingRequest->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $bookingRequest);
     }
 }

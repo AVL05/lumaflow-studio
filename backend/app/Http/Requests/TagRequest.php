@@ -26,7 +26,7 @@ class TagRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:80'],
-            'slug' => ['required', 'string', 'max:100', Rule::unique('tags', 'slug')->where('user_id', $this->user()->id)->ignore($tagId)],
+            'slug' => ['required', 'string', 'max:100', Rule::unique('tags', 'slug')->whereIn('workspace_id', $this->user()->workspaceIds())->ignore($tagId)],
             'color' => ['required', 'string', 'max:20'],
         ];
     }

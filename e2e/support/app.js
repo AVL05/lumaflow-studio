@@ -18,8 +18,11 @@ export async function apiRequest(page, method, path, data) {
 
   return page.request.fetch(`${apiUrl}${path}`, {
     method,
-    headers: authHeaders(token),
-    ...(data ? { data } : {}),
+    headers: {
+      ...authHeaders(token),
+      ...(data ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(data ? { data: JSON.stringify(data) } : {}),
   });
 }
 

@@ -16,9 +16,9 @@ class TaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('user_id', $this->user()->id)],
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('user_id', $this->user()->id)],
-            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('user_id', $this->user()->id)],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'client_id' => ['nullable', Rule::exists('clients', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:3000'],
             'priority' => ['required', Rule::in(Task::PRIORITIES)],

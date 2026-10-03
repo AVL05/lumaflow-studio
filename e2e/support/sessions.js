@@ -12,6 +12,7 @@ import { signIn } from "./app.js";
 const reusableAccounts = {
   owner: accounts.owner,
   outsider: accounts.outsider,
+  guest: accounts.guest,
 };
 
 /**

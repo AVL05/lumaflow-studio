@@ -39,6 +39,13 @@ export const test = base.extend({
     await use(page);
     await context.close();
   },
+  /** Cuenta invitada al estudio compartido (recorrido de memberships). */
+  guestPage: async ({ browser }, use) => {
+    const { context, page } = await openStudioPage(browser, "guest");
+
+    await use(page);
+    await context.close();
+  },
   /** Ventana publica sin sesion, para los portales de entrega. */
   visitorPage: async ({ browser }, use) => {
     const context = await browser.newContext();

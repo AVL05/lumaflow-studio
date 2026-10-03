@@ -34,6 +34,8 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SystemController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\WorkspaceInvitationController;
+use App\Http\Controllers\Api\WorkspaceMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
@@ -143,6 +145,15 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
 
         Route::get('/search', SearchController::class);
         Route::get('/analytics', AnalyticsController::class);
+
+        // Estudio compartido (Issue #5): miembros e invitaciones del workspace actual.
+        Route::get('/workspace/members', [WorkspaceMemberController::class, 'index']);
+        Route::put('/workspace/current', [WorkspaceMemberController::class, 'updateCurrent']);
+        Route::delete('/workspace/members/{user}', [WorkspaceMemberController::class, 'destroy']);
+        Route::get('/workspace/invitations', [WorkspaceInvitationController::class, 'index']);
+        Route::post('/workspace/invitations', [WorkspaceInvitationController::class, 'store']);
+        Route::delete('/workspace/invitations/{invitation}', [WorkspaceInvitationController::class, 'destroy']);
+        Route::post('/workspace/invitations/accept', [WorkspaceInvitationController::class, 'accept']);
 
         Route::post('/bulk-actions', BulkActionController::class);
         Route::match(['get', 'post'], '/exports/{resource}', ExportController::class);

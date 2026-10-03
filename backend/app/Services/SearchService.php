@@ -64,25 +64,25 @@ class SearchService
     private function resolve(string $group, User $user, string $term, int $limit): array
     {
         return match ($group) {
-            'jobs' => Job::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'jobs' => Job::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Job $item) => $this->item('jobs', $item->id, $item->title, $item->event_date?->toDateString(), "/app/jobs/{$item->id}", $item->status))->all(),
 
-            'sessions' => Session::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'sessions' => Session::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Session $item) => $this->item('sessions', $item->id, $item->name, $item->client_name ?? $item->location_name, '/app/sessions', $item->status))->all(),
 
-            'clients' => Client::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'clients' => Client::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Client $item) => $this->item('clients', $item->id, $item->name, $item->company ?? $item->email, "/app/clients/{$item->id}", $item->status))->all(),
 
-            'gear' => GearItem::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'gear' => GearItem::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (GearItem $item) => $this->item('gear', $item->id, $item->name, trim(($item->brand ?? '').' '.($item->model ?? '')), '/app/gear', $item->category))->all(),
 
-            'locations' => Location::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'locations' => Location::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Location $item) => $this->item('locations', $item->id, $item->name, trim(($item->city ?? '').' '.($item->country ?? '')), "/app/locations/{$item->id}", $item->type))->all(),
 
-            'tasks' => Task::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'tasks' => Task::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Task $item) => $this->item('tasks', $item->id, $item->title, $item->due_date?->toDateString(), '/app/tasks', $item->status))->all(),
 
-            'deliveries' => Delivery::query()->ownedBy($user->id)->search($term)->limit($limit)->get()
+            'deliveries' => Delivery::query()->accessibleBy($user)->search($term)->limit($limit)->get()
                 ->map(fn (Delivery $item) => $this->item('deliveries', $item->id, $item->title, $item->delivery_date?->toDateString(), "/app/deliveries/{$item->id}", $item->status))->all(),
         };
     }

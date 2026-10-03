@@ -15,7 +15,7 @@ class PresetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'gear_item_id' => ['nullable', Rule::exists('gear_items', 'id')->where('user_id', $this->user()->id)],
+            'gear_item_id' => ['nullable', Rule::exists('gear_items', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'name' => ['required', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:80'],
             'iso' => ['nullable', 'string', 'max:20'],

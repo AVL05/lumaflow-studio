@@ -15,9 +15,9 @@ class DeliveryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('user_id', $this->user()->id)],
-            'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', $this->user()->id)],
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('user_id', $this->user()->id)],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'client_id' => ['required', Rule::exists('clients', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
             'title' => ['required', 'string', 'max:180'],
             'status' => ['required', Rule::in(['draft', 'pending', 'delivered', 'approved', 'archived'])],
             'budget' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],

@@ -30,6 +30,7 @@ class JobWorkflowService
         foreach ($template['tasks'] as $position => $title) {
             $job->tasks()->create([
                 'user_id' => $job->user_id,
+                'workspace_id' => $job->workspace_id,
                 'client_id' => $job->client_id,
                 'title' => $title,
                 'priority' => 'medium',

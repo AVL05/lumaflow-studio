@@ -9,6 +9,7 @@ use App\Models\Session;
 use App\Services\ActivityLogger;
 use App\Services\JobTransitionService;
 use App\Services\NotificationService;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SessionController extends Controller
@@ -25,7 +26,7 @@ class SessionController extends Controller
         $direction = request('direction') === 'asc' ? 'asc' : 'desc';
 
         $sessions = Session::query()
-            ->ownedBy(request()->user()->id)
+            ->accessibleBy(request()->user())
             ->search(request('search'))
             ->status(request('status'))
             ->type(request('type'))
@@ -89,6 +90,6 @@ class SessionController extends Controller
 
     private function ensureOwnership(Session $session): void
     {
-        abort_unless($session->user_id === request()->user()->id, 404);
+        app(WorkspaceAuthorizer::class)->requireAccessOr404(request()->user(), $session);
     }
 }

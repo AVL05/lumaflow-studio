@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
+use App\Services\WorkspaceAuthorizer;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -144,6 +145,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function workspaces(): HasMany
     {
         return $this->hasMany(Workspace::class);
+    }
+
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(WorkspaceMembership::class);
+    }
+
+    /** @return int[] Workspaces donde el usuario tiene membership valida. */
+    public function workspaceIds(): array
+    {
+        return app(WorkspaceAuthorizer::class)->workspaceIds($this);
     }
 
     public function sendPasswordResetNotification($token): void
