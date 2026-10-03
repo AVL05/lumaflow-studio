@@ -49,7 +49,10 @@ export function WorkspaceMembers({ currentUserId, currentRole }) {
       {loading ? <p className="mt-4 text-sm text-stone-400">Cargando miembros…</p> : null}
       {!loading && error ? <ErrorState message={error} onRetry={reload} /> : null}
       {!loading && !error && feedback ? (
-        <p role="status" className="mt-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+        <p
+          role="status"
+          className="mt-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-sm text-emerald-200"
+        >
           {feedback}
         </p>
       ) : null}
@@ -61,11 +64,16 @@ export function WorkspaceMembers({ currentUserId, currentRole }) {
       {!loading && !error && members.length > 0 ? (
         <ul className="mt-4 divide-y divide-white/5">
           {members.map((member) => (
-            <li key={member.user_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <li
+              key={member.user_id}
+              className="flex flex-wrap items-center justify-between gap-3 py-3"
+            >
               <div>
                 <p className="text-sm font-semibold text-stone-100">
                   {member.name}
-                  {member.user_id === currentUserId ? <span className="ml-2 text-xs text-stone-500">(tú)</span> : null}
+                  {member.user_id === currentUserId ? (
+                    <span className="ml-2 text-xs text-stone-500">(tú)</span>
+                  ) : null}
                 </p>
                 <p className="text-xs text-stone-500">{member.email}</p>
               </div>
@@ -97,7 +105,10 @@ export function WorkspaceMembers({ currentUserId, currentRole }) {
           ) : (
             <ul className="mt-2 divide-y divide-white/5">
               {invitations.map((invitation) => (
-                <li key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                <li
+                  key={invitation.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-2"
+                >
                   <p className="text-sm text-stone-300">
                     {invitation.email}
                     <span className="ml-2 text-xs text-stone-500">
@@ -153,7 +164,10 @@ export function WorkspaceMembers({ currentUserId, currentRole }) {
       ) : null}
 
       {!loading && !error ? (
-        <form onSubmit={onAccept} className="mt-5 grid gap-3 border-t border-white/5 pt-5 sm:grid-cols-[1fr_auto]">
+        <form
+          onSubmit={onAccept}
+          className="mt-5 grid gap-3 border-t border-white/5 pt-5 sm:grid-cols-[1fr_auto]"
+        >
           <label className="block text-sm text-stone-300">
             ¿Tienes un código de invitación? Pégalo aquí
             <Input

@@ -73,7 +73,10 @@ describe("useWorkspaceMembers", () => {
     });
 
     expect(ok).toBe(true);
-    expect(workspacesApi.invite).toHaveBeenCalledWith({ email: "nueva@estudio.es", role: "member" });
+    expect(workspacesApi.invite).toHaveBeenCalledWith({
+      email: "nueva@estudio.es",
+      role: "member",
+    });
     expect(result.current.lastToken).toBe("secreto");
     expect(result.current.feedback).toMatch(/nueva@estudio.es/);
   });

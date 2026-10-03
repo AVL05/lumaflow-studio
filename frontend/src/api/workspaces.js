@@ -8,5 +8,6 @@ export const workspacesApi = {
   invite: (payload) => apiClient.post("/workspace/invitations", payload).then((res) => res.data),
   revokeInvitation: (id) => apiClient.delete(`/workspace/invitations/${id}`),
   removeMember: (userId) => apiClient.delete(`/workspace/members/${userId}`),
-  accept: (token) => apiClient.post("/workspace/invitations/accept", { token }).then((res) => res.data.data),
+  accept: (token) =>
+    apiClient.post("/workspace/invitations/accept", { token }).then((res) => res.data.data),
 };
