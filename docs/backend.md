@@ -38,7 +38,7 @@ backend/app/
 | `NotificationService` | Notificaciones persistidas. `User::notifications()` sobrescribe deliberadamente la relacion de `Notifiable`, que el proyecto no usa. |
 | `CalendarService` | Normaliza sesiones, entregas y tareas al shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo. |
 | `SearchService` | Busqueda unificada por grupos, con limite por grupo. |
-| `AnalyticsService` | KPIs y series. SQL exclusivo de MySQL. |
+| `AnalyticsService` | KPIs y series. Buckets mensuales portables (MySQL `DATE_FORMAT`, SQLite `strftime`). Resultado agregado cacheado por `AnalyticsCache`. |
 | `BulkActionService` | `MATRIX` define que accion admite cada recurso; es la fuente de verdad de la validacion. |
 | `ExportService` | `COLUMNS` define que se exporta. CSV en streaming, JSON como adjunto. |
 | `ChecklistService` | Plantillas, duplicado, reordenacion transaccional. |

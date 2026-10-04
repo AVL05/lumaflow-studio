@@ -1,6 +1,6 @@
 # Base de datos
 
-MySQL 8, `utf8mb4_unicode_ci`. Motor unico soportado: la analitica usa `DATE_FORMAT`.
+MySQL 8, `utf8mb4_unicode_ci`. Motor de produccion: la analitica agrupa por mes con `DATE_FORMAT` en MySQL y `strftime` equivalente en SQLite (tests/E2E), con identica semantica `YYYY-MM`.
 
 ## Migraciones
 

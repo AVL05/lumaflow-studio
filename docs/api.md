@@ -133,8 +133,20 @@ Auditoría mínima: timestamps de envío/decisión/uso y comentario de rechazo. 
 | PATCH | `/notifications/read-all`, `/notifications/{notification}/read` | |
 | DELETE | `/notifications/clear` (`only=read`), `/notifications/{notification}` | |
 | GET | `/search` | `q` (min 2), `groups`, `per_group`. Resultados agrupados |
-| GET | `/analytics` | `from`, `to`. KPIs y series |
+| GET | `/analytics` | `from`, `to`. KPIs y series (contrato sin cambios; respuesta agregada cacheada, ver nota) |
 | POST | `/bulk-actions` | `{resource, action, ids, ...payload}` |
+
+### Caché de analytics
+
+La base de datos es canónica. `GET /api/analytics` cachea el agregado final en `AnalyticsCache`: miss calcula y guarda, hit devuelve, mutación relevante invalida y la siguiente lectura recalcula. Sin cambios de JSON, métricas, filtros ni comportamiento.
+
+- Key: `lumaflow:analytics:v1:ws:{ids-ordenados}:{from}:{to}` (rango determinista `YYYY-MM-DD`). Sin claves globales: dos workspaces nunca comparten datos.
+- Alcance: memberships del usuario (`accessibleBy`, misma semántica que antes, no solo el workspace actual).
+- TTL 300 s configurable (`ANALYTICS_CACHE_TTL`, `config/analytics.php`); funciona con cualquier store de Laravel Cache (tests `array`, local `file/database`), sin Redis obligatorio.
+- Invalidan: sesiones, entregas, clientes, tareas, análisis/planes/conversaciones de IA y localizaciones (únicas entidades consultadas). Quotes, invoices, bookings, jobs, contratos y resto no invalidan porque no alimentan ningún KPI.
+- Mecanismo: `AnalyticsInvalidationObserver` (create/update/delete) con el `workspace_id` de la entidad, sincrónico (el peor caso tras rollback es caché fría, nunca datos erróneos). Sin `Cache::forget` dispersos.
+- Demo: analytics incluye demo como antes (sin filtro `is_demo`); la caché no mezcla nada por sí misma.
+- Limitación conocida: carrera recalcula/muta acotada por TTL, sin locking portable.
 | GET POST | `/exports/{resource}` | `format=csv\|json`, `ids` opcional |
 
 **Acciones masivas soportadas** (`BulkActionService::MATRIX`):
