@@ -109,7 +109,7 @@ class ContractPortalTest extends TestCase
 
     public function test_unknown_revoked_expired_and_draft_links_are_uniform_404(): void
     {
-        $this->getJson('/public/contracts/'.str_repeat('a', 64))->assertNotFound();
+        $this->getJson('/api/public/contracts/'.str_repeat('a', 64))->assertNotFound();
 
         $contract = $this->createContract();
         $this->sendContract($contract['id']);
@@ -126,6 +126,22 @@ class ContractPortalTest extends TestCase
         $draftToken = $this->postJson("/api/contracts/{$draft['id']}/portal")
             ->assertUnprocessable()->json();
         $this->assertNotNull($draftToken);
+    }
+
+    public function test_sent_contract_without_snapshot_has_no_usable_portal(): void
+    {
+        $contract = $this->createContract();
+        $this->sendContract($contract['id']);
+        $token = $this->generateLink($contract['id'])['meta']['token'];
+
+        // Simula un enviado sin snapshot (legado/corrupto): el portal no
+        // debe caer nunca al contenido editable interno.
+        Contract::query()->whereKey($contract['id'])->update(['content_snapshot' => null]);
+
+        $this->getJson("/api/public/contracts/{$token}")->assertNotFound();
+        $this->postJson("/api/public/contracts/{$token}/accept")->assertNotFound();
+        $this->postJson("/api/public/contracts/{$token}/reject")->assertNotFound();
+        $this->assertSame('sent', Contract::query()->find($contract['id'])->status);
     }
 
     public function test_accept_flow_with_idempotency_notification_and_activity(): void

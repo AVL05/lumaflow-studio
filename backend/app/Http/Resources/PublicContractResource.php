@@ -21,8 +21,8 @@ class PublicContractResource extends JsonResource
         return [
             'contract_number' => $contract->contract_number,
             'title' => $contract->title,
-            // Siempre el snapshot congelado al enviar, nunca el borrador vivo.
-            'content' => $contract->content_snapshot ?? $contract->content,
+            // Exclusivamente el snapshot congelado al enviar, nunca el borrador vivo.
+            'content' => $contract->content_snapshot,
             'status' => $contract->status,
             'version' => $contract->version,
             'studio_name' => $contract->user?->studio_name ?? $contract->user?->name,

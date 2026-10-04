@@ -120,6 +120,11 @@ class ContractPortalService
         abort_if(! $contract instanceof Contract
             || $contract->getAttribute('status') === Contract::STATUS_DRAFT, 404);
 
+        // El portal solo muestra el snapshot congelado al enviar: sin
+        // snapshot valido no hay portal utilizable (nunca fallback al
+        // contenido editable interno).
+        abort_if(blank($contract->getAttribute('content_snapshot')), 404);
+
         $link->forceFill(['last_used_at' => now()])->saveQuietly();
 
         return $link->refresh();
