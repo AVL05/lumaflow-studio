@@ -11,6 +11,7 @@ export function ConversationSidebar({
   onSelect,
   onRename,
   onDelete,
+  onClear,
 }) {
   return (
     <aside className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
@@ -45,6 +46,15 @@ export function ConversationSidebar({
           ))
         )}
       </div>
+      {conversations.length > 0 ? (
+        <button
+          type="button"
+          onClick={onClear}
+          className="mt-4 text-xs font-medium text-stone-500 underline decoration-white/20 underline-offset-4 hover:text-red-200"
+        >
+          Borrar historial de este estudio
+        </button>
+      ) : null}
     </aside>
   );
 }
