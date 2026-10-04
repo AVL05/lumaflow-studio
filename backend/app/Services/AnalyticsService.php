@@ -28,17 +28,23 @@ class AnalyticsService
         $to = $to ? Carbon::parse($to)->endOfDay() : Carbon::now()->endOfDay();
         $from = $from ? Carbon::parse($from)->startOfDay() : $to->copy()->subMonths(11)->startOfMonth();
 
-        return [
-            'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
-            'kpis' => $this->kpis($user, $from, $to),
-            'sessionsByMonth' => $this->sessionsByMonth($user, $from, $to),
-            'sessionTypes' => $this->groupCount(Session::query()->accessibleBy($user)->whereBetween('date', [$from, $to]), 'session_type'),
-            'projectStatus' => $this->groupCount(Delivery::query()->accessibleBy($user), 'status'),
-            'aiUsage' => $this->aiUsage($user, $from, $to),
-            'clientsByStatus' => $this->groupCount(Client::query()->accessibleBy($user), 'status'),
-            'tasksByStatus' => $this->groupCount(Task::query()->accessibleBy($user), 'status'),
-            'topLocations' => $this->topLocations($user),
-        ];
+        // La base de datos es canonica: la cache solo evita recalcular.
+        return AnalyticsCache::remember(
+            $user,
+            $from->toDateString(),
+            $to->toDateString(),
+            fn (): array => [
+                'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+                'kpis' => $this->kpis($user, $from, $to),
+                'sessionsByMonth' => $this->sessionsByMonth($user, $from, $to),
+                'sessionTypes' => $this->groupCount(Session::query()->accessibleBy($user)->whereBetween('date', [$from, $to]), 'session_type'),
+                'projectStatus' => $this->groupCount(Delivery::query()->accessibleBy($user), 'status'),
+                'aiUsage' => $this->aiUsage($user, $from, $to),
+                'clientsByStatus' => $this->groupCount(Client::query()->accessibleBy($user), 'status'),
+                'tasksByStatus' => $this->groupCount(Task::query()->accessibleBy($user), 'status'),
+                'topLocations' => $this->topLocations($user),
+            ]
+        );
     }
 
     private function kpis(User $user, Carbon $from, Carbon $to): array
@@ -80,10 +86,11 @@ class AnalyticsService
 
     private function sessionsByMonth(User $user, Carbon $from, Carbon $to): array
     {
+        $bucket = $this->monthBucket('date');
         $rows = Session::query()
             ->accessibleBy($user)
             ->whereBetween('date', [$from, $to])
-            ->selectRaw("DATE_FORMAT(date, '%Y-%m') as bucket, count(*) as total")
+            ->selectRaw("{$bucket} as bucket, count(*) as total")
             ->groupBy('bucket')
             ->pluck('total', 'bucket');
 
@@ -108,11 +115,24 @@ class AnalyticsService
 
     private function monthlyCount($query, Carbon $from, Carbon $to): Collection
     {
+        $bucket = $this->monthBucket('created_at');
+
         return $query
             ->whereBetween('created_at', [$from, $to])
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bucket, count(*) as total")
+            ->selectRaw("{$bucket} as bucket, count(*) as total")
             ->groupBy('bucket')
             ->pluck('total', 'bucket');
+    }
+
+    /**
+     * Buckets mensuales YYYY-MM en el motor activo. MySQL usa DATE_FORMAT;
+     * SQLite (tests/E2E) usa strftime con identica semantica.
+     */
+    private function monthBucket(string $column): string
+    {
+        return DB::getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', {$column})"
+            : "DATE_FORMAT({$column}, '%Y-%m')";
     }
 
     private function topLocations(User $user): array
