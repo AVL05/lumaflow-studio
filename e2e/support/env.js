@@ -82,6 +82,11 @@ export function backendEnv(extra = {}) {
     SESSION_DRIVER: "file",
     QUEUE_CONNECTION: "sync",
     BCRYPT_ROUNDS: "4",
+    // La suite ejecuta once recorridos completos en ~1 min (cientos de
+    // peticiones autenticadas por usuario); sin techo propio agotaria el
+    // budget anti-abuso de produccion (180/min). Produccion no define
+    // esta variable y conserva su valor.
+    API_THROTTLE_PER_MINUTE: "1000",
     ...extra,
   };
 }

@@ -70,7 +70,7 @@ Route::middleware('throttle:30,1')->group(function (): void {
     Route::get('/public/calendar/{token}', [PublicCalendarController::class, 'feed']);
 });
 
-Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
+Route::middleware(['auth:sanctum', 'throttle:'.config('api.throttle_per_minute', 180).',1'])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])

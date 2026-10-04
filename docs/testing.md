@@ -62,6 +62,8 @@ Antes de ejecutar los tests, el `globalSetup`:
 
 `Database\Seeders\E2ESeeder` crea cinco estudios ficticios en el dominio reservado `.test`, ya verificados; cuatro configurados y uno (`e2e.nuevo@lumaflow.test`) sin onboarding para el recorrido de primer valor. Las credenciales viven solo en `e2e/support/accounts.js` y llegan al seeder por variables de entorno, para no duplicarlas en dos lenguajes. Solo se registra por UI una vez por ejecucion (el throttle comparte contador por IP en peticiones no autenticadas): el resto de cuentas llegan sembradas.
 
+La suite ejecuta once recorridos completos en ~1 min, con cientos de peticiones autenticadas por usuario (cada navegacion dispara `AuthContext`, panel y contadores). Para no agotar el budget anti-abuso de produccion (`throttle:180,1`), el backend E2E define `API_THROTTLE_PER_MINUTE=1000` (`e2e/support/env.js`, leido via `config/api.php`). Produccion no define esa variable y conserva 180; `ApiThrottleTest` lo bloquea.
+
 La cuenta de acceso (`e2e.acceso@lumaflow.test`) es independiente a proposito: el backend mantiene una sesion activa por usuario y cada login invalida los tokens anteriores, asi que el recorrido de login no puede usar la misma cuenta que los fixtures reutilizados.
 
 ### Fixtures
