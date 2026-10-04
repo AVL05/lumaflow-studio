@@ -1,4 +1,5 @@
 import axios from "axios";
+import { buildRequestId, extractErrorReference } from "../app/sentry";
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8000/api",
@@ -13,6 +14,8 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  config.headers["X-Request-ID"] ??= buildRequestId();
 
   return config;
 });
@@ -35,5 +38,8 @@ export function getApiError(error, fallback = "No se pudo completar la operacion
     return Object.values(errors).flat().join(" ");
   }
 
-  return error.response?.data?.message ?? fallback;
+  const message = error.response?.data?.message ?? fallback;
+  const reference = extractErrorReference(error);
+
+  return reference ? `${message} (Ref: ${reference})` : message;
 }

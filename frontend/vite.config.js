@@ -4,7 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
+// Release para observabilidad: commit del proveedor cuando existe
+// (Vercel, GitHub Actions), 'unknown' como fallback honesto.
+const appRelease =
+  process.env.VITE_SENTRY_RELEASE ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.GITHUB_SHA ||
+  process.env.RENDER_GIT_COMMIT ||
+  "";
+
 export default defineConfig({
+  define: {
+    __APP_RELEASE__: JSON.stringify(appRelease),
+  },
   plugins: [
     react(),
     tailwindcss(),

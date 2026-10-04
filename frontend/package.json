@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.84",
+    "@sentry/react": "^11.4.0",
     "axios": "^1.18.1",
     "leaflet": "^1.9.4",
     "react": "^19.2.7",
