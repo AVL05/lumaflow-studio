@@ -10,7 +10,9 @@ export const contractsApi = {
   remove: (id) => apiClient.delete(`/contracts/${id}`),
   portal: (id) => apiClient.get(`/contracts/${id}/portal`).then((res) => res.data.data),
   generatePortal: (id, expiresAt) =>
-    apiClient.post(`/contracts/${id}/portal`, { expires_at: expiresAt ?? null }).then((res) => res.data),
+    apiClient
+      .post(`/contracts/${id}/portal`, { expires_at: expiresAt ?? null })
+      .then((res) => res.data),
   regeneratePortal: (id, expiresAt) =>
     apiClient
       .post(`/contracts/${id}/portal/regenerate`, { expires_at: expiresAt ?? null })
