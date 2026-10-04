@@ -18,6 +18,7 @@ class ClientResource extends JsonResource
             'instagram' => $this->instagram,
             'notes' => $this->notes,
             'status' => $this->status,
+            'is_demo' => (bool) $this->is_demo,
             'deliveries_count' => $this->whenCounted('deliveries'),
             'created_at' => $this->created_at?->toISOString(),
         ];

@@ -160,9 +160,9 @@ export function ClientsPage() {
         <ClientSkeleton />
       ) : resource.items.length === 0 ? (
         <EmptyState
-          title="Sin clientes"
-          description="Crea el primer cliente para conectar sesiones y entregas."
-          action={<Button onClick={openCreate}>Crear cliente</Button>}
+          title="Aún no tienes clientes"
+          description="El cliente es el punto de partida: cada trabajo y cada sesión cuelga de un cliente. Crea el primero para empezar."
+          action={<Button onClick={openCreate}>Crear mi primer cliente</Button>}
         />
       ) : (
         <>

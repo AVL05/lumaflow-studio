@@ -9,6 +9,7 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Checkbox } from "../components/ui/Checkbox";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { DemoBadge } from "../components/ui/DemoBadge";
 import { Field } from "../components/ui/Field";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
@@ -181,11 +182,18 @@ export function SessionsPage() {
       {resource.loading ? (
         <SessionSkeleton />
       ) : resource.items.length === 0 ? (
-        <EmptyState
-          title="Sin resultados"
-          description="No hay sesiones que coincidan con los filtros actuales."
-          action={<Button onClick={openCreate}>Crear sesion</Button>}
-        />
+        resource.filters.search || resource.filters.status || resource.filters.type ? (
+          <EmptyState
+            title="Sin resultados"
+            description="No hay sesiones que coincidan con los filtros actuales."
+          />
+        ) : (
+          <EmptyState
+            title="Aún no tienes sesiones"
+            description="La sesión es el día del rodaje: fecha, hora, lugar y cliente. Programa la primera para llenar tu agenda."
+            action={<Button onClick={openCreate}>Programar mi primera sesión</Button>}
+          />
+        )
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -200,7 +208,10 @@ export function SessionsPage() {
                       className="mt-1.5"
                     />
                     <div className="min-w-0">
-                      <h2 className="font-semibold text-stone-50">{session.name}</h2>
+                      <h2 className="font-semibold text-stone-50">
+                        {session.name}
+                        <DemoBadge show={session.is_demo} />
+                      </h2>
                       <p className="mt-1 text-sm text-stone-400">
                         {session.client_name || "Sin cliente"} ·{" "}
                         {session.location?.name || session.location_name || "Sin localizacion"}

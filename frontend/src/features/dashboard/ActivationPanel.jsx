@@ -4,6 +4,8 @@ import { dashboardApi } from "../../api/dashboard";
 import { getApiError } from "../../api/client";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { ErrorState } from "../../components/states/ErrorState";
+import { getNextAction } from "./activation";
 
 export function ActivationPanel({ activation, onRefresh }) {
   const [busy, setBusy] = useState("");
@@ -38,10 +40,17 @@ export function ActivationPanel({ activation, onRefresh }) {
 
   async function copyBookingUrl() {
     if (!activation.booking_url) return;
-    await navigator.clipboard.writeText(activation.booking_url);
+    try {
+      await navigator.clipboard.writeText(activation.booking_url);
+    } catch {
+      window.prompt("Copia tu enlace de reservas:", activation.booking_url);
+      return;
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
+
+  if (!activation) return null;
 
   if (activation.operational) {
     return (
@@ -80,6 +89,8 @@ export function ActivationPanel({ activation, onRefresh }) {
     );
   }
 
+  const nextAction = activation.operational ? null : getNextAction(activation);
+
   return (
     <Card className="p-6 md:p-7">
       <div className="flex flex-col gap-7 xl:flex-row xl:justify-between">
@@ -90,12 +101,27 @@ export function ActivationPanel({ activation, onRefresh }) {
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-50">
             Construye la base operativa de tu estudio
           </h2>
-          <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.07]">
+          <div
+            className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.07]"
+            role="progressbar"
+            aria-valuenow={activation.completed}
+            aria-valuemin={0}
+            aria-valuemax={activation.total}
+            aria-label="Progreso de activación"
+          >
             <div
               className="h-full rounded-full bg-amber-200 transition-[width] duration-500"
               style={{ width: `${(activation.completed / activation.total) * 100}%` }}
             />
           </div>
+          {nextAction ? (
+            <Link
+              to={nextAction.href}
+              className="mt-5 inline-flex rounded-lg bg-amber-200 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-100"
+            >
+              Siguiente paso: {nextAction.label.toLowerCase()}
+            </Link>
+          ) : null}
           {!activation.sample_workspace_activated && activation.completed <= 1 ? (
             <button
               type="button"
@@ -108,7 +134,11 @@ export function ActivationPanel({ activation, onRefresh }) {
                 : "Prefiero explorar con datos de ejemplo"}
             </button>
           ) : null}
-          {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
+          {error ? (
+            <div className="mt-3">
+              <ErrorState message={error} onRetry={() => setError("")} />
+            </div>
+          ) : null}
         </div>
 
         <ol className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2 xl:max-w-2xl">
@@ -128,8 +158,9 @@ export function ActivationPanel({ activation, onRefresh }) {
                 </button>
               ) : (
                 <Link
-                  to={step.completed ? "/app/dashboard" : step.href}
+                  to={step.href}
                   className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] p-3 hover:border-amber-200/25 hover:bg-white/[0.06]"
+                  aria-label={`${step.label}${step.completed ? " (completado, ver)" : ""}`}
                 >
                   <StepMark completed={step.completed} />
                   <span

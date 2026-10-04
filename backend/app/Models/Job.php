@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at'])]
 class Job extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;

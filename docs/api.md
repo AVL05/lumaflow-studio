@@ -21,11 +21,11 @@ Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 ind
 | GET | `/email/verify/{id}/{hash}` | firma temporal | Verifica el email y redirige a la SPA |
 | POST | `/email/verification-notification` | si | Reenvia el enlace, `throttle:6,1` |
 | POST | `/onboarding` | si, email verificado | Guarda estudio, especialidades, pais, moneda y primera prioridad |
-| POST | `/getting-started` | si | Elige `create_first_job`, `sample_workspace` o `import_clients` |
+| POST | `/getting-started` | si | Elige `create_first_job`, `sample_workspace`, `import_clients` o `later` |
 
 Los recursos de producto requieren email verificado y onboarding completado. Una cuenta pendiente puede usar `/user`, `/logout`, el reenvio de verificacion y `/onboarding` cuando corresponda. El enlace de email caduca a los 60 minutos y su firma impide alterar el usuario o el hash.
 
-`sample_workspace` crea de forma idempotente clientes, trabajos, sesiones, tareas, localizacion y entrega ficticios. No genera estados entregados ni activa reservas, por lo que no falsea el hito operativo.
+`sample_workspace` crea de forma idempotente clientes, trabajos, sesiones, tareas, localizacion y entrega ficticios marcados con `is_demo`. No genera estados entregados, no activa reservas y no cuenta como progreso de activación: el checklist solo cuenta recursos reales (`is_demo = false`) y la UI los distingue con la insignia «Ejemplo». No falsea el hito operativo.
 
 ## Salud y sistema
 

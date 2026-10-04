@@ -3,13 +3,17 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { clientStatuses } from "../../utils/catalogs";
+import { DemoBadge } from "../../components/ui/DemoBadge";
 
 export function ClientCard({ client, onEdit, onDelete }) {
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-semibold">{client.name}</h2>
+          <h2 className="font-semibold">
+            {client.name}
+            <DemoBadge show={client.is_demo} />
+          </h2>
           <p className="mt-1 text-sm text-stone-400">
             {client.company || client.email || "Sin empresa/email"}
           </p>

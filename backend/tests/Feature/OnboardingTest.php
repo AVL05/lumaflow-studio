@@ -56,6 +56,23 @@ class OnboardingTest extends TestCase
             ->assertJsonPath('code', 'onboarding_required');
     }
 
+    public function test_onboarding_accepts_empty_specialties(): void
+    {
+        $user = User::factory()->withoutOnboarding()->create();
+
+        $this->actingAs($user)
+            ->postJson('/api/onboarding', [
+                'studio_name' => 'Norte Estudio',
+                'photography_specialties' => [],
+                'country' => 'ES',
+                'currency' => 'EUR',
+                'onboarding_goal' => 'organize_sessions',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.photography_specialties', [])
+            ->assertJsonPath('data.onboarding_completed', true);
+    }
+
     public function test_onboarding_validates_specialties_currency_and_goal(): void
     {
         $user = User::factory()->withoutOnboarding()->create();

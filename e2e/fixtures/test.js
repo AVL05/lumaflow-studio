@@ -46,6 +46,17 @@ export const test = base.extend({
     await use(page);
     await context.close();
   },
+  /** Cuenta nueva a mitad del embudo de onboarding. */
+  newcomerPage: async ({ browser }, use) => {
+    const context = await browser.newContext({ storageState: sessionStateFile("newcomer") });
+    const page = await context.newPage();
+
+    await page.goto("/app/dashboard");
+    await expect(page.getByRole("heading", { name: "¿Cómo se llama tu estudio?" })).toBeVisible();
+
+    await use(page);
+    await context.close();
+  },
   /** Ventana publica sin sesion, para los portales de entrega. */
   visitorPage: async ({ browser }, use) => {
     const context = await browser.newContext();

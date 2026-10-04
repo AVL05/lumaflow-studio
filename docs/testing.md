@@ -60,16 +60,18 @@ Antes de ejecutar los tests, el `globalSetup`:
 2. vacia `backend/storage/logs/laravel.log`, porque el enlace de verificacion de email se lee de ese log (`MAIL_MAILER=log`);
 3. inicia sesion una vez por cuenta reutilizable y guarda el `storageState` de la SPA.
 
-`Database\Seeders\E2ESeeder` crea tres estudios ficticios en el dominio reservado `.test`, ya verificados y configurados. Las credenciales viven solo en `e2e/support/accounts.js` y llegan al seeder por variables de entorno, para no duplicarlas en dos lenguajes.
+`Database\Seeders\E2ESeeder` crea cinco estudios ficticios en el dominio reservado `.test`, ya verificados; cuatro configurados y uno (`e2e.nuevo@lumaflow.test`) sin onboarding para el recorrido de primer valor. Las credenciales viven solo en `e2e/support/accounts.js` y llegan al seeder por variables de entorno, para no duplicarlas en dos lenguajes. Solo se registra por UI una vez por ejecucion (el throttle comparte contador por IP en peticiones no autenticadas): el resto de cuentas llegan sembradas.
 
 La cuenta de acceso (`e2e.acceso@lumaflow.test`) es independiente a proposito: el backend mantiene una sesion activa por usuario y cada login invalida los tokens anteriores, asi que el recorrido de login no puede usar la misma cuenta que los fixtures reutilizados.
 
 ### Fixtures
 
-`e2e/fixtures/test.js` expone tres paginas, cada una en su propio contexto de navegador:
+`e2e/fixtures/test.js` expone estas paginas, cada una en su propio contexto de navegador:
 
 - `ownerPage`: estudio propietario de los recursos que crea el test.
 - `outsiderPage`: segundo estudio, para comprobar aislamiento.
+- `guestPage`: cuenta invitada al estudio compartido.
+- `newcomerPage`: cuenta nueva a mitad del embudo de onboarding.
 - `visitorPage`: ventana sin sesion, para portales publicos.
 
 ### Reglas para escribir tests
@@ -81,7 +83,7 @@ La cuenta de acceso (`e2e.acceso@lumaflow.test`) es independiente a proposito: e
 
 ### Ejecucion en serie
 
-La suite comparte una unica base SQLite, asi que `playwright.config.js` fija `fullyParallel: false` y `workers: 1`. Migrar a una base por test permitiria paralelizar, pero no aporta valor con cinco recorridos.
+La suite comparte una unica base SQLite, asi que `playwright.config.js` fija `fullyParallel: false` y `workers: 1`. Migrar a una base por test permitiria paralelizar, pero no aporta valor con siete recorridos.
 
 ## Integracion en CI
 

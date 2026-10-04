@@ -18,6 +18,7 @@ class DeliveryResource extends JsonResource
             'session' => new SessionResource($this->whenLoaded('session')),
             'title' => $this->title,
             'status' => $this->status,
+            'is_demo' => (bool) $this->is_demo,
             'budget' => $this->budget,
             'payment_status' => $this->payment_status,
             'amount_paid' => $this->amount_paid,
