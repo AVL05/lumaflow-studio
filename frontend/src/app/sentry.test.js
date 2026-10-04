@@ -38,7 +38,9 @@ describe("sentry", () => {
         headers: { authorization: "Bearer x", cookie: "y", "content-type": "application/json" },
         data: { password: "x" },
       },
-      breadcrumbs: { values: [{ data: { url: "https://app.example.com/contract/abc", input: "hola" } }] },
+      breadcrumbs: {
+        values: [{ data: { url: "https://app.example.com/contract/abc", input: "hola" } }],
+      },
       user: { id: 7, email: "a@b.c" },
     });
 

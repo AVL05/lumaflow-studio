@@ -51,7 +51,10 @@ export function sanitizeSentryEvent(event) {
     delete clean.request.cookies;
   }
   if (clean.breadcrumbs) {
-    clean.breadcrumbs = { ...clean.breadcrumbs, values: scrubBreadcrumbs(clean.breadcrumbs.values) };
+    clean.breadcrumbs = {
+      ...clean.breadcrumbs,
+      values: scrubBreadcrumbs(clean.breadcrumbs.values),
+    };
   }
   if (clean.user) clean.user = { id: clean.user.id };
   if (clean.contexts?.trace) {
@@ -140,7 +143,6 @@ export function extractErrorReference(error) {
   const status = error?.response?.status;
   if (typeof status !== "number" || status < 500) return null;
   const headers = error?.response?.headers ?? {};
-  const reference =
-    headers["x-request-id"] ?? headers["X-Request-ID"] ?? error?.reference ?? null;
+  const reference = headers["x-request-id"] ?? headers["X-Request-ID"] ?? error?.reference ?? null;
   return typeof reference === "string" && reference ? reference : null;
 }
