@@ -128,6 +128,9 @@ export function JobDetailPage() {
           <Action to={`/app/quotes?create=1&job_id=${job.id}&client_id=${job.client_id ?? ""}`}>
             Presupuesto
           </Action>
+          <Action to={`/app/contracts?create=1&job_id=${job.id}&client_id=${job.client_id ?? ""}`}>
+            Contrato
+          </Action>
           <Action to={`/app/sessions?create=1&job_id=${job.id}`}>Sesión</Action>
           <Action to={`/app/tasks?create=1&job_id=${job.id}&client_id=${job.client_id ?? ""}`}>
             Tarea
@@ -164,6 +167,20 @@ export function JobDetailPage() {
               Abrir contrato
             </a>
           ) : null}
+          <Collection
+            items={job.contracts}
+            empty="Sin contratos"
+            render={(contract) => (
+              <Link
+                key={contract.id}
+                to="/app/contracts"
+                className="flex justify-between text-sm text-stone-300"
+              >
+                <span>{contract.contract_number}</span>
+                <span>{contract.status}</span>
+              </Link>
+            )}
+          />
           <Collection
             items={job.quotes}
             empty="Sin presupuestos"

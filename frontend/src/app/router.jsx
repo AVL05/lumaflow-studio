@@ -20,6 +20,7 @@ import { LocationsPage } from "../pages/LocationsPage";
 import { LocationDetailPage } from "../pages/LocationDetailPage";
 import { TasksPage } from "../pages/TasksPage";
 import { QuotesPage } from "../pages/QuotesPage";
+import { ContractsPage } from "../pages/ContractsPage";
 import { InvoicesPage } from "../pages/InvoicesPage";
 import { PresetsPage } from "../pages/PresetsPage";
 import { BookingRequestsPage } from "../pages/BookingRequestsPage";
@@ -101,6 +102,7 @@ export const router = createBrowserRouter([
       { path: "deliveries", element: <DeliveriesPage /> },
       { path: "deliveries/:id", element: <DeliveryDetailPage /> },
       { path: "quotes", element: <QuotesPage /> },
+      { path: "contracts", element: <ContractsPage /> },
       { path: "invoices", element: <InvoicesPage /> },
       { path: "booking-requests", element: <BookingRequestsPage /> },
       { path: "locations", element: <LocationsPage /> },

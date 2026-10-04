@@ -116,6 +116,14 @@ export const quoteStatuses = [
   { value: "expired", label: "Caducado", tone: "red" },
 ];
 
+export const contractStatuses = [
+  { value: "draft", label: "Borrador", tone: "neutral" },
+  { value: "sent", label: "Enviado", tone: "warm" },
+  { value: "accepted", label: "Aceptado", tone: "green" },
+  { value: "rejected", label: "Rechazado", tone: "red" },
+  { value: "expired", label: "Caducado", tone: "red" },
+];
+
 export const invoiceStatuses = [
   { value: "draft", label: "Borrador", tone: "neutral" },
   { value: "sent", label: "Enviada", tone: "warm" },

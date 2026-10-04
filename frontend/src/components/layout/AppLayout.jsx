@@ -21,6 +21,7 @@ const navGroups = [
     "Negocio",
     [
       ["Presupuestos", "/app/quotes"],
+      ["Contratos", "/app/contracts"],
       ["Facturas", "/app/invoices"],
       ["Reservas", "/app/booking-requests"],
     ],
