@@ -80,7 +80,7 @@ class JobController extends Controller
     public function destroy(Request $request, Job $job): mixed
     {
         $this->ensureOwnership($request, $job);
-        abort_if($job->sessions()->exists() || $job->quotes()->exists() || $job->deliveries()->exists(), 422, 'No se puede eliminar un trabajo con actividad asociada.');
+        abort_if($job->sessions()->exists() || $job->quotes()->exists() || $job->deliveries()->exists() || $job->contracts()->exists(), 422, 'No se puede eliminar un trabajo con actividad asociada.');
         $job->delete();
 
         return response()->noContent();
@@ -88,7 +88,7 @@ class JobController extends Controller
 
     private function loadJob(Job $job): Job
     {
-        return $job->load(['client', 'location', 'gearItems', 'sessions.location', 'quotes.client', 'quotes.items', 'quotes.invoice', 'invoices.client', 'tasks', 'deliveries.client', 'activities']);
+        return $job->load(['client', 'location', 'gearItems', 'sessions.location', 'quotes.client', 'quotes.items', 'quotes.invoice', 'invoices.client', 'contracts.client', 'tasks', 'deliveries.client', 'activities']);
     }
 
     private function ensureOwnership(Request $request, Job $job): void

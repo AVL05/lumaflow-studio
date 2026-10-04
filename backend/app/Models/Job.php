@@ -78,6 +78,11 @@ class Job extends Model
         return $this->hasMany(Delivery::class);
     }
 
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
+
     public function gearItems(): BelongsToMany
     {
         return $this->belongsToMany(GearItem::class);
