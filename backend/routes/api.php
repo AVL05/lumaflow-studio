@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\ClientImportController;
 use App\Http\Controllers\Api\ContractController;
+use App\Http\Controllers\Api\ContractPortalController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ExportController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PresetController;
 use App\Http\Controllers\Api\Public\PublicBookingController;
 use App\Http\Controllers\Api\Public\PublicCalendarController;
+use App\Http\Controllers\Api\Public\PublicContractController;
 use App\Http\Controllers\Api\Public\PublicDeliveryController;
 use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\ReadyController;
@@ -62,6 +64,9 @@ Route::middleware('throttle:30,1')->group(function (): void {
     Route::get('/public/deliveries/{token}', [PublicDeliveryController::class, 'show']);
     Route::post('/public/deliveries/{token}/approve', [PublicDeliveryController::class, 'approve']);
     Route::post('/public/deliveries/{token}/request-changes', [PublicDeliveryController::class, 'requestChanges']);
+    Route::get('/public/contracts/{token}', [PublicContractController::class, 'show']);
+    Route::post('/public/contracts/{token}/accept', [PublicContractController::class, 'accept']);
+    Route::post('/public/contracts/{token}/reject', [PublicContractController::class, 'reject']);
     Route::get('/public/calendar/{token}', [PublicCalendarController::class, 'feed']);
 });
 
@@ -97,6 +102,10 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
         Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
         Route::apiResource('contracts', ContractController::class);
         Route::patch('/contracts/{contract}/status', [ContractController::class, 'updateStatus']);
+        Route::get('/contracts/{contract}/portal', [ContractPortalController::class, 'show']);
+        Route::post('/contracts/{contract}/portal', [ContractPortalController::class, 'store']);
+        Route::post('/contracts/{contract}/portal/regenerate', [ContractPortalController::class, 'regenerate']);
+        Route::delete('/contracts/{contract}/portal', [ContractPortalController::class, 'destroy']);
         Route::apiResource('presets', PresetController::class)->except('show');
 
         Route::get('/ai/status', [AiController::class, 'status']);

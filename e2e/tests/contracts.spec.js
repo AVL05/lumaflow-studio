@@ -65,8 +65,9 @@ test.describe("contratos", () => {
     expect(locked.status(), "el enviado bloquea el contenido").toBe(422);
 
     await ownerPage.goto("/app/contracts");
-    await expect(ownerPage.getByText(`${contractTitle} v2`)).toBeVisible();
-    await expect(ownerPage.getByLabel(/Estado del contrato/)).toHaveValue("sent");
+    const card = ownerPage.getByRole("article").filter({ hasText: `${contractTitle} v2` });
+    await expect(card.getByText(`${contractTitle} v2`)).toBeVisible();
+    await expect(card.getByLabel(/Estado del contrato/)).toHaveValue("sent");
 
     const accepted = await apiRequest(ownerPage, "PATCH", `/contracts/${contractId}/status`, {
       status: "accepted",

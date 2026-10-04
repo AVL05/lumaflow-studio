@@ -57,6 +57,8 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **Los contratos (`contracts`) son la fuente canónica del acuerdo**: pertenecen al workspace (más creador por compatibilidad), cuelgan de cliente y trabajo con coherencia validada, y su lifecycle vive en `ContractService` con actividad trazada. Los `contract_*` de `photography_jobs` son espejo legacy unidireccional.
 
+**El portal público de contratos (`contract_portal_links`) separa acceso y contenido**: hash de token + caducidad + revocación con historial; el cliente solo ve el snapshot y responde una vez; el estudio gestiona el enlace desde el detalle con las mismas reglas de membership.
+
 **La agregacion ocurre en la base de datos.** `AnalyticsService` agrupa y cuenta en SQL en vez de cargar colecciones en memoria. El coste es acoplarse a MySQL (`DATE_FORMAT`), que es el unico motor soportado.
 
 **La IA principal corre en WebGPU.** La SPA carga WebLLM bajo demanda y ejecuta la inferencia en el navegador. Ollama queda como compatibilidad backend opcional: si no responde, `HealthService` marca el sistema como `degraded`, nunca como `down`.

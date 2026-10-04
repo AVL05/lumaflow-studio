@@ -91,6 +91,20 @@ Los PDF de presupuestos y facturas son documentos descargables autenticados. No 
 - Aceptar sincroniza el espejo legacy del trabajo (`contract_status=signed`, `contract_signed_at`); rechazar marca `declined`. Los campos legacy `contract_*` de `photography_jobs` se conservan por compatibilidad y podrán eliminarse en un Issue posterior; `contract_url` sigue siendo un enlace externo manual.
 - Actividad `created` + `status_changed` sobre el contrato. Sin portal público, firma electrónica ni pagos: llegarán en el #8.
 
+### Portal público de contratos
+
+Enlace opaco por contrato (`/contract/{token}` en la SPA): el token plano de 64 caracteres solo se muestra al generar/regenerar; en base vive su hash SHA-256 con caducidad (30 días por defecto, configurable) y revocación. Regenerar invalida el anterior de inmediato; revocar bloquea todo sin cambiar el estado del contrato.
+
+| Metodo | Ruta | Notas |
+|---|---|---|
+| GET | `/public/contracts/{token}` | Vista del snapshot congelado; uniforme 404 si desconocido, revocado, expirado o borrador |
+| POST | `/public/contracts/{token}/accept` | Solo `sent` → `accepted`; doble envío idempotente (`meta.already_processed`) |
+| POST | `/public/contracts/{token}/reject` | `{message?}` máx. 2000, sin HTML; → `rejected` con comentario visible interno |
+
+El portal expone solo número, título, snapshot, estado, versión, estudio, cliente, servicio, fechas y decisión. Nunca IDs internos, workspace, emails, notas privadas ni tokens. Rate limiting `throttle:30,1` como el resto de superficie pública. La aceptación/rechazo reutiliza `ContractService` (misma máquina de estados), notifica al estudio y registra actividad. Estados terminales: lectura final sin acciones.
+
+Auditoría mínima: timestamps de envío/decisión/uso y comentario de rechazo. Sin IP, user-agent ni fingerprinting. Se registra una aceptación simple, no una firma electrónica certificada.
+
 ### Checklists
 
 | Metodo | Ruta |

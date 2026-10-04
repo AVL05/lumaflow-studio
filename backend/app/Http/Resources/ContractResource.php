@@ -33,6 +33,8 @@ class ContractResource extends JsonResource
                 'total' => $this->quote->total,
             ]),
             'expires_at' => $this->expires_at?->toDateString(),
+            'client_message' => $this->client_message,
+            'client_responded_at' => $this->client_responded_at?->toISOString(),
             'sent_at' => $this->sent_at?->toISOString(),
             'accepted_at' => $this->accepted_at?->toISOString(),
             'rejected_at' => $this->rejected_at?->toISOString(),
