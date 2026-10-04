@@ -66,6 +66,7 @@ Permisos: **owner** accede, lista, invita (admin/member), revoca y retira; **adm
 | Clients | `apiResource /clients` | `search`, `status`, `sort`, `direction` |
 | Deliveries | `apiResource /deliveries` | `search`, `status`, `client_id` |
 | Quotes | `apiResource /quotes`, `PATCH /quotes/{quote}/status`, `GET /quotes/{quote}/pdf` | `search`, `status`, `sort`, `direction` |
+| Contracts | `apiResource /contracts`, `PATCH /contracts/{contract}/status` | `search`, `status`, `job_id`, `sort`, `direction` |
 | Invoices | `GET/POST /invoices`, `PATCH /invoices/{invoice}/status`, `GET /invoices/{invoice}/pdf` | `status` |
 | Presets | `apiResource /presets` sin `show` | `search`, `category` |
 | Tasks | `apiResource /tasks` + `GET /tasks/summary` | `search`, `status`, `priority`, `due_from`, `due_to`, `session_id`, `client_id`, `open` |
@@ -79,6 +80,16 @@ aprobacion. El portal publico (`/public/deliveries/{token}`) muestra el enlace y
 para que el cliente revise en su galeria y vuelva a aprobar o pedir cambios.
 
 Los PDF de presupuestos y facturas son documentos descargables autenticados. No forman parte del exportador generico CSV/JSON.
+
+### Contratos
+
+`Contract` es la fuente canónica del acuerdo con el cliente (trabajo + cliente + presupuesto opcional). Lifecycle `draft → sent → accepted|rejected|expired`, sin retornos y con terminales protegidos; solo transiciones explícitas por `PATCH /contracts/{contract}/status`, nunca `status` arbitrario por CRUD.
+
+- Borrador editable y eliminable; enviado solo admite caducidad con el resto idéntico; terminales inmutables.
+- Al enviar se congela `content_snapshot` y sube `version`; numeración `CON-AAAA-####` por workspace.
+- Contenido Markdown controlado (sin HTML; se rechazan `script/iframe/object/embed/form` e imágenes/enlaces HTML). Si se deja vacío, se genera contenido neutro editable desde trabajo/cliente/presupuesto, sin valor jurídico.
+- Aceptar sincroniza el espejo legacy del trabajo (`contract_status=signed`, `contract_signed_at`); rechazar marca `declined`. Los campos legacy `contract_*` de `photography_jobs` se conservan por compatibilidad y podrán eliminarse en un Issue posterior; `contract_url` sigue siendo un enlace externo manual.
+- Actividad `created` + `status_changed` sobre el contrato. Sin portal público, firma electrónica ni pagos: llegarán en el #8.
 
 ### Checklists
 

@@ -22,6 +22,7 @@ class JobResource extends JsonResource
             'sessions' => SessionResource::collection($this->whenLoaded('sessions')),
             'quotes' => QuoteResource::collection($this->whenLoaded('quotes')),
             'invoices' => InvoiceResource::collection($this->whenLoaded('invoices')),
+            'contracts' => ContractResource::collection($this->whenLoaded('contracts')),
             'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
             'deliveries' => DeliveryResource::collection($this->whenLoaded('deliveries')),
             'activities' => ActivityResource::collection($this->whenLoaded('activities')),

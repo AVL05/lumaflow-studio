@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ChecklistController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\ClientImportController;
+use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ExportController;
@@ -94,6 +95,8 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function (): void {
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
         Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
         Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
+        Route::apiResource('contracts', ContractController::class);
+        Route::patch('/contracts/{contract}/status', [ContractController::class, 'updateStatus']);
         Route::apiResource('presets', PresetController::class)->except('show');
 
         Route::get('/ai/status', [AiController::class, 'status']);
