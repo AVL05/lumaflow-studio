@@ -241,26 +241,6 @@ export async function runWebGpuJson({ task, payload, schema, onProgress, signal 
   return parseJsonAnswer(answer);
 }
 
-export function createLocalConversation(current, userContent, assistantContent) {
-  const now = Date.now();
-  const currentId = String(current?.id ?? "");
-  const id = currentId.startsWith("webgpu-") ? current.id : `webgpu-${now}`;
-
-  const messages = [
-    ...(current?.messages ?? []),
-    { id: `user-${now}`, role: "user", content: userContent },
-    { id: `assistant-${now}`, role: "assistant", content: assistantContent },
-  ];
-
-  return {
-    id,
-    provider: "webgpu",
-    title: current?.title ?? userContent.slice(0, 60),
-    messages,
-    messages_count: messages.length,
-  };
-}
-
 function parseJsonAnswer(answer) {
   try {
     return JSON.parse(answer);

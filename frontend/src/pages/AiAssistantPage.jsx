@@ -13,8 +13,9 @@ import { ConversationSidebar } from "../features/ai/ConversationSidebar";
 import { GearRecommendation } from "../features/ai/GearRecommendation";
 import { ModelManager } from "../features/ai/ModelManager";
 import { SessionPlanner } from "../features/ai/SessionPlanner";
+import { useAuth } from "../features/auth/AuthContext";
+import { autoTitle, buildExport, createLocalAiRepository } from "../features/ai/localAiRepository";
 import {
-  createLocalConversation,
   getActiveWebGpuModel,
   getBrowserStorageEstimate,
   getWebGpuModels,
@@ -48,10 +49,9 @@ const planSchema = {
   },
 };
 
-const WEBGPU_HISTORY_KEY = "lumaflow_webgpu_conversations";
-
 export function AiAssistantPage() {
   const location = useLocation();
+  const { user } = useAuth();
   const [status, setStatus] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -68,6 +68,8 @@ export function AiAssistantPage() {
   const [installedModelIds, setInstalledModelIds] = useState([]);
   const [busyModelId, setBusyModelId] = useState("");
   const [storageEstimate, setStorageEstimate] = useState(null);
+  const [historyRepo, setHistoryRepo] = useState(null);
+  const [storageNotice, setStorageNotice] = useState(false);
   const abortRef = useRef(null);
 
   const messages = useMemo(() => activeConversation?.messages ?? [], [activeConversation]);
@@ -81,34 +83,46 @@ export function AiAssistantPage() {
   }, [location.key, location.state]);
 
   const loadConversations = useCallback(async () => {
+    let local = [];
+    try {
+      if (historyRepo) local = await historyRepo.listConversations();
+    } catch {
+      local = [];
+    }
     try {
       const response = await aiApi.history({ search, per_page: 30 });
-      setConversations(
-        filterLocalConversations(readLocalConversations(), search).concat(response.data),
-      );
+      setConversations(filterLocalConversations(local, search).concat(response.data));
     } catch {
-      setConversations(filterLocalConversations(readLocalConversations(), search));
+      setConversations(filterLocalConversations(local, search));
     }
-  }, [search]);
+  }, [search, historyRepo]);
 
   const loadInitialData = useCallback(async () => {
     setError("");
     try {
-      const [statusResponse, dashboardResponse, sessionResponse, historyResponse] =
+      const repository = await createLocalAiRepository({
+        userId: user?.id,
+        workspaceId: user?.current_workspace_id,
+      });
+      await repository.migrateLegacy();
+      setHistoryRepo(repository);
+      setStorageNotice(!repository.persistent);
+      const [statusResponse, dashboardResponse, sessionResponse, historyResponse, local] =
         await Promise.all([
           Promise.resolve(getWebGpuSupport()),
           dashboardApi.summary(),
           sessionsApi.list({ per_page: 80 }),
-          aiApi.history({ per_page: 30 }),
+          aiApi.history({ per_page: 30 }).catch(() => ({ data: [] })),
+          repository.listConversations(),
         ]);
       setStatus({ ...statusResponse, streaming_supported: true });
       setDashboard(dashboardResponse);
       setSessions(sessionResponse.data);
-      setConversations(readLocalConversations().concat(historyResponse.data));
+      setConversations(local.concat(historyResponse.data));
     } catch (err) {
       setError(getApiError(err));
     }
-  }, []);
+  }, [user?.id, user?.current_workspace_id]);
 
   const refreshInstalledModels = useCallback(async () => {
     try {
@@ -140,7 +154,15 @@ export function AiAssistantPage() {
   async function selectConversation(conversation) {
     setError("");
     if (isLocalConversation(conversation)) {
-      setActiveConversation(conversation);
+      if (!historyRepo) {
+        setActiveConversation(conversation);
+        return;
+      }
+      try {
+        setActiveConversation((await historyRepo.getConversation(conversation.id)) ?? conversation);
+      } catch (err) {
+        setError(getApiError(err, "No se pudo abrir la conversación."));
+      }
       return;
     }
 
@@ -174,10 +196,19 @@ export function AiAssistantPage() {
         onProgress: updateWebGpuProgress,
         messages: [...(previousConversation?.messages ?? []), { role: "user", content }],
       });
-      const conversation = createLocalConversation(previousConversation, content, answer);
-      saveLocalConversation(conversation);
-      setActiveConversation(conversation);
-      setConversations((current) => upsertConversation(current, conversation));
+      if (!historyRepo) throw new Error("Historial no disponible.");
+      let conversation = previousConversation;
+      if (!conversation || !isLocalConversation(conversation)) {
+        conversation = await historyRepo.createConversation({
+          title: autoTitle(content),
+          modelId: activeModelId,
+        });
+      }
+      await historyRepo.appendMessage(conversation.id, { role: "user", content });
+      await historyRepo.appendMessage(conversation.id, { role: "assistant", content: answer });
+      const stored = await historyRepo.getConversation(conversation.id);
+      setActiveConversation(stored);
+      setConversations((current) => upsertConversation(current, stored));
     } catch (err) {
       if (err.name !== "AbortError") setError(err.message || "WebGPU no disponible.");
     } finally {
@@ -306,14 +337,37 @@ export function AiAssistantPage() {
     URL.revokeObjectURL(url);
   }
 
+  function exportJson() {
+    if (!activeConversation || messages.length === 0) return;
+    const { json } = buildExport(
+      {
+        title: activeConversation.title,
+        modelId: activeConversation.modelId ?? null,
+      },
+      messages,
+    );
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${activeConversation?.title || "lumaflow-ai"}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function renameConversation(conversation) {
     const title = window.prompt("Nuevo nombre", conversation.title);
     if (!title) return;
     if (isLocalConversation(conversation)) {
-      const renamed = { ...conversation, title };
-      saveLocalConversation(renamed);
-      setConversations((current) => upsertConversation(current, renamed));
-      if (activeConversation?.id === conversation.id) setActiveConversation(renamed);
+      if (!historyRepo) return;
+      try {
+        const renamed = await historyRepo.renameConversation(conversation.id, title);
+        const full = await historyRepo.getConversation(renamed.id);
+        setConversations((current) => upsertConversation(current, full ?? renamed));
+        if (activeConversation?.id === conversation.id) setActiveConversation(full ?? renamed);
+      } catch (err) {
+        setError(getApiError(err, "No se pudo renombrar."));
+      }
       return;
     }
 
@@ -326,7 +380,13 @@ export function AiAssistantPage() {
   async function deleteConversation(conversation) {
     if (!window.confirm("Eliminar esta conversacion?")) return;
     if (isLocalConversation(conversation)) {
-      deleteLocalConversation(conversation.id);
+      if (!historyRepo) return;
+      try {
+        await historyRepo.deleteConversation(conversation.id);
+      } catch (err) {
+        setError(getApiError(err, "No se pudo eliminar."));
+        return;
+      }
       if (activeConversation?.id === conversation.id) setActiveConversation(null);
       setConversations((current) => current.filter((item) => item.id !== conversation.id));
       return;
@@ -335,6 +395,19 @@ export function AiAssistantPage() {
     await aiApi.deleteHistory(conversation.id);
     if (activeConversation?.id === conversation.id) setActiveConversation(null);
     await loadConversations();
+  }
+
+  async function clearHistory() {
+    if (!historyRepo) return;
+    if (!window.confirm("Borrar todo el historial local de este estudio?")) return;
+    setError("");
+    try {
+      await historyRepo.clearWorkspaceHistory();
+      setActiveConversation(null);
+      await loadConversations();
+    } catch (err) {
+      setError(getApiError(err, "No se pudo borrar el historial."));
+    }
   }
 
   return (
@@ -348,6 +421,24 @@ export function AiAssistantPage() {
         <div className="mb-5">
           <ErrorState message={error} />
         </div>
+      ) : null}
+
+      {storageNotice ? (
+        <div className="mb-5">
+          <ErrorState message="Tu historial de IA local se guarda en este navegador y no se sincroniza con otros dispositivos. Ahora mismo no se puede persistir: la IA sigue funcionando en esta sesión." />
+        </div>
+      ) : (
+        <p className="mb-5 text-xs text-stone-500">
+          Tu historial de IA local se guarda en este navegador y no se sincroniza con otros
+          dispositivos.
+        </p>
+      )}
+      {activeConversation?.modelId &&
+      activeModelId &&
+      activeConversation.modelId !== activeModelId ? (
+        <p className="mb-5 text-xs text-stone-500">
+          Esta conversación se creó con otro modelo. Puedes seguir leyéndola sin cambiar nada.
+        </p>
       ) : null}
 
       <div className="space-y-6">
@@ -375,6 +466,7 @@ export function AiAssistantPage() {
             onSelect={selectConversation}
             onRename={renameConversation}
             onDelete={deleteConversation}
+            onClear={clearHistory}
           />
           <ChatPanel
             conversation={activeConversation}
@@ -384,6 +476,7 @@ export function AiAssistantPage() {
             onSubmit={submitChat}
             onCancel={() => abortRef.current?.abort()}
             onExportMarkdown={exportMarkdown}
+            onExportJson={exportJson}
             onPrintPdf={() => window.print()}
             loading={loading === "chat"}
           />
@@ -409,26 +502,8 @@ export function AiAssistantPage() {
   );
 }
 
-function readLocalConversations() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(WEBGPU_HISTORY_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalConversation(conversation) {
-  const conversations = upsertConversation(readLocalConversations(), conversation);
-  localStorage.setItem(WEBGPU_HISTORY_KEY, JSON.stringify(conversations.slice(0, 30)));
-}
-
-function deleteLocalConversation(id) {
-  const conversations = readLocalConversations().filter((item) => item.id !== id);
-  localStorage.setItem(WEBGPU_HISTORY_KEY, JSON.stringify(conversations));
-}
-
 function upsertConversation(conversations, conversation) {
+  if (!conversation) return conversations;
   return [conversation, ...conversations.filter((item) => item.id !== conversation.id)];
 }
 
@@ -445,7 +520,8 @@ function filterLocalConversations(conversations, search) {
 }
 
 function isLocalConversation(conversation) {
-  return (
-    conversation?.provider === "webgpu" || String(conversation?.id ?? "").startsWith("webgpu-")
-  );
+  if (!conversation) return false;
+  if (conversation?.provider === "webgpu") return true;
+  const id = String(conversation?.id ?? "");
+  return id.startsWith("webgpu-") || id.startsWith("local-");
 }

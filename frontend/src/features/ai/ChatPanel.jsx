@@ -10,6 +10,7 @@ export function ChatPanel({
   setInput,
   onSubmit,
   onExportMarkdown,
+  onExportJson,
   onPrintPdf,
   onCancel,
   loading,
@@ -28,6 +29,9 @@ export function ChatPanel({
         <div className="flex gap-2">
           <Button type="button" onClick={onExportMarkdown} disabled={messages.length === 0}>
             Markdown
+          </Button>
+          <Button type="button" onClick={onExportJson} disabled={messages.length === 0}>
+            JSON
           </Button>
           <Button type="button" onClick={onPrintPdf} disabled={messages.length === 0}>
             PDF
