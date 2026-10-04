@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureOnboardingIsComplete;
+use App\Http\Middleware\RequestCorrelationId;
 use App\Support\AuditLog;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'onboarded' => EnsureOnboardingIsComplete::class,
         ]);
+        $middleware->appendToGroup('api', RequestCorrelationId::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
@@ -41,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request = request();
 
             if ($request->is('api/*')) {
-                AuditLog::apiException($exception, $request->method(), $request->path(), $request->user()?->id);
+                AuditLog::apiException($exception, $request->method(), $request->path(), $request->user()?->id, $request->attributes->get('request_id'));
             }
 
             return true;

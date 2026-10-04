@@ -61,7 +61,7 @@ class AuditLog
     }
 
     /** Excepciones no controladas que llegan al handler de la API. */
-    public static function apiException(Throwable $exception, string $method, string $path, ?int $userId = null): void
+    public static function apiException(Throwable $exception, string $method, string $path, ?int $userId = null, ?string $requestId = null): void
     {
         self::write('error', 'api.exception', [
             'exception' => $exception::class,
@@ -70,6 +70,7 @@ class AuditLog
             'method' => $method,
             'path' => $path,
             'user_id' => $userId,
+            'request_id' => $requestId,
         ]);
     }
 
