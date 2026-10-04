@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'client_id', 'job_id', 'quote_id', 'contract_number', 'title', 'content', 'content_snapshot', 'status', 'version', 'expires_at', 'sent_at', 'accepted_at', 'rejected_at'])]
+#[Fillable(['user_id', 'workspace_id', 'client_id', 'job_id', 'quote_id', 'contract_number', 'title', 'content', 'content_snapshot', 'client_message', 'client_responded_at', 'status', 'version', 'expires_at', 'sent_at', 'accepted_at', 'rejected_at'])]
 class Contract extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations;
@@ -46,6 +46,7 @@ class Contract extends Model
             'sent_at' => 'datetime',
             'accepted_at' => 'datetime',
             'rejected_at' => 'datetime',
+            'client_responded_at' => 'datetime',
         ];
     }
 

@@ -27,6 +27,7 @@ Agrupadas por fase, no una por tabla:
 | `2026_10_03_000002_add_workspace_id_to_domain_tables` | `workspace_id` aditivo nullable en 18 tablas raiz, backfill desde el propietario |
 | `2026_10_05_000001_add_is_demo_to_domain_tables` | `is_demo` en localizaciones, clientes, trabajos, sesiones, entregas y tareas, con backfill de filas de ejemplo |
 | `2026_10_06_000001_create_contracts_table` | `contracts` con workspace, cliente, trabajo, presupuesto opcional, snapshot y lifecycle |
+| `2026_10_07_000001_create_contract_portal_links_table` | `contract_portal_links` (hash, caducidad, revocación) + `client_message`/`client_responded_at` en contratos |
 
 ## Modelo de dominio
 
