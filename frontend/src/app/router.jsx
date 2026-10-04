@@ -26,6 +26,7 @@ import { PresetsPage } from "../pages/PresetsPage";
 import { BookingRequestsPage } from "../pages/BookingRequestsPage";
 import { BookingPage } from "../pages/BookingPage";
 import { ClientPortalPage } from "../pages/ClientPortalPage";
+import { ContractPortalPage } from "../pages/ContractPortalPage";
 import { SystemPage } from "../pages/SystemPage";
 import { SettingsPage } from "../pages/SettingsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
   },
   { path: "/book/:slug", element: <BookingPage />, errorElement },
   { path: "/deliver/:token", element: <ClientPortalPage />, errorElement },
+  { path: "/contract/:token", element: <ContractPortalPage />, errorElement },
   {
     path: "/app",
     element: (

@@ -28,6 +28,7 @@ import {
   canDeleteContract,
   canEditContract,
 } from "../features/contracts/contractTransitions";
+import { ContractPortalPanel } from "../features/contracts/ContractPortalPanel";
 
 const defaults = {
   job_id: "",
@@ -276,6 +277,7 @@ export function ContractsPage() {
             <p className="text-xs leading-5 text-stone-500">
               Contenido editable de ejemplo. No constituye asesoramiento jurídico.
             </p>
+            <ContractPortalPanel key={viewing.id} contract={viewing} />
           </div>
         ) : null}
       </Modal>

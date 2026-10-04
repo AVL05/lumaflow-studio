@@ -11,4 +11,9 @@ export const publicApi = {
     apiClient
       .post(`/public/deliveries/${token}/request-changes`, { message })
       .then((res) => res.data.data),
+  contract: (token) => apiClient.get(`/public/contracts/${token}`).then((res) => res.data),
+  acceptContract: (token) =>
+    apiClient.post(`/public/contracts/${token}/accept`).then((res) => res.data),
+  rejectContract: (token, message) =>
+    apiClient.post(`/public/contracts/${token}/reject`, { message }).then((res) => res.data),
 };
