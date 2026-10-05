@@ -178,9 +178,13 @@ class DataBackupService
         $isWindows = DIRECTORY_SEPARATOR === '\\';
         $extensions = [''];
 
-        if ($isWindows) {
+        // Las extensiones aplican en Windows o cuando se indican
+        // explicitamente (asi la logica es testeable en cualquier SO).
+        if ($isWindows || $pathExt !== null) {
             $pathExt ??= (string) getenv('PATHEXT');
             $seen = [];
+            $extensions = [];
+
             foreach (explode(';', $pathExt === '' ? '.EXE' : $pathExt) as $ext) {
                 $ext = trim($ext);
 
