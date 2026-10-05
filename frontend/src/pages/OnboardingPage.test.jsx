@@ -18,6 +18,10 @@ const authState = {
 
 vi.mock("../features/auth/AuthContext", () => ({
   useAuth: () => authState,
+  AUTH_STATUS_BOOTING: "booting",
+  AUTH_STATUS_AUTHENTICATED: "authenticated",
+  AUTH_STATUS_UNAUTHENTICATED: "unauthenticated",
+  AUTH_STATUS_UNAVAILABLE: "unavailable",
 }));
 
 describe("OnboardingPage", () => {

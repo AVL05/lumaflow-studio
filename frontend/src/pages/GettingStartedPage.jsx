@@ -4,7 +4,8 @@ import { getApiError } from "../api/client";
 import { ErrorState } from "../components/states/ErrorState";
 import { LoadingState } from "../components/states/LoadingState";
 import { OnboardingShell } from "../features/auth/OnboardingShell";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth, AUTH_STATUS_UNAVAILABLE } from "../features/auth/AuthContext";
+import { ServiceUnavailable } from "../components/states/ServiceUnavailable";
 import { getAuthDestination } from "../features/auth/getAuthDestination";
 
 const options = [
@@ -45,12 +46,24 @@ const options = [
 ];
 
 export function GettingStartedPage() {
-  const { user, booting, isAuthenticated, completeGettingStarted } = useAuth();
+  const {
+    user,
+    booting,
+    isAuthenticated,
+    authStatus,
+    bootError,
+    retryBoot,
+    logout,
+    completeGettingStarted,
+  } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState("");
   const [error, setError] = useState("");
 
   if (booting) return <LoadingState label="Preparando tu estudio..." />;
+  if (authStatus === AUTH_STATUS_UNAVAILABLE) {
+    return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!user.email_verified || !user.onboarding_completed)
     return <Navigate to={getAuthDestination(user)} replace />;

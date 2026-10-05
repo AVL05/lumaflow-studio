@@ -5,7 +5,8 @@ import { ErrorState } from "../components/states/ErrorState";
 import { LoadingState } from "../components/states/LoadingState";
 import { Field, inputClass } from "../components/ui/Field";
 import { getApiError } from "../api/client";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth, AUTH_STATUS_UNAVAILABLE } from "../features/auth/AuthContext";
+import { ServiceUnavailable } from "../components/states/ServiceUnavailable";
 import { getAuthDestination } from "../features/auth/getAuthDestination";
 import { OnboardingShell } from "../features/auth/OnboardingShell";
 
@@ -70,7 +71,16 @@ const stepCopy = [
 ];
 
 export function OnboardingPage() {
-  const { user, booting, isAuthenticated, completeOnboarding } = useAuth();
+  const {
+    user,
+    booting,
+    isAuthenticated,
+    authStatus,
+    bootError,
+    retryBoot,
+    logout,
+    completeOnboarding,
+  } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -84,6 +94,9 @@ export function OnboardingPage() {
   const [loading, setLoading] = useState(false);
 
   if (booting) return <LoadingState label="Preparando tu estudio..." />;
+  if (authStatus === AUTH_STATUS_UNAVAILABLE) {
+    return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!user.email_verified) return <Navigate to="/verify-email" replace />;
   if (user.onboarding_completed) return <Navigate to={getAuthDestination(user)} replace />;

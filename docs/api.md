@@ -10,7 +10,7 @@ Sanctum con **tokens Bearer**, no cookies de sesion. El token se obtiene en `reg
 Authorization: Bearer <token>
 ```
 
-Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, revocado o invalido.
+Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, revocado o invalido. La SPA solo destruye la sesion local ante 401; ante 5xx, red o throttling conserva el token y muestra estado degradado con reintento.
 
 | Metodo | Ruta | Auth | Notas |
 |---|---|---|---|
