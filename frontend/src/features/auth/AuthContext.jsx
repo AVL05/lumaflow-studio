@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../../api/auth";
+import { identifySentryUser } from "../../app/sentry";
 
 const AuthContext = createContext(null);
 
@@ -17,8 +18,14 @@ export function AuthProvider({ children }) {
 
     authApi
       .me()
-      .then(setUser)
-      .catch(() => localStorage.removeItem("lumaflow_token"))
+      .then((me) => {
+        setUser(me);
+        identifySentryUser(me?.id);
+      })
+      .catch(() => {
+        localStorage.removeItem("lumaflow_token");
+        identifySentryUser(null);
+      })
       .finally(() => setBooting(false));
   }, []);
 
@@ -26,6 +33,7 @@ export function AuthProvider({ children }) {
     const data = await authApi.login(payload);
     localStorage.setItem("lumaflow_token", data.token);
     setUser(data.user);
+    identifySentryUser(data.user?.id);
     return data.user;
   }
 
@@ -33,6 +41,7 @@ export function AuthProvider({ children }) {
     const data = await authApi.register(payload);
     localStorage.setItem("lumaflow_token", data.token);
     setUser(data.user);
+    identifySentryUser(data.user?.id);
     return data;
   }
 
@@ -64,6 +73,7 @@ export function AuthProvider({ children }) {
     } finally {
       localStorage.removeItem("lumaflow_token");
       setUser(null);
+      identifySentryUser(null);
     }
   }
 

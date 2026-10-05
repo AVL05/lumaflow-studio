@@ -163,6 +163,40 @@ VITE_API_URL=https://api.tu-dominio.com/api
 
 Nunca commitear `.env`. Solo los `.env.example`.
 
+## Observability
+
+Proveedor: **Sentry** (free tier suficiente en beta, SDKs oficiales React 19 + Laravel 13, sin infraestructura propia). Sin DSN no se envía nada y todo funciona igual: frontend arranca, backend responde, health/E2E verdes.
+
+Variables (todas opcionales, vacías por defecto):
+
+```env
+# Backend
+SENTRY_LARAVEL_DSN=
+SENTRY_ENVIRONMENT=production
+SENTRY_RELEASE=
+# Frontend (build)
+VITE_SENTRY_DSN=
+VITE_SENTRY_ENVIRONMENT=
+VITE_SENTRY_RELEASE=
+```
+
+`environment`: `APP_ENV` / `local|testing|production` (tests nunca reportan: sin DSN en CI). `release`: `SENTRY_RELEASE` o commit del proveedor (`RENDER_GIT_COMMIT`, `GITHUB_SHA`, `VERCEL_GIT_COMMIT_SHA`) o `unknown`; frontend y backend comparten el SHA cuando el proveedor lo expone. Trazas y replay desactivados (`sample rate 0`): solo error tracking.
+
+**Correlación:** middleware `RequestCorrelationId` acepta `X-Request-ID` válido (UUID o alfanumérico ≤100) o genera UUID; lo devuelve en la respuesta (CORS lo expone), lo añade a logs y al tag de Sentry. El cliente Axios envía uno por request; en 5xx la UI muestra `Referencia del error: <id>`.
+
+**Privacidad (redacción antes de enviar):** nunca `Authorization`/cookies/tokens, contraseñas, emails, teléfonos, contenido de contratos, notas privadas, `client_message`, prompts/respuestas IA ni cuerpos de petición. URLs con tokens públicos (`/public/*`, `/deliver/*`, `/contract/*`) se sanitizan a `[REDACTED]`. Identidad: solo ID interno pseudónimo. Sin IP completa, sin fingerprinting, sin replay, sin breadcrumbs con inputs o contenido.
+
+**Qué sí viaja:** clase/mensaje de error (sin datos), fichero:línea, método, ruta sanitizada, `user_id`, `request_id`, `release`/`environment`.
+
+### Procedimiento de investigación
+
+1. El usuario reporta el fallo con su referencia (`Ref: …`) o el crash muestra su referencia.
+2. Buscar el evento por request ID / referencia en Sentry.
+3. Comprobar el evento frontend asociado (misma sesión/ventana temporal).
+4. Correlacionar con el log backend (`api.exception` con igual `request_id`).
+5. Revisar release/environment para reproducir en la versión correcta.
+6. Reproducir, corregir y verificar que el evento deja de aparecer en ese release.
+
 ## Checklist antes de produccion
 
 - [ ] `APP_DEBUG=false` y `APP_ENV=production`.
