@@ -74,4 +74,56 @@ class DataBackupServiceTest extends TestCase
         $this->assertContains('lumaflow', $argv);
         $this->assertStringNotContainsString('s3cr3t', implode(' ', $argv));
     }
+
+    public function test_find_executable_with_controlled_path(): void
+    {
+        $dir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'lumaflow-path-'.uniqid();
+        mkdir($dir);
+        $binary = $dir.DIRECTORY_SEPARATOR.'mytool';
+        file_put_contents($binary, '#!/bin/sh');
+        chmod($binary, 0755);
+
+        try {
+            if (DIRECTORY_SEPARATOR === '\\') {
+                // En Windows los ejecutables siempre llevan extension
+                // (PATHEXT); un archivo sin extension no es ejecutable.
+                $this->assertNull(DataBackupService::findExecutable('mytool', $dir));
+            } else {
+                $this->assertSame($binary, DataBackupService::findExecutable('mytool', $dir));
+            }
+            $this->assertNull(DataBackupService::findExecutable('missing-tool', $dir));
+            // Nombres peligrosos nunca resuelven.
+            $this->assertNull(DataBackupService::findExecutable('../mytool', $dir));
+            $this->assertNull(DataBackupService::findExecutable('mytool;rm', $dir));
+            $this->assertNull(DataBackupService::findExecutable('/bin/ls', $dir));
+        } finally {
+            @unlink($binary);
+            @rmdir($dir);
+        }
+    }
+
+    public function test_find_executable_patnext_logic_without_windows(): void
+    {
+        $dir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'lumaflow-patnext-'.uniqid();
+        mkdir($dir);
+        file_put_contents($dir.DIRECTORY_SEPARATOR.'tool.EXE', 'x');
+        chmod($dir.DIRECTORY_SEPARATOR.'tool.EXE', 0755);
+
+        try {
+            // Simula PATHEXT de Windows contra un PATH controlado.
+            $found = DataBackupService::findExecutable('tool', $dir, '.COM;.EXE;.BAT');
+            $this->assertSame($dir.DIRECTORY_SEPARATOR.'tool.EXE', $found);
+            $this->assertNull(DataBackupService::findExecutable('tool', $dir, '.COM;.BAT'));
+        } finally {
+            @unlink($dir.DIRECTORY_SEPARATOR.'tool.EXE');
+            @rmdir($dir);
+        }
+    }
+
+    public function test_binary_available_detects_real_and_missing(): void
+    {
+        // `php` existe en cualquier entorno que ejecute esta suite.
+        $this->assertTrue(DataBackupService::binaryAvailable('php'));
+        $this->assertFalse(DataBackupService::binaryAvailable('lumaflow-binary-que-no-existe'));
+    }
 }

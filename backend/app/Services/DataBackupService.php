@@ -161,14 +161,61 @@ class DataBackupService
         ];
     }
 
+    /**
+     * Resolucion portable de ejecutables recorriendo PATH, sin shell.
+     *
+     * Evita builtins (`command -v` no es un ejecutable en Unix), quoting e
+     * inyeccion: el nombre debe ser un basename simple. En Windows se
+     * contemplan las extensiones de PATHEXT.
+     */
+    public static function findExecutable(string $binary, ?string $path = null, ?string $pathExt = null): ?string
+    {
+        if (! preg_match('/\A[a-zA-Z0-9][a-zA-Z0-9_.-]*\z/', $binary)) {
+            return null;
+        }
+
+        $path ??= (string) getenv('PATH');
+        $isWindows = DIRECTORY_SEPARATOR === '\\';
+        $extensions = [''];
+
+        if ($isWindows) {
+            $pathExt ??= (string) getenv('PATHEXT');
+            $seen = [];
+            foreach (explode(';', $pathExt === '' ? '.EXE' : $pathExt) as $ext) {
+                $ext = trim($ext);
+
+                if ($ext === '' || isset($seen[strtolower($ext)])) {
+                    continue;
+                }
+
+                $seen[strtolower($ext)] = true;
+                $extensions[] = $ext;
+            }
+            $extensions[] = '';
+        }
+
+        foreach (explode(PATH_SEPARATOR, $path) as $dir) {
+            $dir = trim($dir, "\"' \t");
+
+            if ($dir === '') {
+                continue;
+            }
+
+            foreach ($extensions as $ext) {
+                $candidate = $dir.DIRECTORY_SEPARATOR.$binary.$ext;
+
+                if (is_file($candidate) && is_executable($candidate)) {
+                    return $candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static function binaryAvailable(string $binary): bool
     {
-        $checker = DIRECTORY_SEPARATOR === '\\' ? 'where' : 'command -v';
-
-        $process = new Process([$checker, $binary]);
-        $process->run();
-
-        return $process->isSuccessful();
+        return self::findExecutable($binary) !== null;
     }
 
     public function backupDirectory(): string
@@ -467,6 +514,10 @@ class DataBackupService
 
     private function mysqlImport(array $config, string $database, string $sql): void
     {
+        if (! self::binaryAvailable('mysql')) {
+            throw new RuntimeException('Falta el cliente mysql. Instale MySQL client para restaurar este motor.');
+        }
+
         $process = new Process(
             [...self::buildMysqlImportCommand([...$config, 'database' => $database])],
             null,
