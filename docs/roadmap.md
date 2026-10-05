@@ -1,37 +1,43 @@
 # Roadmap
 
-Estado posterior a la consolidacion de RAW Manager en LumaFlow Studio. Lo que sigue no esta implementado; lo que esta implementado no aparece aqui.
+Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece como pendiente.
 
-## Deuda conocida
+## V1 hardening completado
+
+- Red de seguridad E2E (Playwright, 12 recorridos, CI).
+- Workspaces con ownership, memberships, roles e invitaciones.
+- Onboarding con primer valor guiado y checklist real.
+- Contratos con lifecycle, snapshot y portal de aceptación.
+- Caché de analítica con invalidación.
+- Historial IA local en IndexedDB.
+- Observabilidad opcional (Sentry + request IDs).
+- Backup/restore verificable con runbook.
+
+## Deuda conocida (no bloqueante)
 
 | Tema                        | Detalle                                                                                                       |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Persistencia de chat WebGPU | La inferencia principal corre en navegador; falta persistir conversaciones WebGPU en backend o IndexedDB      |
 | Exportacion general         | Presupuestos y facturas tienen PDF. `ExportService` mantiene CSV/JSON para listados y analitica               |
-| Analitica                   | `/api/analytics` hace varias consultas por carga, sin cache. Aceptable durante la beta con volumen controlado |
-| Tests frontend              | Tests sobre hooks, utilidades del calendario y componentes criticos. Sin cobertura de paginas completas       |
+| Runner de backups           | Schedule declarado; sin cron activo en producción (manual hasta entonces)                                      |
+| Source maps Sentry          | Subida no configurada; pendiente de secreto CI                                                                |
+| Onboarding de invitados     | Los invitados configuran estudio personal; flujo invited-first pendiente                                       |
 
-## Proximas fases
+## Post-V1 / feedback-driven
 
-**Corto plazo**
+**Corto plazo (solo con demanda real)**
 
-- Persistencia de conversaciones WebGPU y exportacion desde historial local.
 - Kanban de tareas con drag & drop entre columnas de estado, reutilizando `DayDropZone`.
-- Cache de `/api/analytics` con invalidacion por mutacion.
-
-**Medio plazo**
-
 - Exportacion PDF de planes de sesion, conversaciones de IA e informes de analitica.
-- Contratos y aprobacion formal de entregas por parte del cliente.
-- Caducidad configurable de tokens del portal (la caducidad del enlace externo ya existe en `gallery_expires_at`).
+- Caducidad configurable de tokens del portal.
 
-**Largo plazo**
+**Medio/largo plazo**
 
-- Colaboracion basica por estudio (memberships owner/admin/member, invitaciones con token y caducidad) implementada; pendiente: permisos granulares, equipos, billing por asiento y SSO.
+- Permisos granulares, equipos y SSO (la colaboración básica ya existe).
+- Transferencia de ownership y borrado de cuenta endurecido.
+- Sincronización multi-dispositivo del historial IA.
 - Pagos online y conciliacion de facturas.
+- Límites y planes solo después de validar el uso real.
 
 ## Criterio de producto
 
-LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales antes de definir limites, precios o colaboracion multiusuario.
-
-El aislamiento se aplica por usuario con fundacion de workspace (Issue #4): cada usuario opera en su estudio personal y los recursos ajenos devuelven 404. Antes de escalar a colaboracion multiusuario (#5) deben completarse roles por estudio, observabilidad, copias de seguridad, politicas de retencion y una estrategia de capacidad verificable.
+LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales antes de definir limites, precios o colaboracion avanzada. Sin facturacion ni planes hasta esa validacion.
