@@ -206,7 +206,7 @@ VITE_SENTRY_RELEASE=
 - [ ] `php artisan config:cache route:cache view:cache`.
 - [ ] `composer install --no-dev --optimize-autoloader`.
 - [ ] HTTPS terminado en el proxy: los tokens Bearer viajan en cabecera.
-- [ ] Backup del volumen de MySQL.
+- [ ] Estrategia de backup activa según [backup-recovery.md](backup-recovery.md) (runner de `schedule:run` o equivalente).
 - [ ] `CACHE_STORE` real (database o redis): el rate limiting depende de el.
 - [ ] Rotacion de `storage/logs/lumaflow.log` (canal diario, 14 dias por defecto).
 - [ ] SMTP configurado y entrega real de verificacion probada fuera de spam.
@@ -218,3 +218,7 @@ VITE_SENTRY_RELEASE=
 - `GET /up` — sonda nativa de Laravel.
 
 `degraded` significa que solo la compatibilidad Ollama backend esta caida. La SPA puede seguir usando WebGPU si el navegador lo soporta.
+
+## Backup & Recovery
+
+Ver [backup-recovery.md](backup-recovery.md): inventario, `data:backup`/`data:restore`, retención 7+4, drill reproducible y RPO/RTO orientativos. Los backups nunca forman parte del readiness.
