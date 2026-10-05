@@ -4,11 +4,22 @@ import { Button } from "../components/ui/Button";
 import { ErrorState } from "../components/states/ErrorState";
 import { getApiError } from "../api/client";
 import { AuthShell } from "../features/auth/AuthShell";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth, AUTH_STATUS_UNAVAILABLE } from "../features/auth/AuthContext";
+import { ServiceUnavailable } from "../components/states/ServiceUnavailable";
 import { getAuthDestination } from "../features/auth/getAuthDestination";
 
 export function EmailVerificationPage() {
-  const { user, booting, isAuthenticated, refreshUser, resendVerification, logout } = useAuth();
+  const {
+    user,
+    booting,
+    isAuthenticated,
+    authStatus,
+    bootError,
+    retryBoot,
+    refreshUser,
+    resendVerification,
+    logout,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -42,6 +53,9 @@ export function EmailVerificationPage() {
     );
   }
 
+  if (authStatus === AUTH_STATUS_UNAVAILABLE) {
+    return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user.email_verified) return <Navigate to={getAuthDestination(user)} replace />;
 

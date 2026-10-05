@@ -7,6 +7,10 @@ const authState = { user: null, booting: false, isAuthenticated: false };
 
 vi.mock("./AuthContext", () => ({
   useAuth: () => authState,
+  AUTH_STATUS_BOOTING: "booting",
+  AUTH_STATUS_AUTHENTICATED: "authenticated",
+  AUTH_STATUS_UNAUTHENTICATED: "unauthenticated",
+  AUTH_STATUS_UNAVAILABLE: "unavailable",
 }));
 
 function renderRoute() {
@@ -81,5 +85,23 @@ describe("ProtectedRoute", () => {
     renderRoute();
 
     expect(screen.getByText("completa onboarding")).toBeInTheDocument();
+  });
+
+  it("muestra estado degradado sin redirigir a login ante fallo transitorio", () => {
+    const retryBoot = vi.fn();
+    const logout = vi.fn();
+    Object.assign(authState, {
+      booting: false,
+      isAuthenticated: false,
+      authStatus: "unavailable",
+      bootError: "No se pudo conectar con el servidor.",
+      retryBoot,
+      logout,
+    });
+    renderRoute();
+
+    expect(screen.queryByText("pantalla de login")).not.toBeInTheDocument();
+    expect(screen.getByText("Sin conexión con el servidor")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Reintentar" })).toBeVisible();
   });
 });
