@@ -75,12 +75,21 @@ No consulta información de producción ni comparte datos entre usuarios.
 | **Clientes**                | CRM ligero conectado a trabajos, presupuestos, facturas y entregas            |
 | **Reservas**                | Solicitudes públicas vinculadas a disponibilidad y seguimiento interno        |
 | **Presupuestos y facturas** | Conceptos, IVA, estados, numeración por estudio y PDF                         |
-| **Entregas**                | Portal privado, carga múltiple, favoritas y aprobación del cliente            |
+| **Contratos**               | Acuerdo con cliente y trabajo, lifecycle con snapshot, portal de revisión y aceptación del cliente |
+| **Colaboración**            | Estudios multiusuario con roles (owner/admin/member) e invitaciones por email |
+| **Entregas**                | Enlaces externos de galería con portal privado, contraseña, caducidad y aprobación del cliente |
 | **Equipo y presets**        | Inventario y ajustes de cámara reutilizables                                  |
 | **Localizaciones**          | Mapa, acceso, permisos, coste, clima y equipo recomendado                     |
 | **Analítica**               | KPIs y gráficas calculados sobre la actividad real                            |
 | **IA local**                | Chat contextual, planes de sesión y recomendación de equipo                   |
+| **Historial IA**            | Conversaciones WebGPU persistidas en IndexedDB del navegador                  |
 | **PWA**                     | Aplicación instalable con shell offline                                       |
+
+## Operación y resiliencia
+
+- **Aislamiento por workspace.** Cada consulta parte de `accessibleBy()` (memberships owner/admin/member); `user_id` se conserva como creador. Recursos ajenos responden 404.
+- **Observabilidad opcional.** Sentry desactivado sin DSN; request ID (`X-Request-ID`) correlaciona frontend y backend con redacción de datos sensibles.
+- **Backup y recuperación.** Comandos `data:backup` / `data:restore` con checksum, retención y drill verificado. Ver [docs/backup-recovery.md](docs/backup-recovery.md).
 
 ## Privacidad e IA local
 
@@ -122,7 +131,7 @@ routes/api.php  ->  Controller  ->  FormRequest  ->  Service
 
 Principios principales:
 
-- **Aislamiento por usuario.** Cada consulta parte de `ownedBy()`.
+- **Aislamiento por workspace.** Cada consulta parte de `accessibleBy()` sobre las memberships del usuario.
 - **404 para recursos ajenos.** No se confirma la existencia de información de otra cuenta.
 - **Controladores delgados.** La lógica de dominio vive en servicios.
 - **API y SPA separadas.** El frontend utiliza tokens Bearer de Sanctum.
@@ -211,16 +220,16 @@ La automatización de GitHub ejecuta formato, lint, tests, build PWA, recorridos
 
 ## Roadmap
 
-Las siguientes fases priorizan:
+La V1 de hardening (#3–#12) está completada y mergeada en `main`. El estado completo está en [docs/roadmap.md](docs/roadmap.md).
 
-- persistencia del chat WebGPU;
-- contratos y aprobaciones formales;
-- caducidad de galerías y descarga en lote;
-- roles y colaboración por estudio;
-- pagos y conciliación de facturas;
-- definición de límites y planes después de validar el uso real.
+El trabajo futuro depende de feedback real y métricas de uso. Posibles líneas post-V1, sin compromiso ni fechas:
 
-El estado completo está en [docs/roadmap.md](docs/roadmap.md).
+- colaboración avanzada (permisos granulares, equipos);
+- transferencia de ownership y borrado de cuenta endurecido;
+- avisos de backup automatizado con runner de cron en producción;
+- subida de source maps para Sentry;
+- sincronización multi-dispositivo del historial IA;
+- límites y planes solo después de validar el uso real.
 
 ## Open source y contribuciones
 
