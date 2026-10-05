@@ -5,6 +5,7 @@ namespace App\Services;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
+use Pdo\Mysql;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -119,7 +120,8 @@ class DataBackupService
 
     /**
      * Argv para mysqldump sin secretos: la password viaja por env
-     * (MYSQL_PWD), nunca en argumentos visibles ni logs.
+     * (MYSQL_PWD), nunca en argumentos visibles ni logs. Con CA
+     * configurada (TiDB exige TLS) se pasa --ssl-ca.
      */
     public static function buildMysqlDumpCommand(array $config): array
     {
@@ -128,6 +130,7 @@ class DataBackupService
             "--host={$config['host']}",
             "--port={$config['port']}",
             "--user={$config['username']}",
+            ...self::mysqlTlsArgs($config),
             '--single-transaction',
             '--quick',
             '--routines',
@@ -144,8 +147,36 @@ class DataBackupService
             "--host={$config['host']}",
             "--port={$config['port']}",
             "--user={$config['username']}",
+            ...self::mysqlTlsArgs($config),
             $config['database'],
         ];
+    }
+
+    /**
+     * Atributo SSL CA sin avisos de deprecacion (PDO viejo o Pdo\Mysql nuevo).
+     */
+    public static function sslCaAttribute(): int|string|null
+    {
+        if (class_exists(Mysql::class)) {
+            return Mysql::ATTR_SSL_CA;
+        }
+
+        return \defined('PDO::MYSQL_ATTR_SSL_CA') ? \PDO::MYSQL_ATTR_SSL_CA : null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function mysqlTlsArgs(array $config): array
+    {
+        $attr = self::sslCaAttribute();
+        $ca = $attr === null ? null : ($config['options'][$attr] ?? null);
+
+        if (! is_string($ca) || $ca === '') {
+            return [];
+        }
+
+        return ["--ssl-ca={$ca}"];
     }
 
     public static function buildPgDumpCommand(array $config): array
@@ -338,6 +369,17 @@ class DataBackupService
         return $process->getOutput();
     }
 
+    private function assertTlsCa(array $config): void
+    {
+        foreach (self::mysqlTlsArgs($config) as $arg) {
+            $ca = substr($arg, strlen('--ssl-ca='));
+
+            if (! is_file($ca)) {
+                throw new RuntimeException('CA TLS configurada pero ilegible. Revise MYSQL_ATTR_SSL_CA sin exponer secretos.');
+            }
+        }
+    }
+
     private function snapshotSqlite(): string
     {
         $config = config('database.connections.sqlite');
@@ -521,6 +563,8 @@ class DataBackupService
         if (! self::binaryAvailable('mysql')) {
             throw new RuntimeException('Falta el cliente mysql. Instale MySQL client para restaurar este motor.');
         }
+
+        $this->assertTlsCa($config);
 
         $process = new Process(
             [...self::buildMysqlImportCommand([...$config, 'database' => $database])],

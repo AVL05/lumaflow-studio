@@ -222,3 +222,11 @@ VITE_SENTRY_RELEASE=
 ## Backup & Recovery
 
 Ver [backup-recovery.md](backup-recovery.md): inventario, `data:backup`/`data:restore`, retención 7+4, drill reproducible y RPO/RTO orientativos. Los backups nunca forman parte del readiness.
+
+### Activar el scheduler en producción
+
+1. Provisionar un runner con `schedule:run` cada minuto (p. ej. servicio cron del proveedor con el mismo entorno y DB que la API). Sin runner aprobado, NO activar nada de pago.
+2. Confirmar zona horaria: el schedule usa `03:00 UTC` (timezone de app).
+3. Ejecutar una vez a mano: `php artisan data:backup --prune` y comprobar el artefacto + checksum.
+4. Verificar al día siguiente con `php artisan data:backup-status` (edad < 36h, checksum OK).
+5. Ante un fallo: revisar logs del cron, reejecutar a mano y abrir incidente si se repite. Nunca exponer credenciales en tickets.

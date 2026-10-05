@@ -23,6 +23,25 @@ class DataBackupCommand extends Command
 
     public function handle(DataBackupService $backups): int
     {
+        // Lock de archivo portable (sin Redis): evita dos backups a la vez.
+        $lock = fopen($backups->backupDirectory().DIRECTORY_SEPARATOR.'.backup.lock', 'c');
+
+        if ($lock === false || ! flock($lock, LOCK_EX | LOCK_NB)) {
+            $this->info('Otro backup en curso, se omite esta ejecucion.');
+
+            return self::SUCCESS;
+        }
+
+        try {
+            return $this->runBackup($backups);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    private function runBackup(DataBackupService $backups): int
+    {
         try {
             $result = $backups->backup();
         } catch (\Throwable $exception) {

@@ -12,22 +12,36 @@ Estrategia mínima y verificable para la beta (Issue #12). Sin costes obligatori
 
 ## Motor y mecanismo
 
-MySQL/MariaDB compatible en Docker y producción (TiDB Cloud): `mysqldump --single-transaction` vía `MYSQL_PWD` por entorno (nunca en argv ni logs). PostgreSQL: `pg_dump` con `PGPASSWORD`. SQLite local: snapshot `VACUUM INTO` + dump SQL portable (sin binarios). Salida `storage/backups/lumaflow-db-YYYYMMDD-HHMMSS-{motor}.sql.gz` + sidecar `.sha256`, sin PII en nombres.
+MySQL/MariaDB compatible en Docker y producción (TiDB Cloud): `mysqldump --single-transaction` vía `MYSQL_PWD` por entorno (nunca en argv ni logs). Con CA configurada (`MYSQL_ATTR_SSL_CA`, obligatorio en TiDB) se pasa `--ssl-ca` y se verifica legible antes de ejecutar. PostgreSQL: `pg_dump` con `PGPASSWORD`. SQLite local: snapshot `VACUUM INTO` + dump SQL portable (sin binarios). Salida `storage/backups/lumaflow-db-YYYYMMDD-HHMMSS-{motor}.sql.gz` + sidecar `.sha256`, sin PII en nombres.
 
 ## Comandos
 
 ```bash
 php artisan data:backup [--prune] [--keep-daily=7] [--keep-weekly=4] [--dry-run]
 php artisan data:restore <basename> [--apply] [--force] [--force-production]
+php artisan data:backup-status
 ```
+
+`data:backup` falla con exit 1 y mensaje claro si falta binario/config, y reporta a Sentry cuando existe. `data:restore` por defecto solo hace drill en destino temporal aislado; `--apply` restaura de verdad; producción exige `--force-production` (+ confirmación sin `--force`). `data:backup-status` responde “¿Se hizo el backup de hoy?” (último archivo, edad, checksum, aviso STALE >36h).
 
 `data:backup` falla con exit 1 y mensaje claro si falta binario/config, y reporta a Sentry cuando existe. `data:restore` por defecto solo hace drill en destino temporal aislado; `--apply` restaura de verdad; producción exige `--force-production` (+ confirmación sin `--force`).
 
 ## Frecuencia y retención
 
-Beta: **diario 03:00 con `--prune`, 7 diarios + 4 semanales** (el más nuevo por día/semana ISO; solo archivos `lumaflow-db-*.sql.gz`, nunca rutas arbitrarias, con `--dry-run` disponible).
+Beta: **diario 03:00 UTC** (`dailyAt`, timezone de app `UTC`) con `--prune`, 7 diarios + 4 semanales (el más nuevo por día/semana ISO; solo archivos `lumaflow-db-*.sql.gz`, nunca rutas arbitrarias, con `--dry-run` disponible). El comando usa lock de archivo (sin Redis) y omite la ejecución si otro backup está en curso.
 
-Estado de automatización: la entrada existe en `routes/console.php`, pero **ningún runner ejecuta `schedule:run` hoy** (ni Render free con solo web service, ni Docker Compose, ni CI). Pendiente de activar: servicio cron del proveedor que invoque `php artisan schedule:run` cada minuto. Hasta entonces, backup manual + drill documentado.
+## Runner: estado y decisión
+
+`routes/console.php` declara el backup diario, pero **hoy no existe runner de producción**: Render free solo ofrece web service (los cron jobs requieren plan de pago, no activado sin aprobación), Compose no define servicio cron y CI no programa tareas.
+
+Opciones evaluadas y descartadas:
+
+- **Cron nativo de Render**: requiere plan de pago → NO activado (coste sin aprobación).
+- **GitHub Actions schedule contra producción**: exigiría credenciales de prod en CI → rechazado por seguridad.
+- **Ping/cron externo a un endpoint HTTP**: no existe trigger seguro (crear uno abriría superficie de abuso) → rechazado.
+- **Sidecar cron en Docker**: solo sirve a self-hosted, no a Render → documentado, no implementado.
+
+Estrategia adoptada: comandos listos + verificación manual + `data:backup-status` como observabilidad mínima. Para activar la automatización (sin coste nuevo si el proveedor lo permite en el futuro): servicio cron que ejecute `php artisan schedule:run` cada minuto, o llamada directa diaria a `php artisan data:backup --prune`. Ver `docs/deployment.md` para los pasos exactos.
 
 ## Destino y privacidad
 
