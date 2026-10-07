@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\DataBackupService;
+use App\Services\RemoteBackupService;
 use Illuminate\Console\Command;
 
 /**
@@ -16,17 +17,32 @@ class DataRestoreCommand extends Command
 {
     protected $signature = 'data:restore
         {file : Basename del backup dentro de storage/backups}
+        {--remote : Descarga y verifica desde B2 en temporal privado}
         {--apply : Aplica sobre la base configurada tras verificar}
         {--force : Omite la confirmacion interactiva}
         {--force-production : Permite aplicar en produccion}';
 
     protected $description = 'Verifica un backup en entorno aislado y opcionalmente lo restaura.';
 
-    public function handle(DataBackupService $backups): int
+    public function handle(DataBackupService $backups, RemoteBackupService $remote): int
     {
-        $dir = $backups->backupDirectory();
-        $file = $dir.DIRECTORY_SEPARATOR.basename((string) $this->argument('file'));
+        try {
+            if ($this->option('remote')) {
+                return $remote->withDownloaded((string) $this->argument('file'), fn ($file) => $this->restoreFile($backups, $file));
+            }
+            $file = $backups->backupDirectory().DIRECTORY_SEPARATOR.basename((string) $this->argument('file'));
 
+            return $this->restoreFile($backups, $file);
+        } catch (\Throwable $exception) {
+            $this->error('Restauracion fallida. Revise checksum, almacenamiento y permisos en privado.');
+            report(new \RuntimeException('data:restore fallo: '.get_class($exception)));
+
+            return self::FAILURE;
+        }
+    }
+
+    private function restoreFile(DataBackupService $backups, string $file): int
+    {
         if (! DataBackupService::isRecognizedBackup($file) || ! is_file($file)) {
             $this->error('Backup no reconocido o inexistente. Solo archivos lumaflow-db-*.sql.gz del directorio de backups.');
 
@@ -44,8 +60,8 @@ class DataRestoreCommand extends Command
         try {
             $check = $backups->verifyBackup($file, $driver);
         } catch (\Throwable $exception) {
-            $this->error('Verificacion fallida: '.$exception->getMessage());
-            report($exception);
+            $this->error('Verificacion fallida. Revise dump, TLS y permisos en privado.');
+            report(new \RuntimeException('data:restore verificacion fallo: '.get_class($exception)));
 
             return self::FAILURE;
         }
@@ -78,8 +94,8 @@ class DataRestoreCommand extends Command
                 $backups->applyMysql($file, $driver);
             }
         } catch (\Throwable $exception) {
-            $this->error('Restauracion fallida: '.$exception->getMessage());
-            report($exception);
+            $this->error('Restauracion fallida. Revise destino y permisos en privado.');
+            report(new \RuntimeException('data:restore aplicacion fallo: '.get_class($exception)));
 
             return self::FAILURE;
         }

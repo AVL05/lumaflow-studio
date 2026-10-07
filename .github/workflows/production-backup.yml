@@ -46,7 +46,7 @@ jobs:
             sudo apt-get install -y mysql-client
           fi
 
-      - name: Generate and verify temporary backup
+      - name: Back up, verify B2 and prune remote retention
         env:
           APP_ENV: production
           APP_DEBUG: "false"
@@ -58,6 +58,11 @@ jobs:
           DB_DATABASE: ${{ secrets.BACKUP_DB_DATABASE }}
           DB_USERNAME: ${{ secrets.BACKUP_DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.BACKUP_DB_PASSWORD }}
+          BACKUP_S3_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+          BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
           MYSQL_ATTR_SSL_CA: /etc/ssl/certs/ca-certificates.crt
           BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
         run: |
@@ -68,21 +73,18 @@ jobs:
               if (!getenv($key)) { fwrite(STDERR, "Missing backup configuration.\n"); exit(1); }
             }
             try {
+              require "vendor/autoload.php";
+              $app = require "bootstrap/app.php";
+              $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+              $app->make(App\Services\RemoteBackupService::class)->assertConfigured();
               $pdo = new PDO("mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), [PDO::MYSQL_ATTR_SSL_CA => getenv("MYSQL_ATTR_SSL_CA"), PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true, PDO::ATTR_TIMEOUT => 15]);
               $pdo->query("SELECT 1");
               echo "TLS database connectivity OK.\n";
-            } catch (Throwable $e) { fwrite(STDERR, "Backup connectivity failed; check TLS, allowlist and credentials privately.\n"); exit(1); }
+            } catch (Throwable $e) { fwrite(STDERR, "Backup preflight failed; check B2 configuration, TLS, allowlist and credentials privately.\n"); exit(1); }
           '
-          php artisan data:backup --prune --no-interaction
-          cd "$BACKUP_PATH"
-          sha256sum --check --strict lumaflow-db-*.sql.gz.sha256
-          stat --format='backup=%n bytes=%s timestamp=%y' lumaflow-db-*.sql.gz
-          echo 'Temporary dump verified; NOT a durable production backup.' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Report missing durable destination
-        run: |
-          echo '::error::Issue #24 remains blocked: no verified private durable destination. Temporary dump will be deleted.'
-          exit 1
+          php artisan data:backup --remote --prune --no-interaction
+          php artisan data:backup-status --remote --no-interaction
+          echo 'Private B2 backup verified by download/SHA-256; remote 7 daily + 4 weekly retention applied; temporary copies removed.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove temporary dumps
         if: always()
