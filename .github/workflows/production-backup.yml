@@ -1,0 +1,91 @@
+name: Production backup
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # UTC; GitHub may delay scheduled jobs.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    # Repository variable: environment vars are unavailable before job startup.
+    # Both schedule and dispatch stay skipped until explicitly enabled.
+    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main' && vars.PRODUCTION_BACKUP_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production-backup
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, zip, pdo_mysql
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --no-progress
+
+      - name: Install MySQL client if missing
+        run: |
+          if ! command -v mysqldump >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y mysql-client
+          fi
+
+      - name: Generate and verify temporary backup
+        env:
+          APP_ENV: production
+          APP_DEBUG: "false"
+          LOG_CHANNEL: stderr
+          CACHE_STORE: file
+          DB_CONNECTION: mysql
+          DB_HOST: ${{ secrets.BACKUP_DB_HOST }}
+          DB_PORT: ${{ secrets.BACKUP_DB_PORT }}
+          DB_DATABASE: ${{ secrets.BACKUP_DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.BACKUP_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.BACKUP_DB_PASSWORD }}
+          MYSQL_ATTR_SSL_CA: /etc/ssl/certs/ca-certificates.crt
+          BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
+        run: |
+          umask 077
+          export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+          php -r '
+            foreach (["DB_HOST", "DB_PORT", "DB_DATABASE", "DB_USERNAME", "DB_PASSWORD"] as $key) {
+              if (!getenv($key)) { fwrite(STDERR, "Missing backup configuration.\n"); exit(1); }
+            }
+            try {
+              $pdo = new PDO("mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), [PDO::MYSQL_ATTR_SSL_CA => getenv("MYSQL_ATTR_SSL_CA"), PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true, PDO::ATTR_TIMEOUT => 15]);
+              $pdo->query("SELECT 1");
+              echo "TLS database connectivity OK.\n";
+            } catch (Throwable $e) { fwrite(STDERR, "Backup connectivity failed; check TLS, allowlist and credentials privately.\n"); exit(1); }
+          '
+          php artisan data:backup --prune --no-interaction
+          cd "$BACKUP_PATH"
+          sha256sum --check --strict lumaflow-db-*.sql.gz.sha256
+          stat --format='backup=%n bytes=%s timestamp=%y' lumaflow-db-*.sql.gz
+          echo 'Temporary dump verified; NOT a durable production backup.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report missing durable destination
+        run: |
+          echo '::error::Issue #24 remains blocked: no verified private durable destination. Temporary dump will be deleted.'
+          exit 1
+
+      - name: Remove temporary dumps
+        if: always()
+        env:
+          BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
+        run: rm -rf -- "$BACKUP_PATH"

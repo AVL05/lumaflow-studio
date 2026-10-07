@@ -23,14 +23,37 @@ class DataBackupCommand extends Command
 
     public function handle(DataBackupService $backups): int
     {
+        $lock = null;
         try {
-            $result = $backups->backup();
+            // Lock de archivo portable (sin Redis): evita dos backups a la vez.
+            $lock = fopen($backups->backupDirectory().DIRECTORY_SEPARATOR.'.backup.lock', 'c');
+            if ($lock === false) {
+                throw new \RuntimeException('No se pudo abrir el lock de backup.');
+            }
+            if (! flock($lock, LOCK_EX | LOCK_NB)) {
+                $this->info('Otro backup en curso, se omite esta ejecucion.');
+
+                return self::SUCCESS;
+            }
+
+            return $this->runBackup($backups);
         } catch (\Throwable $exception) {
-            $this->error('Backup fallido: '.$exception->getMessage());
-            report($exception);
+            // No propagar mensajes de drivers que pueden contener credenciales.
+            $this->error('Backup fallido. Revise binarios, almacenamiento, TLS y conectividad en privado.');
+            report(new \RuntimeException('data:backup fallo: '.get_class($exception)));
 
             return self::FAILURE;
+        } finally {
+            if (is_resource($lock)) {
+                flock($lock, LOCK_UN);
+                fclose($lock);
+            }
         }
+    }
+
+    private function runBackup(DataBackupService $backups): int
+    {
+        $result = $backups->backup();
 
         $this->info("Backup generado: {$result['file']}");
         $this->table(

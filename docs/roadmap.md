@@ -18,7 +18,7 @@ Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece 
 | Tema                        | Detalle                                                                                                       |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Exportacion general         | Presupuestos y facturas tienen PDF. `ExportService` mantiene CSV/JSON para listados y analitica               |
-| Runner de backups           | Schedule declarado; sin cron activo en producción (manual hasta entonces)                                      |
+| Runner de backups           | GitHub Actions preparado; activación, destino privado duradero y 3 días reales pendientes (#24)                 |
 | Source maps Sentry          | Subida no configurada; pendiente de secreto CI                                                                |
 | Onboarding de invitados     | Los invitados configuran estudio personal; flujo invited-first pendiente                                       |
 

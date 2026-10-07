@@ -5,6 +5,7 @@ namespace App\Services;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
+use Pdo\Mysql;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -119,7 +120,8 @@ class DataBackupService
 
     /**
      * Argv para mysqldump sin secretos: la password viaja por env
-     * (MYSQL_PWD), nunca en argumentos visibles ni logs.
+     * (MYSQL_PWD), nunca en argumentos visibles ni logs. Con CA
+     * configurada (TiDB exige TLS) se pasa --ssl-ca.
      */
     public static function buildMysqlDumpCommand(array $config): array
     {
@@ -128,6 +130,7 @@ class DataBackupService
             "--host={$config['host']}",
             "--port={$config['port']}",
             "--user={$config['username']}",
+            ...self::mysqlTlsArgs($config),
             '--single-transaction',
             '--quick',
             '--routines',
@@ -144,7 +147,38 @@ class DataBackupService
             "--host={$config['host']}",
             "--port={$config['port']}",
             "--user={$config['username']}",
+            ...self::mysqlTlsArgs($config),
             $config['database'],
+        ];
+    }
+
+    /**
+     * Atributo SSL CA sin avisos de deprecacion (PDO viejo o Pdo\Mysql nuevo).
+     */
+    public static function sslCaAttribute(): int|string|null
+    {
+        if (class_exists(Mysql::class)) {
+            return Mysql::ATTR_SSL_CA;
+        }
+
+        return \defined('PDO::MYSQL_ATTR_SSL_CA') ? \PDO::MYSQL_ATTR_SSL_CA : null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function mysqlTlsArgs(array $config): array
+    {
+        $attr = self::sslCaAttribute();
+        $ca = $attr === null ? null : ($config['options'][$attr] ?? null);
+
+        if (! is_string($ca) || $ca === '') {
+            return [];
+        }
+
+        return [
+            "--ssl-ca={$ca}",
+            ...(($config['driver'] ?? null) === 'mysql' ? ['--ssl-mode=VERIFY_IDENTITY'] : []),
         ];
     }
 
@@ -224,10 +258,12 @@ class DataBackupService
 
     public function backupDirectory(): string
     {
-        $dir = storage_path('backups');
+        $dir = (string) config('backup.path');
 
         if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            if (! mkdir($dir, 0700, true) && ! is_dir($dir)) {
+                throw new RuntimeException('No se pudo crear el directorio privado de backups.');
+            }
         }
 
         return $dir;
@@ -305,6 +341,7 @@ class DataBackupService
         }
 
         $config = config("database.connections.{$driver}");
+        $this->assertTlsCa($config);
         $process = new Process(self::buildMysqlDumpCommand($config), null, [
             'MYSQL_PWD' => (string) ($config['password'] ?? ''),
         ]);
@@ -336,6 +373,20 @@ class DataBackupService
         }
 
         return $process->getOutput();
+    }
+
+    private function assertTlsCa(array $config): void
+    {
+        foreach (self::mysqlTlsArgs($config) as $arg) {
+            if (! str_starts_with($arg, '--ssl-ca=')) {
+                continue;
+            }
+            $ca = substr($arg, strlen('--ssl-ca='));
+
+            if (! is_file($ca)) {
+                throw new RuntimeException('CA TLS configurada pero ilegible. Revise MYSQL_ATTR_SSL_CA sin exponer secretos.');
+            }
+        }
     }
 
     private function snapshotSqlite(): string
@@ -461,7 +512,7 @@ class DataBackupService
         $sidecar = "{$file}.sha256";
 
         if (! is_file($sidecar)) {
-            return true;
+            return false;
         }
 
         $expected = explode(' ', trim((string) file_get_contents($sidecar)))[0] ?? '';
@@ -521,6 +572,8 @@ class DataBackupService
         if (! self::binaryAvailable('mysql')) {
             throw new RuntimeException('Falta el cliente mysql. Instale MySQL client para restaurar este motor.');
         }
+
+        $this->assertTlsCa($config);
 
         $process = new Process(
             [...self::buildMysqlImportCommand([...$config, 'database' => $database])],
