@@ -24,6 +24,23 @@ class BackupScheduleTest extends TestCase
         $this->assertStringNotContainsString('upload-artifact', $workflow);
     }
 
+    public function test_runner_requires_explicit_activation_before_accessing_secrets(): void
+    {
+        $workflow = file_get_contents(base_path('../.github/workflows/production-backup.yml'));
+        $this->assertSame(1, preg_match('/^    if: (.+)$/m', $workflow, $match));
+        $this->assertSame(
+            "github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main' && vars.PRODUCTION_BACKUP_ENABLED == 'true'",
+            trim($match[1])
+        );
+        // Un unico gate de job cubre ambos triggers, sin bypass de dispatch.
+        $this->assertStringContainsString('environment: production-backup', $workflow);
+        $this->assertStringNotContainsString('pull_request', $workflow);
+        $beforeSteps = substr($workflow, 0, strpos($workflow, '    steps:'));
+        $this->assertStringNotContainsString('secrets.', $beforeSteps);
+        $this->assertStringContainsString('Report missing durable destination', $workflow);
+        $this->assertStringContainsString('exit 1', $workflow);
+    }
+
     public function test_configuration_failure_returns_failure_without_secrets(): void
     {
         $this->mock(DataBackupService::class, function ($mock) {

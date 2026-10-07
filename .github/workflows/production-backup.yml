@@ -14,8 +14,9 @@ concurrency:
 
 jobs:
   backup:
-    # Secrets never reach PRs, forks or a dispatch on unreviewed branch code.
-    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'
+    # Repository variable: environment vars are unavailable before job startup.
+    # Both schedule and dispatch stay skipped until explicitly enabled.
+    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main' && vars.PRODUCTION_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: production-backup

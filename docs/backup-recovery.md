@@ -34,6 +34,12 @@ La retención local solo funciona sobre archivos presentes. **En un runner efím
 
 Runner elegido y preparado para #24: **GitHub Actions**, `.github/workflows/production-backup.yml`, con `schedule` diario y `workflow_dispatch`. Ejecuta directamente `php artisan data:backup --prune --no-interaction`: un job diario evita 1.440 invocaciones de `schedule:run` por día. Nadie ejecuta `schedule:run` en Render; los demás scheduled commands no quedan automatizados por este workflow.
 
+**Tras merge: runner versionado y desactivado por defecto.** El gate del job exige repo original, `main` y `vars.PRODUCTION_BACKUP_ENABLED == 'true'`. Sin la variable (o con un valor que no habilite el gate), tanto schedule como dispatch quedan `skipped`: no se inicia runner, no se accede a Secrets/TiDB, no se genera dump ni fallo rojo diario. No hay bypass manual. El environment `production-backup` sigue protegiendo los Secrets.
+
+La variable no secreta vive en **Settings → Secrets and variables → Actions → Variables → Repository variables**, no en el environment. [GitHub documenta](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#configuration-variable-precedence) que las variables del environment solo están disponibles cuando el job ya ha empezado; no sirven para este gate previo al runner. Crear `PRODUCTION_BACKUP_ENABLED` con valor `true` solo cuando se apruebe activar; para desactivar, eliminarla o usar `false`. No se configura en esta tarea.
+
+Orden de activación futura: (1) provisionar/verificar destino privado duradero e implementar/verificar upload y retención remota; (2) configurar Secrets del environment; (3) configurar Repository Variable `PRODUCTION_BACKUP_ENABLED=true`; (4) lanzar primero `workflow_dispatch`; (5) verificar objeto duradero y checksum; (6) observar tres días UTC consecutivos; (7) cerrar #24. El schedule queda habilitado con la misma variable, por lo que conviene hacer la activación y el dispatch fuera del horario de las 03:00 UTC. Mientras este PR conserve `Report missing durable destination`, un job activado falla explícitamente: no activar la variable todavía.
+
 Opciones evaluadas:
 
 - **Cron nativo de Render**: requiere plan de pago → NO activado (coste sin aprobación).
@@ -43,7 +49,7 @@ Opciones evaluadas:
 
 **Estado auditado el 2026-10-07: implementación parcial, no activada en producción.** El workflow aún está en el PR (sin merge), no se han encontrado Secrets de backup en el repositorio y no existe evidencia verificable de storage privado duradero provisionado. `render.yaml` y el adapter S3 instalado son configuración, no prueba de un bucket accesible. No se ha consultado ningún valor secreto ni creado recurso facturable.
 
-El workflow comprueba configuración y conexión TLS con `SELECT 1` sin imprimir errores del driver; genera el dump con el comando canónico, verifica SHA-256 con `sha256sum --check --strict` y muestra nombre, bytes y timestamp. Después **termina con fallo operativo explícito por falta de destino duradero**, incluso si el dump temporal fue válido. `always()` limpia el directorio temporal; no publica datos de producción como artifact. No se considera backup automático completo.
+Solo si está activado, el workflow comprueba configuración y conexión TLS con `SELECT 1` sin imprimir errores del driver; genera el dump con el comando canónico, verifica SHA-256 con `sha256sum --check --strict` y muestra nombre, bytes y timestamp. Después **termina con fallo operativo explícito por falta de destino duradero**, incluso si el dump temporal fue válido. `always()` limpia el directorio temporal; no publica datos de producción como artifact. No se considera backup automático completo.
 
 ## Destino y privacidad
 
