@@ -11,4 +11,4 @@ Artisan::command('inspire', function () {
 // Estrategia declarada (Issue #12): backup diario con retencion.
 // Requiere un runner de `schedule:run` cada minuto (cron del proveedor);
 // sin runner estas entradas no se ejecutan. Ver docs/backup-recovery.md.
-Schedule::command('data:backup --prune')->dailyAt('03:00');
+Schedule::command('data:backup --prune')->dailyAt('03:00')->timezone('UTC')->withoutOverlapping(30);

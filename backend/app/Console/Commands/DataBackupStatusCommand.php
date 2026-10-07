@@ -42,7 +42,7 @@ class DataBackupStatusCommand extends Command
                 filesize($file),
                 $ageHours === null ? 'desconocida' : sprintf('%.1f h', $ageHours),
                 $checksum ? 'OK' : 'FALLO',
-                $ageHours !== null && $ageHours > 36 ? 'STALE' : 'OK',
+                ! $checksum ? 'FALLO' : ($ageHours !== null && $ageHours > 36 ? 'STALE' : 'OK'),
             ]]
         );
 

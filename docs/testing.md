@@ -10,6 +10,17 @@ LumaFlow combina tres niveles de pruebas. Cada uno cubre una capa distinta y nin
 
 Las pruebas unitarias y de componentes son necesarias para iterar rapido; los recorridos E2E existen para confirmar que el flujo completo sigue funcionando entre las dos aplicaciones.
 
+## Verificación de backups (#24)
+
+`php artisan test --filter=Backup` verifica schedule 03:00 UTC/`--prune`/mutex,
+restricción del workflow a repo original y `main`, concurrencia, checksum obligatorio,
+configuración de destino y fallo sin secretos. `BackupRestoreTest` genera una copia
+SQLite sintética con prune, comprueba tamaño/SHA-256 y restaura en DB temporal aislada.
+CI de PRs no recibe Secrets de producción ni ejecuta `production-backup.yml`.
+Ese workflow operativo solo tiene schedule/dispatch; no publica artifacts y falla
+explícitamente mientras no exista destino privado duradero verificado.
+La sintaxis del workflow puede comprobarse con `actionlint .github/workflows/production-backup.yml`.
+
 ## Suite E2E
 
 `e2e/` es un paquete del workspace de pnpm que ejecuta Playwright contra un entorno de pruebas propio. No usa Docker ni una base de datos compartida con desarrollo: crea un archivo SQLite local, arranca el backend con el servidor integrado de PHP y el frontend con el servidor de desarrollo de Vite, y los apaga al terminar.

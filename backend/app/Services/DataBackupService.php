@@ -176,7 +176,10 @@ class DataBackupService
             return [];
         }
 
-        return ["--ssl-ca={$ca}"];
+        return [
+            "--ssl-ca={$ca}",
+            ...(($config['driver'] ?? null) === 'mysql' ? ['--ssl-mode=VERIFY_IDENTITY'] : []),
+        ];
     }
 
     public static function buildPgDumpCommand(array $config): array
@@ -255,10 +258,12 @@ class DataBackupService
 
     public function backupDirectory(): string
     {
-        $dir = storage_path('backups');
+        $dir = (string) config('backup.path');
 
         if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            if (! mkdir($dir, 0700, true) && ! is_dir($dir)) {
+                throw new RuntimeException('No se pudo crear el directorio privado de backups.');
+            }
         }
 
         return $dir;
@@ -336,6 +341,7 @@ class DataBackupService
         }
 
         $config = config("database.connections.{$driver}");
+        $this->assertTlsCa($config);
         $process = new Process(self::buildMysqlDumpCommand($config), null, [
             'MYSQL_PWD' => (string) ($config['password'] ?? ''),
         ]);
@@ -372,6 +378,9 @@ class DataBackupService
     private function assertTlsCa(array $config): void
     {
         foreach (self::mysqlTlsArgs($config) as $arg) {
+            if (! str_starts_with($arg, '--ssl-ca=')) {
+                continue;
+            }
             $ca = substr($arg, strlen('--ssl-ca='));
 
             if (! is_file($ca)) {
@@ -503,7 +512,7 @@ class DataBackupService
         $sidecar = "{$file}.sha256";
 
         if (! is_file($sidecar)) {
-            return true;
+            return false;
         }
 
         $expected = explode(' ', trim((string) file_get_contents($sidecar)))[0] ?? '';

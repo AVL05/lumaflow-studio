@@ -69,12 +69,14 @@ class BackupRestoreTest extends TestCase
         $user = User::factory()->create(['name' => 'Sintético']);
         Client::create(['user_id' => $user->id, 'name' => 'Cliente Sintético', 'status' => 'active']);
 
-        $this->artisan('data:backup')
+        $this->artisan('data:backup', ['--prune' => true])
             ->doesntExpectOutputToContain('s3cr3t-canario')
             ->assertExitCode(0);
 
         $service = app(DataBackupService::class);
         $this->backupFile = $this->newestBackup();
+        $this->assertGreaterThan(0, filesize($this->backupFile));
+        $this->assertTrue($service->verifyChecksum($this->backupFile));
 
         // Destruir y recrear vacio.
         DB::purge('sqlite');
@@ -115,10 +117,7 @@ class BackupRestoreTest extends TestCase
         $command = $this->artisan('data:backup')
             ->doesntExpectOutputToContain('s3cr3t-canario');
 
-        if (! DataBackupService::binaryAvailable('mysqldump')) {
-            $command->expectsOutputToContain('mysqldump');
-        }
-
+        $command->expectsOutputToContain('Backup fallido');
         $command->assertExitCode(1);
     }
 }
