@@ -107,3 +107,17 @@ Verificado 2026-10-07: [primeros 10 GB B2 gratuitos](https://www.backblaze.com/c
 [TiDB Cloud Starter gratuito: snapshot automático diario, retención 1 día](https://docs.pingcap.com/tidbcloud/backup-and-restore-serverless/?plan=essential). Protección adicional, no reemplaza B2: sin 7+4 ni independencia DB. No hemos inspeccionado snapshots de la cuenta real.
 
 [Render Cron](https://render.com/docs/cronjobs) de pago y [Render Free](https://render.com/docs/free) efímero no usados. [Actions estándar público](https://docs.github.com/en/billing/concepts/product-billing/github-actions) sin coste de minutos, sin artifacts productivos. [Schedules](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) pueden retrasarse/descartarse y desactivarse tras 60 días inactivo: operador debe observar ejecuciones/cuota, sin SLA.
+
+## Revalidación Sprint 1 — 29/10/2026
+
+`php artisan test --filter=Backup`: **PASS, 32 tests, 264 assertions** después de actualizar Flysystem a 3.35.3. Se ejecuta generación/restauración SQLite sintética con checksum y verificación de datos; S3 fake y SDK mock comprueban descarga, retención, paginación, VersionId, objetos ajenos, checksums ausentes/corruptos, AccessDenied y limpieza ante fallo. Configuración/errores usan canarios, nunca credenciales reales. Los guards de restauración permanecen intactos.
+
+**No ejecutado:** acceso B2 real, ACL/capacidades de una application key real, recuperación MySQL/TiDB y observación de tres días UTC. Los mocks no prueban esos permisos. chmod de tests Windows no acredita ACL/POSIX del host Linux. #24 sigue abierto; no se ha activado `PRODUCTION_BACKUP_ENABLED` ni ejecutado workflow productivo.
+
+Ensayo pendiente de aprobación/infraestructura aislada:
+
+1. Preparar una DB MySQL compatible exclusivamente sintética y un destino privado autorizado con cuota comprobada; guardar secretos fuera del repo y logs. No sustituir variables de producción.
+2. Desde ese entorno, ejecutar `data:backup --remote`, verificar con `data:backup-status --remote` y confirmar objetos + sidecar, SHA-256, tamaño y timestamp. Revisar acceso mínimo y denegación de lectura anónima en el proveedor.
+3. Ejecutar `data:restore <basename> --remote` contra entorno aislado (drill, sin `--apply`); confirmar integridad, tablas, conteos y aislamiento de dos workspaces sintéticos. Si se ensaya `--apply`, usar únicamente otra DB sintética dedicada y validar nuevamente; nunca la DB de origen ni producción.
+4. Ensayar pérdida de permiso/checksum y recuperación del error sin registrar secretos. Antes de prune, inspeccionar selección con dry-run y datos sintéticos con fechas representativas. `--dry-run` aún genera/sube una copia: no usarlo contra producción como si fuera solo lectura.
+5. Registrar evidencia privada y un resumen sin datos en #24. Activar automatización productiva solo mediante autorización separada; después verificar primera copia durable, restore aislado y tres días UTC consecutivos, junto a retención 7+4. El ensayo local no satisface esos criterios.

@@ -104,6 +104,12 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 
 ## Como elegir donde probar
 
+Sprint 1 añade `WorkspaceAssociationSecurityTest` (dos estudios, roles, referencias nuevas/legacy, historial, importación, calendario/reservas y retirada de contexto), `PublicDeliverySecurityTest`, `DeliveryConcurrencyTest`, `AuditLogPrivacyTest` y `ServerLogPrivacyTest`. Se amplían `ContractPortalTest`, `SentryScrubberTest`, Vitest Sentry y el E2E de entregas.
+
+La prueba de concurrencia crea SQLite temporal con WAL, migra solo esa base y arranca dos procesos PHP tras una barrera de lecturas obsoletas. Cubre entregas (aprobaciones/comentarios) y contratos (aceptar/rechazar), con limpieza en finally. No acredita concurrencia MySQL ni acceso externo. El test del servidor verifica stdout/stderr reales con canarios y sin datos de producción. La redacción Sentry se prueba también con Event del SDK PHP y breadcrumbs reales del SDK JS.
+
+Resultados y límites exactos: [informe Sprint 1](plans/2026-10-29-sprint1-security-stability.md). No confundir lint con `format:check`: el segundo mantiene deuda previa y no se ha desactivado.
+
 | Cambio                                            | Nivel minimo esperado                                   |
 | ------------------------------------------------- | ------------------------------------------------------- |
 | Regla de validacion o serializacion de la API     | PHPUnit feature test + actualizar `docs/api.md` si cambia el contrato |
