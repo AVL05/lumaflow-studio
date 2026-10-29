@@ -71,8 +71,6 @@ Estrategia: migraciones aditivas, sin borrar `user_id` ni datos; `UserObserver::
 
 La numeracion comercial (`quote_number`, `invoice_number`) es por workspace con uniques `(workspace_id, numero)`. `users.current_workspace_id` siempre apunta a un workspace con membership (reparacion al login, en `/user`, al aceptar y al retirar; `PUT /workspace/current` solo entre memberships). Sin selector general visible: la UI solo gestiona miembros del estudio actual.
 
-La numeracion comercial (`quote_number`, `invoice_number`) es por workspace con uniques `(workspace_id, numero)`. `users.current_workspace_id` siempre apunta a un workspace con membership (reparacion al login, en `/user`, al aceptar y al retirar; `PUT /workspace/current` solo entre memberships).
-
 ## Tablas de la fase 9
 
 **`tasks`** — `session_id` y `client_id` nullable con `nullOnDelete`. Enums `priority` (low, medium, high, urgent) y `status` (todo, in_progress, waiting, completed, cancelled). `completed_at` lo mantiene coherente el controlador, no el cliente. Indices: `(user_id, status)`, `(user_id, due_date)`, `(user_id, priority)`.

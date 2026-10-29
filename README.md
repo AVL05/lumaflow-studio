@@ -26,17 +26,17 @@ Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conect
 
 LumaFlow Studio es una plataforma de gestión para fotógrafos y pequeños estudios. Reúne la operación diaria y la relación con el cliente sin obligarte a mantener calendarios, hojas de cálculo, documentos y galerías desconectados.
 
-El producto está en **beta pública**. Puedes crear una cuenta y utilizar las funcionalidades actuales de forma gratuita, sin introducir una tarjeta. Todavía no existe un plan de pago ni un proceso de cobro.
+El producto está en **beta pública**, es gratuito y open source con licencia MIT. No hay suscripciones obligatorias, funciones premium ni límites ligados a donaciones. El objetivo es simplificar el trabajo creativo conservando la arquitectura y los datos existentes.
 
-El objetivo de esta etapa es validar el flujo con usuarios reales, detectar qué módulos aportan más valor y mejorar el producto antes de definir límites o planes futuros.
+La evolución para videógrafos, filmmakers y proyectos personales está planificada en [LumaFlow 2.0](docs/plans/2026-10-29-lumaflow-2.0-plan.md). La [auditoría de Fase 0](docs/plans/2026-10-29-lumaflow-2.0-audit.md) distingue funciones actuales y pendientes: todavía no hay briefing estructurado, shot lists ni módulo específico de rodaje.
 
 ## Pruébalo sin registrarte
 
-La [demo interactiva](https://lumaflow.aleviclop.dev/demo) utiliza datos ficticios y no persiste cambios. Permite recorrer una jornada de trabajo, consultar clientes, explorar la agenda y probar la selección de favoritas de una entrega.
+La [demo interactiva](https://lumaflow.aleviclop.dev/demo) utiliza datos ficticios y no persiste cambios. Permite recorrer una jornada de trabajo, consultar clientes, explorar la agenda y consultar una entrega por enlace externo.
 
 | Resumen                     | Agenda                      | Cliente y entrega                     |
 | --------------------------- | --------------------------- | ------------------------------------- |
-| Métricas y trabajo en curso | Sesiones, tareas y entregas | Actividad comercial y galería privada |
+| Métricas y trabajo en curso | Sesiones, tareas y entregas | Actividad comercial y entrega externa |
 
 No consulta información de producción ni comparte datos entre usuarios.
 
@@ -46,10 +46,12 @@ No consulta información de producción ni comparte datos entre usuarios.
 2. **Controla el trabajo.** Reúne cliente, presupuesto, contrato, pago, sesión, tareas, equipo, galería y entrega en un único proyecto.
 3. **Gestiona el negocio.** Crea presupuestos, controla estados y genera facturas PDF.
 4. **Produce y da seguimiento.** Consulta agenda, notificaciones, progreso y actividad.
-5. **Entrega.** Publica una galería privada para revisión, favoritas y aprobación.
+5. **Entrega.** Comparte un enlace externo mediante el portal de LumaFlow y recibe aprobación o una solicitud general de cambios. El acceso al material depende de los permisos del proveedor original.
 6. **Analiza.** Revisa ingresos, carga de trabajo y evolución del estudio con datos reales.
 
-## Capturas reales
+## Capturas de referencia
+
+Estas capturas corresponden a una versión anterior de la interfaz; no acreditan las funcionalidades 2.0 planificadas. La imagen histórica de entrega conserva elementos de galería que ya no forman parte del flujo actual de enlaces externos.
 
 | Dashboard                                                | Calendario                                               | Analítica                                                |
 | -------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
@@ -76,7 +78,7 @@ No consulta información de producción ni comparte datos entre usuarios.
 | **Reservas**                | Solicitudes públicas vinculadas a disponibilidad y seguimiento interno        |
 | **Presupuestos y facturas** | Conceptos, IVA, estados, numeración por estudio y PDF                         |
 | **Contratos**               | Acuerdo con cliente y trabajo, lifecycle con snapshot, portal de revisión y aceptación del cliente |
-| **Colaboración**            | Estudios multiusuario con roles (owner/admin/member) e invitaciones por email |
+| **Colaboración**            | Estudios multiusuario con roles (owner/admin/member) e invitaciones mediante enlace compartido manualmente |
 | **Entregas**                | Enlaces externos de galería con portal privado, contraseña, caducidad y aprobación del cliente |
 | **Equipo y presets**        | Inventario y ajustes de cámara reutilizables                                  |
 | **Localizaciones**          | Mapa, acceso, permisos, coste, clima y equipo recomendado                     |
@@ -229,7 +231,17 @@ El trabajo futuro depende de feedback real y métricas de uso. Posibles líneas 
 - avisos de backup automatizado con runner de cron en producción;
 - subida de source maps para Sentry;
 - sincronización multi-dispositivo del historial IA;
-- límites y planes solo después de validar el uso real.
+- workspace creativo, planificación audiovisual y revisiones externas según el plan 2.0.
+
+## Qué no hace
+
+LumaFlow no es un editor ni un servicio de alojamiento de fotografías, vídeo, RAW, proxies o proyectos multimedia. Las entregas son enlaces externos; no controla los permisos ni garantiza la disponibilidad del proveedor. La IA es opcional y no es necesaria para gestionar el estudio.
+
+## Apoyar LumaFlow
+
+El producto seguirá siendo gratuito. Se prevé apoyo voluntario mediante Ko-fi y GitHub Sponsors para mantener la infraestructura y continuar el desarrollo, sin ventajas exclusivas por donar. **Los canales de donación y la página `/support` todavía no están implementados ni activados.** No se publican perfiles sin verificar. Consulta el [diseño y las revisiones previas](docs/plans/2026-10-29-lumaflow-2.0-support.md).
+
+También puedes apoyar reportando problemas reproducibles, mejorando documentación o contribuyendo mediante [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Open source y contribuciones
 
