@@ -1,5 +1,6 @@
 import { expect, test } from "../fixtures/test.js";
 import { apiRequest, findResourceId } from "../support/app.js";
+import { apiUrl } from "../support/env.js";
 
 test.describe("portal de entrega", () => {
   test("el cliente aprueba la entrega desde el enlace publico", async ({ ownerPage, visitorPage }) => {
@@ -70,6 +71,15 @@ test.describe("portal de entrega", () => {
     // comprueba por API (sin navegacion en curso) y despues se recarga la UI.
     const refreshed = await apiRequest(ownerPage, "GET", `/deliveries/${deliveryId}`);
     expect((await refreshed.json()).data.status).toBe("approved");
+
+    // Los reintentos del visitante no deben repetir efectos en el estudio.
+    for (let retry = 0; retry < 2; retry++) {
+      const response = await visitorPage.request.post(`${apiUrl}/public/deliveries/${publicToken}/approve`);
+      expect(response.status()).toBe(200);
+    }
+    const notifications = await apiRequest(ownerPage, "GET", "/notifications");
+    const payload = await notifications.json();
+    expect(payload.data.filter((item) => item.message === deliveryTitle && item.title === "Entrega aprobada por el cliente")).toHaveLength(1);
 
     await ownerPage.reload();
     const card = ownerPage.getByRole("article").filter({ hasText: deliveryTitle });

@@ -41,6 +41,8 @@ Los recursos de producto requieren email verificado y onboarding completado. Una
 
 Todos los listados aceptan `page`, `per_page` (acotado) y devuelven `{data, links, meta}`. Los recursos ajenos responden **404, no 403**.
 
+Las asociaciones se validan contra el workspace del recurso en una actualización y contra el workspace actual autorizado en una creación. Una membership en otro estudio no permite mezclar sus entidades. La autorización del recurso precede a la validación de asociaciones. Registros históricos con referencias entre estudios quedan excluidos de lecturas/listados/relaciones, sin borrarlos; corregirlos requiere revisión privada y copia recuperable.
+
 La frontera de autorizacion es la **membership del workspace** (`WorkspaceAuthorizer`): un usuario accede a un recurso solo si pertenece a su workspace, aunque no sea quien lo creo. `user_id` se conserva como creador/compatibilidad. Las notificaciones siguen siendo bandeja personal por `user_id`.
 
 ### Estudio compartido
@@ -73,11 +75,17 @@ Permisos: **owner** accede, lista, invita (admin/member), revoca y retira; **adm
 
 ### Entregas por enlace externo
 
-`Delivery` no aloja originales. Guarda `gallery_url` (max 2048), `gallery_provider` (Pixieset,
+`Delivery` no aloja originales. Guarda `gallery_url` (HTTP/HTTPS sin credenciales en la URL, max 2048), `gallery_provider` (Pixieset,
 Pic-Time, Lightroom, Drive, Dropbox, OneDrive, WeTransfer u otro), `gallery_password` opcional y
 `gallery_expires_at` opcional, junto a estado, `client_message` y `client_responded_at` para la
 aprobacion. El portal publico (`/public/deliveries/{token}`) muestra el enlace y la contraseña
 para que el cliente revise en su galeria y vuelva a aprobar o pedir cambios.
+
+El portal solo admite `pending`, `delivered` y `approved`, sin caducidad o con `gallery_expires_at` desde hoy inclusive. Borrador, archivada, caducada, token desconocido o asociaciones inválidas devuelven 404. Archivar retira el acceso al portal; no cambia los permisos del proveedor externo. Los enlaces históricos con protocolo inseguro no se publican; el estudio puede corregirlos sin borrar datos.
+
+`POST /public/deliveries/{token}/approve` repetido devuelve la entrega aprobada sin alterar la fecha ni crear otra actividad/notificación. `request-changes` repetido con el mismo comentario es idempotente; tras aprobación devuelve 422. Un comentario concurrente diferente basado en datos obsoletos devuelve 409: recargar antes de reintentar. Los cambios aceptados conservan su actividad histórica. Estado, actividad y notificación se confirman en la misma transacción. Contratos conservan `meta.already_processed`, calculado dentro de la transacción.
+
+Los enlaces de contrato legacy de trabajos admiten también únicamente HTTP/HTTPS sin credenciales. Calendario público y nuevas solicitudes de reserva usan el estudio propio del publicador; otras memberships o cambiar el workspace actual no amplían ese permiso público.
 
 Los PDF de presupuestos y facturas son documentos descargables autenticados. No forman parte del exportador generico CSV/JSON.
 
