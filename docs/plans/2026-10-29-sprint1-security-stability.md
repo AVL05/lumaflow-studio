@@ -2,6 +2,8 @@
 
 Fecha: 29/10/2026. Issues #39, #49, #24; epic #37. Estado: **implementado y validado localmente; sin publicar ni desplegar**. La Fase 0 se conserva como evidencia histórica. Este informe describe resultados del sprint, no una auditoría general nueva.
 
+Actualización posterior: [Sprint 1.5](2026-10-29-sprint15-integration-stability.md) integra commits locales. El fallo de formato observado aquí era CRLF del checkout Windows: normalizarlo no cambia ningún blob de los 228 archivos fuente. La afirmación de CI bloqueado por deuda de formato no estaba verificada remotamente; la ejecución remota de `efd6ef5` sí pasó. El formato local queda resuelto y el CI de los nuevos commits sigue pendiente de publicación autorizada. Las filas siguientes conservan la evidencia histórica del Sprint 1.
+
 ## Alcance y conservación del trabajo previo
 
 Se mantiene `feat/backup-b2-storage`, HEAD `efd6ef5`, sin commits, push, PR, merge ni cambio de rama. PR #35 permanece separado: no atribuirle estos cambios. Se preservan los cambios locales iniciales de README, docs/database, docs/roadmap, los cuatro documentos de Fase 0, test_plan.md y las retiradas previas de TagRequest/ScoreBadge. Esas retiradas no pertenecen al sprint.

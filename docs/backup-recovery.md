@@ -121,3 +121,44 @@ Ensayo pendiente de aprobación/infraestructura aislada:
 3. Ejecutar `data:restore <basename> --remote` contra entorno aislado (drill, sin `--apply`); confirmar integridad, tablas, conteos y aislamiento de dos workspaces sintéticos. Si se ensaya `--apply`, usar únicamente otra DB sintética dedicada y validar nuevamente; nunca la DB de origen ni producción.
 4. Ensayar pérdida de permiso/checksum y recuperación del error sin registrar secretos. Antes de prune, inspeccionar selección con dry-run y datos sintéticos con fechas representativas. `--dry-run` aún genera/sube una copia: no usarlo contra producción como si fuera solo lectura.
 5. Registrar evidencia privada y un resumen sin datos en #24. Activar automatización productiva solo mediante autorización separada; después verificar primera copia durable, restore aislado y tres días UTC consecutivos, junto a retención 7+4. El ensayo local no satisface esos criterios.
+
+## Ensayo MySQL/B2 pendiente — Sprint 1.5
+
+**NOT RUN.** En el equipo de esta sesión no hay daemon Docker activo, clientes mysql/mysqldump disponibles ni variables de credenciales de ensayo autorizadas. No utilizar secretos productivos como alternativa. Las pruebas fake/SQLite existentes siguen verificando lógica, no conectividad externa.
+
+Procedimiento reproducible para un operador con acceso autorizado:
+
+1. Usar checkout privado aislado sin `.env` productivo ni configuración cacheada. Preparar MySQL/TiDB de ensayo con clientes mysql/mysqldump, PDO MySQL y CA/TLS compatibles. Crear dos bases vacías llamadas `lumaflow_recovery_test_source` y `lumaflow_recovery_test_target`; usar una cuenta temporal de ensayo con CREATE/DROP DATABASE para el drill, nunca la cuenta diaria productiva. Comprobar cuota/permisos antes de crear recursos; esta sesión no los provisiona.
+2. Inyectar variables por entorno privado: `APP_ENV=testing`, `APP_DEBUG=false`, APP_KEY sintética, `DB_CONNECTION=mysql`, DB_DATABASE de ensayo, DB_HOST/PORT/USERNAME/PASSWORD autorizados y `MYSQL_ATTR_SSL_CA` cuando corresponda. No definir DB_URL; desactivar DSN Sentry y usar `MAIL_MAILER=array`, caché array y BACKUP_PATH privado fuera del repo. Configurar BACKUP_S3_* únicamente para bucket B2 privado de ensayo, sin objetos reales. No volcar configuración ni secretos por consola. Verificar explícitamente entorno, nombre de DB y bucket de ensayo antes de cualquier comando.
+3. Desde backend, con source seleccionada y vacía:
+
+```bash
+php artisan migrate --no-interaction
+php artisan db:seed --class='Database\Seeders\E2ESeeder' --no-interaction
+php artisan data:backup --remote --no-interaction
+php artisan data:backup-status --remote
+```
+
+El seeder actual crea cinco cuentas sintéticas y sus cinco estudios/memberships; no usa clientes reales. Añadir estas filas de dominio **solo en esa source sintética** mediante el cliente SQL privado:
+
+```sql
+INSERT INTO clients (user_id, workspace_id, name, status, created_at, updated_at)
+SELECT id, current_workspace_id, CONCAT('Recovery synthetic ', id), 'active', NOW(), NOW() FROM users;
+INSERT INTO photography_jobs (user_id, workspace_id, client_id, title, specialty, workflow_key, status, contract_status, created_at, updated_at)
+SELECT user_id, workspace_id, id, 'Recovery synthetic project', 'general', 'general', 'lead', 'not_required', NOW(), NOW() FROM clients;
+```
+
+Generar otra copia con `data:backup --remote --no-interaction` y registrar su basename/sidecar/timestamp/checksum sin credenciales. No usar `--prune` durante este ensayo de conectividad ni contra un destino compartido.
+
+4. Cambiar únicamente a target vacía y comprobar de nuevo DB/entorno/bucket. `php artisan data:restore <basename-sintético> --remote` debe completar el drill temporal. Solo en target sintética vacía, `php artisan data:restore <basename-sintético> --remote --apply` permite verificar la aplicación interactiva; no usar `--force-production` ni omitir confirmación. Comparar source/target: cinco usuarios, cinco workspaces, cinco memberships, cinco clientes y cinco trabajos, mismo conjunto de migraciones y cero relaciones incoherentes:
+
+```sql
+SELECT COUNT(*) FROM photography_jobs j JOIN clients c ON c.id = j.client_id WHERE j.workspace_id <> c.workspace_id;
+SELECT COUNT(*) FROM workspace_memberships m JOIN workspaces w ON w.id = m.workspace_id WHERE m.role = 'owner' AND m.user_id = w.user_id;
+```
+
+Esperados: 0 y 5. Una discrepancia bloquea la validación. No afirmar que el chequeo genérico de tablas/usuarios del drill comprueba por sí solo estas relaciones.
+
+5. Verificar en B2 privacidad, aplicación de permisos mínimos, lectura anónima denegada, descarga íntegra y denegación esperada al retirar permisos de una key de ensayo. Contrastar retención/borrado de versiones con fixtures sintéticas en bucket exclusivo y el dry-run del runbook; ese dry-run también sube una copia. Adjuntar únicamente resultados agregados a #24. Activación productiva y tres días UTC siguen siendo una validación separada.
+
+Los comandos anteriores están preparados, **no ejecutados**. No cerrar #24 hasta disponer de la evidencia externa necesaria.

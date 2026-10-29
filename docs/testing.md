@@ -96,7 +96,7 @@ La cuenta de acceso (`e2e.acceso@lumaflow.test`) es independiente a proposito: e
 
 ### Ejecucion en serie
 
-La suite comparte una unica base SQLite, asi que `playwright.config.js` fija `fullyParallel: false` y `workers: 1`. Migrar a una base por test permitiria paralelizar, pero no aporta valor con siete recorridos.
+La suite comparte una unica base SQLite, asi que `playwright.config.js` fija `fullyParallel: false` y `workers: 1`. La suite actual contiene quince recorridos; una base por test permitiría paralelizar, pero no se introduce ese cambio en este sprint.
 
 ## Integracion en CI
 
@@ -108,7 +108,11 @@ Sprint 1 añade `WorkspaceAssociationSecurityTest` (dos estudios, roles, referen
 
 La prueba de concurrencia crea SQLite temporal con WAL, migra solo esa base y arranca dos procesos PHP tras una barrera de lecturas obsoletas. Cubre entregas (aprobaciones/comentarios) y contratos (aceptar/rechazar), con limpieza en finally. No acredita concurrencia MySQL ni acceso externo. El test del servidor verifica stdout/stderr reales con canarios y sin datos de producción. La redacción Sentry se prueba también con Event del SDK PHP y breadcrumbs reales del SDK JS.
 
-Resultados y límites exactos: [informe Sprint 1](plans/2026-10-29-sprint1-security-stability.md). No confundir lint con `format:check`: el segundo mantiene deuda previa y no se ha desactivado.
+Resultados y límites exactos: [informe Sprint 1](plans/2026-10-29-sprint1-security-stability.md) e [integración Sprint 1.5](plans/2026-10-29-sprint15-integration-stability.md). `format:check` pasa tras fijar LF en Git/Prettier: los 226 fallos locales anteriores eran finales de línea CRLF, sin diferencias de contenido respecto a los blobs versionados. No se ha desactivado ni reducido el gate.
+
+`pnpm run test:audit` ejecuta cinco tests con Node nativo para la política de auditoría; también forma parte de `pnpm run test`. CI ejecuta `pnpm audit --prod` y `composer audit --locked` como controles estrictos. La auditoría pnpm completa guarda JSON y su código de salida, y `scripts/check-security-audit.mjs` solo admite GHSA-gcqx-w48m-w2h4 bajo, deepmerge 4.3.1, sin parche y en su ruta concreta de build PWA. Emite warning y resumen visibles; cualquier otro aviso o error de informe/red falla. Cambiar versión, ruta, severidad o disponibilidad del parche invalida la excepción. No hay `continue-on-error` ni ignores generales. La matriz en #49 explica la mitigación.
+
+La ejecución remota histórica de Actions no valida commits locales nuevos. El gate completo del nuevo SHA debe verificarse tras publicación autorizada; esta sesión no hace push ni dispatch.
 
 | Cambio                                            | Nivel minimo esperado                                   |
 | ------------------------------------------------- | ------------------------------------------------------- |

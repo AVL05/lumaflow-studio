@@ -10,7 +10,7 @@ La [auditoría de Fase 0](plans/2026-10-29-lumaflow-2.0-audit.md), el [plan por 
 
 ## V1 hardening completado
 
-Sprint 1 de seguridad 2.0: [implementación y validación local](plans/2026-10-29-sprint1-security-stability.md), [matriz de dependencias](plans/2026-10-29-sprint1-dependencies.md). Cambios sin publicar; #39/#49/#24 siguen abiertos. No equivale a release ni recuperación productiva verificada. Prettier global continúa bloqueando CI y la recuperación externa necesita ensayo autorizado.
+Sprint 1 de seguridad 2.0: [implementación y validación local](plans/2026-10-29-sprint1-security-stability.md), [matriz de dependencias](plans/2026-10-29-sprint1-dependencies.md). [Sprint 1.5](plans/2026-10-29-sprint15-integration-stability.md) integra commits locales y corrige el formato Windows mediante LF. Formato, lint, tests y build pasan localmente; CI incorpora auditorías con una excepción visible y acotada de build. #39/#49/#24 siguen abiertos, sin push ni release. La recuperación externa y el CI de los nuevos commits siguen pendientes.
 
 - Red de seguridad E2E (Playwright, 12 recorridos, CI).
 - Workspaces con ownership, memberships, roles e invitaciones.

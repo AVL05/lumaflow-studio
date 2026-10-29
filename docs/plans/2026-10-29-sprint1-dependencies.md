@@ -56,6 +56,8 @@ Cada fila recoge paquete, versión previa, severidad, ruta, versión corregida e
 
 Se elige actualizar los paquetes afectados, incluidos los avisos de exposición condicionada, dentro de las mayores existentes. El dry-run Composer resuelve exactamente seis actualizaciones, sin instalaciones ni eliminaciones. No se han lanzado payloads de explotación contra producción ni se ha confirmado incidente de credenciales. Las conclusiones de no uso se basan en las rutas e imports actuales, no en una garantía permanente. No añadir excepciones de auditoría para ocultar avisos.
 
+Actualización Sprint 1.5: advisory y registry verificados de nuevo; deepmerge sigue en 4.3.1 sin parche. CI añade una excepción explícita **solo** para ese aviso bajo, versión y ruta de build, con warning/resumen y JSON público del resultado. La auditoría original conserva exit 1; producción y Composer deben permanecer en cero. La política no acepta nuevos avisos bajos ni otros errores y está cubierta por cinco tests. Retirar la excepción cuando exista parche o desaparezca la ruta; #49 sigue abierto. Ver [informe de integración](2026-10-29-sprint15-integration-stability.md).
+
 ## pnpm — árbol completo de desarrollo/build
 
 El análisis completo adicional detectó 46 avisos (17 altos, 21 moderados, 8 bajos) en nueve paquetes/nombres. No eran parte de los 14 avisos runtime anteriores. Se resuelven 45 mediante patches dentro de la mayor instalada. Queda un aviso bajo sin parche upstream. No se silencian avisos ni se rebaja el umbral de CI.
