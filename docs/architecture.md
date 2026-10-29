@@ -45,6 +45,8 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **Multi-tenancy por workspace con memberships.** `workspaces` es el propietario logico: cada usuario accede solo a workspaces con membership (`owner/admin/member`). La fuente unica es `WorkspaceAuthorizer` (pertenencia, rol, invitacion, retirada); los scopes de lectura usan `accessibleBy($user)` y las policies resuelven por workspace con 404 ante lo ajeno. `user_id` se conserva como creador/compatibilidad; las notificaciones siguen personales.
 
+`BelongsToWorkspace` valida las referencias al guardar y aplica el scope global de integridad al leer, con subconsultas EXISTS por clave relacionada. También protege registros anteriores mal asociados sin migrarlos ni borrarlos. Las actividades comprueban el workspace de su sujeto y el equipo del trabajo comprueba el pivot. Esto complementa las policies y `accessibleBy`, no los sustituye. Las escrituras SQL directas pueden eludir eventos del modelo: no utilizarlas para asociaciones de dominio sin validación equivalente.
+
 **404 en lugar de 403.** Devolver 403 sobre un recurso ajeno confirma que existe. Las policies de `app/Policies` extienden `OwnedResourcePolicy` y devuelven `false`; el metodo `authorizeOwnership()` del controlador base traduce ese `false` en un 404. Los recursos anteriores a la fase 9 hacen lo mismo con un `ensureOwnership()` privado.
 
 **La logica vive en servicios.** Los controladores son delgados. `CalendarService`, `AnalyticsService`, `SearchService`, `BulkActionService`, `ExportService`, `CommercialDocumentService`, `ChecklistService`, `ActivityLogger`, `NotificationService`, `HealthService` y la cadena de IA concentran las reglas. Esto permite testear dominio sin HTTP y reutilizar reglas.
@@ -75,7 +77,9 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **Persistencia.** MySQL compatible como base principal (+ SQLite local/test); Laravel Cache para agregados; IndexedDB del navegador para historial IA; las fotografías originales viven siempre en almacenamiento externo (Drive/Dropbox/Pixieset), nunca en LumaFlow.
 
-**Fronteras de seguridad.** Memberships (`owner/admin/member`); aislamiento por workspace con 404 ante lo ajeno; tokens públicos opacos con hash + caducidad + revocación (portales, invitaciones, calendario); snapshots de contrato congelados; `user_id` conservado como creador.
+**Fronteras de seguridad.** Memberships (`owner/admin/member`); aislamiento por workspace con 404 ante lo ajeno; contratos e invitaciones con tokens hasheados. Entregas y calendario conservan sus tokens legacy en base de datos por compatibilidad: no afirmar que todos los tokens públicos están hasheados. Las entregas limitan acceso por estado/caducidad; los contratos conservan snapshot congelado y revocación explícita. `user_id` se conserva como creador.
+
+**Respuestas públicas transaccionales.** `PublicDeliveryService` aplica actualizaciones condicionales; `ContractPortalService` adquiere bloqueo antes de resolver el estado. La decisión y sus actividades/notificaciones son atómicas e idempotentes. Tests con dos procesos reales SQLite cubren seis carreras; la validación con MySQL/TiDB queda pendiente de un entorno aislado.
 
 **Despliegue real.** SPA en Vercel, API en Render (web service, sin cron activo), MySQL compatible en TiDB Cloud. Sin Redis obligatorio, sin APM, sin session replay.
 

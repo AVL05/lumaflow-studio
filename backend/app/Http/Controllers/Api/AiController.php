@@ -55,6 +55,7 @@ class AiController extends Controller
             ->all();
 
         $conversation->messages()->create([
+            'workspace_id' => $conversation->workspace_id,
             'user_id' => $request->user()->id,
             'role' => 'user',
             'content' => $message,
@@ -63,7 +64,7 @@ class AiController extends Controller
 
         try {
             $response = $this->ollama->chat($this->prompts->chat(
-                $this->context->forUser($request->user(), ['conversation_id' => $conversation->id]),
+                $this->context->forUser($request->user(), ['conversation_id' => $conversation->id], $conversation->workspace_id),
                 $message,
                 $history
             ));
@@ -73,6 +74,7 @@ class AiController extends Controller
 
         $answer = $response['message']['content'] ?? '';
         $assistantMessage = $conversation->messages()->create([
+            'workspace_id' => $conversation->workspace_id,
             'user_id' => $request->user()->id,
             'role' => 'assistant',
             'content' => $answer,

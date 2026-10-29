@@ -16,7 +16,7 @@ class ClientImportService
             foreach ($rows as $row) {
                 $email = isset($row['email']) ? mb_strtolower(trim($row['email'])) : null;
 
-                if ($email && $user->clients()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
+                if ($email && $user->clients()->accessibleBy($user)->where('workspace_id', $user->current_workspace_id)->whereRaw('LOWER(email) = ?', [$email])->exists()) {
                     $skipped++;
 
                     continue;

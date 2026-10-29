@@ -85,7 +85,11 @@ class Job extends Model
 
     public function gearItems(): BelongsToMany
     {
-        return $this->belongsToMany(GearItem::class);
+        return $this->belongsToMany(GearItem::class)->whereExists(function ($query): void {
+            $query->selectRaw('1')->from('photography_jobs as gear_job')
+                ->whereColumn('gear_job.id', 'gear_item_job.job_id')
+                ->whereColumn('gear_job.workspace_id', 'gear_items.workspace_id');
+        });
     }
 
     public function activities(): MorphMany

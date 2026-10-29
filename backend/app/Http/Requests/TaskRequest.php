@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Task;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,10 +16,12 @@ class TaskRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
-            'client_id' => ['nullable', Rule::exists('clients', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('workspace_id', $workspaceId)],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('workspace_id', $workspaceId)],
+            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('workspace_id', $workspaceId)],
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:3000'],
             'priority' => ['required', Rule::in(Task::PRIORITIES)],

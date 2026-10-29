@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,10 +15,12 @@ class SessionRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('workspace_id', $workspaceId)],
             'name' => ['required', 'string', 'max:160'],
-            'location_id' => ['nullable', Rule::exists('locations', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'location_id' => ['nullable', Rule::exists('locations', 'id')->where('workspace_id', $workspaceId)],
             'date' => ['required', 'date'],
             'time' => ['nullable', 'date_format:H:i'],
             'location_name' => ['nullable', 'string', 'max:160'],

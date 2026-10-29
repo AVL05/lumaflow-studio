@@ -31,7 +31,7 @@ class InvoiceController extends Controller
     public function store(Request $request): InvoiceResource
     {
         $data = $request->validate([
-            'quote_id' => ['required', Rule::exists('quotes', 'id')->whereIn('workspace_id', $request->user()->workspaceIds())],
+            'quote_id' => ['required', Rule::exists('quotes', 'id')->where('workspace_id', app(WorkspaceAuthorizer::class)->workspaceForRequest($request))],
             'issue_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
             'notes' => ['nullable', 'string', 'max:5000'],

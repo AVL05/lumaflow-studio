@@ -18,7 +18,10 @@ class IcsFeedService
     {
         $from = now()->subDays(30)->toDateString();
         $to = now()->addDays(180)->toDateString();
-        $events = $this->calendar->events($user, $from, $to);
+        // El token publica únicamente el estudio propio, no otras memberships.
+        $workspaceId = (int) $user->workspaces()->value('id');
+        abort_unless($workspaceId, 404);
+        $events = $this->calendar->events($user, $from, $to, [], $workspaceId);
 
         $lines = [
             'BEGIN:VCALENDAR',

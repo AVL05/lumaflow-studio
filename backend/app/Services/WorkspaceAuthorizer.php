@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\WorkspaceMembership;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 /**
  * Unica fuente para responder a la autorizacion por workspace (Issue #5).
@@ -15,6 +16,22 @@ use Illuminate\Database\Eloquent\Model;
  */
 class WorkspaceAuthorizer
 {
+    public function workspaceForRequest(Request $request): int
+    {
+        foreach ($request->route()->parameters() as $resource) {
+            if ($resource instanceof Model && array_key_exists('workspace_id', $resource->getAttributes())) {
+                $this->requireAccessOr404($request->user(), $resource);
+
+                return (int) $resource->workspace_id;
+            }
+        }
+
+        $workspaceId = (int) $request->user()->current_workspace_id;
+        abort_unless($this->isMember($request->user(), $workspaceId), 404);
+
+        return $workspaceId;
+    }
+
     /** @return int[] */
     public function workspaceIds(User $user): array
     {

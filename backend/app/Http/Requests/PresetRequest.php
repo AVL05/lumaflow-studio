@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,8 +15,10 @@ class PresetRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'gear_item_id' => ['nullable', Rule::exists('gear_items', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'gear_item_id' => ['nullable', Rule::exists('gear_items', 'id')->where('workspace_id', $workspaceId)],
             'name' => ['required', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:80'],
             'iso' => ['nullable', 'string', 'max:20'],

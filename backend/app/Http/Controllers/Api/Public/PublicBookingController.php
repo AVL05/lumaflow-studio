@@ -24,7 +24,9 @@ class PublicBookingController extends Controller
     {
         $user = User::query()->where('studio_slug', $slug)->whereNotNull('bookings_enabled_at')->firstOrFail();
 
-        $booking = $user->bookingRequests()->create($request->validated() + ['status' => 'new']);
+        $workspaceId = $user->workspaces()->value('id');
+        abort_unless($workspaceId, 404);
+        $booking = $user->bookingRequests()->create($request->validated() + ['status' => 'new', 'workspace_id' => $workspaceId]);
 
         $this->notifications->info(
             $user,

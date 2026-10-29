@@ -28,6 +28,7 @@ class ActivityLogger
     {
         return Activity::create([
             'user_id' => $user->id,
+            'workspace_id' => $subject->getAttribute('workspace_id'),
             'subject_type' => $subject->getMorphClass(),
             'subject_id' => $subject->getKey(),
             'type' => $type,

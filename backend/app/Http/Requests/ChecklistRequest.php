@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Checklist;
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,8 +16,10 @@ class ChecklistRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('workspace_id', $workspaceId)],
             'name' => ['required', 'string', 'max:120'],
             'type' => ['required', Rule::in(Checklist::TYPES)],
             'use_template' => ['sometimes', 'boolean'],

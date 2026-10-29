@@ -20,9 +20,11 @@ class JobRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'client_id' => ['nullable', Rule::exists('clients', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
-            'location_id' => ['nullable', Rule::exists('locations', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('workspace_id', $workspaceId)],
+            'location_id' => ['nullable', Rule::exists('locations', 'id')->where('workspace_id', $workspaceId)],
             'title' => ['required', 'string', 'max:180'],
             'specialty' => ['required', Rule::in(array_keys(JobWorkflowService::WORKFLOWS))],
             'workflow_key' => ['required', Rule::in(array_keys(JobWorkflowService::WORKFLOWS))],
@@ -32,9 +34,9 @@ class JobRequest extends FormRequest
             'budget' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'deposit_amount' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'contract_status' => ['required', Rule::in(Job::CONTRACT_STATUSES)],
-            'contract_url' => ['nullable', 'url', 'max:255'],
+            'contract_url' => ['nullable', 'url:http,https', 'not_regex:~^https?://[^/?#]*@~i', 'max:255'],
             'gear_item_ids' => ['sometimes', 'array'],
-            'gear_item_ids.*' => [Rule::exists('gear_items', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'gear_item_ids.*' => [Rule::exists('gear_items', 'id')->where('workspace_id', $workspaceId)],
             'create_workflow_tasks' => ['sometimes', 'boolean'],
         ];
     }
