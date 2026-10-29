@@ -45,7 +45,7 @@ class AuditLog
     {
         self::write('error', 'ai.failed', [
             'operation' => $operation,
-            'reason' => $reason,
+            'reason' => preg_match('/\A(?:connection_failed|invalid_json|http_\d{3}|[A-Za-z]+Exception)\z/', $reason) ? $reason : 'inference_failed',
             'user_id' => $userId,
         ]);
     }
@@ -55,7 +55,7 @@ class AuditLog
     {
         self::write('warning', 'mail.failed', [
             'mailable' => $mailable,
-            'reason' => $reason,
+            'reason' => preg_match('/\A[A-Za-z_\\\\]+Exception\z/', $reason) ? $reason : 'mail_delivery_failed',
             'user_id' => $userId,
         ]);
     }
@@ -65,10 +65,9 @@ class AuditLog
     {
         self::write('error', 'api.exception', [
             'exception' => $exception::class,
-            'message' => $exception->getMessage(),
             'file' => $exception->getFile().':'.$exception->getLine(),
             'method' => $method,
-            'path' => $path,
+            'path' => SentryScrubber::scrubUrl($path),
             'user_id' => $userId,
             'request_id' => $requestId,
         ]);

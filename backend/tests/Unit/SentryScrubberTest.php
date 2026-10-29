@@ -4,9 +4,46 @@ namespace Tests\Unit;
 
 use App\Support\SentryScrubber;
 use PHPUnit\Framework\TestCase;
+use Sentry\Breadcrumb;
+use Sentry\Event;
+use Sentry\ExceptionDataBag;
+use Sentry\UserDataBag;
 
 class SentryScrubberTest extends TestCase
 {
+    public function test_native_sdk_event_keeps_exception_type_without_private_content(): void
+    {
+        $event = Event::createEvent();
+        $event->setMessage('MESSAGE_CANARY');
+        $event->setRequest(['url' => 'https://example.test/contract/TOKEN_CANARY?signature=QUERY_CANARY', 'data' => ['secret' => 'BODY_CANARY']]);
+        $event->setExceptions([new ExceptionDataBag(new \RuntimeException('EXCEPTION_CANARY'))]);
+        $event->setUser(new UserDataBag(7, 'EMAIL_CANARY@example.test'));
+        $event->setExtra(['payload' => 'EXTRA_CANARY']);
+        $event->setBreadcrumb([new Breadcrumb('error', 'default', 'log', 'CRUMB_CANARY', ['token' => 'DATA_CANARY'])]);
+        $clean = SentryScrubber::scrubSdkEvent($event);
+        $this->assertSame('RuntimeException', $clean->getExceptions()[0]->getType());
+        $this->assertSame('[REDACTED]', $clean->getExceptions()[0]->getValue());
+        $this->assertNull($clean->getUser()->getEmail());
+        $this->assertSame(7, $clean->getUser()->getId());
+        $this->assertSame([], $clean->getExtra());
+        $this->assertNull($clean->getBreadcrumbs()[0]->getMessage());
+        $this->assertStringNotContainsString('CANARY', json_encode($clean->getRequest()));
+    }
+
+    public function test_exception_payloads_query_credentials_and_case_insensitive_headers_are_removed(): void
+    {
+        $clean = SentryScrubber::scrub([
+            'message' => 'MESSAGE_CANARY',
+            'extra' => ['private' => 'EXTRA_CANARY'],
+            'exception' => ['values' => [['type' => 'RuntimeException', 'value' => 'EXCEPTION_CANARY', 'stacktrace' => ['frames' => [['filename' => 'app.php', 'lineno' => 12, 'vars' => ['secret' => 'VARS_CANARY']]]]]]],
+            'request' => ['headers' => ['AUTHORIZATION' => 'HEADER_CANARY'], 'url' => 'https://user:PASS_CANARY@example.test/api/public/deliveries/PATH_CANARY?signature=QUERY_CANARY#HASH_CANARY', 'query_string' => 'QUERY_CANARY', 'cookies' => ['a' => 'COOKIE_CANARY']],
+            'breadcrumbs' => ['values' => [['message' => 'BREADCRUMB_CANARY', 'data' => ['token' => 'DATA_CANARY']]]],
+        ]);
+        $this->assertStringNotContainsString('CANARY', json_encode($clean));
+        $this->assertSame('RuntimeException', $clean['exception']['values'][0]['type']);
+        $this->assertSame(12, $clean['exception']['values'][0]['stacktrace']['frames'][0]['lineno']);
+    }
+
     public function test_scrubs_sensitive_headers(): void
     {
         $event = SentryScrubber::scrub([

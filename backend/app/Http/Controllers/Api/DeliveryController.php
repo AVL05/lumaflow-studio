@@ -108,7 +108,7 @@ class DeliveryController extends Controller
         try {
             Mail::to($delivery->client->email)->send(new DeliveryReadyMail($delivery, $portalUrl));
         } catch (Throwable $exception) {
-            AuditLog::mailFailed(DeliveryReadyMail::class, $exception->getMessage(), $delivery->user_id);
+            AuditLog::mailFailed(DeliveryReadyMail::class, $exception::class, $delivery->user_id);
         }
     }
 

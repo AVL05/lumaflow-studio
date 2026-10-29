@@ -244,3 +244,13 @@ El operador debe hacer manualmente, en este orden:
 11. Observar **tres días UTC consecutivos** y confirmar 7+4/versión antigua purgada; solo entonces cerrar #24. Mantener `Refs #24` hasta cumplirlo. No activación ni producción durante esta implementación.
 
 Ante fallo: exit no cero, revisar B2 permisos/cuota/config y TiDB TLS/allowlist en privado; mensajes técnicos estáticos/clase sin secrets/contenido, Sentry opcional, readiness independiente. Github puede retrasar/descartar schedules y desactivarlos tras 60 días inactivo. [TiDB Starter snapshot diario, retención 1 día](https://docs.pingcap.com/tidbcloud/backup-and-restore-serverless/?plan=essential) es segunda capa, no sustituye B2 independiente 7+4; cuenta real no auditada. Ver [backup-recovery.md](backup-recovery.md) para inventario, versiones, límites y drill sintético reproducible.
+
+## Endurecimiento de logs — Sprint 1 (implementado localmente)
+
+El handler de excepciones emite `AuditLog` con clase, archivo/línea, ruta plantilla y referencia; no duplica el mensaje/payload bruto en el logger de Laravel. `before_send` PHP recibe un `Sentry\Event` real, y ambos SDK redactan cuerpos, mensajes de excepción, variables de stack, credenciales, consultas y rutas privadas. DSN sigue opcional.
+
+`backend/server.php` es el router que `artisan serve` descubre automáticamente; el runner E2E lo usa también. Conserva el encaminamiento a `public/index.php` y redacta URI antes de stdout. El Dockerfile existente conserva su comando. No se han desplegado estos cambios. Los logs del proxy/proveedor quedan fuera de este proceso: antes de publicar verificar en privado su configuración, retención y redacción de rutas/queries; no copiar logs reales a issues.
+
+En `APP_ENV=production`, el transporte de correo `log` se rechaza antes de escribir cuerpos, también dentro del `failover` predeterminado SMTP/log. Configurar `MAIL_MAILER=smtp` y comprobar entrega real antes del release. No usar `failover` con `log` como sustituto de SMTP: daría por enviado un mensaje y expondría enlaces firmados. En local/E2E se conserva `log` únicamente para cuentas sintéticas; contiene cuerpos y enlaces y no debe recibir información real ni enviarse a Sentry/soporte/artefactos públicos.
+
+Si una revisión privada detecta exposición previa, el operador debe restringir acceso y retención de esos logs y revocar/regenerar los tokens afectados; rotar credenciales SMTP/B2/DB solo si estuvieron expuestas. Esta sesión no ha leído logs productivos ni acredita ausencia de incidentes anteriores. No pegar valores al registrar el incidente.

@@ -14,7 +14,10 @@ use App\Models\User;
 use App\Observers\AnalyticsInvalidationObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Mail\Transport\LogTransport;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +35,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Mail::extend('log', function (array $config): LogTransport {
+            if (app()->environment('production')) {
+                throw new \RuntimeException('The log mail transport is disabled in production. Configure SMTP.');
+            }
+
+            return new LogTransport(Log::channel($config['channel'] ?? config('mail.log_channel')));
+        });
+
         User::observe(UserObserver::class);
 
         // Entidades que alimentan los KPIs de analytics: cualquier

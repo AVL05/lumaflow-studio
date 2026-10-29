@@ -42,10 +42,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $request = request();
 
-            if ($request->is('api/*')) {
-                AuditLog::apiException($exception, $request->method(), $request->path(), $request->user()?->id, $request->attributes->get('request_id'));
+            AuditLog::apiException($exception, $request->method(), $request->route()?->uri() ?? '/[unmatched]', $request->user()?->id, $request->attributes->get('request_id'));
+            if (config('sentry.dsn')) {
+                \Sentry\captureException($exception);
             }
 
-            return true;
+            // El logger por defecto volvería a emitir mensaje, bindings y stack sin redacción.
+            return false;
         });
     })->create();

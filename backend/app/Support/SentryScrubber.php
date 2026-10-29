@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use Sentry\Breadcrumb;
+use Sentry\Event;
+use Sentry\UserDataBag;
+
 /**
  * Redaccion de eventos antes de enviarlos a observabilidad (Issue #11).
  *
@@ -51,8 +55,10 @@ class SentryScrubber
     public static function scrub(array $event): array
     {
         if (isset($event['request']['headers']) && is_array($event['request']['headers'])) {
-            foreach (self::SENSITIVE_HEADERS as $header) {
-                unset($event['request']['headers'][$header]);
+            foreach (array_keys($event['request']['headers']) as $header) {
+                if (in_array(strtolower($header), self::SENSITIVE_HEADERS, true) || preg_match('/token|secret|api.key/i', $header)) {
+                    unset($event['request']['headers'][$header]);
+                }
             }
         }
 
@@ -61,7 +67,16 @@ class SentryScrubber
         }
 
         // Sin cuerpos por defecto: solo metadata inocua sobrevive.
-        unset($event['request']['data']);
+        unset($event['request']['data'], $event['request']['query_string'], $event['request']['cookies'], $event['request']['env'], $event['extra']);
+        if (isset($event['message'])) {
+            $event['message'] = '[REDACTED]';
+        }
+        foreach ($event['exception']['values'] ?? [] as $index => $exception) {
+            $event['exception']['values'][$index]['value'] = '[REDACTED]';
+            foreach ($exception['stacktrace']['frames'] ?? [] as $frame => $value) {
+                unset($event['exception']['values'][$index]['stacktrace']['frames'][$frame]['vars']);
+            }
+        }
 
         if (isset($event['breadcrumbs']['values']) && is_array($event['breadcrumbs']['values'])) {
             $event['breadcrumbs']['values'] = array_values(array_filter(
@@ -72,6 +87,29 @@ class SentryScrubber
 
         if (isset($event['user']) && is_array($event['user'])) {
             $event['user'] = array_intersect_key($event['user'], ['id' => true]);
+        }
+
+        return $event;
+    }
+
+    public static function scrubSdkEvent(Event $event): Event
+    {
+        $clean = self::scrub(['request' => $event->getRequest()]);
+        $event->setRequest($clean['request'])->setMessage('[REDACTED]')->setExtra([]);
+        $event->setUser($event->getUser() ? new UserDataBag($event->getUser()->getId()) : null);
+        foreach ($event->getExceptions() as $exception) {
+            $exception->setValue('[REDACTED]');
+            foreach ($exception->getStacktrace()?->getFrames() ?? [] as $frame) {
+                $frame->setVars([]);
+            }
+        }
+        $event->setBreadcrumb(array_map(function (Breadcrumb $breadcrumb): Breadcrumb {
+            $clean = self::scrubBreadcrumb(['data' => $breadcrumb->getMetadata()]);
+
+            return new Breadcrumb($breadcrumb->getLevel(), $breadcrumb->getType(), $breadcrumb->getCategory(), null, $clean['data'] ?? [], $breadcrumb->getTimestamp());
+        }, $event->getBreadcrumbs()));
+        foreach ($event->getContexts() as $name => $context) {
+            $event->setContext($name, $name === 'trace' ? array_intersect_key($context, array_flip(['trace_id', 'span_id', 'parent_span_id', 'op', 'status'])) : []);
         }
 
         return $event;
@@ -98,15 +136,28 @@ class SentryScrubber
 
     public static function scrubUrl(string $url): string
     {
-        $path = (string) parse_url($url, PHP_URL_PATH);
+        $parts = parse_url($url);
+        if ($parts === false || (isset($parts['scheme']) && ! in_array($parts['scheme'], ['http', 'https'], true))) {
+            return '[REDACTED]';
+        }
+        $path = '/'.ltrim($parts['path'] ?? '', '/');
 
         foreach (self::PUBLIC_TOKEN_PREFIXES as $prefix) {
             if (str_starts_with($path, $prefix)) {
-                return str_replace($path, $prefix.'[REDACTED]', $url);
+                $path = $prefix.'[REDACTED]';
+                break;
             }
         }
 
-        return $url;
+        $path = preg_replace('~^(/?(?:api/)?email/verify/).*~', '$1[REDACTED]', $path);
+        $path = preg_replace('~^(/storage/).*~', '$1[REDACTED]', $path);
+        $origin = isset($parts['host']) ? ($parts['scheme'] ?? 'https').'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '') : '';
+        $query = '';
+        if (isset($parts['query'])) {
+            $query = preg_match('/\A(?:page|per_page)=\d+(?:&(?:page|per_page)=\d+)*\z/', $parts['query']) ? '?'.$parts['query'] : '?[REDACTED]';
+        }
+
+        return $origin.$path.$query;
     }
 
     private static function scrubBreadcrumb(mixed $crumb): ?array
@@ -122,16 +173,10 @@ class SentryScrubber
                 $data['url'] = self::scrubUrl($data['url']);
             }
 
-            foreach (['message', 'input', 'prompt', 'response', 'content'] as $field) {
-                unset($data[$field]);
-            }
-
-            $crumb['data'] = $data;
+            $crumb['data'] = array_intersect_key($data, array_flip(['url', 'method', 'status_code', 'duration_ms']));
         }
 
-        if (isset($crumb['message']) && ! is_string($crumb['message'])) {
-            unset($crumb['message']);
-        }
+        unset($crumb['message']);
 
         return $crumb;
     }
