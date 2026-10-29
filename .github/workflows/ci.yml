@@ -33,6 +33,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test audit policy
+        run: pnpm run test:audit
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod
+
+      - name: Audit complete dependency tree
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --json > dependency-audit.json
+          audit_status=$?
+          set -e
+          node scripts/check-security-audit.mjs dependency-audit.json "$audit_status"
+
+      - name: Upload complete security audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-security-audit
+          path: dependency-audit.json
+          retention-days: 7
+
       - name: Check formatting
         run: pnpm --dir frontend run format:check
 
@@ -70,6 +93,10 @@ jobs:
 
       - name: Install dependencies
         run: composer install --working-dir=backend --no-interaction --prefer-dist
+
+      - name: Audit Composer dependencies
+        working-directory: backend
+        run: composer audit --locked
 
       - name: Prepare Laravel
         working-directory: backend
