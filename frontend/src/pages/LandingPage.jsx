@@ -6,7 +6,7 @@ const workflow = [
   ["Planifica", "Agenda sesiones, tareas, equipo y localizaciones desde un calendario compartido."],
   ["Produce", "Centraliza checklists, presets y contexto del cliente antes de cada sesión."],
   ["Gestiona", "Convierte el trabajo en presupuestos, facturas y entregas trazables."],
-  ["Entrega", "Publica una galería privada para revisión, favoritos y aprobación del cliente."],
+  ["Entrega", "Comparte un enlace externo y sigue la revisión y aprobación del cliente."],
 ];
 
 const faqs = [
@@ -24,11 +24,11 @@ const faqs = [
   ],
   [
     "¿Cómo recibe las fotografías mi cliente?",
-    "Cada entrega dispone de un portal privado donde el cliente puede revisar la galería, seleccionar favoritas y aprobar el trabajo.",
+    "Cada entrega dispone de un portal privado con el enlace de tu galería externa y el estado de revisión y aprobación. Tus fotografías siguen en el proveedor que elijas.",
   ],
   [
     "¿Cuánto cuesta ahora?",
-    "La beta pública es gratuita y no solicita tarjeta. Si el modelo cambia, las condiciones se comunicarán antes de aplicarse.",
+    "LumaFlow seguirá siendo gratuito y no solicita tarjeta. Las donaciones son voluntarias y no desbloquean funciones ni privilegios.",
   ],
 ];
 
@@ -68,8 +68,8 @@ export function LandingPage() {
               Tu estudio fotográfico, en un único lugar.
             </h1>
             <p className="mt-6 max-w-[38rem] text-base leading-7 text-stone-400 sm:text-lg">
-              Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conectados
-              en un mismo flujo.
+              Un CRM gratuito para fotógrafos y filmmakers. Clientes, trabajos, reservas,
+              presupuestos, facturas, sesiones y entregas conectados en un mismo flujo.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -116,7 +116,7 @@ export function LandingPage() {
             {[
               ["Operación", "Sesiones, tareas y calendario"],
               ["Negocio", "Clientes, presupuestos y facturas"],
-              ["Entrega", "Galerías privadas y favoritos"],
+              ["Entrega", "Enlaces externos y aprobación"],
               ["Inteligencia", "IA local con WebGPU"],
             ].map(([title, text]) => (
               <div key={title} className="bg-[#0d0c0b] px-6 py-7 lg:px-8">
@@ -289,7 +289,7 @@ export function LandingPage() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-[0_32px_100px_rgba(0,0,0,.4)]">
               <ProductImage
                 src="/product/gallery.png"
-                alt="Vista real de una entrega y galería privada de cliente en LumaFlow"
+                alt="Entrega con enlace externo y aprobación del cliente en LumaFlow"
                 className="rounded-xl border border-white/8"
               />
             </div>
@@ -325,7 +325,7 @@ export function LandingPage() {
                 <p className="mt-3 text-6xl font-semibold tracking-[-0.06em] text-stone-50">
                   0 €
                   <span className="ml-2 text-base font-normal tracking-normal text-stone-500">
-                    durante la beta
+                    sin planes de pago
                   </span>
                 </p>
               </div>
@@ -339,7 +339,7 @@ export function LandingPage() {
                 to="/pricing"
                 className="mt-3 text-center text-sm font-semibold text-stone-300 transition hover:text-stone-50"
               >
-                Ver condiciones de la beta
+                Gratuidad y apoyo voluntario
               </Link>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../components/branding/BrandLogo";
 import { demoAgenda, demoClients, demoWeek } from "../features/demo/demoData";
@@ -12,14 +12,6 @@ const views = [
 
 export function DemoPage() {
   const [activeView, setActiveView] = useState("overview");
-
-  useEffect(() => {
-    const previousTitle = document.title;
-    document.title = "Demo interactiva | LumaFlow Studio";
-    return () => {
-      document.title = previousTitle;
-    };
-  }, []);
 
   return (
     <div className="min-h-dvh bg-[#090908] text-stone-100">

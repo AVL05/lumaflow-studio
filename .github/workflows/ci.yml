@@ -127,12 +127,20 @@ jobs:
       - name: Test
         run: pnpm run test:e2e
 
+      - name: Build public HTML and PWA
+        run: pnpm run build
+
+      - name: Verify SEO and PWA regressions
+        run: pnpm run test:pwa
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: e2e/playwright-report/
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/pwa/
           retention-days: 7
 
   containers:

@@ -1,5 +1,11 @@
 # API
 
+## Exclusión de indexación — SEO P0/P1 local
+
+El middleware global `ExcludeSearchIndexing` añade `X-Robots-Tag: noindex, nofollow, nosnippet` y `Referrer-Policy: no-referrer` a respuestas Laravel. Las rutas `/api/*` usan `Cache-Control: private, no-store`, también en errores. Son controles de rastreo/caché; no sustituyen autenticación, scopes, permisos, revocación o caducidad. No cambian endpoints, payloads ni códigos de estado de dominio; PDF/ICS conservan su tipo de contenido.
+
+`SearchIndexingTest` cubre éxito, 401, identificadores públicos desconocidos 404 y un fallo inesperado 500 sin detalles privados. Los 500 observados en producción siguen pendientes de diagnóstico del despliegue: no se convierten en 404 mediante captura genérica. Ver [auditoría SEO/GEO](SEO_GEO_AUDIT.md#13-implementación-local-p0p1).
+
 Base: `http://localhost:8000/api`. Todas las respuestas son JSON.
 
 ## Autenticacion

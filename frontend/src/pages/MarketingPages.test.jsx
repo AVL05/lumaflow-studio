@@ -18,7 +18,7 @@ describe("páginas comerciales", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Controla tus entregas" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Cobra sin perseguir clientes" }),
+      screen.getByRole("heading", { name: "Controla presupuestos y facturas" }),
     ).toBeInTheDocument();
   });
 
@@ -27,15 +27,22 @@ describe("páginas comerciales", () => {
 
     expect(screen.getByText("0 €")).toBeInTheDocument();
     expect(screen.getByText("Sin tarjeta. Sin cargos automáticos.")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Qué ocurrirá después." })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Cómo se sostiene el proyecto." }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/sin planes premium, cuotas ni funciones exclusivas por donar/i),
+    ).toBeInTheDocument();
   });
 
-  it("separa IA local, API y almacenamiento de galerías", () => {
+  it("separa IA local, API y proveedores de entrega", () => {
     renderPage(<PrivacyPage />);
 
     expect(screen.getByRole("heading", { name: "Tu navegador" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "API de LumaFlow" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Almacenamiento de galerías" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Proveedores de entrega externos" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/no envía el prompt a OpenAI/i)).toBeInTheDocument();
   });
 });

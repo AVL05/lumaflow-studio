@@ -1,5 +1,13 @@
 # Arquitectura
 
+## HTML comercial y SPA privada — implementación local SEO P0/P1
+
+El frontend conserva React/Vite y React Router. `src/app/seo.js` define seis páginas indexables: `/`, `/features`, `/pricing`, `/privacy`, `/about-project` y `/support`. `scripts/publicSeo.mjs` renderiza sus componentes durante `vite build`, con el mismo árbol inicial de providers y rutas, y emite metadatos, robots y sitemap. No hay servidor SSR en ejecución ni consultas de negocio durante el render de build.
+
+Las páginas marcadas `data-prerendered` se hidratan; acceso, CRM, demo y portales usan `app-shell.html` con raíz vacía, sin canonical y con `noindex`. `RouteMetadata` actualiza head al navegar. Las guardias, tokens y autorización Laravel conservan su comportamiento. El sitemap nunca se obtiene de registros del CRM.
+
+El HTML definitivo se emite antes de que Workbox calcule sus revisiones. Su fallback de navegación apunta al shell operativo solo para rutas conocidas; páginas comerciales usan los documentos precacheados y las desconocidas conservan su 404 online. La respuesta de API no se cachea. Vercel/Nginx separan archivos públicos, alias, shell y 404. Evidencia y límites: [auditoría SEO/GEO](SEO_GEO_AUDIT.md#13-implementación-local-p0p1).
+
 LumaFlow Studio son dos aplicaciones independientes en un monorepo. No comparten codigo ni build: se comunican unicamente por HTTP contra la API REST.
 
 ```

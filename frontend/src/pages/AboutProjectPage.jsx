@@ -15,9 +15,9 @@ const stack = [
 const modules = [
   ["Sesiones", "CRUD con cliente, tipo, estado, localizacion, checklists y timeline."],
   ["Localizaciones", "Mapa Leaflet, coordenadas, acceso, permisos, clima y equipo sugerido."],
-  ["Clientes y entregas", "CRM ligero conectado a sesiones, presupuestos y galerias."],
+  ["Clientes y entregas", "CRM ligero conectado a sesiones, presupuestos y entregas externas."],
   ["Negocio", "Presupuestos, facturas PDF, vencimientos y estados de cobro."],
-  ["Galerias", "Carga multiple, portal privado y seleccion de favoritas del cliente."],
+  ["Entregas", "Enlaces externos, portal privado y seguimiento de la aprobación del cliente."],
   ["Presets", "Configuraciones de camara vinculadas al inventario real."],
   ["Workflow", "Calendario con drag & drop, tareas y notificaciones."],
   ["Analitica", "KPIs y graficas calculadas sobre datos reales del usuario."],
@@ -35,7 +35,7 @@ const decisions = [
   ],
   [
     "La IA solo ve datos del usuario",
-    "AiContextService arma un contexto compacto y acotado; el prompt de sistema prohibe inventar equipo, clientes o sesiones. El historial se reconstruye del servidor, nunca del cliente.",
+    "La experiencia WebGPU usa contexto del estudio autorizado y guarda su historial en IndexedDB del navegador. Los endpoints de compatibilidad Ollama mantienen su propio historial en servidor.",
   ],
   [
     "Agregacion en base de datos",
@@ -93,7 +93,7 @@ export function AboutProjectPage() {
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
             El producto esta en beta publica gratuita y no solicita tarjeta. Esta etapa sirve para
-            validar el flujo con fotografos reales antes de definir limites o planes futuros. El
+            mejorar el flujo con profesionales reales, manteniendo todas las funciones gratuitas. El
             codigo es open source y tambien documenta el proceso tecnico del producto.
           </p>
         </section>
@@ -122,8 +122,8 @@ export function AboutProjectPage() {
             ruta, controlador, form request, modelo con scopes y resource, y la logica de dominio
             vive en servicios. El frontend es una SPA con router, providers de auth y
             notificaciones, hooks compartidos y modulos por dominio. Todo el aislamiento entre
-            usuarios se apoya en un scope <code className="text-stone-300">ownedBy</code> y en
-            policies que responden 404.
+            estudios se apoya en scopes de workspace, comprobación de miembros y en policies que
+            responden 404.
           </p>
           <div className="mt-5 overflow-x-auto">
             <pre className="w-max min-w-full rounded-lg border border-white/10 bg-black/40 p-5 text-xs leading-6 text-stone-400">
@@ -206,7 +206,8 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
             ))}
           </div>
           <p className="mt-4 text-xs text-stone-400">
-            Beta publica gratuita. Los limites o precios futuros se comunicaran antes de aplicarse.
+            Gratuito y open source. Las donaciones son voluntarias y no dan acceso a funciones
+            exclusivas.
           </p>
         </section>
       </main>

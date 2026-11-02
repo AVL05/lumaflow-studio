@@ -1,5 +1,11 @@
 # Roadmap
 
+## SEO/GEO P0/P1 — implementado localmente, con verificaciones externas pendientes
+
+Metadatos por ruta, allowlist comercial, robots/sitemap generados, exclusión de superficies operativas, headers API, copy coherente y HTML público prerenderizado/hidratado sin cambiar React/Vite + Laravel. El CRM conserva su SPA; no se añaden pagos, alojamiento de originales, blog ni dependencias. Se mantienen estilos y animaciones.
+
+Ver [auditoría y criterios de aceptación](SEO_GEO_AUDIT.md#13-implementación-local-p0p1). Los 500 de portales productivos, rendimiento móvil pendiente, Vercel/Nginx real, actualización desde PWA antigua, Search Console y métricas de campo no se declaran resueltos por la validación local. Sin commit, push ni despliegue.
+
 Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece como pendiente.
 
 ## V1 hardening completado

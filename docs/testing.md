@@ -1,5 +1,13 @@
 # Estrategia de pruebas
 
+## SEO/GEO P0/P1 — regresiones locales
+
+Vitest cubre la allowlist, metadata por ruta, queries sensibles, navegación pública/privada y copy de capacidades reales. `prerender.test.jsx` verifica contenido SSR comercial, rechazo de rutas privadas, ausencia de lectura del token y de peticiones fetch durante render. `SearchIndexingTest` verifica headers en éxito y errores sin modificar los estados 401/404/500.
+
+Después de `pnpm run build`, `pnpm run test:pwa` ejecuta también `e2e/pwa/seo.spec.js` sobre el artefacto servido: seis páginas con y sin JS, hidratación sin errores, CTA/back, metadatos iniciales/DOM, robots/sitemap parseable, queries sensibles, alias 308, desconocidas 404 y shell privado. Comprueba además el conjunto de HTML emitido, schema sin valoraciones inventadas, revisiones MD5 finales del precache y contenido/CTA a 390/768/1280 px. Las capturas quedan en `e2e/test-results/pwa/` (ignoradas por Git).
+
+La suite E2E principal conserva sus recorridos SPA/API y no sustituye estas pruebas del build. El smoke remoto conserva login/salud y añade H1/canonical de seis páginas y Content-Type de robots/sitemap. No se ha ejecutado en Actions ni se ha publicado esta implementación. Resultados y criterios abiertos: [auditoría SEO/GEO](SEO_GEO_AUDIT.md#13-implementación-local-p0p1).
+
 LumaFlow combina tres niveles de pruebas. Cada uno cubre una capa distinta y ninguno sustituye a los demas.
 
 | Nivel                            | Herramienta                        | Cubre                                                              | Comando              |

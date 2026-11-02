@@ -1,8 +1,95 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/index\\.html$",
+      "status": 308,
+      "headers": {
+        "Location": "/"
+      }
+    },
+    {
+      "src": "^/security/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/privacy"
+      }
+    },
+    {
+      "src": "^/(features|pricing|privacy|about-project|support)(?:/|\\.html)$",
+      "status": 308,
+      "headers": {
+        "Location": "/$1"
+      }
+    },
+    {
+      "src": "^/(?:|features|pricing|privacy|about-project|support)$",
+      "has": [
+        {
+          "type": "query",
+          "key": "token"
+        }
+      ],
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow, nosnippet",
+        "Referrer-Policy": "no-referrer"
+      },
+      "dest": "/app-shell.html"
+    },
+    {
+      "src": "^/(?:|features|pricing|privacy|about-project|support)$",
+      "has": [
+        {
+          "type": "query",
+          "key": "signature"
+        }
+      ],
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow, nosnippet",
+        "Referrer-Policy": "no-referrer"
+      },
+      "dest": "/app-shell.html"
+    },
+    {
+      "src": "^/(?:|features|pricing|privacy|about-project|support)$",
+      "has": [
+        {
+          "type": "query",
+          "key": "email"
+        }
+      ],
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow, nosnippet",
+        "Referrer-Policy": "no-referrer"
+      },
+      "dest": "/app-shell.html"
+    },
+    {
+      "src": "^/(?:app(?:/.*)?|login|register|forgot-password|reset-password|verify-email|onboarding|getting-started|demo|deliver/[^/]+|contract/[^/]+|book/[^/]+|app-shell\\.html|404\\.html)/?$",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow, nosnippet",
+        "Referrer-Policy": "no-referrer"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/(features|pricing|privacy|about-project|support)$",
+      "dest": "/$1.html"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/(?:app(?:/.*)?|login|register|forgot-password|reset-password|verify-email|onboarding|getting-started|demo|deliver/[^/]+|contract/[^/]+|book/[^/]+|app-shell\\.html|404\\.html)/?$",
+      "dest": "/app-shell.html"
+    },
+    {
+      "src": "^/.*$",
+      "dest": "/404.html",
+      "status": 404,
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow, nosnippet",
+        "Referrer-Policy": "no-referrer"
+      }
     }
   ]
 }

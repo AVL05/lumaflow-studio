@@ -1,5 +1,15 @@
 # Despliegue
 
+## SEO P0/P1 — build y rutas locales, sin desplegar
+
+`pnpm run build` genera automáticamente seis documentos comerciales, `app-shell.html`, `404.html`, robots y sitemap. No hay dependencias nuevas, variables nuevas ni servicio SSR. El origen canónico es el público de LumaFlow; localhost/previews no lo sustituyen por su host. Los builds de preview deben mantener la protección de indexación propia del proveedor y no publicarse como dominios de producto.
+
+`frontend/vercel.json` usa reglas ordenadas: normalización de alias públicos, tratamiento de queries sensibles conocidas, HTML comercial, archivos estáticos, shell operativo y 404. No activar `cleanUrls`, `trailingSlash` ni el antiguo rewrite global junto a estas reglas. `/features.html` redirige a `/features`; login, `/app/*` y portales mantienen sus URLs y reciben shell `noindex`. No se normalizan tokens/firmas de API. La API sigue en otro origen.
+
+`frontend/docker/nginx.conf` mantiene la misma separación. El plugin de Vite preview interpreta el subconjunto de reglas usado por el repositorio para comprobar HTTP localmente; **no es una certificación del edge de Vercel**. Docker/Nginx real requiere una ejecución adicional si el daemon no está disponible. El Dockerfile existente ejecuta el mismo build y no necesita cambios.
+
+No sobrescribir HTML en `dist/` después de generar el SW. El build emite el HTML final antes del precache; las pruebas verifican sus hashes. Validar actualizaciones desde versiones productivas antiguas antes de publicar. Tras un despliegue autorizado: comprobar SHA, seis páginas, tipos TXT/XML, canonicals, noindex, 308/404 y portales, y después Search Console/Bing. No se activa ningún canal de donación por este cambio.
+
 ## Beta publica gratuita
 
 La beta publica usa servicios con limite de gasto cero mientras se valida el producto:
