@@ -119,3 +119,10 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 | Hook, utilidad o componente del frontend           | Vitest + Testing Library                                 |
 | Flujo de usuario de principio a fin               | Recorrido E2E                                            |
 | Correccion de error reproducible                  | Test de regresion en el nivel mas bajo posible y, si rompia un flujo, E2E |
+
+
+### SEO Preview y actualización de PWA
+
+La suite `test:pwa` incluye transición desde la fuente pre-SEO congelada en `03676ea`: construye esa versión en TEMP con los módulos instalados y cambia al build actual en el mismo origen. Requiere ese objeto Git; CI hace checkout con historial. `PWA_LEGACY_DIR` permite contrastar una captura pública anterior en local, sin conectarse al backend ni usar sesiones reales.
+
+El smoke remoto separado usa `SEO_PREVIEW_URL` (deployment HTTPS exacto de Vercel) con `pnpm --dir e2e exec playwright test --config=playwright.preview.config.js`. Para un Preview protegido, proporcionar el OIDC efímero mediante la CLI autenticada; nunca incluir el token en argumentos o archivos. Los headers se limitan al origen, terceros se bloquean y no se guardan trazas/capturas. El noindex del Preview es esperado; no sustituye al workflow de producción. Ver §15 de `SEO_GEO_AUDIT.md`.
