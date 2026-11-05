@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 #[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'client_id', 'session_id', 'title', 'status', 'budget', 'payment_status', 'amount_paid', 'delivery_date', 'gallery_url', 'gallery_provider', 'gallery_password', 'gallery_expires_at', 'private_notes', 'public_token', 'client_message', 'client_responded_at'])]
 class Delivery extends Model
@@ -21,6 +23,19 @@ class Delivery extends Model
         static::creating(function (Delivery $delivery): void {
             $delivery->public_token ??= Str::random(40);
         });
+        static::saving(function (Delivery $delivery): void {
+            if ($delivery->exists && $delivery->isDirty('status') && ! $delivery->isDirty('revision_number')) {
+                if ($delivery->getOriginal('review_state') === 'approved' && in_array($delivery->status, ['pending', 'delivered'], true)) {
+                    throw ValidationException::withMessages(['status' => 'Publica una nueva revisión para reabrir la entrega.']);
+                }
+                if ($delivery->status === 'approved') {
+                    $delivery->review_state = 'approved';
+                }
+            }
+            if ($delivery->exists && $delivery->isDirty(['job_id', 'client_id', 'session_id']) && $delivery->revisions()->where('published', true)->exists()) {
+                throw ValidationException::withMessages(['client_id' => 'Crea otra entrega para cambiar el contexto de un historial publicado.']);
+            }
+        });
     }
 
     protected function casts(): array
@@ -31,6 +46,9 @@ class Delivery extends Model
             'delivery_date' => 'date',
             'gallery_expires_at' => 'date',
             'client_responded_at' => 'datetime',
+            'portal_revoked_at' => 'datetime',
+            'version' => 'integer',
+            'revision_number' => 'integer',
         ];
     }
 
@@ -77,5 +95,10 @@ class Delivery extends Model
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject');
+    }
+
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(DeliveryRevision::class);
     }
 }

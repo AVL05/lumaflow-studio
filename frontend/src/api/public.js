@@ -5,12 +5,18 @@ export const publicApi = {
   book: (slug, payload) =>
     apiClient.post(`/public/studios/${slug}/bookings`, payload).then((res) => res.data),
   delivery: (token) => apiClient.get(`/public/deliveries/${token}`).then((res) => res.data.data),
-  approveDelivery: (token) =>
-    apiClient.post(`/public/deliveries/${token}/approve`).then((res) => res.data.data),
-  requestDeliveryChanges: (token, message) =>
+  approveDelivery: (token, revision_number) =>
     apiClient
-      .post(`/public/deliveries/${token}/request-changes`, { message })
+      .post(`/public/deliveries/${token}/approve`, { revision_number })
       .then((res) => res.data.data),
+  requestDeliveryChanges: (token, message, revision_number) =>
+    apiClient
+      .post(`/public/deliveries/${token}/request-changes`, { message, revision_number })
+      .then((res) => res.data.data),
+  deliveryHistory: (token, params) =>
+    apiClient.get(`/public/deliveries/${token}/history`, { params }).then((res) => res.data),
+  respondDelivery: (token, action, payload) =>
+    apiClient.post(`/public/deliveries/${token}/${action}`, payload).then((res) => res.data.data),
   contract: (token) => apiClient.get(`/public/contracts/${token}`).then((res) => res.data),
   acceptContract: (token) =>
     apiClient.post(`/public/contracts/${token}/accept`).then((res) => res.data),

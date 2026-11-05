@@ -61,7 +61,7 @@ export function DeliveryDetail({ delivery }) {
               <span>Contraseña: {delivery.gallery_password}</span>
             ) : null}
             {delivery.gallery_expires_at ? (
-              <span>Caduca: {delivery.gallery_expires_at}</span>
+              <span>Caducidad del portal: {delivery.gallery_expires_at}</span>
             ) : null}
           </div>
           <p className="mt-2 text-xs text-stone-500">

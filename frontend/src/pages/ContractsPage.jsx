@@ -65,7 +65,7 @@ export function ContractsPage() {
     ])
       .then(([clientResponse, jobResponse, quoteResponse]) => {
         setClients(clientResponse.data);
-        setJobs(jobResponse.data);
+        setJobs(jobResponse);
         setQuotes(quoteResponse.data);
       })
       .catch(() => {});

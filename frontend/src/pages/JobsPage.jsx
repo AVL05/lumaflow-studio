@@ -1,52 +1,55 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { clientsApi } from "../api/clients";
 import { getApiError } from "../api/client";
 import { jobsApi } from "../api/jobs";
 import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Select } from "../components/ui/Select";
+import { Pagination } from "../components/ui/Pagination";
 import { DemoBadge } from "../components/ui/DemoBadge";
 import { Modal } from "../components/ui/Modal";
 import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState } from "../components/states/EmptyState";
 import { ErrorState } from "../components/states/ErrorState";
 import { JobForm } from "../features/jobs/JobForm";
-import { jobDefaults, normalizeJob } from "../features/jobs/jobFormUtils";
+import {
+  jobDefaults,
+  normalizeJob,
+  projectTypes,
+  productionPhases,
+} from "../features/jobs/jobFormUtils";
 import { useCreateIntent } from "../hooks/useCreateIntent";
+import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useToast } from "../features/notifications/ToastContext";
 
 export function JobsPage() {
   const toast = useToast();
-  const [jobs, setJobs] = useState([]);
-  const [clients, setClients] = useState([]);
+  const {
+    items: jobs,
+    meta,
+    loading,
+    error,
+    refresh,
+    filters,
+    updateFilter,
+    setPage,
+  } = usePaginatedResource(jobsApi.page, { page: 1, per_page: 12, search: "", project_type: "" });
   const [catalog, setCatalog] = useState({ pipeline: {}, workflows: {} });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [optionsError, setOptionsError] = useState("");
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [form, setForm] = useState(jobDefaults);
-  const columns = useMemo(() => Object.entries(catalog.pipeline), [catalog.pipeline]);
-
-  async function load() {
-    setLoading(true);
-    setError("");
+  async function loadOptions() {
+    setOptionsError("");
     try {
-      const [jobData, workflowData, clientData] = await Promise.all([
-        jobsApi.list(),
-        jobsApi.workflows(),
-        clientsApi.list({ per_page: 100, sort: "name", direction: "asc" }),
-      ]);
-      setJobs(jobData);
-      setCatalog(workflowData);
-      setClients(clientData.data);
+      setCatalog(await jobsApi.workflows());
     } catch (err) {
-      setError(getApiError(err));
-    } finally {
-      setLoading(false);
+      setOptionsError(getApiError(err));
     }
   }
   useEffect(() => {
-    load();
+    loadOptions();
   }, []);
   function openCreate() {
     setForm(jobDefaults);
@@ -61,108 +64,105 @@ export function JobsPage() {
     try {
       await jobsApi.create(normalizeJob(form));
       setOpen(false);
-      toast.success("Trabajo creado con su workflow.");
-      await load();
+      toast.success("Proyecto creado.");
+      updateFilter("search", "");
+      updateFilter("project_type", "");
+      await refresh();
     } catch (err) {
       setFormError(getApiError(err));
     } finally {
       setSaving(false);
     }
   }
-
   return (
     <>
       <PageHeader
-        eyebrow="Pipeline"
-        title="Trabajos"
-        description="Cada encargo, desde el primer contacto hasta la entrega y el cierre, en un único lugar."
-        action={<Button onClick={openCreate}>Nuevo trabajo</Button>}
+        eyebrow="Creative workspace"
+        title="Proyectos"
+        description="De la primera idea a la entrega. Fotografía, audiovisual y proyectos personales, en un mismo espacio."
+        action={<Button onClick={openCreate}>Nuevo proyecto</Button>}
       />
-      {error ? <ErrorState message={error} onRetry={load} /> : null}
-      {!loading && !error && jobs.length === 0 ? (
-        <EmptyState
-          title="Aún no tienes trabajos"
-          description="El trabajo organiza todo el encargo: sesiones, tareas y entregas. Crea el primero para ver el pipeline en acción."
-          action={<Button onClick={openCreate}>Crear mi primer trabajo</Button>}
+      <div className="mb-6 grid gap-3 sm:grid-cols-[1fr_15rem]">
+        <Input
+          aria-label="Buscar proyectos"
+          placeholder="Buscar por proyecto o cliente"
+          value={filters.search}
+          onChange={(e) => updateFilter("search", e.target.value)}
         />
-      ) : null}
-      {loading ? <p className="text-sm text-stone-400">Cargando pipeline...</p> : null}
-      {!loading && !error && jobs.length ? (
-        <div className="overflow-x-auto pb-4">
-          <div className="grid min-w-[1600px] grid-flow-col auto-cols-[17rem] gap-3">
-            {columns.map(([status, label]) => {
-              const items = jobs.filter((job) => job.status === status);
-              return (
-                <section
-                  key={status}
-                  className="rounded-2xl border border-white/10 bg-white/[0.025] p-3"
-                >
-                  <div className="flex items-center justify-between px-1 pb-3">
-                    <h2 className="text-sm font-semibold text-stone-200">{label}</h2>
-                    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-xs text-stone-500">
-                      {items.length}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {items.map((job) => (
-                      <JobCard key={job.id} job={job} />
-                    ))}
-                    {items.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-white/10 px-3 py-8 text-center text-xs text-stone-600">
-                        Sin trabajos
-                      </div>
-                    ) : null}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
+        <Select
+          aria-label="Filtrar por tipo"
+          value={filters.project_type}
+          onChange={(e) => updateFilter("project_type", e.target.value)}
+          options={[{ value: "", label: "Todos los proyectos" }, ...projectTypes]}
+        />
+      </div>
+      {error && <ErrorState message={error} onRetry={refresh} />}
+      {optionsError && <ErrorState message={optionsError} onRetry={loadOptions} />}
+      {loading && (
+        <p role="status" className="text-sm text-stone-400">
+          Cargando proyectos...
+        </p>
+      )}
+      {!loading && !error && !jobs.length && (
+        <EmptyState
+          title="No hay proyectos en esta vista"
+          description="Crea un proyecto personal o para un cliente, o ajusta los filtros."
+          action={<Button onClick={openCreate}>Crear proyecto</Button>}
+        />
+      )}
+      {!loading && !error && (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {jobs.map((job) => (
+            <Link
+              key={job.id}
+              to={`/app/jobs/${job.id}`}
+              className="group min-w-0 rounded-2xl border border-white/10 bg-[#13120f] p-5 transition hover:border-amber-200/40 focus-visible:outline-2 focus-visible:outline-amber-200"
+            >
+              <div className="mb-5 flex flex-wrap justify-between gap-2 text-xs text-stone-400">
+                <span>
+                  {projectTypes.find((type) => type.value === job.project_type)?.label ??
+                    "Fotográfico"}
+                </span>
+                <span>
+                  {productionPhases.find((phase) => phase.value === job.production_phase)?.label ??
+                    "Cancelado"}
+                </span>
+              </div>
+              <h2 className="break-words text-lg font-semibold text-stone-100 group-hover:text-amber-100">
+                {job.title}
+                <DemoBadge show={job.is_demo} />
+              </h2>
+              <p className="mt-2 text-sm text-stone-400">
+                {job.client?.name || "Proyecto sin cliente"}
+              </p>
+              <p className="mt-5 text-xs text-stone-400">
+                {catalog.pipeline[job.status] ?? job.status} ·{" "}
+                {job.event_date || "Fecha por definir"}
+              </p>
+              <p className="mt-2 text-xs text-amber-100/70">
+                {job.counts?.open_tasks ?? 0} tareas pendientes
+              </p>
+            </Link>
+          ))}
         </div>
-      ) : null}
-      <Modal open={open} title="Nuevo trabajo" onClose={() => setOpen(false)}>
+      )}
+      <Pagination meta={meta} onPage={setPage} />
+      <Modal
+        open={open}
+        title="Nuevo proyecto"
+        onClose={() => {
+          if (!saving) setOpen(false);
+        }}
+      >
         <JobForm
           form={form}
           setForm={setForm}
-          clients={clients}
           workflows={catalog.workflows}
           onSubmit={submit}
           saving={saving}
-          error={formError}
+          error={formError || optionsError}
         />
       </Modal>
     </>
-  );
-}
-
-function JobCard({ job }) {
-  return (
-    <Link
-      to={`/app/jobs/${job.id}`}
-      className="block rounded-xl border border-white/10 bg-[#15130f] p-4 transition hover:-translate-y-0.5 hover:border-amber-200/25 hover:bg-[#191610]"
-    >
-      <p className="font-semibold text-stone-100">
-        {job.title}
-        <DemoBadge show={job.is_demo} />
-      </p>
-      <p className="mt-1 text-xs text-stone-500">{job.client?.name || "Cliente pendiente"}</p>
-      <div className="mt-4 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-xs text-stone-500">
-            {job.event_date
-              ? new Date(`${job.event_date}T12:00:00`).toLocaleDateString("es-ES", {
-                  day: "numeric",
-                  month: "short",
-                })
-              : "Sin fecha"}
-          </p>
-          <p className="mt-1 text-[11px] uppercase tracking-wide text-amber-200/70">
-            {job.specialty}
-          </p>
-        </div>
-        {job.counts?.open_tasks ? (
-          <span className="text-xs text-stone-400">{job.counts.open_tasks} tareas</span>
-        ) : null}
-      </div>
-    </Link>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { deliveriesApi } from "../api/deliveries";
 import { getApiError } from "../api/client";
@@ -6,7 +6,14 @@ import { Button } from "../components/ui/Button";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Skeleton } from "../components/ui/Skeleton";
 import { ErrorState } from "../components/states/ErrorState";
+
 import { DeliveryDetail } from "../features/deliveries/DeliveryDetail";
+
+const DeliveryReviewPanel = lazy(() =>
+  import("../features/deliveries/DeliveryReviewPanel").then((module) => ({
+    default: module.DeliveryReviewPanel,
+  })),
+);
 
 export function DeliveryDetailPage() {
   const { id } = useParams();
@@ -40,7 +47,14 @@ export function DeliveryDetailPage() {
       />
       {error ? <ErrorState message={error} /> : null}
       {!delivery && !error ? <Skeleton className="h-80" /> : null}
-      {delivery ? <DeliveryDetail delivery={delivery} /> : null}
+      {delivery ? (
+        <>
+          <DeliveryDetail delivery={delivery} />
+          <Suspense fallback={<Skeleton className="mt-4 h-48" />}>
+            <DeliveryReviewPanel delivery={delivery} onChanged={setDelivery} />
+          </Suspense>
+        </>
+      ) : null}
     </>
   );
 }

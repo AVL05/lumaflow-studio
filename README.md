@@ -28,7 +28,7 @@ LumaFlow Studio es una plataforma de gestión para fotógrafos y pequeños estud
 
 El producto está en **beta pública**, es gratuito y open source con licencia MIT. No hay suscripciones obligatorias, funciones premium ni límites ligados a donaciones. El objetivo es simplificar el trabajo creativo conservando la arquitectura y los datos existentes.
 
-La evolución para videógrafos, filmmakers y proyectos personales está planificada en [LumaFlow 2.0](docs/plans/2026-10-29-lumaflow-2.0-plan.md). La [auditoría de Fase 0](docs/plans/2026-10-29-lumaflow-2.0-audit.md) distingue funciones actuales y pendientes: todavía no hay briefing estructurado, shot lists ni módulo específico de rodaje.
+La evolución para videógrafos, filmmakers y proyectos personales sigue el [plan LumaFlow 2.0](docs/plans/2026-10-29-lumaflow-2.0-plan.md). El [Sprint 2](docs/plans/2026-10-30-sprint2-creative-workspace.md) implementa localmente proyectos fotográficos, audiovisuales y personales, organización y briefing manual. El [Sprint 3](docs/plans/2026-10-30-sprint3-production.md) añade tomas, jornadas, seguimiento móvil y PDF/impresión. El [Sprint 4](docs/plans/2026-11-01-sprint4-workflows.md) incorpora nueve plantillas profesionales editables/reutilizables y postproducción con tareas, responsables, fechas y checklists. Estos cambios aún no están publicados ni desplegados. Organizan el trabajo sin importar ni procesar archivos audiovisuales.
 
 ## Pruébalo sin registrarte
 
@@ -46,7 +46,7 @@ No consulta información de producción ni comparte datos entre usuarios.
 2. **Controla el trabajo.** Reúne cliente, presupuesto, contrato, pago, sesión, tareas, equipo, galería y entrega en un único proyecto.
 3. **Gestiona el negocio.** Crea presupuestos, controla estados y genera facturas PDF.
 4. **Produce y da seguimiento.** Consulta agenda, notificaciones, progreso y actividad.
-5. **Entrega.** Comparte un enlace externo mediante el portal de LumaFlow y recibe aprobación o una solicitud general de cambios. El acceso al material depende de los permisos del proveedor original.
+5. **Entrega.** Comparte un enlace externo mediante el portal de LumaFlow y recibe aprobación o una solicitud general de cambios. El acceso al material depende de los permisos del proveedor original. El [Sprint 5, implementado localmente](docs/plans/2026-11-02-sprint5-delivery-revisions.md), incorpora versiones numeradas, historial, recepción explícita, comentarios y revocación/rotación del portal, también sin cliente obligatorio; todavía no está publicado ni desplegado.
 6. **Analiza.** Revisa ingresos, carga de trabajo y evolución del estudio con datos reales.
 
 ## Capturas de referencia
@@ -79,7 +79,7 @@ Estas capturas corresponden a una versión anterior de la interfaz; no acreditan
 | **Presupuestos y facturas** | Conceptos, IVA, estados, numeración por estudio y PDF                         |
 | **Contratos**               | Acuerdo con cliente y trabajo, lifecycle con snapshot, portal de revisión y aceptación del cliente |
 | **Colaboración**            | Estudios multiusuario con roles (owner/admin/member) e invitaciones mediante enlace compartido manualmente |
-| **Entregas**                | Enlaces externos de galería con portal privado, contraseña, caducidad y aprobación del cliente |
+| **Entregas**                | Enlaces externos con portal por token, contraseña externa, caducidad del portal y aprobación; revisiones 2.0 disponibles localmente, sin desplegar |
 | **Equipo y presets**        | Inventario y ajustes de cámara reutilizables                                  |
 | **Localizaciones**          | Mapa, acceso, permisos, coste, clima y equipo recomendado                     |
 | **Analítica**               | KPIs y gráficas calculados sobre la actividad real                            |
@@ -239,7 +239,9 @@ LumaFlow no es un editor ni un servicio de alojamiento de fotografías, vídeo, 
 
 ## Apoyar LumaFlow
 
-El producto seguirá siendo gratuito. Se prevé apoyo voluntario mediante Ko-fi y GitHub Sponsors para mantener la infraestructura y continuar el desarrollo, sin ventajas exclusivas por donar. **Los canales de donación y la página `/support` todavía no están implementados ni activados.** No se publican perfiles sin verificar. Consulta el [diseño y las revisiones previas](docs/plans/2026-10-29-lumaflow-2.0-support.md).
+LumaFlow seguirá siendo gratuito, sin planes premium, cuotas ni ventajas exclusivas por donar. El apoyo voluntario ayuda a mantener la infraestructura y continuar el desarrollo. La [página de apoyo](frontend/src/pages/SupportPage.jsx), disponible en `/support`, está implementada localmente con accesos en footer y configuración; todavía no está desplegada.
+
+Ko-fi y GitHub Sponsors se configuran con `VITE_KOFI_URL` y `VITE_GITHUB_SPONSORS_URL`, vacías por defecto. **No hay enlaces de donación activos ni perfiles verificados; no se ha creado FUNDING.yml.** LumaFlow no procesa pagos ni almacena datos de donantes. Consulta [Apoyar LumaFlow: configuración y revisión previa](docs/support.md) antes de activar perfiles reales, incluida la revisión fiscal española y de Vercel Hobby.
 
 También puedes apoyar reportando problemas reproducibles, mejorando documentación o contribuyendo mediante [CONTRIBUTING.md](CONTRIBUTING.md).
 

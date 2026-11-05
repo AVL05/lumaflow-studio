@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureOnboardingIsComplete;
+use App\Http\Middleware\ExcludeSearchIndexing;
 use App\Http\Middleware\RequestCorrelationId;
 use App\Support\AuditLog;
 use Illuminate\Auth\AuthenticationException;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(ExcludeSearchIndexing::class);
         $middleware->alias([
             'onboarded' => EnsureOnboardingIsComplete::class,
         ]);

@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ContractsPage } from "./ContractsPage";
+import userEvent from "@testing-library/user-event";
+import { jobsApi } from "../api/jobs";
 
 vi.mock("../api/contracts", () => ({
   contractsApi: {
@@ -17,7 +19,7 @@ vi.mock("../api/contracts", () => ({
 vi.mock("../api/clients", () => ({
   clientsApi: { list: vi.fn().mockResolvedValue({ data: [] }) },
 }));
-vi.mock("../api/jobs", () => ({ jobsApi: { list: vi.fn().mockResolvedValue({ data: [] }) } }));
+vi.mock("../api/jobs", () => ({ jobsApi: { list: vi.fn().mockResolvedValue([]) } }));
 vi.mock("../api/quotes", () => ({ quotesApi: { list: vi.fn().mockResolvedValue({ data: [] }) } }));
 vi.mock("../features/notifications/ToastContext", () => ({
   useToast: () => ({ success: vi.fn(), error: vi.fn() }),
@@ -44,6 +46,19 @@ function draft(overrides = {}) {
 describe("ContractsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("conserva el selector comercial con el listado histórico de proyectos", async () => {
+    contractsApi.list.mockResolvedValue(page([]));
+    jobsApi.list.mockResolvedValue([{ id: 9, title: "Proyecto existente" }]);
+    render(
+      <MemoryRouter>
+        <ContractsPage />
+      </MemoryRouter>,
+    );
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Crear mi primer contrato" }));
+    expect(await screen.findByRole("option", { name: "Proyecto existente" })).toBeInTheDocument();
   });
 
   it("muestra el empty state con CTA cuando no hay contratos", async () => {

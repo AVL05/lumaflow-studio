@@ -11,6 +11,11 @@ class ChecklistRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        if ($job = $this->route('job')) {
+            app(WorkspaceAuthorizer::class)->requireAccessOr404($this->user(), $job);
+            $this->merge(['job_id' => $job->id]);
+        }
+
         return true;
     }
 
@@ -19,7 +24,9 @@ class ChecklistRequest extends FormRequest
         $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
 
         return [
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('workspace_id', $workspaceId)],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('workspace_id', $workspaceId)],
+            'stage_id' => ['nullable', Rule::exists('postproduction_stages', 'id')->where('workspace_id', $workspaceId)->where('job_id', $this->input('job_id', $this->route('checklist')?->job_id))],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('workspace_id', $workspaceId)->when($this->input('stage_id', $this->route('checklist')?->stage_id), fn ($q) => $q->where('job_id', $this->input('job_id', $this->route('checklist')?->job_id)))],
             'name' => ['required', 'string', 'max:120'],
             'type' => ['required', Rule::in(Checklist::TYPES)],
             'use_template' => ['sometimes', 'boolean'],

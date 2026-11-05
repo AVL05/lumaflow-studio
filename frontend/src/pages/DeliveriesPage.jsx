@@ -221,7 +221,8 @@ export function DeliveriesPage() {
 function normalizeDelivery(form) {
   return {
     job_id: form.job_id ? Number(form.job_id) : null,
-    client_id: Number(form.client_id),
+    client_id: form.client_id ? Number(form.client_id) : null,
+    ...(form.version !== undefined ? { version: form.version } : {}),
     session_id: form.session_id ? Number(form.session_id) : null,
     title: form.title,
     status: form.status,

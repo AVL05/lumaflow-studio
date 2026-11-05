@@ -317,6 +317,7 @@ export function TasksPage() {
 
 function normalizeTask(form) {
   return {
+    ...(form.revision !== undefined ? { revision: form.revision } : {}),
     job_id: form.job_id ? Number(form.job_id) : null,
     title: form.title,
     description: form.description || null,

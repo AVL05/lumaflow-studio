@@ -87,7 +87,17 @@ La numeracion comercial (`quote_number`, `invoice_number`) es por workspace con 
 
 **Consecuencia practica:** cualquier borrado debe pasar por el modelo. `BulkActionService::delete()` itera y llama a `$model->delete()` en vez de `whereIn()->delete()`, que saltaria el evento.
 
-## Seeder
+## Creative Workspace — Sprint 2
+
+Migración aditiva `2026_10_30_000001_add_creative_workspace_to_jobs.php`: mantiene `photography_jobs`, IDs, `client_id` nullable y columnas históricas. Añade `project_type` (varchar 20, `photography` por defecto), `participants`, `external_links`, `briefing` (JSON nullable), `start_date`, `end_date`, `delivery_due_date` (date nullable), `briefing_revision` (unsigned integer, 0 por defecto). Sin backfill del texto de `description`, que conserva su contenido.
+
+Nuevo pivot `job_location`: `job_id` → `photography_jobs`, `location_id` → `locations`, clave primaria compuesta y cascadas al borrar la entidad. No sustituye `location_id` ni `gear_item_job`. La validación y la relación Eloquent exigen coincidencia de workspace; la FK por sí sola no garantiza ese aislamiento.
+
+El briefing 1:1 usa JSON acotado en Job y control optimista de revisión, sin otra tabla de ownership. Los participantes son nombres/roles descriptivos, no cuentas ni permisos. Las fases se derivan del estado existente, sin segunda columna de pipeline.
+
+El test de migración recrea una fila anterior en SQLite sintético y comprueba ID, descripción, estado y presupuesto. El ensayo MySQL/TiDB sigue pendiente: antes de aplicar fuera de tests, ejecutar sobre una copia sintética aislada, verificar defaults/JSON/FKs y recuperación según [runbook](backup-recovery.md). La sesión no ejecuta migraciones de desarrollo ni producción. No usar `down()` como rollback de datos tras guardar metadatos nuevos: retiraría esas columnas; conservar copia recuperable y preferir corrección hacia delante.
+
+## Seeder de desarrollo
 
 Un unico `DatabaseSeeder`. Crea `test@example.com` (password `password`) con dos sesiones, equipo, preset, dos localizaciones, cliente, entrega, presupuesto aceptado, factura, cuatro tareas, tres checklists, actividad y notificaciones.
 
@@ -95,7 +105,23 @@ Un unico `DatabaseSeeder`. Crea `test@example.com` (password `password`) con dos
 php artisan migrate:fresh --seed --force
 ```
 
-## Base de test
+## Producción — Sprint 3
+
+Migración aditiva `2026_10_30_000002_add_production_planning.php`: añade `end_time` (time nullable), `participants` (JSON nullable) e `incidents` (text nullable) a `sessions`, manteniendo IDs, datos, estados y relaciones existentes.
+
+Nueva tabla `shots`: creador/workspace/proyecto con FK; sesión y localización nullable con `nullOnDelete`; escena, descripción, plano, movimiento, focal, segundos estimados, hora prevista, notas, estado, posición y revisión. Índices `(job_id,position,id)` y `(session_id,scheduled_time)`. `gear_item_shot` tiene PK compuesta y FKs con cascada. Borrar una sesión conserva las tomas; borrar proyecto elimina sus tomas. Ni FK simple ni pivot garantizan por sí solos el mismo estudio/proyecto: validación, scopes y guard de traslado de Session completan la integridad.
+
+Los tests ensayan up/down exclusivamente en SQLite sintético y conservan una sesión anterior con notas y Job. Backup/restore también recupera toma, estado, revisión, jornada y equipo. MySQL/TiDB y B2 siguen pendientes según runbook; no usar down como rollback tras incorporar datos reales. Se conserva la estrategia de copia recuperable y corrección hacia delante.
+
+## Plantillas y etapas — Sprint 4
+
+Migración aditiva `2026_11_01_000001_add_project_workflows.php`: `project_templates` (workspace/creador, nombre, descripción, definición JSON, revisión), `postproduction_stages` (workspace/creador/Job, clave única por proyecto, nombre, estado, responsable User nullable, vencimiento/observaciones, orden y revisión) y `project_template_applications` (recibo único por Job/clave de plantilla con nombre, versión, hash y fecha).
+
+Task conserva IDs y campos; añade `stage_id` nullable, `assigned_user_id` nullable, `workflow_phase` nullable y `revision` default 0. Checklist añade `job_id` y `stage_id` nullable: las checklists anteriores siguen ligadas a su sesión. FKs de etapa/responsable son `nullOnDelete`; las checklists de proyecto y etapas se eliminan con el Job. No se publica aquí ninguna operación de borrado de etapas/plantillas; omitir una etapa conserva su contenido.
+
+La integridad entre estudio/proyecto/etapa/sesión se comprueba en Request/modelo y scopes, no solo en FKs simples. Los recibos sobreviven a la edición de una plantilla y conservan la aplicación anterior; no son snapshots completos de todas sus versiones. El dump completo incluye estas tablas automáticamente. El ensayo SQLite recupera definición, recibo, etapas, asignaciones, fechas, tareas y checks. MySQL/TiDB y B2 siguen pendientes; up/down solo se ensaya sobre datos sintéticos. No ejecutar down tras guardar datos reales; requiere copia recuperable y migración hacia delante.
+
+## Base de pruebas
 
 `phpunit.xml` usa SQLite en memoria. Si el PHP local no trae `pdo_sqlite`:
 
@@ -106,3 +132,11 @@ CREATE DATABASE lumaflow_studio_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 ```bash
 DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
 ```
+
+## Revisiones de entrega — Sprint 5
+
+Migración aditiva `2026_11_02_000001_add_delivery_revisions.php`: conserva Delivery, IDs, enlaces y estados comerciales; `client_id` nullable permite entregas personales. Añade `version`, `revision_number`, `review_state` y `portal_revoked_at`. `delivery_revisions` guarda snapshot inmutable de enlace/proveedor/contraseña/fecha/notas, número, autor opcional, UUID/hash de solicitud y marcas legacy/publicación. Únicos por entrega/número y entrega/UUID; FK con borrado en cascada de la entrega, autor nullable al eliminar User. No aloja medios.
+
+El backfill recorre bloques de 100 mediante Query Builder, sin eventos de negocio: captura versión inicial, último comentario y fecha de respuesta anteriores sin cambiar URLs, tokens ni estados. `recorded_at` es la fecha de captura, no una fecha de envío histórica inventada; autor desconocido permanece null. Los borradores históricos no se publican en el portal. Activity conserva el historial de acciones existente y añade número/acción/responsable; no se crea otra tabla de eventos.
+
+La migración es exclusivamente hacia delante: `down()` se niega a eliminar revisiones o imponer NOT NULL sobre clientes. Antes de cualquier activación: copia verificada, ensayo de `up` y restore en MySQL/TiDB aislado, recuentos antes/después e integridad de asociaciones. SQLite sintético valida backfill y recuperación; no acredita MySQL/TiDB. Un rollback de código necesita conservar el esquema aditivo y los datos; no ejecutar down en producción. Tokens y contraseñas externas conservan el almacenamiento legacy: copias y accesos a BD siguen siendo sensibles.

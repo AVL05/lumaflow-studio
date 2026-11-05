@@ -124,6 +124,12 @@ Ensayo pendiente de aprobación/infraestructura aislada:
 
 ## Ensayo MySQL/B2 pendiente — Sprint 1.5
 
+Sprint 4 añade `project_templates`, `postproduction_stages` y `project_template_applications` al inventario crítico, además de referencias/asignación/revisión en Task y contexto Job/etapa en Checklist. BackupRestoreTest recupera estos datos, incluidos responsables y fechas introducidos explícitamente. El dump es completo, no depende de una lista fija de tablas. Incluirlos en el ensayo sintético MySQL/TiDB/B2 pendiente. CI remoto, impresión física y tres días UTC no quedan acreditados por estos tests; #24 continúa abierto.
+
+Sprint 3 añade `shots` y `gear_item_shot` al inventario crítico del dump completo, además de hora final, participantes e incidencias de Session. El drill SQLite de `BackupRestoreTest` comprueba restauración de toma/estado/notas/revisión, sesión, horario, participantes y equipo; no valida almacenamiento remoto ni motor MySQL. Añadir estas entidades sintéticas y relaciones al ensayo externo pendiente. No cerrar #24 ni aplicar migraciones/restauraciones a producción para comprobarlas.
+
+Sprint 2 mantiene este ensayo **NOT RUN** y #24 abierto. El backup de BD completa incluye ahora también metadatos/briefing/revisión en `photography_jobs` y el pivot `job_location`; no hay nuevos archivos multimedia que copiar. `BackupRestoreTest` verifica recuperación de estos datos únicamente en SQLite temporal. En el ensayo externo, añadir proyecto personal con briefing y localización a las dos workspaces sintéticas, y comparar valores, revisión y pivots después de restaurar. No aplicar la migración ni restaurar sobre datos reales para validar este cambio.
+
 **NOT RUN.** En el equipo de esta sesión no hay daemon Docker activo, clientes mysql/mysqldump disponibles ni variables de credenciales de ensayo autorizadas. No utilizar secretos productivos como alternativa. Las pruebas fake/SQLite existentes siguen verificando lógica, no conectividad externa.
 
 Procedimiento reproducible para un operador con acceso autorizado:
@@ -162,3 +168,9 @@ Esperados: 0 y 5. Una discrepancia bloquea la validación. No afirmar que el che
 5. Verificar en B2 privacidad, aplicación de permisos mínimos, lectura anónima denegada, descarga íntegra y denegación esperada al retirar permisos de una key de ensayo. Contrastar retención/borrado de versiones con fixtures sintéticas en bucket exclusivo y el dry-run del runbook; ese dry-run también sube una copia. Adjuntar únicamente resultados agregados a #24. Activación productiva y tres días UTC siguen siendo una validación separada.
 
 Los comandos anteriores están preparados, **no ejecutados**. No cerrar #24 hasta disponer de la evidencia externa necesaria.
+
+### Ampliación del ensayo sintético — Sprint 5
+
+`BackupRestoreTest` incluye entrega personal, enlace original, segunda revisión, notas públicas, token y revocación, además de Activity. El dump completo recoge delivery_revisions automáticamente. El ensayo local recupera esos registros y sus relaciones en SQLite temporal; no hay material audiovisual. No ejecutar rollback de la migración de revisiones: su down está bloqueado para preservar historial y clientes nulos.
+
+Sigue pendiente ejecutar este mismo escenario en MySQL/TiDB y el roundtrip privado B2 del runbook, con credenciales y entornos autorizados. Verificar números de revisión, URLs exactas, marcas de publicación, UUIDs, eventos, FK y revocación; no copiar datos reales a un ensayo ni publicar tokens. Esta ampliación local no completa #24 ni acredita permisos/retención B2.

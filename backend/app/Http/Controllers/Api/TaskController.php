@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Http\Resources\TaskResource;
+use App\Models\Job;
 use App\Models\Task;
 use App\Services\ActivityLogger;
 use App\Services\NotificationService;
+use App\Services\ProductionService;
 use App\Services\TaskSummaryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -51,10 +55,18 @@ class TaskController extends Controller
 
     public function store(TaskRequest $request): TaskResource
     {
-        $task = $request->user()->tasks()->create($this->payload($request->validated()));
-        $this->activity->log($request->user(), $task, ActivityLogger::CREATED, "Tarea creada: {$task->title}");
+        return DB::transaction(function () use ($request): TaskResource {
+            $payload = $this->payload($request->validated());
+            if ($jobId = $request->validated('job_id')) {
+                $job = Job::findOrFail($jobId);
+                app(ProductionService::class)->lockProject($job);
+                $payload['workspace_id'] = $job->workspace_id;
+            }
+            $task = $request->user()->tasks()->create($payload);
+            $this->activity->log($request->user(), $task, ActivityLogger::CREATED, "Tarea creada: {$task->title}");
 
-        return new TaskResource($task->load(['session:id,name', 'client:id,name']));
+            return new TaskResource($task->load(['session:id,name', 'client:id,name']));
+        }, 3);
     }
 
     public function show(Task $task): TaskResource
@@ -68,21 +80,36 @@ class TaskController extends Controller
     {
         $this->authorizeOwnership('update', $task);
 
-        $previous = $task->status;
-        $task->update($this->payload($request->validated()));
-        $this->activity->logStatusChange($request->user(), $task, $previous, $task->status);
+        return DB::transaction(function () use ($request, $task): TaskResource {
+            if ($task->job_id) {
+                app(ProductionService::class)->lockProject(Job::findOrFail($task->job_id));
+            }
+            if (DB::getDriverName() === 'sqlite') {
+                DB::table('tasks')->where('id', $task->id)->update(['id' => $task->id]);
+            }
+            $task = Task::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
+            abort_if($request->has('revision') && $task->revision !== $request->integer('revision'), 409, 'La tarea ha cambiado. Conserva tu borrador y recarga.');
+            $previous = $task->status;
+            $task->update($this->payload($request->validated()));
+            $this->activity->logStatusChange($request->user(), $task, $previous, $task->status);
 
-        if ($previous !== 'completed' && $task->status === 'completed') {
-            $this->notifications->success($request->user(), 'Tarea completada', $task->title, '/app/tasks');
-        }
+            if ($previous !== 'completed' && $task->status === 'completed') {
+                $this->notifications->success($request->user(), 'Tarea completada', $task->title, '/app/tasks');
+            }
 
-        return new TaskResource($task->refresh()->load(['session:id,name', 'client:id,name']));
+            return new TaskResource($task->refresh()->load(['session:id,name', 'client:id,name']));
+        }, 3);
     }
 
     public function destroy(Task $task): mixed
     {
         $this->authorizeOwnership('delete', $task);
-        $task->delete();
+        DB::transaction(function () use ($task): void {
+            if ($task->job_id) {
+                app(ProductionService::class)->lockProject(Job::findOrFail($task->job_id));
+            }
+            $task->delete();
+        }, 3);
 
         return response()->noContent();
     }
@@ -90,6 +117,6 @@ class TaskController extends Controller
     /** Mantiene completed_at coherente con el estado sin exponerlo al cliente. */
     private function payload(array $validated): array
     {
-        return [...$validated, 'completed_at' => $validated['status'] === 'completed' ? now() : null];
+        return [...Arr::except($validated, ['revision']), 'completed_at' => $validated['status'] === 'completed' ? now() : null];
     }
 }

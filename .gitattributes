@@ -1,2 +1,3 @@
 frontend/src/** text eol=lf
 frontend/.prettierrc.json text eol=lf
+patches/*.patch text eol=lf

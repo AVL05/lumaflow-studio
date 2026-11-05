@@ -27,10 +27,13 @@ class ServerLogPrivacyTest extends TestCase
                 }
             } while (microtime(true) < $deadline);
             $this->assertSame(404, $response->status());
+            Http::get('http://'.$address.'/api/public/deliveries/PATH_CANARY/history?signature=QUERY_CANARY');
+            Http::post('http://'.$address.'/api/public/deliveries/PATH_CANARY/comment', ['revision_number' => 1, 'request_id' => '00000000-0000-4000-8000-000000000001', 'message' => 'PAYLOAD_CANARY']);
             $server->stop();
             $output = $server->getOutput().$server->getErrorOutput();
             $this->assertStringNotContainsString('PATH_CANARY', $output);
             $this->assertStringNotContainsString('QUERY_CANARY', $output);
+            $this->assertStringNotContainsString('PAYLOAD_CANARY', $output);
             $this->assertStringContainsString('GET', $output);
             $this->assertStringContainsString('[REDACTED]', $output);
         } finally {

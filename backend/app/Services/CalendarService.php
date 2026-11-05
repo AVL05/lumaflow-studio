@@ -7,6 +7,7 @@ use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class CalendarService
 {
@@ -18,6 +19,7 @@ class CalendarService
      */
     public function events(User $user, string $from, string $to, array $sources = [], ?int $workspaceId = null): array
     {
+        $to = Carbon::parse($to)->endOfDay()->toDateTimeString();
         $sources = array_values(array_intersect($sources ?: self::SOURCES, self::SOURCES));
 
         return collect($sources)
@@ -77,6 +79,7 @@ class CalendarService
                 $session->status,
                 [
                     'session_type' => $session->session_type,
+                    'end_time' => $session->end_time ? substr($session->end_time, 0, 5) : null,
                     'client_name' => $session->client_name,
                     'location' => $session->location?->name ?? $session->location_name,
                 ],

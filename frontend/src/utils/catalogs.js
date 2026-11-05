@@ -98,6 +98,8 @@ export const paymentStatuses = [
 ];
 
 export const galleryProviders = [
+  "Vimeo",
+  "YouTube (no listado)",
   { value: "Pixieset", label: "Pixieset" },
   { value: "Pic-Time", label: "Pic-Time" },
   { value: "Lightroom", label: "Lightroom Gallery" },

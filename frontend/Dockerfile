@@ -8,6 +8,7 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY frontend/package.json ./frontend/package.json
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile --filter frontend...
 
 COPY frontend ./frontend
@@ -15,6 +16,10 @@ COPY frontend ./frontend
 # La URL de la API se inyecta en tiempo de build: Vite la sustituye en el bundle.
 ARG VITE_API_URL=http://localhost:8000/api
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_KOFI_URL=
+ARG VITE_GITHUB_SPONSORS_URL=
+ENV VITE_KOFI_URL=$VITE_KOFI_URL
+ENV VITE_GITHUB_SPONSORS_URL=$VITE_GITHUB_SPONSORS_URL
 RUN pnpm --dir frontend run build
 
 FROM nginx:1.27-alpine

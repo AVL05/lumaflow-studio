@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'session_id', 'client_id', 'title', 'description', 'priority', 'status', 'due_date', 'due_time', 'completed_at', 'position', 'stage_id', 'assigned_user_id', 'workflow_phase'])]
 class Task extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;
@@ -26,7 +26,27 @@ class Task extends Model
         return [
             'due_date' => 'date',
             'completed_at' => 'datetime',
+            'revision' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(fn (Task $task) => PostproductionStage::validateAssignee($task->assigned_user_id, $task->workspace_id));
+        static::updating(function (Task $task): void {
+            if ($task->isDirty()) {
+                $task->revision++;
+            }
+        });
+        static::saved(function (Task $task): void {
+            if ($task->wasRecentlyCreated || $task->wasChanged()) {
+                PostproductionStage::contentChanged($task->stage_id, in_array($task->status, self::OPEN_STATUSES, true));
+            }
+            if ($task->wasChanged('stage_id')) {
+                PostproductionStage::contentChanged($task->getOriginal('stage_id'), false);
+            }
+        });
+        static::deleted(fn (Task $task) => PostproductionStage::contentChanged($task->stage_id, false));
     }
 
     public function scopeOwnedBy($query, int $userId)

@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { checkAudit } from "./check-security-audit.mjs";
+import {
+  checkAudit,
+  verifyDeepmergeMitigation,
+} from "./check-security-audit.mjs";
 
 function report(overrides = {}) {
   return {
@@ -38,7 +41,22 @@ test("a clean audit passes without warnings", () => {
 });
 
 test("the exact documented build advisory remains visible", () => {
-  assert.match(checkAudit(report(), 1)[0], /LOW.*deepmerge.*#49/);
+  assert.match(
+    checkAudit(report(), 1)[0],
+    /Mitigated LOW.*deepmerge.*verified local patch.*nonzero.*#49/,
+  );
+});
+
+test("the exception requires the reviewed patch and the actually installed patched entry", () => {
+  assert.doesNotThrow(() => verifyDeepmergeMitigation());
+  assert.throws(
+    () => verifyDeepmergeMitigation({ patch: "tampered" }),
+    /missing or modified/,
+  );
+  assert.throws(
+    () => verifyDeepmergeMitigation({ installed: "unpatched" }),
+    /missing or modified/,
+  );
 });
 
 test("new low advisories and any higher severity fail", () => {

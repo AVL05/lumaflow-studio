@@ -19,7 +19,12 @@ export function CalendarEvent({ event, onSelect, compact = false }) {
       className={`w-full cursor-grab rounded border px-2 py-1 text-left text-xs transition active:cursor-grabbing hover:brightness-125 ${sourceStyles[event.source]}`}
     >
       <span className="flex items-center gap-1.5">
-        {event.time ? <span className="shrink-0 tabular-nums opacity-70">{event.time}</span> : null}
+        {event.time ? (
+          <span className="shrink-0 tabular-nums opacity-70">
+            {event.time}
+            {event.meta?.end_time ? `–${event.meta.end_time}` : ""}
+          </span>
+        ) : null}
         <span className="truncate">{event.title}</span>
       </span>
       {!compact && event.meta?.client ? (

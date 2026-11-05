@@ -8,6 +8,10 @@ export function Modal({ open, title, children, onClose }) {
   const dialogRef = useRef(null);
   const previouslyFocused = useRef(null);
   const titleId = useId();
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -18,7 +22,7 @@ export function Modal({ open, title, children, onClose }) {
     // Escape cierra y el tabulador no debe escapar del dialogo mientras esta abierto.
     function onKeyDown(event) {
       if (event.key === "Escape") {
-        onClose();
+        closeRef.current();
 
         return;
       }
@@ -49,7 +53,7 @@ export function Modal({ open, title, children, onClose }) {
       document.body.style.overflow = previousOverflow;
       previouslyFocused.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

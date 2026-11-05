@@ -1,14 +1,26 @@
 # Despliegue
 
+## SEO P0/P1 — build y rutas locales, sin desplegar
+
+`pnpm run build` genera automáticamente seis documentos comerciales, `app-shell.html`, `404.html`, robots y sitemap. No hay dependencias nuevas, variables nuevas ni servicio SSR. El origen canónico es el público de LumaFlow; localhost/previews no lo sustituyen por su host. Los builds de preview deben mantener la protección de indexación propia del proveedor y no publicarse como dominios de producto.
+
+`frontend/vercel.json` usa reglas ordenadas: normalización de alias públicos, tratamiento de queries sensibles conocidas, HTML comercial, archivos estáticos, shell operativo y 404. No activar `cleanUrls`, `trailingSlash` ni el antiguo rewrite global junto a estas reglas. `/features.html` redirige a `/features`; login, `/app/*` y portales mantienen sus URLs y reciben shell `noindex`. No se normalizan tokens/firmas de API. La API sigue en otro origen.
+
+`frontend/docker/nginx.conf` mantiene la misma separación. El plugin de Vite preview interpreta el subconjunto de reglas usado por el repositorio para comprobar HTTP localmente; **no es una certificación del edge de Vercel**. Docker/Nginx real requiere una ejecución adicional si el daemon no está disponible. El Dockerfile existente ejecuta el mismo build y no necesita cambios.
+
+No sobrescribir HTML en `dist/` después de generar el SW. El build emite el HTML final antes del precache; las pruebas verifican sus hashes. Validar actualizaciones desde versiones productivas antiguas antes de publicar. Tras un despliegue autorizado: comprobar SHA, seis páginas, tipos TXT/XML, canonicals, noindex, 308/404 y portales, y después Search Console/Bing. No se activa ningún canal de donación por este cambio.
+
+Sprint 4: el código local de plantillas/postproducción requiere `2026_11_01_000001_add_project_workflows.php` además de las migraciones de Sprints 2/3. Ensayar primero sobre MySQL/TiDB sintético autorizado y comprobar restauración de plantilla, etapas, asignaciones y recibos. Preparar backup recuperable antes de cualquier integración; aplicar el esquema aditivo antes de activar código que consulta sus columnas. Esta sesión no ejecuta migraciones productivas ni acredita B2/CI remoto. No utilizar `down()` para retirar el esquema tras guardar datos nuevos: conservarlos y preparar una corrección hacia delante. Ver [informe](plans/2026-11-01-sprint4-workflows.md) y [runbook](backup-recovery.md).
+
 ## Beta publica gratuita
 
 La beta publica usa servicios con limite de gasto cero mientras se valida el producto:
 
-| Capa          | Servicio                                | URL                                  |
-| ------------- | --------------------------------------- | ------------------------------------ |
-| SPA           | Vercel                                  | `https://lumaflow.aleviclop.dev`     |
-| API Laravel   | Render (free web service)               | `https://lumaflow-api.aleviclop.dev` |
-| Base de datos | TiDB Cloud Starter, MySQL compatible    | Privada, TLS obligatorio             |
+| Capa          | Servicio                             | URL                                  |
+| ------------- | ------------------------------------ | ------------------------------------ |
+| SPA           | Vercel                               | `https://lumaflow.aleviclop.dev`     |
+| API Laravel   | Render (free web service)            | `https://lumaflow-api.aleviclop.dev` |
+| Base de datos | TiDB Cloud Starter, MySQL compatible | Privada, TLS obligatorio             |
 
 Las entregas no alojan originales: solo guardan enlace externo, proveedor, contraseña y
 caducidad. No hay bucket S3 de galerias ni costes de almacenamiento/transferencia.
@@ -254,3 +266,19 @@ El handler de excepciones emite `AuditLog` con clase, archivo/línea, ruta plant
 En `APP_ENV=production`, el transporte de correo `log` se rechaza antes de escribir cuerpos, también dentro del `failover` predeterminado SMTP/log. Configurar `MAIL_MAILER=smtp` y comprobar entrega real antes del release. No usar `failover` con `log` como sustituto de SMTP: daría por enviado un mensaje y expondría enlaces firmados. En local/E2E se conserva `log` únicamente para cuentas sintéticas; contiene cuerpos y enlaces y no debe recibir información real ni enviarse a Sentry/soporte/artefactos públicos.
 
 Si una revisión privada detecta exposición previa, el operador debe restringir acceso y retención de esos logs y revocar/regenerar los tokens afectados; rotar credenciales SMTP/B2/DB solo si estuvieron expuestas. Esta sesión no ha leído logs productivos ni acredita ausencia de incidentes anteriores. No pegar valores al registrar el incidente.
+
+### Gate de Sprint 5 (solo preparación local)
+
+La migración aditiva de revisiones requiere copia recuperable y ensayo aislado MySQL/TiDB antes de activarse. No ejecutar su down ni desplegar automáticamente. El código sigue compatible con IDs/URLs legacy; conservar el esquema nuevo si se revierte código y revisar clientes nulos con la versión anterior.
+
+Actualización Sprint 5.5: audit de producción pnpm y auditorías Composer completas/producción sin avisos. Los moderados de glob/minimatch están corregidos con overrides transitivos acotados y probados. El audit completo nativo sigue saliendo 1 por deepmerge 4.3.1 sin release corregida; el gate pasa con warning únicamente si verifica el parche local y la entrada instalada mediante SHA-256. No se aceptan avisos nuevos ni una instalación sin mitigar. Véase [informe actual](plans/2026-11-02-sprint55-dependency-security.md).
+
+Conservar `patches/deepmerge@4.3.1.patch`, `package.json` y lockfile juntos. `pnpm install --frozen-lockfile` aplica/verifica el parche; no sustituir por una instalación sin lock ni cambiar EOL del parche. `.gitattributes` fija LF y el Dockerfile copia `patches/` antes de instalar. Instalación desde cero, pruebas de contratos y build comprobados localmente con Node 22.23.4; el build de imagen completo no se ejecuta por falta de daemon Docker disponible.
+
+CI incorpora la PWA compilada y su prueba offline además de las suites anteriores. CI remoto, MySQL/TiDB, B2 e impresión física siguen pendientes; este trabajo no autoriza una release ni modifica producción.
+
+### Apoyo voluntario — Sprint 6
+
+/support pública está implementada localmente. Las variables VITE_KOFI_URL y VITE_GITHUB_SPONSORS_URL permanecen vacías y no hay perfiles verificados ni FUNDING.yml; no se activa ningún enlace real. Vite solo admite URLs HTTPS de perfiles de sus proveedores mediante validación local, sin comprobar identidad o disponibilidad remota. Cambiar variables requiere reconstrucción; no son claves de API ni configuración en base de datos.
+
+El Dockerfile conserva copia/parche/instalación frozen de Sprint 5.5 y admite ambas variables como build args vacíos por defecto; no se ha ejecutado imagen completa ni despliegue. CI prueba enlaces sintéticos en un servidor aislado que no modifica la configuración de la aplicación compilada. Antes de configurar URLs reales y publicar: cumplir [guía de apoyo](support.md), verificar titularidad, condiciones Vercel Hobby sobre el producto completo y revisión fiscal española individual. Nada de ello se considera aprobado por estas pruebas locales.

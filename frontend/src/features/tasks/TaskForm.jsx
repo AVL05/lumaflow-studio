@@ -6,7 +6,7 @@ import { Textarea } from "../../components/ui/Textarea";
 import { ErrorState } from "../../components/states/ErrorState";
 import { taskPriorities, taskStatuses } from "../../utils/catalogs";
 
-export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, clients }) {
+export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, clients, members }) {
   const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
@@ -52,6 +52,22 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
           onChange={(e) => setValue("due_time", e.target.value)}
         />
       </Field>
+      {members && (
+        <Field label="Responsable de la tarea">
+          <Select
+            value={form.assigned_user_id ?? ""}
+            onChange={(e) => setValue("assigned_user_id", e.target.value)}
+            options={[
+              { value: "", label: "Sin responsable" },
+              ...members.map((m) => ({ value: m.id, label: m.name })),
+              ...(form.assigned_user_id &&
+              !members.some((m) => m.id === Number(form.assigned_user_id))
+                ? [{ value: form.assigned_user_id, label: "Miembro no disponible" }]
+                : []),
+            ]}
+          />
+        </Field>
+      )}
 
       <Field label="Sesion">
         <Select

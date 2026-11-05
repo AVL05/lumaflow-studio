@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'is_demo', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at', 'project_type', 'participants', 'start_date', 'end_date', 'delivery_due_date', 'external_links', 'briefing', 'briefing_revision'])]
 class Job extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;
@@ -23,9 +23,11 @@ class Job extends Model
 
     public const CONTRACT_STATUSES = ['not_required', 'draft', 'sent', 'signed', 'declined'];
 
+    public const PROJECT_TYPES = ['photography', 'audiovisual', 'personal'];
+
     protected function casts(): array
     {
-        return ['event_date' => 'date', 'budget' => 'decimal:2', 'deposit_amount' => 'decimal:2', 'contract_signed_at' => 'datetime'];
+        return ['event_date' => 'date', 'budget' => 'decimal:2', 'deposit_amount' => 'decimal:2', 'contract_signed_at' => 'datetime', 'participants' => 'array', 'external_links' => 'array', 'briefing' => 'array', 'briefing_revision' => 'integer', 'start_date' => 'date', 'end_date' => 'date', 'delivery_due_date' => 'date'];
     }
 
     public function scopeOwnedBy($query, int $userId)
@@ -56,6 +58,21 @@ class Job extends Model
     public function sessions(): HasMany
     {
         return $this->hasMany(Session::class);
+    }
+
+    public function shots(): HasMany
+    {
+        return $this->hasMany(Shot::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function stages(): HasMany
+    {
+        return $this->hasMany(PostproductionStage::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class);
     }
 
     public function quotes(): HasMany
@@ -95,5 +112,14 @@ class Job extends Model
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject')->latest();
+    }
+
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class, 'job_location')->whereExists(function ($query): void {
+            $query->selectRaw('1')->from('photography_jobs as location_job')
+                ->whereColumn('location_job.id', 'job_location.job_id')
+                ->whereColumn('location_job.workspace_id', 'locations.workspace_id');
+        });
     }
 }

@@ -12,6 +12,10 @@ class TaskResource extends JsonResource
         return [
             'id' => $this->id,
             'job_id' => $this->job_id,
+            'stage_id' => $this->stage_id,
+            'assigned_user_id' => $this->assigned_user_id,
+            'workflow_phase' => $this->workflow_phase,
+            'revision' => $this->revision ?? 0,
             'session_id' => $this->session_id,
             'session' => new SessionResource($this->whenLoaded('session')),
             'client_id' => $this->client_id,

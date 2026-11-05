@@ -1,9 +1,47 @@
 import { readFileSync, appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+import { createHash } from "node:crypto";
 
 const knownAdvisory = "https://github.com/advisories/GHSA-gcqx-w48m-w2h4";
 const buildPath =
   "frontend>vite-plugin-pwa>workbox-build>@rollup/plugin-node-resolve>deepmerge";
+
+function installedDeepmerge() {
+  let resolver = createRequire(
+    new URL("../frontend/package.json", import.meta.url),
+  );
+  for (const dependency of [
+    "vite-plugin-pwa",
+    "workbox-build",
+    "@rollup/plugin-node-resolve",
+  ]) {
+    resolver = createRequire(resolver.resolve(dependency));
+  }
+  return resolver.resolve("deepmerge");
+}
+
+export function verifyDeepmergeMitigation({
+  patch = readFileSync(
+    new URL("../patches/deepmerge@4.3.1.patch", import.meta.url),
+  ),
+  installed = readFileSync(installedDeepmerge()),
+} = {}) {
+  const manifest = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  if (
+    manifest.pnpm?.patchedDependencies?.["deepmerge@4.3.1"] !==
+      "patches/deepmerge@4.3.1.patch" ||
+    createHash("sha256").update(patch).digest("hex") !==
+      "f53dc4ca4b2b78d6959faaac4776a084c416d7b5ff27b819a557022c2d373f8c" ||
+    createHash("sha256").update(installed).digest("hex") !==
+      "82760c8642c378627a229fe14370632c63d3b0aea3b65da4a6d63d2b7cacf837"
+  )
+    throw new Error(
+      "The reviewed deepmerge mitigation is missing or modified.",
+    );
+}
 
 export function checkAudit(audit, exitCode) {
   if (
@@ -32,7 +70,7 @@ export function checkAudit(audit, exitCode) {
   }
   const warnings = [];
   for (const advisory of advisories) {
-    // shortcut: upstream has no patch; remove this exact build exception when fixed (#49).
+    // shortcut: audit cannot recognize the local patch; remove when upstream ships a fixed release (#49).
     const permitted =
       advisory.module_name === "deepmerge" &&
       advisory.severity === "low" &&
@@ -46,8 +84,9 @@ export function checkAudit(audit, exitCode) {
       throw new Error(
         `Unaccepted security advisory: ${advisory.url ?? "unknown"}`,
       );
+    verifyDeepmergeMitigation();
     warnings.push(
-      `Known unpatched LOW build advisory: deepmerge 4.3.1 — ${knownAdvisory}. See #49 and docs/plans/2026-10-29-sprint1-dependencies.md.`,
+      `Mitigated LOW build advisory: deepmerge 4.3.1 with verified local patch — ${knownAdvisory}. Native audit remains nonzero. See #49 and docs/plans/2026-11-02-sprint55-dependency-security.md.`,
     );
   }
   return warnings;

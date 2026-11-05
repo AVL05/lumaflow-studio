@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { publicApi } from "../api/public";
 import { getApiError } from "../api/client";
@@ -9,7 +9,14 @@ import { Field, inputClass } from "../components/ui/Field";
 import { Textarea } from "../components/ui/Textarea";
 import { ErrorState } from "../components/states/ErrorState";
 import { BrandLogo } from "../components/branding/BrandLogo";
+
 import { sessionTypes } from "../utils/catalogs";
+
+const DeliveryReviewPanel = lazy(() =>
+  import("../features/deliveries/DeliveryReviewPanel").then((module) => ({
+    default: module.DeliveryReviewPanel,
+  })),
+);
 
 const paymentLabels = {
   pending: ["Pago pendiente", "red"],
@@ -20,7 +27,7 @@ const paymentLabels = {
 const statusHeadings = {
   draft: "Tu entrega se está preparando",
   pending: "Tu entrega está en camino",
-  delivered: "Tu sesión está lista",
+  delivered: "Tu proyecto está listo",
   approved: "Entrega aprobada · Gracias",
   archived: "Entrega archivada",
 };
@@ -48,10 +55,16 @@ export function ClientPortalPage() {
   const [copied, setCopied] = useState(false);
 
   function load() {
+    setError("");
+    setNotFound(false);
     publicApi
       .delivery(token)
       .then(setDelivery)
-      .catch(() => setNotFound(true));
+      .catch((err) => {
+        if (err.response?.status === 404) setNotFound(true);
+        else
+          setError(getApiError(err, "La API puede estar iniciando. Reintenta en unos segundos."));
+      });
   }
 
   useEffect(load, [token]);
@@ -61,7 +74,7 @@ export function ClientPortalPage() {
     setError("");
 
     try {
-      setDelivery(await publicApi.approveDelivery(token));
+      setDelivery(await publicApi.approveDelivery(token, delivery.revision_number));
     } catch (err) {
       setError(getApiError(err, "No se pudo registrar la aprobacion."));
     } finally {
@@ -75,7 +88,7 @@ export function ClientPortalPage() {
     setError("");
 
     try {
-      setDelivery(await publicApi.requestDeliveryChanges(token, message));
+      setDelivery(await publicApi.requestDeliveryChanges(token, message, delivery.revision_number));
       setShowChangesForm(false);
       setMessage("");
     } catch (err) {
@@ -103,6 +116,13 @@ export function ClientPortalPage() {
       </PublicShell>
     );
   }
+
+  if (!delivery && error)
+    return (
+      <PublicShell>
+        <ErrorState message={error} onRetry={load} />
+      </PublicShell>
+    );
 
   if (!delivery) {
     return (
@@ -143,12 +163,17 @@ export function ClientPortalPage() {
 
         <div className="mt-8">
           {delivery.gallery_url ? (
-            <a href={delivery.gallery_url} target="_blank" rel="noreferrer" className="inline-flex">
-              <Button>Ver fotografías</Button>
+            <a
+              href={delivery.gallery_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex rounded-lg bg-amber-100 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60"
+            >
+              Ver entrega externa
             </a>
           ) : (
             <p className="text-sm text-stone-400">
-              El estudio todavía no ha compartido el enlace de tu galería.
+              El estudio todavía no ha compartido el enlace de tu entrega.
             </p>
           )}
         </div>
@@ -185,14 +210,16 @@ export function ClientPortalPage() {
             ) : null}
             {delivery.gallery_expires_at ? (
               <p className="pt-1 text-xs text-stone-500">
-                Enlace disponible hasta el {formatLongDate(delivery.gallery_expires_at)}.
+                Portal de LumaFlow disponible hasta el {formatLongDate(delivery.gallery_expires_at)}
+                .
               </p>
             ) : null}
           </dl>
         ) : null}
 
         <p className="mx-auto mt-6 max-w-sm text-xs leading-5 text-stone-500">
-          Tus fotografías viven en tu galería externa y nunca pasan por nuestros servidores.
+          El material permanece en el proveedor externo. LumaFlow no almacena fotografías ni vídeos
+          ni controla sus permisos o disponibilidad.
         </p>
       </Card>
 
@@ -263,6 +290,10 @@ export function ClientPortalPage() {
           </form>
         ) : null}
       </Card>
+
+      <Suspense fallback={<Card className="mt-4 p-5">Cargando seguimiento...</Card>}>
+        <DeliveryReviewPanel delivery={delivery} token={token} onChanged={setDelivery} />
+      </Suspense>
 
       <footer className="mt-8 text-center">
         {delivery.studio_name ? (

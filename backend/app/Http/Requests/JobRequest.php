@@ -38,6 +38,35 @@ class JobRequest extends FormRequest
             'gear_item_ids' => ['sometimes', 'array'],
             'gear_item_ids.*' => [Rule::exists('gear_items', 'id')->where('workspace_id', $workspaceId)],
             'create_workflow_tasks' => ['sometimes', 'boolean'],
+            'project_type' => ['sometimes', Rule::in(Job::PROJECT_TYPES)],
+            'participants' => ['sometimes', 'array', 'list', 'max:25'],
+            'participants.*' => ['array:name,role'],
+            'participants.*.name' => ['required', 'string', 'max:120'],
+            'participants.*.role' => ['nullable', 'string', 'max:120'],
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+            'delivery_due_date' => ['nullable', 'date_format:Y-m-d'],
+            'external_links' => ['sometimes', 'array', 'list', 'max:20'],
+            'external_links.*' => ['array:label,url'],
+            'external_links.*.label' => ['required', 'string', 'max:120'],
+            'external_links.*.url' => ['required', 'url:http,https', 'not_regex:~^https?://[^/?#]*@~i', 'max:2048'],
+            'location_ids' => ['sometimes', 'array', 'list', 'max:25'],
+            'location_ids.*' => ['integer', 'distinct', Rule::exists('locations', 'id')->where('workspace_id', $workspaceId)],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            if ($validator->errors()->any()) {
+                return;
+            }
+            $job = $this->route('job');
+            $start = $this->input('start_date', $job?->start_date?->toDateString());
+            $end = $this->input('end_date', $job?->end_date?->toDateString());
+            if ($start && $end && $end < $start) {
+                $validator->errors()->add('end_date', 'La fecha final no puede ser anterior al inicio.');
+            }
+        });
     }
 }

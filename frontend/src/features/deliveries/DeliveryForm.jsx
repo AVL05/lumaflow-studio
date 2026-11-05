@@ -28,11 +28,10 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
       </Field>
       <Field label="Cliente">
         <Select
-          required
           value={form.client_id}
           onChange={(e) => setValue("client_id", e.target.value)}
           options={[
-            { value: "", label: "Selecciona cliente" },
+            { value: "", label: "Sin cliente · Proyecto personal" },
             ...clients.map((client) => ({ value: String(client.id), label: client.name })),
           ]}
         />
@@ -117,7 +116,7 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
               onChange={(e) => setValue("gallery_password", e.target.value)}
             />
           </Field>
-          <Field label="Caducidad del enlace (opcional)">
+          <Field label="Caducidad del portal (opcional)">
             <Input
               type="date"
               value={form.gallery_expires_at ?? ""}

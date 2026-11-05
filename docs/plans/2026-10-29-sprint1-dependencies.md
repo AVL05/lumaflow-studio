@@ -126,3 +126,11 @@ Mitigación actual: configuración/plugins de confianza, instalación frozen-loc
 - Auditoría pnpm --prod: PASS, 0 avisos. Auditoría Composer --locked: PASS, 0 avisos / 0 abandonados.
 - pnpm audit completo: FAIL (salida 1) por el único aviso bajo pendiente. 0 altos, 0 críticos, 0 moderados. Se conserva el fallo como evidencia.
 - Los avisos de obsolescencia de jest-dom/glob son distintos de las vulnerabilidades; no se han hecho upgrades oportunistas para eliminarlos. Tests, lint, build y E2E verifican las nuevas versiones en este equipo; no sustituyen CI ni despliegue real.
+
+## Revalidación 02/11/2026 — Sprint 5
+
+La matriz anterior es evidencia histórica del 29/10, no el resultado actual. Se sustituye únicamente el override follow-redirects 1.16.1 por 1.16.2 y se regenera lockfile (un paquete cambiado). Reproducibilidad frozen-lockfile verificada. Audit de producción pnpm y Composer siguen sin avisos. Audit completo ahora informa 1 bajo y 3 moderados de build: deepmerge 4.3.1, minimatch 5.1.9/10.2.6 y glob 11.1.0. El gate falla; no se amplía la excepción de deepmerge ni se afirman auditorías verdes. Véase matriz, fuentes y mitigaciones actualizadas en `2026-11-02-sprint5-delivery-revisions.md`; seguimiento en #49.
+
+## Revalidación posterior — Sprint 5.5, 02/11/2026
+
+La evidencia anterior se conserva fechada. Los tres moderados posteriores de build quedan corregidos con glob 14.0.3 y minimatch 11.0.4 mediante overrides acotados y contratos/CLI/PWA probados. Deepmerge 4.3.1 conserva el aviso nativo sin parche publicado; se mitiga con parche reproducible local y comprobación obligatoria de hashes del parche y código instalado. No se acepta una instalación sin mitigar. Audit completo nativo exit 1 (solo ese bajo), gate PASS con warning visible, producción pnpm y Composer completos/producción sin avisos. Véase la matriz y evidencia actuales en `2026-11-02-sprint55-dependency-security.md`; #49 continúa abierto.

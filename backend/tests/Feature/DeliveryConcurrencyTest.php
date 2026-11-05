@@ -29,7 +29,7 @@ class DeliveryConcurrencyTest extends TestCase
             $owner = User::factory()->create();
             $client = Client::create(['user_id' => $owner->id, 'name' => 'Synthetic', 'status' => 'active']);
             $job = Job::create(['user_id' => $owner->id, 'client_id' => $client->id, 'title' => 'Synthetic', 'specialty' => 'general', 'workflow_key' => 'general', 'status' => 'lead', 'contract_status' => 'sent']);
-            foreach ([['approve', 'approve'], ['changes', 'approve'], ['changes', 'changes'], ['accept', 'accept'], ['reject', 'reject'], ['accept', 'reject']] as $round => $actions) {
+            foreach ([['approve', 'approve'], ['changes', 'approve'], ['changes', 'changes'], ['accept', 'accept'], ['reject', 'reject'], ['accept', 'reject'], ['receive', 'receive'], ['review', 'review'], ['comment', 'comment'], ['publish', 'publish'], ['publish', 'approve-v1']] as $round => $actions) {
                 $isContract = in_array($actions[0], ['accept', 'reject'], true);
                 if ($isContract) {
                     $delivery = Contract::create(['user_id' => $owner->id, 'client_id' => $client->id, 'job_id' => $job->id, 'contract_number' => 'CON-RACE-'.$round, 'title' => 'Synthetic concurrent contract', 'status' => 'sent', 'content' => 'Synthetic terms', 'content_snapshot' => 'Synthetic terms']);
@@ -62,11 +62,26 @@ class DeliveryConcurrencyTest extends TestCase
                 }
                 $transitions = Activity::query()->where('subject_id', $delivery->id)->where('subject_type', $delivery::class)->where('type', 'status_changed')->count();
                 $comments = Activity::query()->where('subject_id', $delivery->id)->where('subject_type', $delivery::class)->where('type', 'comment')->count();
-                $this->assertSame($before + $transitions + $comments, $owner->notifications()->count());
+                $newEvents = $delivery instanceof Delivery ? $delivery->activities()->whereIn('type', ['delivery_receive', 'delivery_review', 'delivery_revision'])->count() : 0;
+                $this->assertSame($before + $transitions + $comments + $newEvents, $owner->notifications()->count());
                 if ($isContract) {
                     $this->assertContains($delivery->fresh()->status, ['accepted', 'rejected']);
                     $this->assertSame(1, $transitions);
                 } else {
+                    if (in_array($actions[0], ['receive', 'review', 'comment', 'publish'], true)) {
+                        $this->assertSame(1, $delivery->activities()->count());
+                        if ($actions[0] === 'publish') {
+                            if ($actions[1] === 'approve-v1' && $delivery->fresh()->status === 'approved') {
+                                $this->assertSame(1, $delivery->fresh()->revision_number);
+                            } else {
+                                $this->assertSame(2, $delivery->fresh()->revision_number);
+                                $this->assertSame('sent', $delivery->fresh()->review_state);
+                                $this->assertSame(2, $delivery->revisions()->count());
+                            }
+                        }
+
+                        continue;
+                    }
                     $approved = in_array('approve', $actions, true);
                     $this->assertSame($approved ? 'approved' : 'delivered', $delivery->fresh()->status);
                     $this->assertSame($approved ? 1 : 0, $transitions);

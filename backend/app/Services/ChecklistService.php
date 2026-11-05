@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
+use App\Models\Job;
 use App\Models\Session;
 use Illuminate\Support\Facades\DB;
 
@@ -24,10 +25,16 @@ class ChecklistService
             $session = isset($attributes['session_id'])
                 ? Session::query()->find($attributes['session_id'])
                 : null;
+            $job = isset($attributes['job_id']) ? Job::findOrFail($attributes['job_id']) : null;
+            if ($job) {
+                app(ProductionService::class)->lockProject($job);
+            }
 
             $checklist = Checklist::create([
                 'user_id' => $userId,
-                'workspace_id' => $session?->workspace_id,
+                'workspace_id' => $job?->workspace_id ?? $session?->workspace_id,
+                'job_id' => $job?->id,
+                'stage_id' => $attributes['stage_id'] ?? null,
                 'session_id' => $attributes['session_id'] ?? null,
                 'name' => $attributes['name'],
                 'type' => $attributes['type'],
@@ -50,6 +57,8 @@ class ChecklistService
             $copy = Checklist::create([
                 'user_id' => $checklist->user_id,
                 'workspace_id' => $checklist->workspace_id,
+                'job_id' => $checklist->job_id,
+                'stage_id' => $checklist->stage_id,
                 'session_id' => $checklist->session_id,
                 'name' => $checklist->name.' (copia)',
                 'type' => $checklist->type,

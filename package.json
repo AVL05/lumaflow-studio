@@ -17,7 +17,9 @@
     "format:frontend": "pnpm --dir frontend run format",
     "format:backend": "cd backend && php vendor/bin/pint",
     "test": "pnpm run test:audit && pnpm run test:backend && pnpm run test:frontend",
-    "test:audit": "node --test scripts/check-security-audit.test.mjs",
+    "test:audit": "node --test scripts/check-security-audit.test.mjs scripts/build-dependencies.test.mjs",
+    "test:pwa": "pnpm --dir e2e exec playwright test --config=playwright.pwa.config.js",
+    "test:support": "pnpm --dir e2e exec playwright test --config=playwright.support.config.js",
     "test:backend": "cd backend && php artisan test",
     "test:frontend": "pnpm --dir frontend run test",
     "test:e2e": "pnpm --dir e2e run test",
@@ -34,13 +36,17 @@
   "devDependencies": {},
   "pnpm": {
     "overrides": {
-      "follow-redirects": "1.16.1",
-      "brace-expansion@2": "2.1.7",
+      "follow-redirects": "1.16.2",
+      "workbox-build@7.4.1>glob": "14.0.3",
+      "filelist@1.0.6>minimatch": "11.0.4",
       "brace-expansion@5": "5.0.12",
       "fast-uri": "3.1.9",
       "serialize-javascript": "7.1.3",
       "source-map-js": "1.2.2",
       "undici@7": "7.30.1"
+    },
+    "patchedDependencies": {
+      "deepmerge@4.3.1": "patches/deepmerge@4.3.1.patch"
     }
   }
 }

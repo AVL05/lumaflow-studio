@@ -41,6 +41,19 @@ export function SettingsPage() {
           </Link>
         </Panel>
       </div>
+      <Panel className="mt-5 p-6">
+        <h2 className="text-lg font-semibold">LumaFlow, gratuito y open source</h2>
+        <p className="mt-3 text-sm leading-6 text-stone-400">
+          Puedes apoyar voluntariamente su mantenimiento y desarrollo. Donar no cambia las funciones
+          disponibles ni es necesario para utilizar la aplicación.
+        </p>
+        <Link
+          to="/support"
+          className="mt-4 inline-flex min-h-11 items-center text-sm text-amber-200 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
+        >
+          Apoyar LumaFlow
+        </Link>
+      </Panel>
       <WorkspaceMembers
         key={user?.current_workspace_id ?? "sin-estudio"}
         currentUserId={user?.id}

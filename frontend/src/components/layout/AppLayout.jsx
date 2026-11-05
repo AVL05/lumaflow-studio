@@ -11,7 +11,7 @@ import { GlobalSearch } from "../../features/search/GlobalSearch";
 
 const primaryNav = [
   ["Inicio", "/app/dashboard"],
-  ["Trabajos", "/app/jobs"],
+  ["Proyectos", "/app/jobs"],
   ["Calendario", "/app/calendar"],
   ["Clientes", "/app/clients"],
 ];
