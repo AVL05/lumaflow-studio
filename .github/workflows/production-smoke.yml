@@ -16,7 +16,14 @@ permissions:
 jobs:
   smoke:
     name: Production health
-    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
+    # Preview deployments of feature branches must not run production assertions:
+    # they fired against the fixed production domain and reported false failures
+    # (runs 41513813116, 41523623975, 42045469155). Production/Render deploys and
+    # the schedule keep every check unchanged.
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment != 'Preview')
     runs-on: ubuntu-latest
     steps:
       - name: Check frontend
@@ -66,3 +73,13 @@ jobs:
             .checks.storage.status == "up" and
             .checks.cache.status == "up"
           ' /tmp/lumaflow-health.json
+
+      - name: Record public health summary on failure
+        if: failure()
+        shell: bash
+        # Coarse public probe (statuses only, no internals): tells an app-level
+        # "down" dependency apart from a platform 5xx or a hung instance.
+        run: |
+          curl --silent --show-error --max-time 90 \
+            --write-out '\nHTTP %{http_code} in %{time_total}s\n' \
+            https://lumaflow-api.aleviclop.dev/api/health || true
