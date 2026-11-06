@@ -10,6 +10,12 @@ export function MarketingFooter() {
           <span>LumaFlow Studio</span>
         </div>
         <nav aria-label="Enlaces del pie" className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link
+            className="inline-flex min-h-6 items-center transition hover:text-stone-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
+            to="/support"
+          >
+            Apoyar LumaFlow
+          </Link>
           <Link className="transition hover:text-stone-200" to="/features">
             Casos de uso
           </Link>

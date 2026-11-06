@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { publicSeo } from "./scripts/publicSeo.mjs";
 
 // https://vite.dev/config/
 // Release para observabilidad: commit del proveedor cuando existe
@@ -20,6 +21,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    publicSeo(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon-32x32.png", "apple-touch-icon.png"],
@@ -44,7 +46,11 @@ export default defineConfig({
       },
       workbox: {
         globIgnores: ["**/lib-*.js"],
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallback: "/app-shell.html",
+        navigateFallbackAllowlist: [
+          /^\/(?:app(?:\/.*)?|login|register|forgot-password|reset-password|verify-email|onboarding|getting-started|demo|deliver\/[^/?]+|contract\/[^/?]+|book\/[^/?]+)\/?(?:\?.*)?$/,
+        ],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === "image",

@@ -12,6 +12,8 @@ class ChecklistResource extends JsonResource
         return [
             'id' => $this->id,
             'session_id' => $this->session_id,
+            'job_id' => $this->job_id,
+            'stage_id' => $this->stage_id,
             'session' => new SessionResource($this->whenLoaded('session')),
             'name' => $this->name,
             'type' => $this->type,

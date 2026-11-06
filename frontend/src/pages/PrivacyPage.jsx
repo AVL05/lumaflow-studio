@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { MarketingPage } from "../components/marketing/MarketingPage";
-import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 const layers = [
   {
@@ -22,22 +21,17 @@ const layers = [
     ],
   },
   {
-    label: "Almacenamiento de galerías",
+    label: "Proveedores de entrega externos",
     tone: "border-white/10 bg-white/[0.035]",
     items: [
-      "Fotografías que decides subir",
-      "Archivos en almacenamiento S3 compatible",
-      "Acceso del cliente mediante el portal de entrega",
+      "Fotografías y vídeos alojados en el proveedor que eliges",
+      "LumaFlow guarda el enlace, proveedor y datos de acceso de la entrega",
+      "El cliente accede al enlace desde el portal de entrega",
     ],
   },
 ];
 
 export function PrivacyPage() {
-  useDocumentMeta(
-    "Privacidad e IA local | LumaFlow",
-    "Conoce qué datos guarda LumaFlow, qué permanece en tu navegador y cómo funciona la IA local con WebGPU.",
-  );
-
   return (
     <MarketingPage>
       <section className="mx-auto grid max-w-[1400px] gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[0.76fr_1.24fr] lg:items-center lg:px-10 lg:py-28">
@@ -111,7 +105,8 @@ export function PrivacyPage() {
           </h2>
           <p className="mt-5 text-base leading-7 text-stone-400">
             WebLLM descarga el modelo en la caché gestionada por el navegador y genera allí las
-            respuestas. El modelo activo y el historial WebGPU se guardan en almacenamiento local.
+            respuestas. El modelo activo se guarda en el navegador y el historial WebGPU en
+            IndexedDB, separado por cuenta y estudio.
           </p>
           <div className="mt-9 border-l border-amber-200/35 pl-5">
             <p className="text-sm font-semibold text-stone-100">
@@ -129,7 +124,8 @@ export function PrivacyPage() {
           </h2>
           <p className="mt-5 text-base leading-7 text-stone-400">
             Los datos necesarios para gestionar el estudio se envían a la API: clientes, sesiones,
-            tareas, documentos y estados. Las fotografías solo se suben cuando creas una entrega.
+            tareas, documentos y estados. En las entregas se guardan enlaces externos y datos de
+            acceso, no los originales de tus fotografías o vídeos.
           </p>
           <div className="mt-9 border-l border-white/15 pl-5">
             <p className="text-sm font-semibold text-stone-100">
@@ -152,11 +148,11 @@ export function PrivacyPage() {
             {[
               [
                 "Acceso por cuenta",
-                "La API usa tokens Bearer y cada consulta limita los recursos al usuario autenticado.",
+                "La API usa tokens Bearer y limita los recursos a los estudios a los que tu cuenta tiene acceso.",
               ],
               [
                 "Aislamiento de recursos",
-                "Un recurso de otra cuenta responde como no encontrado para no revelar su existencia.",
+                "Un recurso de un estudio sin acceso responde como no encontrado para no revelar su existencia.",
               ],
               [
                 "Conexión cifrada",

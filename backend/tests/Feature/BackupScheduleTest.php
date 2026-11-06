@@ -18,10 +18,13 @@ class BackupScheduleTest extends TestCase
         $this->assertStringContainsString("github.ref == 'refs/heads/main'", $workflow);
         $this->assertStringContainsString('group: production-backup', $workflow);
         $this->assertStringContainsString('cancel-in-progress: false', $workflow);
-        $this->assertStringContainsString('php artisan data:backup --prune --no-interaction', $workflow);
-        $this->assertStringContainsString('sha256sum --check --strict', $workflow);
+        $this->assertStringContainsString('php artisan data:backup --remote --prune --no-interaction', $workflow);
+        $this->assertStringContainsString('php artisan data:backup-status --remote --no-interaction', $workflow);
+        $this->assertStringContainsString('RemoteBackupService::class)->assertConfigured()', $workflow);
         $this->assertStringContainsString('if: always()', $workflow);
         $this->assertStringNotContainsString('upload-artifact', $workflow);
+        $this->assertSame(1, preg_match('/echo \'([^\'\r\n]*)\' >> "\$GITHUB_STEP_SUMMARY"/', $workflow, $summary));
+        $this->assertStringNotContainsString('${', $summary[1]);
     }
 
     public function test_runner_requires_explicit_activation_before_accessing_secrets(): void
@@ -37,8 +40,10 @@ class BackupScheduleTest extends TestCase
         $this->assertStringNotContainsString('pull_request', $workflow);
         $beforeSteps = substr($workflow, 0, strpos($workflow, '    steps:'));
         $this->assertStringNotContainsString('secrets.', $beforeSteps);
-        $this->assertStringContainsString('Report missing durable destination', $workflow);
-        $this->assertStringContainsString('exit 1', $workflow);
+        $this->assertStringNotContainsString('Report missing durable destination', $workflow);
+        $this->assertStringContainsString('secrets.BACKUP_S3_SECRET_ACCESS_KEY', $workflow);
+        $this->assertStringContainsString('vars.BACKUP_S3_ENDPOINT', $workflow);
+        $this->assertStringContainsString('exit(1)', $workflow);
     }
 
     public function test_configuration_failure_returns_failure_without_secrets(): void

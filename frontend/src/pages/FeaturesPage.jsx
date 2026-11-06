@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { MarketingPage } from "../components/marketing/MarketingPage";
-import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 const useCases = [
   {
@@ -23,7 +22,7 @@ const useCases = [
   },
   {
     number: "03",
-    title: "Cobra sin perseguir clientes",
+    title: "Controla presupuestos y facturas",
     description:
       "Crea presupuestos y facturas conectados al trabajo, controla su estado y conserva el historial comercial junto al cliente.",
     outcome: "El seguimiento económico forma parte del flujo.",
@@ -42,11 +41,6 @@ const useCases = [
 ];
 
 export function FeaturesPage() {
-  useDocumentMeta(
-    "Casos de uso para estudios fotográficos | LumaFlow",
-    "Convierte solicitudes en sesiones, prepara el trabajo, controla entregas y cobra desde un único lugar.",
-  );
-
   return (
     <MarketingPage>
       <section className="mx-auto grid max-w-[1400px] gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:px-10 lg:py-28">

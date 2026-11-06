@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\DataBackupService;
+use App\Services\RemoteBackupService;
 use Illuminate\Console\Command;
 
 /**
@@ -10,16 +11,42 @@ use Illuminate\Console\Command;
  *
  * Responde "¿Se hizo el backup de hoy?" sin exponer secretos: ultimo
  * backup, edad, checksum y aviso STALE si supera ~36h. Informativo
- * (exit 0); no forma parte del readiness.
+ * local (exit 0); remoto falla si no es verificable o esta STALE.
+ * No forma parte del readiness.
  */
 class DataBackupStatusCommand extends Command
 {
-    protected $signature = 'data:backup-status';
+    protected $signature = 'data:backup-status {--remote : Verifica ultimo backup en B2}';
 
     protected $description = 'Muestra el ultimo backup, su edad y su checksum.';
 
-    public function handle(DataBackupService $backups): int
+    public function handle(DataBackupService $backups, RemoteBackupService $remote): int
     {
+        if ($this->option('remote')) {
+            try {
+                $names = $remote->listBackups();
+                if ($names === []) {
+                    $this->warn('Sin backups remotos.');
+
+                    return self::FAILURE;
+                }
+                $last = $remote->verify($names[0]);
+                $date = DataBackupService::parseBackupDate($last['name']);
+                $age = (time() - $date->getTimestamp()) / 3600;
+                $this->table(['Archivo', 'Timestamp UTC', 'Bytes', 'Edad', 'Estado'], [[
+                    $last['name'], $date->format('Y-m-d H:i:s'), $last['bytes'], sprintf('%.1f h', $age), $age > 36 ? 'STALE' : 'OK',
+                ]]);
+
+                $this->line('SHA-256: '.$last['sha256']);
+
+                return $age > 36 ? self::FAILURE : self::SUCCESS;
+            } catch (\Throwable $exception) {
+                $this->error('Estado remoto FALLO. Revise configuracion B2 y checksum en privado.');
+                report(new \RuntimeException('data:backup-status fallo: '.get_class($exception)));
+
+                return self::FAILURE;
+            }
+        }
         $names = $backups->listBackups();
 
         if ($names === []) {

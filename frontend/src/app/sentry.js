@@ -7,11 +7,29 @@ const SENSITIVE_URL_PATTERNS = [
 
 function scrubUrl(url) {
   if (typeof url !== "string") return url;
-  let scrubbed = url;
-  for (const pattern of SENSITIVE_URL_PATTERNS) {
-    scrubbed = scrubbed.replace(pattern, (match) => match.replace(/[^/]+$/, "[REDACTED]"));
+  try {
+    const parsed = new URL(url, "https://lumaflow.invalid");
+    if (!["https:", "http:"].includes(parsed.protocol)) return "[REDACTED]";
+    parsed.username = "";
+    parsed.password = "";
+    parsed.hash = "";
+    for (const pattern of SENSITIVE_URL_PATTERNS) {
+      parsed.pathname = parsed.pathname.replace(pattern, (match) =>
+        match.replace(/[^/]+$/, "[REDACTED]"),
+      );
+    }
+    parsed.pathname = parsed.pathname
+      .replace(/^(\/(?:api\/)?email\/verify\/).*/, "$1[REDACTED]")
+      .replace(/^(\/storage\/).*/, "$1[REDACTED]");
+    if (
+      parsed.search &&
+      !/^\?(?:page|per_page)=\d+(?:&(?:page|per_page)=\d+)*$/.test(parsed.search)
+    )
+      parsed.search = "?[REDACTED]";
+    return url.startsWith("/") ? `${parsed.pathname}${parsed.search}` : parsed.toString();
+  } catch {
+    return "[REDACTED]";
   }
-  return scrubbed;
 }
 
 function scrubBreadcrumbs(breadcrumbs) {
@@ -22,13 +40,17 @@ function scrubBreadcrumbs(breadcrumbs) {
       const data = crumb.data && typeof crumb.data === "object" ? { ...crumb.data } : undefined;
       if (data) {
         if (typeof data.url === "string") data.url = scrubUrl(data.url);
-        delete data.message;
-        delete data.input;
-        delete data.prompt;
-        delete data.response;
-        delete data.content;
-        crumb = { ...crumb, data };
+        crumb = {
+          ...crumb,
+          data: Object.fromEntries(
+            Object.entries(data).filter(([key]) =>
+              ["url", "method", "status_code", "duration_ms"].includes(key),
+            ),
+          ),
+        };
       }
+      crumb = { ...crumb };
+      delete crumb.message;
       return crumb;
     })
     .filter(Boolean);
@@ -36,29 +58,63 @@ function scrubBreadcrumbs(breadcrumbs) {
 
 export function sanitizeSentryEvent(event) {
   const clean = { ...event };
+  delete clean.extra;
+  delete clean.logentry;
+  if (clean.message) clean.message = "[REDACTED]";
+  if (clean.exception?.values) {
+    clean.exception = {
+      ...clean.exception,
+      values: clean.exception.values.map((exception) => ({
+        ...exception,
+        value: "[REDACTED]",
+        ...(exception.stacktrace
+          ? {
+              stacktrace: {
+                ...exception.stacktrace,
+                frames: exception.stacktrace.frames?.map((frame) => {
+                  const { vars: _vars, ...safeFrame } = frame;
+                  return safeFrame;
+                }),
+              },
+            }
+          : {}),
+      })),
+    };
+  }
   if (clean.request) {
     clean.request = { ...clean.request };
     if (clean.request.headers) {
       const headers = { ...clean.request.headers };
-      delete headers.authorization;
-      delete headers.Authorization;
-      delete headers.cookie;
-      delete headers.Cookie;
+      for (const key of Object.keys(headers)) {
+        if (/authorization|cookie|token|secret|api.key/i.test(key)) delete headers[key];
+      }
       clean.request.headers = headers;
     }
     if (typeof clean.request.url === "string") clean.request.url = scrubUrl(clean.request.url);
     delete clean.request.data;
     delete clean.request.cookies;
+    delete clean.request.query_string;
+    delete clean.request.env;
   }
   if (clean.breadcrumbs) {
-    clean.breadcrumbs = {
-      ...clean.breadcrumbs,
-      values: scrubBreadcrumbs(clean.breadcrumbs.values),
-    };
+    clean.breadcrumbs = Array.isArray(clean.breadcrumbs)
+      ? scrubBreadcrumbs(clean.breadcrumbs)
+      : {
+          ...clean.breadcrumbs,
+          values: scrubBreadcrumbs(clean.breadcrumbs.values),
+        };
   }
   if (clean.user) clean.user = { id: clean.user.id };
-  if (clean.contexts?.trace) {
-    clean.contexts = { ...clean.contexts };
+  if (clean.contexts) {
+    clean.contexts = clean.contexts.trace
+      ? {
+          trace: Object.fromEntries(
+            Object.entries(clean.contexts.trace).filter(([key]) =>
+              ["trace_id", "span_id", "parent_span_id", "op", "status"].includes(key),
+            ),
+          ),
+        }
+      : {};
   }
   return clean;
 }

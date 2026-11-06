@@ -1,9 +1,27 @@
+import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Modal } from "./Modal";
 
 describe("Modal", () => {
+  it("mantiene el foco al escribir aunque el callback de cierre cambie", async () => {
+    function Harness() {
+      const [value, setValue] = useState("");
+      return (
+        <Modal open title="Editar" onClose={() => {}}>
+          <input aria-label="Nombre" value={value} onChange={(e) => setValue(e.target.value)} />
+        </Modal>
+      );
+    }
+    render(<Harness />);
+    const user = userEvent.setup();
+    const input = screen.getByLabelText("Nombre");
+    await user.type(input, "Texto completo");
+    expect(input).toHaveValue("Texto completo");
+    expect(input).toHaveFocus();
+  });
+
   it("no renderiza nada cerrado", () => {
     render(
       <Modal open={false} title="Oculto" onClose={vi.fn()}>

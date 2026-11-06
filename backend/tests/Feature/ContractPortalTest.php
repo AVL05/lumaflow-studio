@@ -10,6 +10,7 @@ use App\Models\Job;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\WorkspaceMembership;
+use App\Services\ContractPortalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -60,6 +61,19 @@ class ContractPortalTest extends TestCase
     private function generateLink(int $id): array
     {
         return $this->postJson("/api/contracts/{$id}/portal")->assertCreated()->json();
+    }
+
+    public function test_stale_portal_approvals_notify_once_inside_the_transaction(): void
+    {
+        $contract = $this->createContract();
+        $this->sendContract($contract['id']);
+        $token = $this->generateLink($contract['id'])['meta']['token'];
+        $service = app(ContractPortalService::class);
+        $first = $service->resolveUsable($token);
+        $stale = $service->resolveUsable($token);
+        $service->accept($first);
+        $service->accept($stale);
+        $this->assertSame(1, Notification::query()->where('title', 'Contrato aceptado por el cliente')->count());
     }
 
     public function test_portal_link_stores_only_hash_and_shows_token_once(): void

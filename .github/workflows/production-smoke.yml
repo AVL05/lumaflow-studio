@@ -30,6 +30,27 @@ jobs:
           grep -q 'id="root"' /tmp/lumaflow-login.html
           grep -q '/favicon-32x32.png' /tmp/lumaflow-login.html
 
+      - name: Check public indexing documents
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          const origin = 'https://lumaflow.aleviclop.dev';
+          for (const path of ['/', '/features', '/pricing', '/privacy', '/about-project', '/support']) {
+            const response = await fetch(origin + path);
+            assert.equal(response.status, 200, path);
+            assert.match(response.headers.get('content-type'), /text\/html/);
+            const html = await response.text();
+            assert.match(html, /<h1[ >]/, path);
+            assert.ok(html.includes(`rel="canonical" href="${origin}${path}"`), path);
+          }
+          for (const [path, type] of [['/robots.txt', /text\/plain/], ['/sitemap.xml', /xml/]]) {
+            const response = await fetch(origin + path);
+            assert.equal(response.status, 200, path);
+            assert.match(response.headers.get('content-type'), type, path);
+          }
+          NODE
+
       - name: Check API and dependencies
         shell: bash
         run: |

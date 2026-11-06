@@ -33,6 +33,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test audit policy
+        run: pnpm run test:audit
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod
+
+      - name: Audit complete dependency tree
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --json > dependency-audit.json
+          audit_status=$?
+          set -e
+          node scripts/check-security-audit.mjs dependency-audit.json "$audit_status"
+
+      - name: Upload complete security audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-security-audit
+          path: dependency-audit.json
+          retention-days: 7
+
       - name: Check formatting
         run: pnpm --dir frontend run format:check
 
@@ -70,6 +93,10 @@ jobs:
 
       - name: Install dependencies
         run: composer install --working-dir=backend --no-interaction --prefer-dist
+
+      - name: Audit Composer dependencies
+        working-directory: backend
+        run: composer audit --locked
 
       - name: Prepare Laravel
         working-directory: backend
@@ -127,12 +154,24 @@ jobs:
       - name: Test
         run: pnpm run test:e2e
 
+      - name: Build production PWA
+        run: pnpm run build
+
+      - name: Verify optional support providers
+        run: pnpm run test:support
+
+      - name: Verify production PWA offline
+        run: pnpm run test:pwa
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: e2e/playwright-report/
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/pwa/
+            e2e/test-results/support/
           retention-days: 7
 
   containers:

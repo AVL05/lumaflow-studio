@@ -43,7 +43,10 @@ export const CalendarList = memo(function CalendarList({ events, onSelect }) {
               className="cursor-pointer border-b border-white/[0.05] transition last:border-0 hover:bg-white/[0.03]"
             >
               <td className="px-3 py-2 tabular-nums text-stone-400">{event.date}</td>
-              <td className="px-3 py-2 tabular-nums text-stone-400">{event.time ?? "--:--"}</td>
+              <td className="px-3 py-2 tabular-nums text-stone-400">
+                {event.time ?? "--:--"}
+                {event.meta?.end_time ? `–${event.meta.end_time}` : ""}
+              </td>
               <td className="px-3 py-2">
                 <span className="flex items-center gap-2 text-stone-400">
                   <span className={`h-2 w-2 rounded-full ${sourceDots[event.source]}`} />

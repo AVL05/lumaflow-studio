@@ -112,6 +112,8 @@ Descartado B porque contradice local-first (más superficie de ataque, backups c
 
 **Backend legacy:** `ai_conversations/messages/plans/analyses` siguen siendo persistencia del modo Ollama (`AiController`), leídas en la SPA solo como compatibilidad (historial antiguo). El modo WebGPU no las escribe ni las necesita.
 
+El contexto backend requiere membership vigente y se limita al workspace de la conversación/sesión (al actual para recomendaciones). Mensajes, planes y análisis conservan explícitamente ese workspace aunque el actor tenga otro seleccionado. Retirar una membership impide reutilizar contexto de ese estudio. Este endurecimiento no añade funciones ni inferencia automática.
+
 **Logs:** sin `console.*` de contenido; `AuditLog::aiFailure` solo guarda operación y motivo.
 
 ## Limitaciones actuales

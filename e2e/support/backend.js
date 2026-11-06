@@ -53,7 +53,7 @@ export function prepareTestEnvironment() {
 
 /** Ruta del router que usa `php artisan serve` para reescribir las rutas de la API. */
 export function phpServerRouter() {
-  const router = `${backendDir}/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`;
+  const router = `${backendDir}/server.php`;
 
   if (!existsSync(router)) {
     throw new Error("No se encuentra el servidor de Laravel. Ejecuta `composer install` en backend/.");

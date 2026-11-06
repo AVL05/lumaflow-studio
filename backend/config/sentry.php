@@ -46,5 +46,5 @@ return [
         UnauthorizedHttpException::class,
     ],
 
-    'before_send' => fn (array $event): array => SentryScrubber::scrub($event),
+    'before_send' => [SentryScrubber::class, 'scrubSdkEvent'],
 ];

@@ -78,9 +78,17 @@ class BulkActionService
         $models = $this->scoped($resource, $user)->whereIn('id', $ids)->get();
 
         foreach ($models as $model) {
+            if ($model instanceof Delivery) {
+                $model = app(DeliveryRevisionService::class)->lock($model);
+            }
             $previous = $model->status;
             $model->update(['status' => $value]);
             $this->activity->logStatusChange($user, $model, $previous, $value);
+            if ($model instanceof Delivery && $previous !== $value) {
+                $model->version++;
+                $model->save();
+                app(DeliveryRevisionService::class)->syncStages($model, $model->review_state ?? 'sent');
+            }
         }
 
         return $models->count();
@@ -89,6 +97,15 @@ class BulkActionService
     private function client(User $user, string $resource, array $ids, int $clientId): int
     {
         Client::query()->accessibleBy($user)->findOrFail($clientId);
+
+        if ($resource === 'deliveries') {
+            $models = $this->scoped($resource, $user)->whereIn('id', $ids)->get();
+            foreach ($models as $model) {
+                app(DeliveryRevisionService::class)->lock($model)->update(['client_id' => $clientId]);
+            }
+
+            return $models->count();
+        }
 
         return $this->scoped($resource, $user)->whereIn('id', $ids)->update(['client_id' => $clientId]);
     }

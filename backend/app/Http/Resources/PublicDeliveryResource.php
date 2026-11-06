@@ -17,6 +17,9 @@ class PublicDeliveryResource extends JsonResource
         return [
             'title' => $this->title,
             'status' => $this->status,
+            'version' => (int) $this->version,
+            'review_state' => $this->review_state ?? ($this->status === 'approved' ? 'approved' : (in_array($this->status, ['pending', 'delivered'], true) ? 'sent' : null)),
+            'revision_number' => max(1, (int) $this->revision_number),
             'studio_name' => $this->user?->studio_name ?? $this->user?->name,
             'client_name' => $this->client?->name,
             'session_name' => $this->session?->name,

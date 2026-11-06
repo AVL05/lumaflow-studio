@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\WorkspaceAuthorizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,10 +15,12 @@ class QuoteRequest extends FormRequest
 
     public function rules(): array
     {
+        $workspaceId = app(WorkspaceAuthorizer::class)->workspaceForRequest($this);
+
         return [
-            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
-            'client_id' => ['required', Rule::exists('clients', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
-            'session_id' => ['nullable', Rule::exists('sessions', 'id')->whereIn('workspace_id', $this->user()->workspaceIds())],
+            'job_id' => ['nullable', Rule::exists('photography_jobs', 'id')->where('workspace_id', $workspaceId)],
+            'client_id' => ['required', Rule::exists('clients', 'id')->where('workspace_id', $workspaceId)],
+            'session_id' => ['nullable', Rule::exists('sessions', 'id')->where('workspace_id', $workspaceId)],
             'issue_date' => ['nullable', 'date'],
             'valid_until' => ['nullable', 'date', 'after_or_equal:issue_date'],
             'tax_rate' => ['required', 'numeric', 'min:0', 'max:100'],

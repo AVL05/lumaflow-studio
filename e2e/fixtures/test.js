@@ -1,5 +1,5 @@
 import { test as base, expect } from "@playwright/test";
-import { sessionStateFile } from "../support/env.js";
+import { apiUrl, sessionStateFile } from "../support/env.js";
 
 /**
  * Suite E2E de LumaFlow.
@@ -58,12 +58,39 @@ export const test = base.extend({
     await context.close();
   },
   /** Ventana publica sin sesion, para los portales de entrega. */
-  visitorPage: async ({ browser }, use) => {
-    const context = await browser.newContext();
-
-    await use(await context.newPage());
-    await context.close();
-  },
+  visitorPage: [
+    async ({ browser }, use, testInfo) => {
+      const context = await browser.newContext();
+      try {
+        // Each public journey needs its own budget; keep the real 30/min protection enabled.
+        const probe = () =>
+          context.request.get(
+            `${apiUrl}/public/studios/synthetic-rate-budget-probe`,
+          );
+        let response = await probe();
+        expect([404, 429]).toContain(response.status());
+        const remaining = Number(response.headers()["x-ratelimit-remaining"]);
+        expect(Number.isSafeInteger(remaining)).toBe(true);
+        if (remaining < 20 || response.status() === 429) {
+          testInfo.annotations.push({
+            type: "rate-limit",
+            description:
+              "Wait for the public 30/min window; no counters are cleared and no actions retried.",
+          });
+          await new Promise((resolve) => setTimeout(resolve, 60_000));
+          response = await probe();
+          expect(response.status()).toBe(404);
+          expect(
+            Number(response.headers()["x-ratelimit-remaining"]),
+          ).toBeGreaterThanOrEqual(20);
+        }
+        await use(await context.newPage());
+      } finally {
+        await context.close();
+      }
+    },
+    { timeout: 90_000 },
+  ],
 });
 
 export { expect };

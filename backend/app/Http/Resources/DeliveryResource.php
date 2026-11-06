@@ -11,6 +11,8 @@ class DeliveryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'version' => (int) $this->version,
+            'portal_revoked_at' => $this->portal_revoked_at?->toISOString(),
             'job_id' => $this->job_id,
             'client_id' => $this->client_id,
             'client' => new ClientResource($this->whenLoaded('client')),
@@ -18,6 +20,8 @@ class DeliveryResource extends JsonResource
             'session' => new SessionResource($this->whenLoaded('session')),
             'title' => $this->title,
             'status' => $this->status,
+            'review_state' => $this->review_state ?? ($this->status === 'approved' ? 'approved' : (in_array($this->status, ['pending', 'delivered'], true) ? 'sent' : null)),
+            'revision_number' => max(1, (int) $this->revision_number),
             'is_demo' => (bool) $this->is_demo,
             'budget' => $this->budget,
             'payment_status' => $this->payment_status,

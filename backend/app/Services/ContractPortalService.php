@@ -23,6 +23,7 @@ class ContractPortalService
     public function __construct(
         private readonly WorkspaceAuthorizer $authorizer,
         private readonly ActivityLogger $activity,
+        private readonly NotificationService $notifications,
     ) {}
 
     /**
@@ -130,55 +131,50 @@ class ContractPortalService
         return $link->refresh();
     }
 
-    public function accept(ContractPortalLink $link, ?string $message = null): Contract
+    public function accept(ContractPortalLink $link): bool
     {
-        return DB::transaction(function () use ($link): Contract {
-            $contract = $link->contract()->lockForUpdate()->first();
-
-            abort_if($contract->getAttribute('status') !== Contract::STATUS_SENT
-                && $contract->getAttribute('status') !== Contract::STATUS_ACCEPTED, 422,
-                'Este contrato ya no admite aceptación.');
-
-            if ($contract->getAttribute('status') === Contract::STATUS_ACCEPTED) {
-                return $contract->load(['client', 'job']);
-            }
-
-            $contract->forceFill(['client_responded_at' => now()])->saveQuietly();
-
-            return app(ContractService::class)->transition(
-                $contract, $contract->user, Contract::STATUS_ACCEPTED
-            );
-        });
+        return $this->respond($link, Contract::STATUS_ACCEPTED);
     }
 
-    public function reject(ContractPortalLink $link, ?string $message = null): Contract
+    public function reject(ContractPortalLink $link, ?string $message = null): bool
     {
         $clean = $message === null ? null : trim(strip_tags($message));
 
         abort_if($clean !== null && mb_strlen($clean) > 2000, 422,
             'El comentario no puede superar los 2000 caracteres.');
 
-        return DB::transaction(function () use ($link, $clean): Contract {
-            $contract = $link->contract()->lockForUpdate()->first();
+        return $this->respond($link, Contract::STATUS_REJECTED, $clean);
+    }
+
+    private function respond(ContractPortalLink $link, string $status, ?string $message = null): bool
+    {
+        return DB::transaction(function () use ($link, $status, $message): bool {
+            // UPDATE primero adquiere el bloqueo también en SQLite; no cambia timestamps.
+            $link->contract()->update(['updated_at' => DB::raw('updated_at')]);
+            $link = $link->fresh();
+            abort_unless($link && $link->isUsable(), 404);
+            $contract = $link->contract()->lockForUpdate()->firstOrFail();
 
             abort_if($contract->getAttribute('status') !== Contract::STATUS_SENT
-                && $contract->getAttribute('status') !== Contract::STATUS_REJECTED, 422,
-                'Este contrato ya no admite rechazo.');
+                && $contract->getAttribute('status') !== $status, 422,
+                'Este contrato ya no admite esta respuesta.');
 
-            if ($contract->getAttribute('status') === Contract::STATUS_REJECTED) {
-                return $contract->load(['client', 'job']);
+            if ($contract->getAttribute('status') === $status) {
+                return true;
             }
 
-            if ($clean !== null && $clean !== '') {
-                $contract->forceFill([
-                    'client_message' => $clean,
-                    'client_responded_at' => now(),
-                ])->saveQuietly();
+            $contract->forceFill(['client_responded_at' => now()]);
+            if ($message !== null && $message !== '') {
+                $contract->forceFill(['client_message' => $message]);
+            }
+            $contract = app(ContractService::class)->transition($contract, $contract->user, $status);
+            if ($status === Contract::STATUS_ACCEPTED) {
+                $this->notifications->success($contract->user, 'Contrato aceptado por el cliente', $contract->title, "/app/contracts/{$contract->id}");
+            } else {
+                $this->notifications->warning($contract->user, 'El cliente ha rechazado el contrato', $contract->title, "/app/contracts/{$contract->id}");
             }
 
-            return app(ContractService::class)->transition(
-                $contract, $contract->user, Contract::STATUS_REJECTED
-            );
-        });
+            return false;
+        }, 3);
     }
 }

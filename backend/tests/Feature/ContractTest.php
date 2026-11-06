@@ -111,8 +111,8 @@ class ContractTest extends TestCase
 
         Sanctum::actingAs(User::factory()->create());
         $this->getJson("/api/contracts/{$contract['id']}")->assertNotFound();
-        // Con IDs ajenos la validacion scoped falla sin filtrar existencia.
-        $this->putJson("/api/contracts/{$contract['id']}", $this->draftPayload())->assertUnprocessable();
+        // La autorización del recurso precede a cualquier validación de entrada.
+        $this->putJson("/api/contracts/{$contract['id']}", $this->draftPayload())->assertNotFound();
         $this->deleteJson("/api/contracts/{$contract['id']}")->assertNotFound();
     }
 
