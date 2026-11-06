@@ -69,6 +69,10 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test/setup.js",
     include: ["src/**/*.test.{js,jsx}"],
+    // The first test of heavy page suites pays the cold import of lazy routes;
+    // on loaded 2-core CI runners that exceeded the 5 s default (CI run
+    // 42045414965) while taking <1 s locally. Assertions are unchanged.
+    testTimeout: 15000,
     coverage: {
       reporter: ["text", "html"],
       include: ["src/hooks/**", "src/features/**", "src/components/**"],
