@@ -1,6 +1,8 @@
+> Decisión final de publicación: **NO-GO para publicación conjunta en producción**. Evaluación de `eb9553b`: ver §16. Las secciones anteriores conservan evidencia histórica.
+
 # Auditoría SEO/GEO de LumaFlow Studio
 
-Fecha: **2 de noviembre de 2026**, Europe/Madrid. Estado actualizado: **P0/P1 implementados localmente con verificaciones y bloqueos abiertos; sin publicar**. Resultados actuales en [§13](#13-implementación-local-p0p1). Las secciones 1–12 conservan el diagnóstico y las propuestas anteriores a la implementación.
+Fecha: **2 de noviembre de 2026**, Europe/Madrid. Estado actualizado: **P0/P1 implementados localmente con verificaciones y bloqueos abiertos; sin publicar**. Preparación de publicación aislada en [§14](#14-publicación-aislada-desde-originmain). Las secciones 1–13 conservan el diagnóstico, implementación y mediciones del workspace original; no representan el conjunto de código que se publica en la rama aislada.
 
 ## 1. Dictamen ejecutivo
 
@@ -476,3 +478,232 @@ Las suites E2E existentes también regeneraron tres artefactos de documentación
 5. Confirmar veracidad de capturas y disponibilidad audiovisual contra el release publicado; no activar perfiles de apoyo ni inventar condiciones.
 
 No se ha cambiado la autenticación, autorización, schema de DB ni contenido de recursos del CRM. `package.json`, `frontend/package.json`, `pnpm-lock.yaml`, guardia/auth y CSS principal se contrastaron con la baseline y permanecen iguales a su estado previo a esta tarea.
+
+## 14. Publicación aislada desde origin/main
+
+El usuario autorizó una rama SEO independiente al comprobar que `feat/backup-b2-storage` tenía nueve commits locales previos sin publicar y numerosos cambios de otros sprints. Rama de publicación: `feat/seo-geo-public-pages`, creada desde `origin/main` **03676ea496b22d6538f4c2fcb0671bf6592e64ff**, sin esos commits. El checkout original conserva su rama, código y staging; no se traslada ni elimina su trabajo.
+
+### Alcance revisado
+
+Se incluyen únicamente metadatos, head/navegación, HTML comercial estático, shell/404, robots/sitemap, headers de indexación, corrección de copy, tests SEO/PWA y documentación. `SupportPage`, su validador de URLs y sus tests ya existían en el trabajo local: son dependencias necesarias del sexto documento comercial aprobado. Se incorporan sin perfiles reales, SDK de pagos, backend de donantes ni activación remota. El footer enlaza esa página. No se copian funcionalidades de proyectos, briefing, rodaje, workflows, revisiones de entrega, backups, cambios de ownership, migraciones ni upgrades de dependencias.
+
+En documentos compartidos se trasladan solo las secciones SEO; se excluyen los bloques de otros sprints y el reformateo ajeno. `package.json` añade únicamente `test:pwa`; los manifiestos de dependencias y lockfiles permanecen iguales a `origin/main`. CI incorpora build y pruebas SEO/PWA al recorrido E2E existente, sin retirar checks. El smoke público conserva login y salud y añade HTML/canonical/TXT/XML.
+
+Las únicas capturas incluidas son [portada móvil](screenshots/seo-home-mobile.png) y [portada escritorio](screenshots/seo-home-desktop.png), obtenidas del build aislado, sin sesión y con imágenes/datos de demostración. Se excluyen las capturas de sprints anteriores. Los PNG contienen exclusivamente chunks IHDR/IDAT/IEND, sin EXIF ni texto de metadatos. Los informes Lighthouse, logs, `.env`, claves de pruebas, bases SQLite, node_modules/vendor y dist quedan fuera del commit.
+
+### Validación del conjunto publicable
+
+| Gate                      | Resultado de esta rama                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Instalación reproducible  | `pnpm install --frozen-lockfile` y `composer install --no-interaction --prefer-dist`: PASS; no se actualizan lockfiles                                 |
+| Lint                      | `pnpm run lint`: PASS                                                                                                                                  |
+| Formato                   | `pnpm --dir frontend run format:check`: PASS. Se normalizaron CRLF solo en el checkout Windows aislado, sin cambios de contenido ni diff adicional     |
+| Build                     | `pnpm run build`: PASS; seis HTML comerciales, shell, 404, TXT/XML y SW con 25 entradas; Vite 8.2.1 de la base remota                                  |
+| Tests completos           | `pnpm run test`: PASS, **170 backend / 822 assertions y 193 frontend / 32 archivos**                                                                   |
+| E2E existentes            | `pnpm run test:e2e`: PASS, **15 recorridos**, 1,2 min                                                                                                  |
+| SEO/PWA del artefacto     | `pnpm run test:pwa`: PASS, **10 pruebas**, incluyendo hidratación, sin JS, privacidad de shell/head, 308/404, queries, tipos, sitemap y precache final |
+| Smoke remoto              | Sintaxis del JavaScript comprobada con Node; ejecución remota pendiente de publicación/evento del proveedor                                            |
+| Secretos/artefactos       | Escaneo de firmas de credenciales sin hallazgos; revisión manual de diff, ficheros y capturas. Escaneo final sobre staging sin hallazgos antes del commit                |
+| Auditoría pnpm producción | **FAIL heredado:** 15 avisos, 10 altos y 5 moderados, en Axios/follow-redirects del lockfile remoto                                                    |
+| Auditoría Composer        | **FAIL heredado:** avisos en dompdf/dompdf, laravel/framework, league/commonmark, league/flysystem, symfony/http-foundation y symfony/mime             |
+
+Los avisos de dependencias se contrastan con manifiestos/lockfiles sin cambios respecto a la base. No se importan silenciosamente los commits de seguridad excluidos, ni se actualizan versiones para ocultar ese resultado. **Esta rama está preparada para revisión, no aprobada para producción.** Los contadores de §13 pertenecen al workspace ampliado anterior y no se atribuyen a este commit aislado.
+
+### Cobertura de los 15 criterios en la rama aislada
+
+| Criterio | Estado publicable                                                                                                                                                                                                                                   |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC-01    | PASS: allowlist de seis rutas y conjunto exacto de HTML/sitemap                                                                                                                                                                                     |
+| AC-02    | PASS local: title/description/canonical/OG propios en HTTP y DOM, sin duplicados                                                                                                                                                                    |
+| AC-03    | PASS: seis páginas con contenido y CTA sin JS                                                                                                                                                                                                       |
+| AC-04    | PASS: robots TXT y sitemap XML reales/parseables                                                                                                                                                                                                    |
+| AC-05    | PASS local: shell operacional noindex y headers API; sin tokens en head/HTML generado                                                                                                                                                               |
+| AC-06    | PARTIAL: 308/404 y deep links probados localmente; HTTPS/provider/Nginx reales pendientes                                                                                                                                                           |
+| AC-07    | PARTIAL: 15 recorridos e independencia de auth/API conservados. No se publican aquí los endurecimientos previos de los portales; no se certifican todos sus estados de expiración/revocación/relaciones. Los 500 productivos siguen sin diagnóstico |
+| AC-08    | PASS local: render comercial acotado sin lectura de token ni fetch de negocio                                                                                                                                                                       |
+| AC-09    | PARTIAL: instalación/offline/hash final PASS; transición desde PWA productiva antigua pendiente                                                                                                                                                     |
+| AC-10    | PASS de copy local; funcionalidades audiovisuales específicas no incluidas ni anunciadas como implementadas. Canales de apoyo sin activar                                                                                                           |
+| AC-11    | PASS: navegación comercial → registro → atrás, sin heredar canonical público en privado                                                                                                                                                             |
+| AC-12    | PARTIAL: schema parseable y honesto; validador externo/rich result no comprobados                                                                                                                                                                   |
+| AC-13    | PARTIAL: 12 mediciones nuevas del build aislado, SEO 100 en todas; rendimiento móvil 86–96 y escritorio 100. LCP móvil 2,33–3,69 s; objetivo móvil abierto. Las 36 muestras de §13 son históricas                                                                                                                         |
+| AC-14    | PARTIAL: CTA y contenido comprobados a 390/768/1280; no se modifica contraste ni navegación visual                                                                                                                                                  |
+| AC-15    | Pendiente: push/SHA remoto/CI se informan tras publicación; no hay despliegue manual ni verificación de indexación real                                                                                                                             |
+
+### Límites de publicación
+
+No se cambia configuración remota de Vercel, Render o Nginx; los archivos de configuración versionados son parte del SEO revisado. No hay deploy manual, migraciones remotas, merge ni activación de donaciones. CI solo se dispara para `main` y PRs contra `main`: un push a la nueva rama no implica una ejecución de CI. El SHA del commit y el estado remoto se comunican después del push; no se inventa un resultado anticipado.
+
+Antes de una aprobación de producción siguen abiertos los avisos de dependencias, los 500 de portales, el rendimiento móvil, el edge/Nginx real, workers antiguos y Search Console/Bing. Una CI funcional verde no cierra por sí sola esos riesgos.
+
+### Lighthouse final del build aislado
+
+Lighthouse 13.5.0, preview local del build de esta rama, una medición por página/perfil (12 en total); sin errores de ejecución. No son métricas de producción ni datos de campo.
+
+| Ruta | Rendimiento móvil / escritorio | SEO ambos | LCP móvil / escritorio (s) | Accesibilidad ambos |
+| --- | --- | --- | --- | --- |
+| / | 93 / 100 | 100 | 2,93 / 0,76 | 95 |
+| /features | 86 / 100 | 100 | 3,69 / 0,75 | 95 |
+| /pricing | 96 / 100 | 100 | 2,33 / 0,51 | 95 |
+| /privacy | 91 / 100 | 100 | 3,10 / 0,66 | 96 |
+| /about-project | 95 / 100 | 100 | 2,41 / 0,71 | 100 |
+| /support | 96 / 100 | 100 | 2,33 / 0,55 | 94 |
+
+Los informes JSON/HTML se conservan fuera del repositorio, en el directorio temporal `lumaflow-seo-publication-lighthouse`. No se cambian diseño, animaciones ni dependencias para mejorar estas cifras durante la preparación de publicación.
+
+
+## 15. Bloqueos y verificación de la PR #50
+
+### Preview exacto de 21dcafe
+
+Vercel identifica el deployment `dpl_382jDHatoimiXkhNuBZwCUWGXrpi`, estado READY, SHA completo `21dcafe29c55a1b8c70e686276e1d8ffbe222a1d`, rama `feat/seo-geo-public-pages`, URL [lumaflow-studio-fl1e5bgll-aleviclop.vercel.app](https://lumaflow-studio-fl1e5bgll-aleviclop.vercel.app). Se verificó la asociación SHA/deployment mediante el conector, no mediante un alias de rama mutable.
+
+El Preview exige Vercel Authentication. Se accedió con la sesión CLI existente y un OIDC de desarrollo efímero (`vercel env run`), sin desactivar protección, crear enlaces compartidos, modificar variables remotas ni persistir/imprimir el token. `vercel curl` devolvía todavía 302; ese intento no se contó como validación. Playwright solo adjunta el header a peticiones al origen Preview y bloquea terceros; trazas y capturas desactivadas para no guardar credenciales. Service workers bloqueados en ese smoke remoto; su actualización se prueba aparte.
+
+**PASS: 7 pruebas remotas**, seis rutas y un recorrido de infraestructura:
+
+- Seis respuestas HTML 200 con H1, títulos/descripciones y canonical absoluto de producción; contenido/CTA visibles con JS desactivado.
+- Hidratación sin errores React y navegación comercial → registro → atrás; privado sin canonical y retorno sin duplicados.
+- `robots.txt` 200 `text/plain`, `sitemap.xml` 200 `application/xml`, conjunto exacto de seis URLs de producción.
+- Alias 308, desconocidas/assets/API frontal inexistentes 404; acceso, recuperación, CRM, portales sintéticos y query sensible reciben shell vacío noindex, sin canonical ni identificador en HTML.
+- El header `X-Robots-Tag: noindex` de Vercel en las páginas públicas del **Preview es esperado**. No se elimina para aparentar indexabilidad del entorno. Los metadatos comerciales mantienen el canonical productivo.
+
+Pruebas reutilizables: `e2e/playwright.preview.config.js` y `e2e/preview/seo.spec.js`. Ejecutar desde un entorno con acceso autorizado: `SEO_PREVIEW_URL=https://<deployment-exacto>.vercel.app pnpm --dir e2e exec playwright test --config=playwright.preview.config.js`. En Windows se puede envolver esa orden en `vercel env run --project lumaflow-studio --scope aleviclop -- ...`; el token no va en argumentos, fuentes ni logs. La variable selecciona únicamente el target del smoke y no modifica la aplicación.
+
+### Producción permanece separada
+
+[Production Smoke Checks 41513813116](https://github.com/AVL05/lumaflow-studio/actions/runs/41513813116) falló al exigir H1 en `/`: se activó tras el Preview pero consulta el dominio productivo fijo, donde se recibió el shell antiguo. No se han cambiado ni relajado sus expectativas, triggers, assertions ni estado. La CI funcional verde de `21dcafe` ([41517937995](https://github.com/AVL05/lumaflow-studio/actions/runs/41517937995)) no significa que la fase SEO esté publicada en producción.
+
+### Seguridad: correcciones compatibles justificadas
+
+Se inspeccionó `22a2eb89c1dc0a2779fdffa1c35d82222b23f215` de `feat/backup-b2-storage`. Contiene cambios de dependencias separables del resto del trabajo. Se recuperan únicamente sus manifiestos/locks de seguridad, manteniendo `test:pwa` y sin cherry-pick de funcionalidades, políticas, migraciones, CI ni otros sprints. No se introduce ninguna dependencia nueva ni se cruza un major instalado.
+
+| Área | Versiones resultantes | Motivo |
+| --- | --- | --- |
+| Runtime JS | Axios 1.20.0; follow-redirects 1.16.2 | Avisos confirmados por auditoría; la rama antigua fijaba 1.16.1, aún afectada por [GHSA-mrwp-f3q8-3g9p](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p); aquí se aplica 1.16.2 |
+| Build/tests | Vite 8.2.4; Vitest/coverage 4.1.12 | Parches compatibles del bundler y runner utilizados por prerender/PWA |
+| Transitivas | brace-expansion 2.1.7/5.0.12; fast-uri 3.1.9; serialize-javascript 7.1.3; source-map-js 1.2.2; undici 7.30.1 | Overrides de seguridad de la rama auditada, acotados a las mismas familias major |
+| PHP | Laravel 13.30.0; dompdf 3.1.6; CommonMark 2.10.2; Flysystem 3.35.3; Symfony HttpFoundation/Mime 8.1.10 | Solo seis entradas de paquete cambian en composer.lock; sin cambiar composer.json ni el código de autenticación/API. Laravel corrige, entre otros, [GHSA-f9x3-7vq9-cph6](https://github.com/advisories/GHSA-f9x3-7vq9-cph6) |
+
+Resultados medidos tras instalación frozen y Composer install:
+
+- `pnpm audit --prod --json`: **PASS, 0 avisos**.
+- `composer audit --locked --format=json`: **PASS, 0 avisos**.
+- `pnpm audit --json`: **FAIL residual, 4 avisos: 3 moderados y 1 bajo; 0 altos/críticos**. La auditoría previa completa tenía 64 (27 altos, 29 moderados y 8 bajos). Son conteos de dependencia/advisory, no cuatro fallos explotables demostrados del CRM.
+- Residuales en `vite-plugin-pwa → workbox-build`: glob 11.1.0 (parche publicado 14.0.2), minimatch 5.1.9/10.2.6 (parche publicado 11.0.1), deepmerge 4.3.1 ([sin versión corregida publicada](https://github.com/advisories/GHSA-gcqx-w48m-w2h4)). Se usan al generar artefactos desde el repositorio, no como dependencias runtime de las páginas ni de Laravel. No se añade una excepción silenciosa ni se fuerza un override major incompatible; queda **pendiente revisión del toolchain/upstream**, especialmente si se construye código o configuración no confiable.
+
+Los locks de §14 eran inmutables para aquella publicación. Esta continuación autoriza corregir bloqueos de seguridad y por ello documenta explícitamente el cambio de alcance y versiones, sin atribuir sus resultados al antiguo Preview.
+
+### HTTP 500 productivos: diagnóstico pendiente
+
+Repetición con GET sin sesión a los tres endpoints públicos usando exclusivamente identificadores sintéticos: deliveries, contracts y studios siguen devolviendo **500 JSON genérico**, sin stack/SQL en la respuesta. `/api/health` devuelve 200; esto no demuestra que el esquema, release y todas las consultas de portales sean correctos. Se usó el ID de correlación sintético `seo-release-negative-20261102`, devuelto por la API, para facilitar búsqueda de logs.
+
+Se revisó el código: entrega/reserva resuelven ausencias mediante `firstOrFail`; contratos usan un 404 uniforme. Los tests locales negativos y de aislamiento pasan. No hay evidencia para atribuir el 500 a esos controladores, a una migración, a la base o al logging. Los logs del checkout son locales, no evidencia de Render. El servicio productivo es la API Laravel de Render; los logs de funciones Vercel no son sustituto de sus logs.
+
+No hay conector/CLI de Render autenticada ni acceso Sentry disponible. El usuario indicó continuar sin esos logs, mantener el diagnóstico pendiente y no modificar el backend a ciegas. **No se añade catch global ni se transforma 500 en 404 artificialmente.** Pendiente para el operador: correlacionar el request ID en Render/Sentry con release y excepción redactada; comprobar el esquema aplicado sin ejecutar migraciones o consultas sobre datos privados dentro de esta PR.
+
+### PWA anterior → nueva: evidencia y límites
+
+Se añade `e2e/pwa/upgrade.spec.js`: construye la fuente pre-SEO congelada en `03676ea` en un directorio temporal con dependencias ya instaladas, sin cambiar de rama. Instala su worker, conserva una pestaña abierta y almacenamiento sintético; sirve después el build candidato en **el mismo origen**, solicita `registration.update()` y espera el reload de `autoUpdate`. Comprueba shell privado noindex sin canonical, navegación/recarga offline, limpieza de entradas precache obsoletas y conservación de localStorage. No borra almacenamiento del usuario para hacer pasar la actualización.
+
+**PASS** con el build anterior reconstruido y **PASS** con una captura pública del worker/assets que producción sirve actualmente, usada solo en el servidor local de pruebas (`PWA_LEGACY_DIR`), sin tocar sesiones/cachés del navegador del usuario ni la web productiva. La captura queda en TEMP, fuera de Git:
+
+- JS de entrada anterior: `/assets/index-DaMPEJou.js`.
+- SHA-256 del SW anterior: `cc8fee4a73655b9e7718676c5e04062c051f337704d0805e7806a5b611e8779d`.
+- SHA-256 del index anterior: `0d7624111f12c6173eac30358e8a77d36b03619e4d087ca899f28c0bf602ce67`.
+
+La prueba respeta que el fallback del SW solo atiende **navegaciones**, no cualquier fetch. Se corrigió una carrera del propio test entre el reload automático y uno manual; no fue necesario cambiar el worker ni código de aplicación. CI obtiene historial para reconstruir esa baseline; no necesita red productiva ni credenciales de Vercel. El worker capturado se valida localmente en Chromium, no se certifican todos los sistemas operativos ni todas las generaciones históricas de worker. Una PWA que permanezca offline no puede descargar la actualización hasta recuperar red; las pestañas antiguas pueden seguir mostrando su build hasta que el worker tome control. El caché runtime de imágenes mantiene su política previa; no se vacían datos privados ni IndexedDB.
+
+### Estado actualizado de los criterios
+
+| Criterio | Resultado de esta continuación |
+| --- | --- |
+| AC-01 | PASS: allowlist intacta; seis documentos públicos |
+| AC-02 | PASS Preview: head inicial y tras navegación sin duplicados |
+| AC-03 | PASS Preview sin JS, seis rutas |
+| AC-04 | PASS Preview: TXT/XML y URLs exactas |
+| AC-05 | PASS Preview/local: privado noindex y shell sin identificadores |
+| AC-06 | PASS Preview 200/308/404; Nginx real y promoción productiva pendientes |
+| AC-07 | PARTIAL/BLOCKED producción: 500 persistentes sin logs; no se altera auth/contratos |
+| AC-08 | PASS: prerender sigue limitado al contenido público |
+| AC-09 | PASS Chromium local con worker anterior reconstruido y capturado; rollout real/múltiples SO pendiente |
+| AC-10 | Sin cambios: copy verificado; donaciones no activadas |
+| AC-11 | PASS Preview: registro/atrás e hidratación |
+| AC-12 | Sin cambios: schema local validado; validador externo pendiente |
+| AC-13 | Sin cambios: objetivo móvil pendiente, no se atribuye una mejora a los parches |
+| AC-14 | Sin cambios visuales; contraste/navegación pendientes de su tarea |
+| AC-15 | PR sigue en borrador; ningún merge ni publicación productiva; Search Console/Bing pendiente |
+
+### Validación y límites finales
+
+Lint, build, 170 tests backend / 822 assertions y 193 frontend: PASS con las dependencias corregidas. SEO/PWA: 11 pruebas PASS, incluida actualización desde baseline reconstruida; smoke del Preview 21dcafe: 7 PASS. La suite E2E inicial dio 14 PASS y un fallo al borrar historial local de IA; ese recorrido pasó aislado al repetirse. No se oculta la incidencia ni se modifica el CRM o se debilitan assertions para resolverla.
+
+La repetición completa E2E pasó: **15/15**, 47,8 s, sin modificar ese test ni el CRM. CI del nuevo SHA se informa en la PR tras el push. El smoke productivo conserva sus fallos y expectativas. No hay merge, despliegue manual, migración remota ni modificación de configuración de proveedores. Los avisos moderados/bajos del toolchain, los 500 sin diagnóstico y las comprobaciones productivas pendientes siguen abiertos; no equivalen a un release aprobado.
+
+
+## 16. Evaluación final de publicación de eb9553b
+
+Fecha: 2 de noviembre de 2026 (Europe/Madrid). Candidato de aplicación evaluado: `eb9553bd9ac6ae31d9109df4a624b9cd20a84c9e`. Esta evaluación solo añade documentación; no modifica aplicación, tests, dependencias ni configuración remota. La PR permanece en borrador.
+
+### 16.1 Los cuatro avisos: severidad y exposición
+
+Se repitieron las tres auditorías: runtime pnpm **0 avisos**, Composer locked **0 avisos**, auditoría pnpm completa **4 hallazgos (3 moderados, 1 bajo)**. Son **tres advisories**, con minimatch afectando a dos versiones/rutas. No se confunde cantidad de hallazgos con cuatro vulnerabilidades distintas. Severidad publicada según GitHub Reviewed; exposición según código y configuración revisados, no una prueba de explotación.
+
+| Hallazgo instalado | Severidad publicada | Exposición observada y precondición | ¿Corrección obligatoria antes de producción? |
+| --- | --- | --- | --- |
+| deepmerge 4.3.1, vía Workbox → plugin-node-resolve | Baja, [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | En Node al combinar opciones del resolver; el callsite inspeccionado combina defaults del plugin. No llega una petición/dato del CRM a esas opciones. El ataque requiere un objeto fuente malicioso. Sin parche publicado | No bloquea por sí solo este artefacto estático si se construye código/configuración revisados. Seguimiento upstream y aceptación explícita del riesgo residual; bloquear si se permite configuración de terceros no confiable |
+| minimatch 5.1.9, vía Workbox → plugin-off-main-thread → ejs → jake → filelist | Moderada, [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | Dependencia transitiva de herramientas. El aviso cubre versiones <11.0.1; no se demostró que el camino concreto de Jake se ejecute ni un exploit sobre 5.1.9. Los patrones son del repositorio, no de usuarios del CRM | No se fuerza salto 5→11 dentro de esta PR. Pendiente actualización compatible/upstream; requisito previo si se introducen patrones no confiables |
+| minimatch 10.2.6, vía Workbox → glob | Moderada, mismo advisory | Amplificación de patrones con optimizationLevel ≥2 según advisory; requiere patrones controlados por atacante. Workbox enumera archivos locales de dist con patrones/configuración del build | No bloquea aisladamente con entradas revisadas y build aislado; no se afirma riesgo cero. No override 10→11 sin compatibilidad probada |
+| glob 11.1.0, vía Workbox | Moderada, [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) | Bypass de cancelación AbortSignal en recorridos, impacto de disponibilidad/I/O. El callsite de Workbox usa globSync con cwd/follow/ignore, sin signal; no hay globbing de peticiones. No se reprodujo explotación en este uso | No requiere forzar 11→14 para publicar estos archivos estáticos. Seguimiento del parche 14.0.2 y uso de límites del proceso de build, sin confiar en AbortSignal como aislamiento |
+
+Evidencia local: `workbox-build/build/lib/get-file-details.js:23` usa globSync sobre globDirectory; `@rollup/plugin-node-resolve/dist/es/index.js:1079` combina defaults mediante deepMerge. Estas dependencias no son runtime del frontend servido como archivos ni del backend PHP. Riesgo residual principal: proceso de build/CI ante código, árboles o configuración hostiles. No se silencian los avisos ni se añade una excepción a CI. La condición operativa es construir solo la revisión aprobada con lockfiles y aislamiento habituales, sin reutilizar secretos de producción en builds no confiables. Los avisos no son el motivo principal del NO-GO.
+
+### 16.2 HTTP 500: qué se puede concluir
+
+Se repitieron GET negativos de deliveries/contracts/studios con identificadores sintéticos: **500 genérico sin stack/SQL**; request ID `seo-final-evaluation-20261102`. Se conserva la limitación de §15: no hay logs de Render/Sentry ni SHA de la API desplegada verificable desde las fuentes accesibles.
+
+La preexistencia está documentada desde la auditoría inicial. Vercel confirma además que el frontend productivo actual es `dpl_EWFQuHTqY1et2aC13CHy6DvwWQCg`, SHA **03676ea**, no la rama SEO. El estado del frontend no demuestra el release del backend. La PR no modifica controladores públicos, ContractPortalService, rutas API, CORS, migraciones ni cliente de auth frente a main; sí cambia headers globales y seis dependencias PHP. `SearchIndexingTest` se repitió: **4 PASS / 42 assertions**, incluyendo 404 negativos, 401 y conservación del 500 inesperado.
+
+Conclusión acotada: **no hay evidencia de que esta PR introduzca los 500 observados y se documentaron antes de publicarla; no se puede certificar causalidad nula ni ausencia de interacción en un futuro backend sin logs/release/esquema**. Tampoco se interpreta health 200 como certificación de los portales. No se altera backend a ciegas ni se convierte 500 en 404 para maquillar el gate.
+
+### 16.3 Preview: SEO PASS; autenticación y PWA con límites demostrados
+
+Deployment exacto **eb9553b**: `dpl_CtB3motkpJUvbDjpJ5RfXqayQAM3`, [lumaflow-studio-opt22ycl3-aleviclop.vercel.app](https://lumaflow-studio-opt22ycl3-aleviclop.vercel.app), READY. Repetición de `playwright.preview.config.js`: **7/7 PASS**, 10,7 s: seis páginas comerciales, navegación/atrás, hidratación, contenido sin JS, sitemap/robots, canonical y códigos HTTP. El noindex del Preview es esperado. [CI 41521043713](https://github.com/AVL05/lumaflow-studio/actions/runs/41521043713) del candidato continúa verde en sus cuatro jobs.
+
+Comprobaciones adicionales con contexto Chromium nuevo, sin datos ni credenciales de clientes:
+
+- **PASS:** `/app/clients` sin sesión redirige a `/login`; formulario de acceso visible.
+- **FAIL de validación integrada en Preview:** GET `/api/user` sin token devuelve 401; preflight de `/api/login` devuelve 204, pero ambos anuncian `Access-Control-Allow-Origin: https://lumaflow.aleviclop.dev`, incluso cuando Origin es el deployment Preview. El navegador confirma que fetch desde Preview queda bloqueado por CORS. El mismo header coincide para el origen productivo. No se envía una contraseña real, no se crea cuenta productiva ni se abre CORS con comodines. La configuración CORS está igual que en main; es una restricción del entorno disponible, no una regresión de auth demostrada de la PR.
+- **PASS local, 2 E2E de auth repetidos:** registro/verificación/onboarding e inicio de sesión con cuenta sintética del backend SQLite aislado. No equivale a login exitoso del Preview contra Render.
+- **PWA remota NOT VERIFIED:** en el Preview protegido, la navegación HTTP con OIDC funciona pero Chromium rechaza la carga de script del worker con `The script resource is behind a redirect, which is disallowed.`; no aparece registro/control tras 15 s. Un fetch HTTP normal a sw.js con header da 200 JavaScript. Esto confirma la limitación del flujo de autenticación del Preview para registrar el worker; no demuestra que el SW público de producción vaya a fallar. No se desactiva protección ni se crea un bypass compartido para aprobarlo artificialmente.
+- **PWA local PASS previo del mismo candidato:** 11 tests SEO/PWA, actualización del worker anterior reconstruido y captura del productivo; no se promueve ese resultado a certificación del worker remoto protegido. Queda pendiente validar con acceso browser/session admitido para todos los subrecursos o un entorno de QA autorizado, y después el smoke productivo tras promoción.
+
+[Production Smoke Checks 41521086778](https://github.com/AVL05/lumaflow-studio/actions/runs/41521086778) sigue **FAIL**, independiente de Preview: conserva todas sus expectativas sobre el dominio de producción. No se ha cambiado ni marcado como superado.
+
+### 16.4 Integración con main y trabajo posterior
+
+Después de fetch, `origin/main` permanece en **03676ea496b22d6538f4c2fcb0671bf6592e64ff**, ancestro del candidato: **0 commits detrás / 3 delante**. GitHub informa MERGEABLE y la simulación `git merge-tree --write-tree --name-only origin/main eb9553b` no presenta conflictos; no ejecuta un merge en la rama ni modifica índice/worktree. El diff de 52 archivos queda limitado al SEO/PWA/copy, soporte comercial ya aprobado, sus tests/docs/capturas y las correcciones de dependencias explícitamente justificadas en §15. No se añaden migraciones ni funcionalidades CRM.
+
+Distinción necesaria sobre trabajo posterior:
+
+- La PR pública #35 de backups, head remoto **efd6ef5**, también se combina sin conflictos textuales con eb9553b en la simulación. Esto no certifica su funcionamiento conjunto ni autoriza fusionarla.
+- La rama **local** `feat/backup-b2-storage` contiene nueve commits adicionales no publicados. Su simulación contra el candidato sí produce conflictos en **package.json y pnpm-lock.yaml**; hay 11 archivos solapados entre sus commits y esta PR. El checkout original tiene además trabajo pendiente que solapa 25 archivos. No se ha modificado, descartado ni publicado ese trabajo.
+- Si ese trabajo se integra después, revisar manualmente scripts, overrides y lockfile para conservar `test:pwa` y follow-redirects 1.16.2, sin restaurar 1.16.1 por accidente; regenerar lock y repetir checks. Revisar también middlewares y CI aunque Git pueda fusionarlos automáticamente.
+
+Conclusión: **sin conflictos ni commits inesperados respecto al main consultado**, no una garantía sobre futuros movimientos de main u otras ramas. Repetir fetch/simulación/checks inmediatamente antes de cualquier merge autorizado. No se resuelven conflictos de ramas ajenas dentro de esta evaluación.
+
+### 16.5 Plan de publicación y rollback — preparado, NO ejecutado
+
+1. **Antes de autorizar publicación:** resolver o aceptar con responsable la incidencia productiva de portales tras diagnosticarla; disponer de release/SHA, esquema aplicado y deployment anterior de Render. Validar login real en QA con cuenta sintética y origen CORS exacto autorizado, y registro/offline de PWA con acceso válido a sus scripts. No cambiar CORS/protección remotamente sin autorización. Registrar aceptación del riesgo residual del toolchain. Confirmar main/CI del SHA final y operador disponible para rollback.
+2. **Coordinar ambos proveedores antes del merge:** el repositorio declara Vercel ligado a main y Render checksPass. No asumir que fusionar es una acción sin despliegue. Verificar la configuración real y que el smoke productivo rojo no deje Render esperando checks indefinidamente; no deshabilitar el gate. No añadir mecanismos ni modificar proveedores en esta evaluación.
+3. **Vercel:** tras autorización y CI verde, usar el flujo Git existente para generar el build de producción con su VITE_API_URL productivo; no promover ciegamente el Preview, que puede llevar variables de otro entorno. Confirmar SHA y dominio. Mantener ambas versiones disponibles para recuperación.
+4. **Backend:** usar su flujo autorizado una vez verificados release, backup/restauración y estado de migraciones. Esta PR no añade migraciones, pero el entrypoint existente ejecuta `php artisan migrate --force`: que el diff no tenga migraciones no demuestra que la DB remota no tenga otras pendientes. No ejecutar migraciones manuales, regenerar APP_KEY ni cambiar secretos como parte del smoke. No publicar a ciegas el backend sin esa comprobación.
+5. **Smoke inmediato y posterior a actualización de worker:** seis HTML 200 con contenido sin JS, title/description/canonical/OG propios; robots TXT y sitemap XML con seis URLs; alias 308 y desconocidas/assets 404; acceso/recuperación/CRM/portales noindex sin información en HTML. Login/logout y recuperación permitidos con cuenta sintética autorizada; API sin sesión 401 y aislamiento de tenant en QA. Identificadores públicos inexistentes deben dar 404 sin detalles; 500 es FAIL, nunca se acepta como respuesta correcta. PWA nueva y cliente con worker anterior: red→update→offline, shell privado correcto y sin API cacheada. Comprobar ausencia de aumento de errores con logs redactados. No enviar formularios de clientes reales ni datos a herramientas de indexación. Search Console/Bing después de estabilizar.
+6. **Rollback:** ante fallo nuevo de login, exposición, hidratación, rutas, errores API o worker, detener avance y restaurar el artefacto anterior de la capa afectada. Frontend: [Instant Rollback de Vercel](https://vercel.com/docs/instant-rollback) al deployment productivo anterior registrado (actualmente dpl_EWFQuHTqY1et2aC13CHy6DvwWQCg / 03676ea; confirmar elegibilidad y disponibilidad en el momento). Backend: [Rollback de Render](https://render.com/docs/rollbacks) a un artefacto anterior verificado; su ID y disponibilidad están pendientes, no se inventa un objetivo. El rollback del Dashboard Render desactiva autodeploy; el de API no lo hace: el operador debe coordinar el flujo con autorización. No se prescribe `migrate:rollback`, restauración destructiva de DB ni borrado de localStorage/IndexedDB. Volver a comprobar el worker y cliente: cambiar el deployment no revierte inmediatamente un SW ya instalado ni borra datos. Repetir el smoke, conservar evidencia y preparar corrección posterior; volver al release anterior no arregla los 500 que ya existían.
+
+### 16.6 Decisión y condiciones para reconsiderar
+
+**NO-GO para publicación conjunta de la PR #50 en producción en el estado de evidencia actual.** El código SEO está implementado, su Preview comercial pasa y CI es verde. Los avisos de build tienen exposición acotada y pueden tratarse mediante aceptación explícita y seguimiento; no justifican un salto major forzado.
+
+El NO-GO se debe a que falta verificar auth real y PWA en el entorno de publicación/QA autorizado, los 500 reales siguen sin diagnóstico y no hay evidencia suficiente de release/esquema/objetivo de rollback de Render. No se afirma que la PR cause esas incidencias ni se convierte una limitación del entorno Preview en un defecto nuevo de aplicación. La política del repositorio impide fusionar con checks fallidos; el smoke productivo rojo permanece visible.
+
+Para pasar a GO condicionado: cerrar la validación de auth/PWA en un entorno admitido, obtener diagnóstico y tratamiento aceptado de los 500, confirmar rollback del backend y coordinación de gates/autodeploy, aceptar el riesgo residual de toolchain y repetir integración/CI si cambia main. La autorización expresa para merge/despliegue sigue siendo necesaria. En esta sesión solo se actualizan el informe y la PR; no se ejecutan estos pasos de publicación.

@@ -118,6 +118,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # PWA upgrade regression builds the frozen pre-SEO source
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -154,13 +156,13 @@ jobs:
       - name: Test
         run: pnpm run test:e2e
 
-      - name: Build production PWA
+      - name: Build public HTML and PWA
         run: pnpm run build
 
       - name: Verify optional support providers
         run: pnpm run test:support
 
-      - name: Verify production PWA offline
+      - name: Verify SEO and PWA regressions
         run: pnpm run test:pwa
 
       - name: Upload Playwright report
