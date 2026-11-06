@@ -141,6 +141,10 @@ La suite comparte una unica base SQLite, asi que `playwright.config.js` fija `fu
 
 El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sqlite`, Node 22, las dependencias de Composer y del workspace, el navegador Chromium de Playwright y ejecuta `pnpm run test:e2e`. El informe HTML se publica como artefacto cuando falla la suite.
 
+Vitest usa `testTimeout: 15000`. El primer test de las suites de página pesadas (`DeliveryReviewPanel`, `JobDetailPage`) paga la importación en frío de rutas lazy y superó los 5 s por defecto en runners de dos núcleos (run 42045414965), aunque tarda menos de 1 s en local. Las aserciones no cambian; un test colgado sigue fallando.
+
+En Windows con `core.autocrlf=true`, `format:check` puede marcar como mal formateados archivos que Git guarda con LF y que la copia de trabajo tiene en CRLF. CI (Linux) comprueba los blobs LF. Para comprobar el contenido en local sin reescribir archivos: `pnpm --dir frontend exec prettier --check --end-of-line auto src`.
+
 ## Como elegir donde probar
 
 Sprint 1 añade `WorkspaceAssociationSecurityTest` (dos estudios, roles, referencias nuevas/legacy, historial, importación, calendario/reservas y retirada de contexto), `PublicDeliverySecurityTest`, `DeliveryConcurrencyTest`, `AuditLogPrivacyTest` y `ServerLogPrivacyTest`. Se amplían `ContractPortalTest`, `SentryScrubberTest`, Vitest Sentry y el E2E de entregas.

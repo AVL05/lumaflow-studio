@@ -1,6 +1,8 @@
 # Despliegue
 
-## SEO P0/P1 — build y rutas locales, sin desplegar
+## SEO P0/P1 — build y rutas
+
+> **Estado observado el 06/11/2026:** el frontend productivo de Vercel sirve desde el 03/11/2026 13:56 UTC un deployment `Production` creado desde `76c52dd` (`feat/seo-geo-public-pages`, no fusionada en `main`), pese a la decisión NO-GO de [§16.6](SEO_GEO_AUDIT.md#166-decisión-y-condiciones-para-reconsiderar). La API sigue en `main`. Antes de fusionar, confirmar en Vercel qué rama es la de producción y cómo se creó ese deployment.
 
 `pnpm run build` genera automáticamente seis documentos comerciales, `app-shell.html`, `404.html`, robots y sitemap. No hay dependencias nuevas, variables nuevas ni servicio SSR. El origen canónico es el público de LumaFlow; localhost/previews no lo sustituyen por su host. Los builds de preview deben mantener la protección de indexación propia del proveedor y no publicarse como dominios de producto.
 
@@ -36,7 +38,7 @@ La SPA se construye con:
 VITE_API_URL=https://lumaflow-api.aleviclop.dev/api
 ```
 
-El backend usa `FILESYSTEM_DISK=public` en local. No se requiere S3: no hay originales que alojar.
+El backend usa `FILESYSTEM_DISK=public` en local. No se requiere S3 para el producto: no hay originales que alojar. El `FILESYSTEM_DISK=s3` de `render.yaml` solo lo ejercita la sonda de salud (ver más abajo).
 
 ## Despliegue automático y controles
 
@@ -48,6 +50,32 @@ Cada `push` o merge a `main` inicia el ciclo de entrega:
 4. Vercel despliega automáticamente `frontend/` con Node 22.
 5. Render espera a que los checks de GitHub terminen correctamente antes de desplegar la API.
 6. Al finalizar un despliegue, y además cada seis horas, se comprueban el login público y `/api/health`.
+
+**Fusionar en `main` equivale a desplegar ambas capas.** El entrypoint del backend
+ejecuta `php artisan migrate --force` en cada arranque: cualquier migración pendiente
+se aplica sobre la base productiva sin paso manual. Tras la consolidación de
+noviembre de 2026 hay cuatro migraciones aditivas nuevas (Sprints 2–5); ver el
+[informe de consolidación](plans/2026-11-06-consolidation-release-assessment.md)
+antes de fusionar.
+
+El entrypoint espera a MySQL como máximo `DB_WAIT_TIMEOUT` segundos (180 por
+defecto). Si no conecta, termina con código distinto de cero y registra solo la
+clase y el código de la excepción PDO (nunca host, usuario ni contraseña). Antes
+la espera era infinita y silenciosa: una base inalcanzable dejaba el contenedor
+sin servir ni explicar el motivo.
+
+El smoke de producción no se ejecuta para despliegues `Preview` de Vercel (sus
+aserciones apuntan al dominio productivo fijo y generaban falsos fallos). Los
+despliegues de producción, Render y la ejecución programada mantienen todas las
+aserciones; si fallan, el job imprime el resumen público de `/api/health` y su
+código HTTP.
+
+`/api/health` marca `down` (503) si falla la base, la caché **o el disco por
+defecto**. En producción `render.yaml` declara `FILESYSTEM_DISK=s3`, aunque ninguna
+funcionalidad usa ese disco (solo la sonda de salud y, aparte, `backup_s3`). Unas
+credenciales S3/R2 caducadas bastan para devolver 503 y hacer fallar el health
+check de Render. Revisar ese disco forma parte del diagnóstico operativo; no se
+relaja la sonda en código.
 
 Los workflows están en `.github/workflows/ci.yml` y
 `.github/workflows/production-smoke.yml`. Un fallo queda visible en la pestaña

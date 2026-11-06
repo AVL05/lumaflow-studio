@@ -2,6 +2,10 @@
 
 Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece como pendiente.
 
+## Consolidación de ramas — noviembre de 2026, local y sin publicar
+
+`chore/consolidate-lumaflow` integra `feat/backup-b2-storage` (B2 privado, Sprints 1–6) y `feat/seo-geo-public-pages` (SEO/GEO P0/P1, regresión de actualización PWA) sobre `main` `03676ea`. Corrige la espera infinita del entrypoint ante una base inalcanzable, los falsos fallos del smoke en Previews y los timeouts de arranque de dos suites Vitest en CI. Los backups siguen desactivados. No hay push, merge ni despliegue: resultados, bloqueos y decisión en el [informe de consolidación](plans/2026-11-06-consolidation-release-assessment.md).
+
 ## SEO/GEO P0/P1 — implementado localmente, con verificaciones externas pendientes
 
 Metadatos por ruta, allowlist comercial, robots/sitemap generados, exclusión de superficies operativas, headers API, copy coherente y HTML público prerenderizado/hidratado sin cambiar React/Vite + Laravel. El CRM conserva su SPA; no se añaden pagos, alojamiento de originales, blog ni dependencias. Se mantienen estilos y animaciones.
