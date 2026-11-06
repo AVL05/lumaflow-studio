@@ -77,7 +77,7 @@ Orden: merge `--no-ff` de la rama de backups y después de la SEO (`5c9165c`, `a
 | `pnpm audit --prod` / `composer audit --locked` | PASS, 0 avisos |
 | `php vendor/bin/pint --test` | PASS |
 | `php artisan test` (SQLite en memoria) | PASS, 249 tests / 2363 aserciones |
-| `pnpm run test:e2e` (SQLite temporal aislada) | E2E_RESULT |
+| `pnpm run test:e2e` (SQLite temporal aislada) | **19/21 PASS, 2 FAIL** (`ai-history` no muestra la conversación sembrada; `onboarding` agota 30 s). Ambos fallan igual en aislamiento y **también en el head original `5525b04`**, que en CI Linux pasó 21/21 sin reintentos (run 42045414965). Fallo propio de este entorno Windows (suite de 8,4 min frente a 3,6 min en CI), anterior a la integración; causa no diagnosticada y tests sin modificar |
 | Entrypoint | Stub de `php`: aborta a los 4 s con BD caída y continúa con BD disponible; PHP real contra puerto cerrado: `PDOException code 2002`, sin credenciales |
 
 No ejecutado: CI remoto del nuevo SHA (requiere push), imágenes Docker/Nginx (sin Docker local), MySQL/TiDB y B2 reales, smoke del Preview protegido, validadores YAML/actionlint.
