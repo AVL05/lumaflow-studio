@@ -2,6 +2,10 @@
 
 This file is the primary operating contract for AI coding agents working in this repository. Follow it before making changes. More specific `AGENTS.md` files inside `frontend/` and `backend/` extend these rules for each stack.
 
+## Strategic source of truth
+
+Read [`PRODUCT_VISION.md`](PRODUCT_VISION.md) for the current business model, audience, product boundaries and priorities, [`DESIGN.md`](DESIGN.md) for experience direction, and [`CLAUDE.md`](CLAUDE.md) for Claude Code's task protocol. This document remains the primary technical/security contract. Product vision is intent, not proof of implemented features. Where older roadmap or pricing text conflicts with the product vision, flag and reconcile it rather than silently creating paid features.
+
 ## 1. Product mission
 
 LumaFlow Studio is a public-beta workflow SaaS for photographers and small studios. It centralizes clients, jobs, bookings, sessions, tasks, quotes, invoices, deliveries, analytics and local AI without trying to replace Lightroom, Capture One, Pixieset or other photo editors/gallery hosts.
@@ -23,7 +27,7 @@ Do not collapse frontend and backend into one framework. Do not migrate to Next.
 
 ## 3. Source of truth and task intake
 
-Work must start from a GitHub Issue except for trivial documentation or emergency fixes.
+Work should be grounded in a GitHub Issue when one exists, or in an explicit owner-approved task with documented scope. Trivial docs and emergency fixes may proceed without creating an issue.
 
 Before coding:
 
@@ -35,31 +39,16 @@ Before coding:
 
 If the requested implementation conflicts with the repository architecture, security model, product scope or another accepted issue, stop and surface the conflict rather than working around it silently.
 
-## 4. Branching and pull-request workflow
+## 4. Branching and review workflow
 
-Never implement feature work directly on `main`.
+The owner prefers **main-centered development with minimal branch/PR overhead**, provided safeguards are preserved.
 
-Branch naming:
-
-- `feat/<short-kebab-name>`
-- `fix/<short-kebab-name>`
-- `refactor/<short-kebab-name>`
-- `docs/<short-kebab-name>`
-- `test/<short-kebab-name>`
-- `chore/<short-kebab-name>`
-
-One branch should solve one coherent issue. Avoid unrelated cleanup.
-
-Every non-trivial change finishes in a Pull Request. The PR must:
-
-- link the issue (`Closes #123` when appropriate);
-- summarize the user-visible and technical changes;
-- identify migrations, API contract changes and security implications;
-- list validation commands actually run;
-- include screenshots/video for visible UI changes;
-- call out follow-up work instead of sneaking it into the current scope.
-
-Do not merge code with failing CI.
+- When the owner explicitly authorizes a change, and the working tree, branch protections and remote state permit, use a focused commit on `main` for small, reviewable changes.
+- Use short-lived `feat/`, `fix/`, `docs/`, `test/` or `chore/` branches and PRs when GitHub protections, review needs, risky scope or explicit owner instructions require them.
+- Never overwrite unrelated local work, force-push, merge unrelated changes, delete branches or deploy without explicit authorization.
+- For significant changes, document the issue/problem, acceptance criteria, impact, risks and tests whether or not a PR is used.
+- Do not declare completion with failing relevant checks. Never claim CI passed unless checked.
+- If a PR is used, link the issue when applicable, explain API/migration/security impact, list validations actually run, and include screenshots for visible changes.
 
 ## 5. Commit convention
 
@@ -245,7 +234,7 @@ A task is done only when all applicable items are true:
 - documentation is synchronized;
 - no debug code, placeholder copy, dead code or exposed secrets remain;
 - UI changes handle loading, empty, error and responsive states where applicable;
-- PR contains verification evidence and links the issue.
+- PR, when used, contains verification evidence and links the issue; otherwise the completion report records that evidence.
 
 "Code written" is not equivalent to "done".
 
