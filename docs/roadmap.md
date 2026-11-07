@@ -35,9 +35,9 @@ Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece 
 - Permisos granulares, equipos y SSO (la colaboración básica ya existe).
 - Transferencia de ownership y borrado de cuenta endurecido.
 - Sincronización multi-dispositivo del historial IA.
-- Pagos online y conciliacion de facturas.
-- Límites y planes solo después de validar el uso real.
+- Mejorar documentos comerciales y seguimiento de cobros sin convertir donaciones en pagos de producto.
+- Sostener el servicio gratuito con contribuciones voluntarias sin privilegios para donantes; revisar costes reales antes de ampliar infraestructura.
 
 ## Criterio de producto
 
-LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales antes de definir limites, precios o colaboracion avanzada. Sin facturacion ni planes hasta esa validacion.
+LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales y mejorar fiabilidad, seguridad y experiencia de extremo a extremo. La direccion actual es mantener LumaFlow gratuito y aceptar contribuciones voluntarias sin ventajas para donantes; no se planifican suscripciones ni tiers. La vision canonica esta en [PRODUCT_VISION.md](../PRODUCT_VISION.md).
