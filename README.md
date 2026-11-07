@@ -22,13 +22,15 @@ Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conect
 
 ---
 
+**Visión y colaboración:** [Visión de producto](PRODUCT_VISION.md) · [Dirección de diseño](DESIGN.md) · [Claude Code](CLAUDE.md) · [Normas para agentes](AGENTS.md)
+
 ## Qué es LumaFlow
 
 LumaFlow Studio es una plataforma de gestión para fotógrafos y pequeños estudios. Reúne la operación diaria y la relación con el cliente sin obligarte a mantener calendarios, hojas de cálculo, documentos y galerías desconectados.
 
 El producto está en **beta pública**. Puedes crear una cuenta y utilizar las funcionalidades actuales de forma gratuita, sin introducir una tarjeta. Todavía no existe un plan de pago ni un proceso de cobro.
 
-El objetivo de esta etapa es validar el flujo con usuarios reales, detectar qué módulos aportan más valor y mejorar el producto antes de definir límites o planes futuros.
+El objetivo de esta etapa es validar el flujo con usuarios reales, detectar qué módulos aportan más valor y mejorar la estabilidad y la experiencia. La dirección del producto es mantener LumaFlow gratuito, con aportaciones voluntarias opcionales y sin ventajas para donantes.
 
 ## Pruébalo sin registrarte
 
@@ -111,7 +113,7 @@ La beta actual es gratuita y no solicita tarjeta. Esto significa:
 - demo pública sin registro;
 - evolución frecuente del producto;
 - posibilidad de cambios de interfaz y contrato durante la beta;
-- sin compromiso sobre precios o límites futuros hasta que se publiquen expresamente.
+- vocación de gratuidad permanente, sin niveles de pago ni funciones exclusivas para donantes.
 
 LumaFlow ya funciona como producto desplegado, pero sigue siendo experimental. No debe considerarse todavía un servicio crítico ni utilizarse como única copia de documentos o fotografías.
 
