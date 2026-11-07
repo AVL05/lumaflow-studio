@@ -1,10 +1,10 @@
 # Development Workflow
 
-This document defines how LumaFlow Studio work moves from idea to production. It is designed for human + Codex collaboration and complements `AGENTS.md`.
+This document defines how LumaFlow Studio work moves from idea to production. It is designed for human + AI coding-agent collaboration and complements `AGENTS.md`, `CLAUDE.md`, and `PRODUCT_VISION.md`. Older mandatory issue/branch/PR guidance below describes the structured review path; the current owner-approved main-centered exception is defined in `AGENTS.md` section 4.
 
 ## 1. Work hierarchy
 
-Use GitHub as the source of truth:
+Use GitHub as the durable source of truth for tracked tasks. For small owner-authorized changes, a focused direct-to-main commit with a documented validation report is also acceptable under `AGENTS.md`:
 
 ```text
 Product goal
@@ -17,7 +17,7 @@ Product goal
               -> Merge
 ```
 
-Do not treat chat prompts as the durable record of a feature. Important context belongs in the issue or linked documentation.
+This diagram is the full-review path, not a mandatory branch/PR requirement for every task. Do not treat chat prompts as the durable record of a feature. Important context belongs in the issue or linked documentation.
 
 ## 2. Milestones
 
