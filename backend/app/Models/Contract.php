@@ -63,9 +63,9 @@ class Contract extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('contract_number', 'like', "%{$search}%")
-                ->orWhere('title', 'like', "%{$search}%")
-                ->orWhereHas('client', fn ($client) => $client->where('name', 'like', "%{$search}%"));
+            $inner->whereLike('contract_number', "%{$search}%")
+                ->orWhereLike('title', "%{$search}%")
+                ->orWhereHas('client', fn ($client) => $client->whereLike('name', "%{$search}%"));
         }));
     }
 

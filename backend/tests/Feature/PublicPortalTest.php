@@ -7,8 +7,10 @@ use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
+use Mockery;
 use Tests\TestCase;
 
 class PublicPortalTest extends TestCase
@@ -137,6 +139,51 @@ class PublicPortalTest extends TestCase
         ])->assertOk();
 
         Mail::assertSent(DeliveryReadyMail::class, fn ($mail) => $mail->hasTo('marca@example.com'));
+    }
+
+    public function test_smtp_failure_does_not_break_the_update_and_is_audited(): void
+    {
+        Sanctum::actingAs($this->user);
+        $client = Client::create(['user_id' => $this->user->id, 'name' => 'Marca', 'email' => 'marca@example.com', 'status' => 'active']);
+        $delivery = Delivery::create(['user_id' => $this->user->id, 'client_id' => $client->id, 'title' => 'Entrega test', 'status' => 'pending']);
+
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('smtp down'));
+        $channel = Mockery::mock();
+        $channel->shouldReceive('warning')->once()->with('mail.failed', Mockery::on(
+            fn (array $context) => $context['mailable'] === DeliveryReadyMail::class
+                && $context['reason'] === 'RuntimeException'
+                && $context['user_id'] === $this->user->id,
+        ));
+        Log::partialMock()->shouldReceive('channel')->with('lumaflow')->andReturn($channel);
+
+        $this->putJson("/api/deliveries/{$delivery->id}", [
+            'client_id' => $client->id,
+            'title' => 'Entrega test',
+            'status' => 'delivered',
+        ])->assertOk()->assertJsonPath('data.status', 'delivered');
+    }
+
+    public function test_delivery_mail_is_deferred_until_after_the_response(): void
+    {
+        Mail::fake();
+        Sanctum::actingAs($this->user);
+        $client = Client::create(['user_id' => $this->user->id, 'name' => 'Marca', 'email' => 'marca@example.com', 'status' => 'active']);
+        $delivery = Delivery::create(['user_id' => $this->user->id, 'client_id' => $client->id, 'title' => 'Entrega test', 'status' => 'pending']);
+
+        $sentDuringRequest = null;
+        $this->app->terminating(function () use (&$sentDuringRequest): void {
+            // Se registra despues del envio diferido: el correo ya debio salir en terminate.
+            $sentDuringRequest = true;
+        });
+
+        $this->putJson("/api/deliveries/{$delivery->id}", [
+            'client_id' => $client->id,
+            'title' => 'Entrega test',
+            'status' => 'delivered',
+        ])->assertOk();
+
+        $this->assertTrue($sentDuringRequest);
+        Mail::assertSent(DeliveryReadyMail::class, 1);
     }
 
     public function test_calendar_feed_responds_with_ics_content_for_a_valid_token(): void

@@ -28,7 +28,7 @@ class AiConversation extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        return $query->when($search, fn ($builder) => $builder->where('title', 'like', "%{$search}%"));
+        return $query->when($search, fn ($builder) => $builder->whereLike('title', "%{$search}%"));
     }
 
     public function user(): BelongsTo

@@ -16,7 +16,7 @@ Sanctum con **tokens Bearer**, no cookies de sesion. El token se obtiene en `reg
 Authorization: Bearer <token>
 ```
 
-Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, revocado o invalido. La SPA solo destruye la sesion local ante 401; ante 5xx, red o throttling conserva el token y muestra estado degradado con reintento.
+Los tokens caducan a los `SANCTUM_TOKEN_EXPIRATION` minutos de su creacion (43200 = 30 dias por defecto en `.env.example`; vacio desactiva la caducidad) y `sanctum:prune-expired` los purga a diario cuando hay runner de `schedule:run`. Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, caducado, revocado o invalido. La SPA solo destruye la sesion local ante 401; ante 5xx, red o throttling conserva el token y muestra estado degradado con reintento.
 
 | Metodo | Ruta                               | Auth                 | Notas                                                                    |
 | ------ | ---------------------------------- | -------------------- | ------------------------------------------------------------------------ |
@@ -40,6 +40,11 @@ Los recursos de producto requieren email verificado y onboarding completado. Una
 | GET    | `/health` | no   | Coarse. 200 si operativo, 503 si `down`. Solo expone `status` por sonda |
 | GET    | `/system` | si   | Detalle: latencias, driver, version, modelo de IA                       |
 | GET    | `/up`     | no   | Sonda nativa de Laravel                                                 |
+| Metodo | Ruta | Auth | Notas |
+|---|---|---|---|
+| GET | `/health` | no | Coarse. 200 si operativo, 503 si `down`. Solo expone `status` por sonda |
+| GET | `/system` | si | Detalle: latencias, driver, version, modelo de IA |
+| GET | `/up` | no | Liveness nativa de Laravel (sin dependencias); es la sonda de Render. `/health` es la readiness |
 
 `status` global: `up` (todo bien), `degraded` (solo compatibilidad Ollama backend caida), `down` (alguna dependencia critica).
 
@@ -325,3 +330,25 @@ El recibo único por proyecto/clave hace que solicitudes repetidas o simultánea
 | 422    | Validacion fallida, o accion masiva no soportada                                                                 |
 | 429    | Rate limit                                                                                                       |
 | 503    | Ollama no disponible (solo en endpoints backend legacy de IA)                                                    |
+| Codigo | Significado |
+|---|---|
+| 401 | Sin token, o token revocado |
+| 403 | Email sin verificar o firma invalida |
+| 404 | No existe **o no es tuyo** |
+| 409 | Onboarding pendiente (`code: onboarding_required`) |
+| 422 | Validacion fallida, o accion masiva no soportada |
+| 429 | Rate limit |
+| 503 | Ollama no disponible (solo en endpoints backend legacy de IA) |
+
+## Límites en endpoints públicos (#59)
+
+Superficie sin autenticar: `/public/studios/{slug}` (+ `/bookings`), `/public/deliveries/{token}` (+ `/approve`, `/request-changes`), `/public/contracts/{token}` (+ `/accept`, `/reject`) y `/public/calendar/{token}`.
+
+| Límite | Alcance |
+| --- | --- |
+| `throttle:30,1` | Todo el grupo público, por IP (contador compartido entre endpoints) |
+| `throttle:public-booking` (5/min) | `POST /public/studios/{slug}/bookings`, por IP y estudio |
+
+- **Honeypot:** la reserva acepta un campo opcional `website`, oculto en la SPA. Si llega relleno, la API responde `201` igual que un éxito pero no guarda la solicitud ni notifica al estudio.
+- **Tokens inválidos:** desconocidos, revocados o caducados devuelven un `404` uniforme en entregas, contratos y calendario, sin distinguir el motivo.
+- No hay captcha de terceros. Cubre `PublicEndpointAbuseTest`.

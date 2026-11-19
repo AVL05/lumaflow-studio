@@ -98,3 +98,9 @@ Sprint 1 de seguridad 2.0: [implementación y validación local](plans/2026-10-2
 ## Criterio de producto
 
 LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza el trabajo creativo que las rodea. La prioridad es validar los flujos con usuarios reales y ampliar lo que resulte útil sin introducir planes de pago. Presupuestos y facturas del estudio ya existen y se conservan; no son cobros por utilizar LumaFlow.
+- Mejorar documentos comerciales y seguimiento de cobros sin convertir donaciones en pagos de producto.
+- Sostener el servicio gratuito con contribuciones voluntarias sin privilegios para donantes; revisar costes reales antes de ampliar infraestructura.
+
+## Criterio de producto
+
+LumaFlow es un producto experimental en beta publica. No sustituye a Lightroom ni a otras herramientas de edicion: organiza la operacion que las rodea. La prioridad inmediata es validar el flujo con fotografos reales y mejorar fiabilidad, seguridad y experiencia de extremo a extremo. La direccion actual es mantener LumaFlow gratuito y aceptar contribuciones voluntarias sin ventajas para donantes; no se planifican suscripciones ni tiers. La vision canonica esta en [PRODUCT_VISION.md](../PRODUCT_VISION.md).

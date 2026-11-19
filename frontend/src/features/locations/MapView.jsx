@@ -86,7 +86,12 @@ export function MapView({
       const point = [Number(marker.latitude), Number(marker.longitude)];
       bounds.push(point);
       leaflet
-        .marker(point, { icon: buildMarkerIcon(leaflet, marker.id === selected?.id) })
+        .marker(point, {
+          icon: buildMarkerIcon(leaflet, marker.id === selected?.id),
+          // Nombre accesible del marcador (lectores de pantalla y axe `aria-command-name`).
+          alt: marker.name || "Localización",
+          title: marker.name || "Localización",
+        })
         .bindPopup(
           `<strong>${escapeHtml(marker.name || "Localización")}</strong><br>${escapeHtml(marker.meta || "")}`,
         )
@@ -97,7 +102,11 @@ export function MapView({
       const point = [Number(selected.latitude), Number(selected.longitude)];
       bounds.push(point);
       leaflet
-        .marker(point, { icon: buildMarkerIcon(leaflet, true) })
+        .marker(point, {
+          icon: buildMarkerIcon(leaflet, true),
+          alt: selected.name || "Selección",
+          title: selected.name || "Selección",
+        })
         .bindPopup(`<strong>${escapeHtml(selected.name || "Selección")}</strong>`)
         .addTo(layerRef.current);
     }

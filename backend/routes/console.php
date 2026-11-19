@@ -12,3 +12,6 @@ Artisan::command('inspire', function () {
 // Requiere un runner de `schedule:run` cada minuto (cron del proveedor);
 // sin runner estas entradas no se ejecutan. Ver docs/backup-recovery.md.
 Schedule::command('data:backup --prune')->dailyAt('03:00')->timezone('UTC')->withoutOverlapping(30);
+
+// Purga los tokens caducados (SANCTUM_TOKEN_EXPIRATION). Mismo requisito de runner que el backup.
+Schedule::command('sanctum:prune-expired --hours=24')->daily()->timezone('UTC');

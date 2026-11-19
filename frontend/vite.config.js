@@ -34,6 +34,11 @@ export default defineConfig({
     __APP_RELEASE__: JSON.stringify(appRelease),
     __PRODUCT_IMAGES_VERSION__: JSON.stringify(productImagesVersion),
   },
+  build: {
+    // Only the WebLLM chunk (lib-*, ~6 MB, loaded on demand by the local-AI feature and kept out
+    // of the PWA precache) exceeds this. Everything else is held by `pnpm run check:bundle`.
+    chunkSizeWarningLimit: 6500,
+  },
   plugins: [
     react(),
     tailwindcss(),

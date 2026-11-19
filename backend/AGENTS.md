@@ -4,7 +4,7 @@ These rules extend the root `AGENTS.md` for work inside `backend/`.
 
 ## Stack and boundaries
 
-The backend is a Laravel 13 REST API using PHP 8.3+, Sanctum and Eloquent with a MySQL-compatible production database.
+The backend is a Laravel 13 REST API using PHP 8.3+, Sanctum and Eloquent with a PostgreSQL production database (Supabase); MySQL and SQLite stay supported in development and CI.
 
 Keep business logic out of controllers. The expected flow is:
 
@@ -72,7 +72,7 @@ Do not use bulk query deletion when model events are required for cleanup. Respe
 - Destructive operations require explicit issue approval and migration/rollback consideration.
 - Seeders and fixtures must use fictitious data only.
 
-Production supports MySQL-compatible behavior. Do not introduce database-specific SQL for another engine without an approved portability effort.
+Production runs on PostgreSQL; CI runs the Feature suite on MySQL 8 and PostgreSQL 16 plus SQLite. Keep queries portable (use Eloquent helpers such as `whereLike`, branch on `DB::getDriverName()` only for unavoidable raw SQL) and do not introduce engine-specific SQL without covering every supported engine.
 
 ## Analytics and performance
 
