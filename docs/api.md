@@ -186,3 +186,16 @@ Una combinacion no soportada devuelve 422.
 | 422 | Validacion fallida, o accion masiva no soportada |
 | 429 | Rate limit |
 | 503 | Ollama no disponible (solo en endpoints backend legacy de IA) |
+
+## Límites en endpoints públicos (#59)
+
+Superficie sin autenticar: `/public/studios/{slug}` (+ `/bookings`), `/public/deliveries/{token}` (+ `/approve`, `/request-changes`), `/public/contracts/{token}` (+ `/accept`, `/reject`) y `/public/calendar/{token}`.
+
+| Límite | Alcance |
+| --- | --- |
+| `throttle:30,1` | Todo el grupo público, por IP (contador compartido entre endpoints) |
+| `throttle:public-booking` (5/min) | `POST /public/studios/{slug}/bookings`, por IP y estudio |
+
+- **Honeypot:** la reserva acepta un campo opcional `website`, oculto en la SPA. Si llega relleno, la API responde `201` igual que un éxito pero no guarda la solicitud ni notifica al estudio.
+- **Tokens inválidos:** desconocidos, revocados o caducados devuelven un `404` uniforme en entregas, contratos y calendario, sin distinguir el motivo.
+- No hay captcha de terceros. Cubre `PublicEndpointAbuseTest`.
