@@ -367,3 +367,11 @@ TOTP (RFC 6238: SHA-1, 6 dígitos, 30 s, tolerancia ±1 intervalo) más 8 códig
 - Un código TOTP no puede reutilizarse (se guarda el último intervalo aceptado) y cada código de recuperación se consume al usarse.
 - El secreto y los códigos de recuperación se guardan cifrados (cast `encrypted`, clave `APP_KEY`) y nunca se serializan; `UserResource` solo expone `two_factor_enabled`.
 - Los endpoints usan el limitador `two-factor` (10/min por usuario) y el login conserva `throttle:10,1`.
+
+## Exportación completa de datos (#67)
+
+| Método | Ruta | Auth | Notas |
+| --- | --- | --- | --- |
+| GET | `/account/export` | sí | Descarga JSON (`Content-Disposition: attachment`) con todos los datos accesibles al usuario: `account`, `totals` y `data` (`clients`, `jobs`, `sessions`, `tasks`, `quotes`, `invoices`, `contracts`, `deliveries`, `locations`, `gear`, `presets`, `booking_requests`, `checklists`, `activities`). Límite propio de 6/min por usuario (`throttle:account-export`). |
+
+Lee siempre mediante el scope `accessibleBy`: nunca incluye datos de otros estudios. Excluye `gallery_password`, `public_token`, `calendar_token`, contraseñas y tokens. El borrado de cuenta **no está implementado**: requiere decidir el periodo de gracia, el tratamiento de workspaces compartidos y una revisión legal (AGENTS.md §15).

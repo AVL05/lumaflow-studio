@@ -53,6 +53,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(10)
             ->by('two-factor|'.$request->user()?->id));
 
+        // La exportacion completa es pesada: limite propio por usuario (el contador de `throttle:N,1`
+        // sin nombre se comparte con el techo general del grupo autenticado).
+        RateLimiter::for('account-export', fn (Request $request) => Limit::perMinute(6)
+            ->by('account-export|'.$request->user()?->id));
+
         RateLimiter::for('public-booking', fn (Request $request) => Limit::perMinute(5)
             ->by($request->ip().'|'.$request->route('slug')));
 

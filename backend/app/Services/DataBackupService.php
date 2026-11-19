@@ -182,8 +182,14 @@ class DataBackupService
         ];
     }
 
+    /**
+     * pg_dump solo del esquema de la app (en Supabase `public` y los esquemas del sistema no son
+     * nuestros y el rol de la app no puede leerlos), sin propietarios ni privilegios.
+     */
     public static function buildPgDumpCommand(array $config): array
     {
+        $schema = self::pgSchema($config);
+
         return [
             'pg_dump',
             "--host={$config['host']}",
@@ -191,8 +197,42 @@ class DataBackupService
             "--username={$config['username']}",
             '--format=plain',
             '--no-owner',
+            '--no-privileges',
+            ...($schema !== null ? ["--schema={$schema}"] : []),
             $config['database'],
         ];
+    }
+
+    public static function buildPsqlImportCommand(array $config): array
+    {
+        return [
+            'psql',
+            "--host={$config['host']}",
+            "--port={$config['port']}",
+            "--username={$config['username']}",
+            '--set=ON_ERROR_STOP=1',
+            '--single-transaction',
+            '--quiet',
+            "--dbname={$config['database']}",
+        ];
+    }
+
+    /** Primer esquema de `search_path`, o null si es `public` (volcado completo de la base). */
+    public static function pgSchema(array $config): ?string
+    {
+        $schema = trim(explode(',', (string) ($config['search_path'] ?? 'public'))[0]);
+
+        return $schema === '' || $schema === 'public' ? null : $schema;
+    }
+
+    /** Entorno de libpq: password y modo TLS fuera de los argumentos visibles. */
+    public static function pgEnvironment(array $config): array
+    {
+        return array_filter([
+            'PGPASSWORD' => (string) ($config['password'] ?? ''),
+            'PGSSLMODE' => (string) ($config['sslmode'] ?? ''),
+            'PGCONNECT_TIMEOUT' => '15',
+        ], fn (string $value) => $value !== '');
     }
 
     /**
@@ -362,9 +402,7 @@ class DataBackupService
         }
 
         $config = config('database.connections.pgsql');
-        $process = new Process(self::buildPgDumpCommand($config), null, [
-            'PGPASSWORD' => (string) ($config['password'] ?? ''),
-        ]);
+        $process = new Process(self::buildPgDumpCommand($config), null, self::pgEnvironment($config));
         $process->setTimeout(600);
         $process->run();
 
@@ -475,6 +513,10 @@ class DataBackupService
             } finally {
                 @unlink($tmp);
             }
+        }
+
+        if ($driver === 'pgsql') {
+            return self::verifyPostgresDump($sql);
         }
 
         $config = config("database.connections.{$driver}");
@@ -600,6 +642,50 @@ class DataBackupService
         $pdo = null;
 
         rename($tmp, $target);
+    }
+
+    /**
+     * Verificacion estructural de un volcado de PostgreSQL: el rol de la app no puede crear bases
+     * temporales (Supabase), asi que se comprueba que el volcado esta completo, contiene la tabla
+     * `migrations` y al menos una tabla. La prueba de restauracion real se hace contra un
+     * PostgreSQL de pruebas con `data:restore`.
+     *
+     * @return array{tables: int, users: int|null}
+     */
+    public static function verifyPostgresDump(string $sql): array
+    {
+        if (! str_contains($sql, 'PostgreSQL database dump complete')) {
+            throw new RuntimeException('Verificacion fallida: el volcado de PostgreSQL esta incompleto.');
+        }
+
+        $tables = preg_match_all('/^CREATE TABLE /m', $sql);
+
+        if ($tables === 0) {
+            throw new RuntimeException('Verificacion fallida: el volcado no contiene tablas.');
+        }
+
+        if (! preg_match('/^CREATE TABLE (?:"?[a-z0-9_]+"?\.)?"?migrations"? /m', $sql)) {
+            throw new RuntimeException('Verificacion fallida: falta la tabla migrations.');
+        }
+
+        return ['tables' => (int) $tables, 'users' => null];
+    }
+
+    public function applyPostgres(string $file): void
+    {
+        if (! self::binaryAvailable('psql')) {
+            throw new RuntimeException('Falta el cliente psql. Instale PostgreSQL client para restaurar este motor.');
+        }
+
+        $config = config('database.connections.pgsql');
+        $process = new Process(self::buildPsqlImportCommand($config), null, self::pgEnvironment($config));
+        $process->setTimeout(600);
+        $process->setInput($this->readBackupSql($file));
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            throw new RuntimeException('Importacion de PostgreSQL fallida.');
+        }
     }
 
     public function applyMysql(string $file, string $driver): void

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountExportController;
 use App\Http\Controllers\Api\ActivationController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AiController;
@@ -212,5 +213,6 @@ Route::middleware(['auth:sanctum', 'throttle:'.config('api.throttle_per_minute',
 
         Route::post('/bulk-actions', BulkActionController::class);
         Route::match(['get', 'post'], '/exports/{resource}', ExportController::class);
+        Route::get('/account/export', AccountExportController::class)->middleware('throttle:account-export');
     });
 });
