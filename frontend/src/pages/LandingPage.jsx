@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MarketingFooter } from "../components/marketing/MarketingFooter";
 import { MarketingHeader } from "../components/marketing/MarketingHeader";
+import { productImage } from "../utils/productImage";
 
 const workflow = [
   ["Planifica", "Agenda sesiones, tareas, equipo y localizaciones desde un calendario compartido."],
@@ -91,7 +92,7 @@ export function LandingPage() {
             <div className="absolute -inset-16 -z-10 bg-[radial-gradient(circle,rgba(196,141,72,.18),transparent_62%)] blur-2xl" />
             <div className="overflow-hidden rounded-2xl border border-white/12 bg-[#11100e] p-2 shadow-[0_40px_120px_rgba(0,0,0,.5)] sm:p-3">
               <ProductImage
-                src="/product/dashboard.png"
+                src={productImage("dashboard.png")}
                 alt="Dashboard real de LumaFlow Studio con calendario, tareas y métricas del estudio"
                 eager
                 className="rounded-xl border border-white/8"
@@ -151,7 +152,7 @@ export function LandingPage() {
                 </p>
               </div>
               <ProductImage
-                src="/product/calendar.png"
+                src={productImage("calendar.png")}
                 alt="Calendario real de LumaFlow con vistas de mes, semana, día, agenda y lista"
                 className="border-t border-white/8"
               />
@@ -177,7 +178,7 @@ export function LandingPage() {
                 </p>
               </div>
               <ProductImage
-                src="/product/analytics.png"
+                src={productImage("analytics.png")}
                 alt="Panel de analítica real de LumaFlow Studio"
                 className="border-t border-white/8"
               />
@@ -263,7 +264,7 @@ export function LandingPage() {
           </div>
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-[0_32px_100px_rgba(0,0,0,.4)]">
             <ProductImage
-              src="/product/ai-assistant.png"
+              src={productImage("ai-assistant.png")}
               alt="Centro de inteligencia fotográfica real con modelos WebGPU administrables"
               className="rounded-xl border border-white/8"
             />
@@ -288,7 +289,7 @@ export function LandingPage() {
             </div>
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-[0_32px_100px_rgba(0,0,0,.4)]">
               <ProductImage
-                src="/product/gallery.png"
+                src={productImage("gallery.png")}
                 alt="Entrega con enlace externo y aprobación del cliente en LumaFlow"
                 className="rounded-xl border border-white/8"
               />

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MarketingPage } from "../components/marketing/MarketingPage";
+import { productImage } from "../utils/productImage";
 
 const layers = [
   {
@@ -48,7 +49,7 @@ export function PrivacyPage() {
         </div>
         <div className="landing-enter landing-enter-delay overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-[0_40px_120px_rgba(0,0,0,.5)]">
           <img
-            src="/product/ai-assistant.png"
+            src={productImage("ai-assistant.png")}
             alt="Gestor de modelos de inteligencia artificial WebGPU en LumaFlow"
             width="1270"
             height="714"

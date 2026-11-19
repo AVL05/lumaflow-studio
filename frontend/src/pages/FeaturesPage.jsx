@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MarketingPage } from "../components/marketing/MarketingPage";
+import { productImage } from "../utils/productImage";
 
 const useCases = [
   {
@@ -8,7 +9,7 @@ const useCases = [
     description:
       "Recibe la petición, conserva el contexto del cliente y llévala al calendario sin reconstruir la información en otra herramienta.",
     outcome: "De una consulta dispersa a una fecha confirmada.",
-    image: "/product/calendar.png",
+    image: productImage("calendar.png"),
     alt: "Calendario de LumaFlow con sesiones, tareas y entregas organizadas",
   },
   {
@@ -17,7 +18,7 @@ const useCases = [
     description:
       "Reúne equipo, localización, preset, checklist y notas del cliente antes de salir del estudio.",
     outcome: "Menos improvisación cuando empieza la producción.",
-    image: "/product/presets.png",
+    image: productImage("presets.png"),
     alt: "Biblioteca de presets de producción fotográfica en LumaFlow",
   },
   {
@@ -26,7 +27,7 @@ const useCases = [
     description:
       "Crea presupuestos y facturas conectados al trabajo, controla su estado y conserva el historial comercial junto al cliente.",
     outcome: "El seguimiento económico forma parte del flujo.",
-    image: "/product/invoices.png",
+    image: productImage("invoices.png"),
     alt: "Facturas y estado de cobro dentro de LumaFlow Studio",
   },
   {
@@ -35,7 +36,7 @@ const useCases = [
     description:
       "Registra el enlace de tu galería externa (Pixieset, Drive, Dropbox o tu web) y sigue la aprobación sin alojar gigabytes.",
     outcome: "Tus fotos donde tú decides. LumaFlow guarda solo el enlace y el estado.",
-    image: "/product/gallery.png",
+    image: productImage("gallery.png"),
     alt: "Entrega con enlace de galería externa y aprobación del cliente",
   },
 ];
@@ -71,7 +72,7 @@ export function FeaturesPage() {
         </div>
         <div className="landing-enter landing-enter-delay overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-[0_40px_120px_rgba(0,0,0,.5)] lg:-mr-20">
           <img
-            src="/product/dashboard.png"
+            src={productImage("dashboard.png")}
             alt="Panel general de un estudio fotográfico gestionado con LumaFlow"
             width="1270"
             height="714"
@@ -145,7 +146,7 @@ export function FeaturesPage() {
         </div>
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2">
           <img
-            src="/product/analytics.png"
+            src={productImage("analytics.png")}
             alt="Analítica de actividad e ingresos en LumaFlow"
             width="1270"
             height="714"
