@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->appendToGroup('api', RequestCorrelationId::class);
         $middleware->append(SecurityHeaders::class);
+        // Render termina TLS en su proxy: sin esto la app ve HTTP (sin HSTS, URLs generadas en http).
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
