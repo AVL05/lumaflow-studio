@@ -1,3 +1,6 @@
+// El prefijo `zz-` fija el orden: Playwright ejecuta los ficheros alfabeticamente y este genera
+// trafico anonimo a la API. El throttle de Laravel sin nombre (`throttle:N,1`) comparte contador por
+// IP entre rutas, asi que ejecutado antes de auth.spec.js agotaba el limite de la verificacion de email.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "../fixtures/test.js";
 import { apiRequest } from "../support/app.js";
