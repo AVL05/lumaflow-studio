@@ -14,7 +14,7 @@ Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conect
 
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
-[![MySQL](https://img.shields.io/badge/MySQL-compatible-4479A1)](https://www.mysql.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791)](https://supabase.com)
 [![WebGPU](https://img.shields.io/badge/IA-WebGPU_local-111827)](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
 [![License](https://img.shields.io/badge/License-MIT-d4b06a)](LICENSE)
 
@@ -147,10 +147,10 @@ Más detalle en [docs/architecture.md](docs/architecture.md).
 | --------------- | ------------------------------------------------------------------------- |
 | Frontend        | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet, PWA    |
 | Backend         | Laravel 13, PHP 8.3+, Sanctum, Dompdf                                     |
-| Datos           | MySQL compatible, Eloquent                                                |
+| Datos           | PostgreSQL (Supabase) en produccion; MySQL y SQLite en desarrollo/CI, Eloquent |
 | IA              | WebGPU, WebLLM y Ollama opcional                                          |
 | Calidad         | PHPUnit, Pint, Vitest, Testing Library, Playwright, oxlint y Prettier     |
-| Infraestructura | Vercel, Render, TiDB Cloud, almacenamiento S3 compatible y Docker Compose |
+| Infraestructura | Vercel, Render, Supabase (PostgreSQL y almacenamiento S3 compatible) S3 compatible y Docker Compose |
 
 ## Desarrollo local
 

@@ -19,7 +19,7 @@ Do not add features merely because they are technically interesting. Every produ
 LumaFlow is a monorepo containing two independent applications communicating only through HTTP:
 
 - `frontend/`: React 19 + Vite SPA, JavaScript/JSX, React Router, Tailwind CSS, PWA, WebGPU/WebLLM.
-- `backend/`: Laravel 13 REST API, PHP 8.3+, Sanctum, Eloquent, MySQL-compatible production database.
+- `backend/`: Laravel 13 REST API, PHP 8.3+, Sanctum, Eloquent, PostgreSQL production database (Supabase); MySQL and SQLite stay supported in development and CI.
 - `docs/`: architecture, API, deployment, AI and roadmap documentation.
 - `.github/`: CI, production smoke checks and collaboration templates.
 

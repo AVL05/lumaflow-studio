@@ -77,7 +77,7 @@ pages/XPage.jsx  ──uses──►  hooks (usePaginatedResource, useResource, 
 
 **Fronteras de seguridad.** Memberships (`owner/admin/member`); aislamiento por workspace con 404 ante lo ajeno; tokens públicos opacos con hash + caducidad + revocación (portales, invitaciones, calendario); snapshots de contrato congelados; `user_id` conservado como creador.
 
-**Despliegue real.** SPA en Vercel, API en Render (web service, sin cron activo), MySQL compatible en TiDB Cloud. Sin Redis obligatorio, sin APM, sin session replay.
+**Despliegue real.** SPA en Vercel, API en Render (web service, sin cron activo), PostgreSQL en Supabase (esquema privado `lumaflow`, conexion por el pooler Supavisor); MySQL y SQLite siguen soportados en desarrollo y CI. Sin Redis obligatorio, sin APM, sin session replay.
 
 ## Limites conscientes
 
