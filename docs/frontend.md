@@ -112,3 +112,11 @@ pnpm run test          # vitest
 pnpm run test:coverage
 pnpm run build
 ```
+
+## Proveedor de teselas del mapa (#64)
+
+`MapView` lee el proveedor de `features/locations/mapTiles.js`, configurable solo con variables `VITE_MAP_*` (ver `frontend/.env.example`): `VITE_MAP_TILE_URL` (plantilla Leaflet; `{key}` se sustituye por `VITE_MAP_TILE_KEY`), `VITE_MAP_TILE_ATTRIBUTION`, `VITE_MAP_TILE_DARK_FILTER`, `VITE_MAP_TILE_MAX_ZOOM` y `VITE_MAP_TILE_SUBDOMAINS`. Sin ellas se usa OpenStreetMap (`tile.openstreetmap.org`) con su atribución.
+
+- **Política de uso:** las teselas estándar de OpenStreetMap solo admiten uso ligero ([tile usage policy](https://operations.osmfoundation.org/policies/tiles/)). Para más tráfico hay que cambiar de proveedor por variables de entorno, sin tocar código; la atribución del proveedor elegido es obligatoria.
+- **Fallo de teselas:** si ninguna tesela carga tras 4 errores, el mapa muestra un aviso y conserva marcadores y búsqueda por coordenadas; la página no se rompe.
+- Al cambiar de dominio de teselas hay que actualizar `img-src` de la CSP (ver `docs/deployment.md`, #56). Las variables `VITE_*` se fijan en build: cambiarlas exige un nuevo despliegue del frontend, no un cambio de código.
