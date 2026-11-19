@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { buildMarkerIcon } from "./MapMarker";
+import { getTileConfig, tilesUnavailable } from "./mapTiles";
 import "leaflet/dist/leaflet.css";
 
 const defaultCenter = [40.4168, -3.7038];
@@ -20,6 +21,7 @@ export function MapView({
   const [leaflet, setLeaflet] = useState(null);
   const [map, setMap] = useState(null);
   const [query, setQuery] = useState("");
+  const [tilesFailed, setTilesFailed] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -52,15 +54,24 @@ export function MapView({
       })
       .setView(normalizedCenter(initialCenter, initialMarkers, initialSelected), initialZoom);
 
-    // CARTO basemaps now answer every keyless request with an "API key required"
-    // tile. Standard OSM tiles need no key; the dark look comes from a CSS filter.
-    leaflet
-      .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        className: "lumaflow-dark-tiles",
-        maxZoom: 19,
-      })
-      .addTo(instance);
+    // Provider and key come from VITE_MAP_* variables (OpenStreetMap by default).
+    const tiles = getTileConfig();
+    const counts = { errors: 0, loaded: 0 };
+    const tileLayer = leaflet.tileLayer(tiles.url, {
+      attribution: tiles.attribution,
+      className: tiles.darkFilter ? "lumaflow-dark-tiles" : "",
+      maxZoom: tiles.maxZoom,
+      subdomains: tiles.subdomains,
+    });
+    tileLayer.on("tileload", () => {
+      counts.loaded += 1;
+      setTilesFailed(false);
+    });
+    tileLayer.on("tileerror", () => {
+      counts.errors += 1;
+      if (tilesUnavailable(counts)) setTilesFailed(true);
+    });
+    tileLayer.addTo(instance);
 
     layerRef.current = leaflet.layerGroup().addTo(instance);
     mapInstanceRef.current = instance;
@@ -160,6 +171,15 @@ export function MapView({
       {!leaflet ? (
         <div className="absolute inset-0 grid place-items-center bg-[#11100e] text-sm text-stone-400">
           Cargando mapa...
+        </div>
+      ) : null}
+      {tilesFailed ? (
+        <div
+          role="status"
+          className="absolute bottom-3 left-3 right-3 z-[500] rounded-md border border-amber-200/30 bg-black/80 px-3 py-2 text-xs text-amber-100 backdrop-blur"
+        >
+          No se pudieron cargar las teselas del mapa. Los marcadores y las coordenadas siguen
+          funcionando.
         </div>
       ) : null}
       {selectable ? (
