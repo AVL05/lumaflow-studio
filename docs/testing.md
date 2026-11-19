@@ -111,3 +111,9 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 | Hook, utilidad o componente del frontend           | Vitest + Testing Library                                 |
 | Flujo de usuario de principio a fin               | Recorrido E2E                                            |
 | Correccion de error reproducible                  | Test de regresion en el nivel mas bajo posible y, si rompia un flujo, E2E |
+
+## Presupuesto de rendimiento (#68)
+
+- Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
+- `pnpm --dir frontend run check:bundle` (job `Frontend quality`) falla si el chunk de entrada supera 520 kB o cualquier otro 450 kB (excluye `lib-*`). Por eso `chunkSizeWarningLimit` está subido: solo `lib-*` lo supera y está justificado.
+- El job `Lighthouse budget` ejecuta Lighthouse CI sobre `/` y `/login` con `frontend/lighthouserc.json` (rendimiento ≥ 0,7, accesibilidad ≥ 0,85, TBT ≤ 400 ms, LCP ≤ 4 s, CLS ≤ 0,1). **Estos umbrales no están medidos**: no se ha podido ejecutar Lighthouse en local; hay que ajustarlos con la primera ejecución real en Actions.
