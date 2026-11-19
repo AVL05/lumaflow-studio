@@ -332,7 +332,19 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Build backend image
-        run: docker build --file backend/Dockerfile backend
+        run: docker build --file backend/Dockerfile --tag lumaflow-api:ci backend
+
+      - name: Smoke the backend image (FrankenPHP serves /up and concurrent requests)
+        run: |
+          docker run -d --name lumaflow-api -p 8080:8080             -e PORT=8080 -e APP_ENV=production -e APP_DEBUG=false             -e APP_KEY=$(openssl rand -base64 32)             -e DB_CONNECTION=sqlite -e DB_DATABASE=/tmp/ci.sqlite             -e CACHE_STORE=file -e SESSION_DRIVER=file -e QUEUE_CONNECTION=sync             --entrypoint sh lumaflow-api:ci \n            -c 'touch /tmp/ci.sqlite && exec entrypoint frankenphp run --config /etc/caddy/Caddyfile'
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/up >/dev/null; then ok=1; break; fi
+            sleep 2
+          done
+          [ "${ok:-0}" = "1" ] || { docker logs lumaflow-api; exit 1; }
+          # Varias peticiones a la vez: el servidor de desarrollo las serializaba.
+          for i in 1 2 3 4 5 6; do curl -fsS -o /dev/null http://localhost:8080/up & done; wait
+          curl -fsS -D - -o /dev/null http://localhost:8080/api/health | head -1
 
       - name: Build frontend image
         run: docker build --file frontend/Dockerfile .
