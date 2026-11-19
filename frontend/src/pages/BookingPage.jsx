@@ -16,6 +16,7 @@ const defaults = {
   session_type: "",
   preferred_date: "",
   message: "",
+  website: "",
 };
 
 export function BookingPage() {
@@ -91,6 +92,18 @@ export function BookingPage() {
                 <ErrorState message={error} />
               </div>
             ) : null}
+            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label>
+                No rellenar
+                <input
+                  tabIndex={-1}
+                  autoComplete="off"
+                  name="website"
+                  value={form.website}
+                  onChange={(e) => setValue("website", e.target.value)}
+                />
+              </label>
+            </div>
             <Field label="Nombre">
               <input
                 required

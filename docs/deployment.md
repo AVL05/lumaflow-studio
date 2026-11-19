@@ -210,12 +210,13 @@ VITE_SENTRY_RELEASE=
 - [ ] `CACHE_STORE` real (database o redis): el rate limiting depende de el.
 - [ ] Rotacion de `storage/logs/lumaflow.log` (canal diario, 14 dias por defecto).
 - [ ] SMTP configurado y entrega real de verificacion probada fuera de spam.
+- Correo de entrega (`DeliveryReadyMail`): se envia tras la respuesta HTTP (`dispatch(...)->afterResponse()`), sin esperar al SMTP y sin worker de cola. Un fallo SMTP no afecta a la respuesta y queda registrado como `mail.failed`. No hay reintentos: si hiciera falta fiabilidad de entrega, habria que desplegar un worker (`queue:work`) y pasar el Mailable a cola.
 
 ## Monitorizacion
 
-- `GET /api/health` — sonda publica para orquestadores. 200 operativo, 503 caido. Solo expone el `status` de cada dependencia.
+- `GET /up` — **liveness**. Es la sonda de Render (`healthCheckPath` en `render.yaml`): solo comprueba que el proceso arranca y responde, sin tocar base de datos, disco ni Ollama. Una dependencia caida no reinicia la instancia.
+- `GET /api/health` — **readiness**. La consume el smoke de produccion (`production-smoke.yml`), que exige `database`, `storage` y `cache` en `up`. 200 operativo o `degraded`, 503 caido. Solo expone el `status` de cada dependencia. Un fallo del disco `s3` da 503 aqui pero ya no reinicia la instancia.
 - `GET /api/system` — detalle autenticado (latencias, driver, versiones, modelo de IA). Lo consume la pagina `/app/system`.
-- `GET /up` — sonda nativa de Laravel.
 
 `degraded` significa que solo la compatibilidad Ollama backend esta caida. La SPA puede seguir usando WebGPU si el navegador lo soporta.
 
@@ -238,3 +239,9 @@ Runner: `.github/workflows/production-backup.yml`, Linux estándar de GitHub Act
 Cuando el gate permite iniciar el job, el workflow instala PHP 8.4/PDO MySQL, Composer con `--no-dev` y MySQL client solo si falta. CA: `/etc/ssl/certs/ca-certificates.crt`. `APP_KEY` es efímera generada para bootstrap; no se necesita la clave de producción ni migraciones/seed. Preflight PDO valida TLS y `SELECT 1` sin imprimir errores del driver. No se habilita R2/S3/Render de pago.
 
 No afirmar “backups automáticos” por `Schedule::command` ni por un workflow committed: hace falta una ejecución real con copia privada duradera. Render Free además carece de `mysqldump` en la imagen actual y de filesystem persistente; esta solución instala el cliente en Actions, sin modificar ni cobrar infraestructura Render.
+
+## Cabeceras de seguridad (#56)
+
+- **SPA (Vercel):** `frontend/vercel.json` envía CSP, HSTS, `nosniff`, `Referrer-Policy` y `Permissions-Policy`, con `frame-ancestors 'none'`. La CSP permite solo los orígenes reales: la API (`lumaflow-api.aleviclop.dev`), teselas CARTO, Hugging Face y `raw.githubusercontent.com` (modelos y wasm de WebLLM, con `wasm-unsafe-eval`) y Sentry. Si cambia el dominio de la API, el proveedor de mapas (#64) o el DSN de Sentry, hay que actualizar `connect-src`/`img-src`.
+- **API (Laravel):** el middleware `SecurityHeaders` añade las mismas cabeceras a toda respuesta (CSP `default-src 'none'`); HSTS solo sobre HTTPS. Lo cubre `SecurityHeadersTest`.
+- **Pendiente de verificar:** las cabeceras de Vercel no se prueban en CI. Antes de dar el cambio por bueno hay que comprobarlas en un Preview (consola sin violaciones de CSP en login, mapas, IA local y Sentry).

@@ -115,3 +115,9 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 ## Migraciones y Feature tests en MySQL (#54)
 
 El job `Backend on MySQL 8` de CI levanta un servicio `mysql:8.0`, ejecuta `php artisan migrate --force` desde cero y después la suite `Feature` contra MySQL (las variables `DB_*` del job prevalecen sobre las de `phpunit.xml`). Si una migración no funciona en MySQL, CI falla. Los tests de concurrencia con workers SQLite/WAL no acreditan bloqueos MySQL. El ensayo sobre un clon de TiDB sigue pendiente y requiere acceso del operador.
+
+## Presupuesto de rendimiento (#68)
+
+- Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
+- `pnpm --dir frontend run check:bundle` (job `Frontend quality`) falla si el chunk de entrada supera 520 kB o cualquier otro 450 kB (excluye `lib-*`). Por eso `chunkSizeWarningLimit` está subido: solo `lib-*` lo supera y está justificado.
+- El job `Lighthouse budget` ejecuta Lighthouse CI sobre `/` y `/login` con `frontend/lighthouserc.json` (rendimiento ≥ 0,7, accesibilidad ≥ 0,85, TBT ≤ 400 ms, LCP ≤ 4 s, CLS ≤ 0,1). **Estos umbrales no están medidos**: no se ha podido ejecutar Lighthouse en local; hay que ajustarlos con la primera ejecución real en Actions.
