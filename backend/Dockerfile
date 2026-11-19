@@ -9,6 +9,13 @@ RUN apk add --no-cache git unzip \
     && install-php-extensions pdo_mysql pdo_pgsql pdo_sqlite intl zip exif opcache \
     && rm -rf /var/cache/apk/*
 
+# La imagen oficial da al binario la capability CAP_NET_BIND_SERVICE. Render ejecuta los contenedores
+# sin esa capability y el kernel rechaza el exec (`Operation not permitted`, exit 126). Se escucha en
+# un puerto alto (PORT), asi que no hace falta.
+RUN apk add --no-cache libcap-utils \
+    && setcap -r /usr/local/bin/frankenphp \
+    && rm -rf /var/cache/apk/*
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-lumaflow.ini
