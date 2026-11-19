@@ -346,3 +346,5 @@ Pasos pendientes del responsable (no se pueden hacer desde el repositorio):
 4. Verificar: provocar un error en un Preview con las variables y comprobar en Sentry que el stack apunta a ficheros de `src/` legibles y que llega el aviso.
 
 Datos personales: los eventos pasan por `SentryScrubber` (backend) y por el scrubber del SDK (frontend); no se envian PII por defecto, cuerpos de peticion, cabeceras de auth ni contenido de contratos o prompts de IA.
+
+- **Backups:** `data:backup` / `data:restore` y `production-backup.yml` soportan PostgreSQL: `pg_dump` solo del esquema `lumaflow` (`--no-owner --no-privileges`), verificacion estructural del volcado y restauracion con `psql --single-transaction`. El runner usa `postgresql-client-17` (pg_dump no puede ser mas antiguo que el servidor). Sigue desactivado: faltan los secretos `BACKUP_DB_*` (datos del pooler y rol de la app) y las credenciales del bucket de backups (#53).
