@@ -344,3 +344,5 @@ La API ya no arranca con `php artisan serve` (servidor de desarrollo de PHP, un 
 - `PHP_CLI_SERVER_WORKERS` en Render ya no hace falta y se puede borrar.
 - **Plan de Render:** se mantiene el plan gratuito: la instancia se duerme tras inactividad y el primer acceso tarda hasta ~1 min. Pasar a un plan de pago (o mantenerla despierta con el monitor externo de #63) elimina los arranques en frio; es una decision de coste del responsable.
 - **Rollback:** Render permite volver al deploy anterior; el ultimo con `php artisan serve` es el de #107/#80.
+
+- **Backups:** `data:backup` / `data:restore` y `production-backup.yml` soportan PostgreSQL: `pg_dump` solo del esquema `lumaflow` (`--no-owner --no-privileges`), verificacion estructural del volcado y restauracion con `psql --single-transaction`. El runner usa `postgresql-client-17` (pg_dump no puede ser mas antiguo que el servidor). Sigue desactivado: faltan los secretos `BACKUP_DB_*` (datos del pooler y rol de la app) y las credenciales del bucket de backups (#53).
