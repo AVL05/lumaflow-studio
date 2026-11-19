@@ -33,7 +33,7 @@ Los recursos de producto requieren email verificado y onboarding completado. Una
 |---|---|---|---|
 | GET | `/health` | no | Coarse. 200 si operativo, 503 si `down`. Solo expone `status` por sonda |
 | GET | `/system` | si | Detalle: latencias, driver, version, modelo de IA |
-| GET | `/up` | no | Sonda nativa de Laravel |
+| GET | `/up` | no | Liveness nativa de Laravel (sin dependencias); es la sonda de Render. `/health` es la readiness |
 
 `status` global: `up` (todo bien), `degraded` (solo compatibilidad Ollama backend caida), `down` (alguna dependencia critica).
 
