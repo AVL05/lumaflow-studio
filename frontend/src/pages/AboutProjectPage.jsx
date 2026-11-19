@@ -3,6 +3,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Panel } from "../components/ui/Panel";
+import { productImage } from "../utils/productImage";
 
 const stack = [
   ["Frontend", "React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet"],
@@ -55,12 +56,12 @@ const links = [
 ];
 
 const screenshots = [
-  ["Dashboard", "/product/dashboard.png"],
-  ["Calendario", "/product/calendar.png"],
-  ["Analítica", "/product/analytics.png"],
-  ["Galería", "/product/gallery.png"],
-  ["Localizaciones", "/product/locations.png"],
-  ["Asistente IA", "/product/ai-assistant.png"],
+  ["Dashboard", productImage("dashboard.png")],
+  ["Calendario", productImage("calendar.png")],
+  ["Analítica", productImage("analytics.png")],
+  ["Galería", productImage("gallery.png")],
+  ["Localizaciones", productImage("locations.png")],
+  ["Asistente IA", productImage("ai-assistant.png")],
 ];
 
 export function AboutProjectPage() {

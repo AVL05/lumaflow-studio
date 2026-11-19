@@ -28,6 +28,9 @@ describe("LandingPage", () => {
       screen.getByAltText(
         "Dashboard real de LumaFlow Studio con calendario, tareas y métricas del estudio",
       ),
-    ).toHaveAttribute("src", "/product/dashboard.png");
+    ).toHaveAttribute(
+      "src",
+      expect.stringMatching(/^\/product\/dashboard\.png(\?v=[0-9a-f]{8})?$/),
+    );
   });
 });

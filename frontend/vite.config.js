@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { createHash } from "node:crypto";
+import { readdirSync, readFileSync } from "node:fs";
 import { VitePWA } from "vite-plugin-pwa";
 import { publicSeo } from "./scripts/publicSeo.mjs";
 
@@ -14,9 +16,23 @@ const appRelease =
   process.env.RENDER_GIT_COMMIT ||
   "";
 
+// Content hash of the marketing screenshots: URLs change when a screenshot is regenerated under
+// the same name, so the PWA's CacheFirst image cache never serves a stale one (see productImage.js).
+const productDir = new URL("./public/product/", import.meta.url);
+const productImagesVersion = createHash("sha1")
+  .update(
+    readdirSync(productDir)
+      .sort()
+      .map((name) => name + readFileSync(new URL(name, productDir)).toString("base64"))
+      .join(""),
+  )
+  .digest("hex")
+  .slice(0, 8);
+
 export default defineConfig({
   define: {
     __APP_RELEASE__: JSON.stringify(appRelease),
+    __PRODUCT_IMAGES_VERSION__: JSON.stringify(productImagesVersion),
   },
   build: {
     // Only the WebLLM chunk (lib-*, ~6 MB, loaded on demand by the local-AI feature and kept out

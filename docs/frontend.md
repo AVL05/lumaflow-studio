@@ -112,3 +112,7 @@ pnpm run test          # vitest
 pnpm run test:coverage
 pnpm run build
 ```
+
+## Versionado de capturas de producto (#65)
+
+La PWA cachea imágenes con `CacheFirst` durante 30 días, así que regenerar `public/product/*` con el mismo nombre dejaba capturas antiguas a los usuarios recurrentes. Las páginas usan `productImage(nombre)` (`src/utils/productImage.js`), que añade `?v=<hash>`: un hash del contenido de `public/product/` calculado en `vite.config.js` (`__PRODUCT_IMAGES_VERSION__`, también inyectado en el prerender de `scripts/publicSeo.mjs`). Cambiar una captura cambia la URL y fuerza su descarga tras desplegar. La imagen Open Graph (`/product/dashboard.png` en `seo.js` y `index.html`) se mantiene sin versionar: no pasa por la caché de la PWA y su URL estable evita invalidar las tarjetas ya compartidas. La estrategia de caché de imágenes no se ha cambiado.
