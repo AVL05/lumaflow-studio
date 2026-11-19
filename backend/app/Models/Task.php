@@ -37,8 +37,8 @@ class Task extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
+            $inner->whereLike('title', "%{$search}%")
+                ->orWhereLike('description', "%{$search}%");
         }));
     }
 

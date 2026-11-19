@@ -42,10 +42,10 @@ class Delivery extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('title', 'like', "%{$search}%")
-                ->orWhere('gallery_url', 'like', "%{$search}%")
-                ->orWhereHas('client', fn ($client) => $client->where('name', 'like', "%{$search}%"))
-                ->orWhereHas('session', fn ($session) => $session->where('name', 'like', "%{$search}%"));
+            $inner->whereLike('title', "%{$search}%")
+                ->orWhereLike('gallery_url', "%{$search}%")
+                ->orWhereHas('client', fn ($client) => $client->whereLike('name', "%{$search}%"))
+                ->orWhereHas('session', fn ($session) => $session->whereLike('name', "%{$search}%"));
         }));
     }
 

@@ -31,9 +31,9 @@ class GearItem extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('name', 'like', "%{$search}%")
-                ->orWhere('brand', 'like', "%{$search}%")
-                ->orWhere('model', 'like', "%{$search}%");
+            $inner->whereLike('name', "%{$search}%")
+                ->orWhereLike('brand', "%{$search}%")
+                ->orWhereLike('model', "%{$search}%");
         }));
     }
 

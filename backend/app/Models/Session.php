@@ -31,9 +31,9 @@ class Session extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('name', 'like', "%{$search}%")
-                ->orWhere('location_name', 'like', "%{$search}%")
-                ->orWhere('client_name', 'like', "%{$search}%");
+            $inner->whereLike('name', "%{$search}%")
+                ->orWhereLike('location_name', "%{$search}%")
+                ->orWhereLike('client_name', "%{$search}%");
         }));
     }
 
