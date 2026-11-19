@@ -12,7 +12,8 @@ export function LoginPage() {
   const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", code: "" });
+  const [needsCode, setNeedsCode] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,10 +27,16 @@ export function LoginPage() {
     setError("");
 
     try {
-      const authenticatedUser = await login(form);
+      const { code, ...credentials } = form;
+      const authenticatedUser = await login(needsCode ? { ...credentials, code } : credentials);
       navigate(getAuthDestination(authenticatedUser));
     } catch (err) {
-      setError(getApiError(err, "No se pudo iniciar sesión."));
+      if (err.response?.data?.two_factor_required) {
+        // Contraseña correcta: falta el segundo factor.
+        setNeedsCode(true);
+      } else {
+        setError(getApiError(err, "No se pudo iniciar sesión."));
+      }
     } finally {
       setLoading(false);
     }
@@ -78,6 +85,18 @@ export function LoginPage() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
         </Field>
+        {needsCode ? (
+          <Field label="Código de verificación">
+            <input
+              className={inputClass}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="Código de tu aplicación o de recuperación"
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value })}
+            />
+          </Field>
+        ) : null}
         <div className="flex justify-end">
           <Link
             className="text-sm font-medium text-stone-400 transition hover:text-amber-100"
