@@ -1,12 +1,20 @@
 name: Production backup
 
+# Backup diario de la base de datos de produccion (PostgreSQL en Supabase) sin servicios de pago:
+# pg_dump del esquema `lumaflow`, verificacion del volcado, cifrado con una passphrase y subida
+# como artefacto del workflow (30 dias). El repositorio es publico, asi que el artefacto SIEMPRE
+# va cifrado: sin la passphrase no se puede leer. La passphrase vive en el secreto
+# BACKUP_ENCRYPTION_PASSPHRASE y el responsable debe guardar una copia aparte (los secretos de
+# GitHub no se pueden leer despues). Restauracion: docs/backup-recovery.md.
+
 on:
   schedule:
-    - cron: "0 3 * * *" # UTC; GitHub may delay scheduled jobs.
+    - cron: "0 3 * * *" # UTC; GitHub puede retrasar los trabajos programados.
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: production-backup
@@ -14,12 +22,10 @@ concurrency:
 
 jobs:
   backup:
-    # Repository variable: environment vars are unavailable before job startup.
-    # Both schedule and dispatch stay skipped until explicitly enabled.
-    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main' && vars.PRODUCTION_BACKUP_ENABLED == 'true'
+    name: Encrypted database backup
+    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    environment: production-backup
     defaults:
       run:
         working-directory: backend
@@ -47,7 +53,8 @@ jobs:
           sudo apt-get install -y -qq postgresql-client-17
           pg_dump --version
 
-      - name: Back up, verify B2 and prune remote retention
+      - name: Dump, verify and encrypt
+        id: dump
         env:
           APP_ENV: production
           APP_DEBUG: "false"
@@ -56,40 +63,61 @@ jobs:
           DB_CONNECTION: pgsql
           DB_SCHEMA: lumaflow
           DB_SSLMODE: require
-          DB_HOST: ${{ secrets.BACKUP_DB_HOST }}
-          DB_PORT: ${{ secrets.BACKUP_DB_PORT }}
-          DB_DATABASE: ${{ secrets.BACKUP_DB_DATABASE }}
-          DB_USERNAME: ${{ secrets.BACKUP_DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.BACKUP_DB_PASSWORD }}
-          BACKUP_S3_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
-          BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
-          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
-          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
-          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_PORT: ${{ secrets.PROD_DB_PORT }}
+          DB_DATABASE: ${{ secrets.PROD_DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
           BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
         run: |
+          set -euo pipefail
           umask 077
+          for key in DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD BACKUP_ENCRYPTION_PASSPHRASE; do
+            if [ -z "${!key:-}" ]; then echo "::error::Falta el secreto para $key (ver docs/backup-recovery.md)"; exit 1; fi
+          done
           export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
-          php -r '
-            foreach (["DB_HOST", "DB_PORT", "DB_DATABASE", "DB_USERNAME", "DB_PASSWORD"] as $key) {
-              if (!getenv($key)) { fwrite(STDERR, "Missing backup configuration.\n"); exit(1); }
-            }
-            try {
-              require "vendor/autoload.php";
-              $app = require "bootstrap/app.php";
-              $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-              $app->make(App\Services\RemoteBackupService::class)->assertConfigured();
-              $pdo = new PDO("pgsql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE").";sslmode=require", getenv("DB_USERNAME"), getenv("DB_PASSWORD"), [PDO::ATTR_TIMEOUT => 15]);
-              $pdo->query("SELECT 1");
-              echo "TLS database connectivity OK.\n";
-            } catch (Throwable $e) { fwrite(STDERR, "Backup preflight failed; check B2 configuration, TLS, allowlist and credentials privately.\n"); exit(1); }
-          '
-          php artisan data:backup --remote --prune --no-interaction
-          php artisan data:backup-status --remote --no-interaction
-          echo 'Private B2 backup verified by download/SHA-256; remote 7 daily + 4 weekly retention applied; temporary copies removed.' >> "$GITHUB_STEP_SUMMARY"
+
+          php artisan data:backup --no-interaction
+          file=$(ls "$BACKUP_PATH"/lumaflow-db-*-pgsql.sql.gz | head -1)
+          php artisan data:restore "$(basename "$file")" --no-interaction   # verificacion del volcado
+          sha256sum "$file" | cut -d' ' -f1 > "$file.sha256.txt"
+
+          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt \
+            -in "$file" -out "$file.enc" -pass env:BACKUP_ENCRYPTION_PASSPHRASE
+          # Comprobar que el cifrado es reversible antes de dar el backup por bueno.
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in "$file.enc" -out "$file.check" -pass env:BACKUP_ENCRYPTION_PASSPHRASE
+          [ "$(sha256sum "$file.check" | cut -d' ' -f1)" = "$(cat "$file.sha256.txt")" ]
+          rm -f "$file.check" "$file"
+
+          echo "name=$(basename "$file").enc" >> "$GITHUB_OUTPUT"
+          echo "Backup cifrado y verificado: $(basename "$file").enc" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: lumaflow-db-backup-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lumaflow-backups/*.enc
+            ${{ runner.temp }}/lumaflow-backups/*.sha256.txt
+          retention-days: 30
+          if-no-files-found: error
 
       - name: Remove temporary dumps
         if: always()
+        run: rm -rf -- "${{ runner.temp }}/lumaflow-backups"
+
+      - name: Open an incident when the backup fails
+        if: failure()
         env:
-          BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
-        run: rm -rf -- "$BACKUP_PATH"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --label incident --state open --search "Backup" --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --label incident \
+              --title "El backup de produccion ha fallado ($(date -u +%Y-%m-%d) UTC)" \
+              --body "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          Causas habituales: secretos PROD_DB_* o BACKUP_ENCRYPTION_PASSPHRASE ausentes o caducados, o la base de datos inaccesible."
+          fi

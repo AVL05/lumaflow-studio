@@ -203,11 +203,11 @@ jobs:
         run: php artisan test --testsuite=Feature
 
   backend-postgres:
-    name: Backend on PostgreSQL 16
+    name: Backend on PostgreSQL 17
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: lumaflow_ci
@@ -259,6 +259,25 @@ jobs:
       - name: Feature tests on PostgreSQL
         working-directory: backend
         run: php artisan test --testsuite=Feature
+
+      - name: Backup and restore drill on PostgreSQL
+        working-directory: backend
+        env:
+          BACKUP_PATH: ${{ runner.temp }}/lumaflow-backups
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+          command -v pg_dump >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client; }
+          source_tables=$(psql -h 127.0.0.1 -U postgres -d lumaflow_ci -tAc "select count(*) from information_schema.tables where table_schema='public'")
+          php artisan data:backup --no-interaction
+          file=$(basename "$(ls "$BACKUP_PATH"/lumaflow-db-*-pgsql.sql.gz | head -1)")
+          psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE lumaflow_restore"
+          DB_DATABASE=lumaflow_restore php artisan data:restore "$file" --apply --force --no-interaction
+          restored_tables=$(psql -h 127.0.0.1 -U postgres -d lumaflow_restore -tAc "select count(*) from information_schema.tables where table_schema='public'")
+          echo "tablas origen=$source_tables restauradas=$restored_tables"
+          [ "$source_tables" = "$restored_tables" ] && [ "$restored_tables" -gt 0 ]
+          restored_migrations=$(psql -h 127.0.0.1 -U postgres -d lumaflow_restore -tAc "select count(*) from migrations")
+          [ "$restored_migrations" -gt 0 ]
 
   e2e:
     name: E2E journeys

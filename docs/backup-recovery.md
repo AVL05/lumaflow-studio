@@ -177,3 +177,31 @@ Sigue pendiente ejecutar este mismo escenario en MySQL/TiDB y el roundtrip priva
 Auditoría: [Render Cron](https://render.com/docs/cronjobs) exige mínimo 1 USD/mes y no permite discos persistentes; [Render Free](https://render.com/docs/free) pierde archivos al reiniciar/redeploy/suspenderse, no permite discos, shell ni one-off jobs. No activados. Repositorio público confirmado con `gh repo view`: [Actions estándar](https://docs.github.com/en/billing/concepts/product-billing/github-actions) gratuito, sin artifacts ni storage contratado. TiDB debe mantener límite de gasto cero (no verificado en su consola en esta tarea); permisos, tráfico y conexión reales requieren verificación antes de activación. [Schedules GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) solo corren desde default branch, pueden retrasarse y en repos públicos se desactivan tras 60 días sin actividad. No se afirma que estos comandos cubran recuperación de producción hasta disponer de destino duradero.
 
 > **Nota (19/11/2026):** produccion pasó a PostgreSQL en Supabase. El servicio de backup soporta ya PostgreSQL (`pg_dump` del esquema `lumaflow`, verificacion estructural y restauracion con `psql`); los pasos de este documento que mencionan `mysqldump`/TiDB aplican a MySQL. `production-backup.yml` esta adaptado a Postgres pero sigue desactivado hasta tener secretos y bucket (#53).
+
+## Backup diario gratuito con GitHub Actions (#53)
+
+`.github/workflows/production-backup.yml` (diario, 03:00 UTC, y manual): `data:backup` hace `pg_dump` del esquema `lumaflow`, `data:restore` verifica el volcado, se **cifra con AES-256 (`openssl`, PBKDF2)** y se sube como artefacto del workflow con retención de 30 días. El repositorio es público, así que sin cifrado cualquier persona con cuenta de GitHub podría descargar el artefacto: **nunca se sube un volcado sin cifrar**. Si falla, abre un issue `incident`.
+
+Secretos del repositorio necesarios (Settings → Secrets and variables → Actions):
+
+| Secreto | Valor |
+| --- | --- |
+| `PROD_DB_HOST` | host del pooler de Supabase (sesión) |
+| `PROD_DB_PORT` | `5432` |
+| `PROD_DB_DATABASE` | `postgres` |
+| `PROD_DB_USERNAME` | `lumaflow_app.<project-ref>` |
+| `PROD_DB_PASSWORD` | contraseña del rol `lumaflow_app` (la misma de `DB_PASSWORD` en Render) |
+| `BACKUP_ENCRYPTION_PASSPHRASE` | frase larga aleatoria generada por el responsable |
+
+**Guarda una copia de `BACKUP_ENCRYPTION_PASSPHRASE` fuera de GitHub** (gestor de contraseñas): los secretos no se pueden leer después y sin ella los backups son irrecuperables.
+
+Restaurar un backup:
+
+1. Descarga el artefacto `lumaflow-db-backup-<run>` desde la pestaña Actions y descomprímelo.
+2. Descifra: `openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in <fichero>.sql.gz.enc -out <fichero>.sql.gz` (pide la passphrase con `-pass env:BACKUP_ENCRYPTION_PASSPHRASE`).
+3. Comprueba la huella: `sha256sum <fichero>.sql.gz` debe coincidir con el `.sha256.txt` incluido.
+4. Copia el `.sql.gz` a `backend/storage/backups/` y ejecuta `php artisan data:restore <fichero>.sql.gz` (verifica) y, sobre una base vacía o de pruebas, `--apply`. En producción exige además `--force-production`.
+
+La restauración se ensaya en cada ejecución de CI: el job `Backend on PostgreSQL 17` hace un backup, lo restaura en una base nueva y compara el número de tablas y la tabla `migrations`.
+
+Supabase en el plan gratuito no incluye copias automáticas: este workflow es la única copia, así que comprueba de vez en cuando que los artefactos existen.

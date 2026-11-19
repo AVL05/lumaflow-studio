@@ -8,10 +8,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Estrategia declarada (Issue #12): backup diario con retencion.
-// Requiere un runner de `schedule:run` cada minuto (cron del proveedor);
-// sin runner estas entradas no se ejecutan. Ver docs/backup-recovery.md.
-Schedule::command('data:backup --prune')->dailyAt('03:00')->timezone('UTC')->withoutOverlapping(30);
-
-// Purga los tokens caducados (SANCTUM_TOKEN_EXPIRATION). Mismo requisito de runner que el backup.
+// Render no ejecuta `schedule:run`. El backup diario (production-backup.yml) y el mantenimiento
+// (scheduled-maintenance.yml) los lanza GitHub Actions llamando a los comandos directamente.
+// Esta entrada solo se aplica si algun dia hay un runner de `schedule:run` en el hosting.
 Schedule::command('sanctum:prune-expired --hours=24')->daily()->timezone('UTC');

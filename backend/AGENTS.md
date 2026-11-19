@@ -72,7 +72,7 @@ Do not use bulk query deletion when model events are required for cleanup. Respe
 - Destructive operations require explicit issue approval and migration/rollback consideration.
 - Seeders and fixtures must use fictitious data only.
 
-Production runs on PostgreSQL; CI runs the Feature suite on MySQL 8 and PostgreSQL 16 plus SQLite. Keep queries portable (use Eloquent helpers such as `whereLike`, branch on `DB::getDriverName()` only for unavoidable raw SQL) and do not introduce engine-specific SQL without covering every supported engine.
+Production runs on PostgreSQL; CI runs the Feature suite on MySQL 8 and PostgreSQL 17 plus SQLite. Keep queries portable (use Eloquent helpers such as `whereLike`, branch on `DB::getDriverName()` only for unavoidable raw SQL) and do not introduce engine-specific SQL without covering every supported engine.
 
 ## Analytics and performance
 
