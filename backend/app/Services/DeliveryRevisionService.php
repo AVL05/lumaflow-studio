@@ -345,11 +345,17 @@ class DeliveryRevisionService
         if (! $delivery->client?->email) {
             return;
         }
-        try {
-            $url = rtrim(config('app.frontend_url'), '/')."/deliver/{$delivery->public_token}";
-            Mail::to($delivery->client->email)->send(new DeliveryReadyMail($delivery, $url));
-        } catch (\Throwable $exception) {
-            AuditLog::mailFailed(DeliveryReadyMail::class, $exception::class, $delivery->user_id);
-        }
+        $email = $delivery->client->email;
+        $url = rtrim(config('app.frontend_url'), '/')."/deliver/{$delivery->public_token}";
+
+        // Tras enviar la respuesta: la latencia SMTP no alarga la peticion y no hace falta un
+        // worker de cola (QUEUE_CONNECTION=database no tiene uno en produccion).
+        dispatch(function () use ($delivery, $email, $url): void {
+            try {
+                Mail::to($email)->send(new DeliveryReadyMail($delivery, $url));
+            } catch (\Throwable $exception) {
+                AuditLog::mailFailed(DeliveryReadyMail::class, $exception::class, $delivery->user_id);
+            }
+        })->afterResponse();
     }
 }

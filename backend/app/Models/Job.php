@@ -39,7 +39,7 @@ class Job extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        return $query->when($search, fn ($q) => $q->where(fn ($i) => $i->where('title', 'like', "%{$search}%")->orWhereHas('client', fn ($c) => $c->where('name', 'like', "%{$search}%"))));
+        return $query->when($search, fn ($q) => $q->where(fn ($i) => $i->whereLike('title', "%{$search}%")->orWhereHas('client', fn ($c) => $c->whereLike('name', "%{$search}%"))));
     }
 
     /**

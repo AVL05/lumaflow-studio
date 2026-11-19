@@ -14,13 +14,15 @@ Clientes, trabajos, reservas, presupuestos, facturas, sesiones y entregas conect
 
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev)
-[![MySQL](https://img.shields.io/badge/MySQL-compatible-4479A1)](https://www.mysql.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791)](https://supabase.com)
 [![WebGPU](https://img.shields.io/badge/IA-WebGPU_local-111827)](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
 [![License](https://img.shields.io/badge/License-MIT-d4b06a)](LICENSE)
 
 </div>
 
 ---
+
+**Visión y colaboración:** [Visión de producto](PRODUCT_VISION.md) · [Dirección de diseño](DESIGN.md) · [Claude Code](CLAUDE.md) · [Normas para agentes](AGENTS.md)
 
 ## Qué es LumaFlow
 
@@ -29,6 +31,7 @@ LumaFlow Studio es una plataforma de gestión para fotógrafos y pequeños estud
 El producto está en **beta pública**, es gratuito y open source con licencia MIT. No hay suscripciones obligatorias, funciones premium ni límites ligados a donaciones. El objetivo es simplificar el trabajo creativo conservando la arquitectura y los datos existentes.
 
 La evolución para videógrafos, filmmakers y proyectos personales sigue el [plan LumaFlow 2.0](docs/plans/2026-10-29-lumaflow-2.0-plan.md). El [Sprint 2](docs/plans/2026-10-30-sprint2-creative-workspace.md) implementa localmente proyectos fotográficos, audiovisuales y personales, organización y briefing manual. El [Sprint 3](docs/plans/2026-10-30-sprint3-production.md) añade tomas, jornadas, seguimiento móvil y PDF/impresión. El [Sprint 4](docs/plans/2026-11-01-sprint4-workflows.md) incorpora nueve plantillas profesionales editables/reutilizables y postproducción con tareas, responsables, fechas y checklists. Estos cambios aún no están publicados ni desplegados. Organizan el trabajo sin importar ni procesar archivos audiovisuales.
+El objetivo de esta etapa es validar el flujo con usuarios reales, detectar qué módulos aportan más valor y mejorar la estabilidad y la experiencia. La dirección del producto es mantener LumaFlow gratuito, con aportaciones voluntarias opcionales y sin ventajas para donantes.
 
 ## Pruébalo sin registrarte
 
@@ -113,7 +116,7 @@ La beta actual es gratuita y no solicita tarjeta. Esto significa:
 - demo pública sin registro;
 - evolución frecuente del producto;
 - posibilidad de cambios de interfaz y contrato durante la beta;
-- sin compromiso sobre precios o límites futuros hasta que se publiquen expresamente.
+- vocación de gratuidad permanente, sin niveles de pago ni funciones exclusivas para donantes.
 
 LumaFlow ya funciona como producto desplegado, pero sigue siendo experimental. No debe considerarse todavía un servicio crítico ni utilizarse como única copia de documentos o fotografías.
 
@@ -147,10 +150,10 @@ Más detalle en [docs/architecture.md](docs/architecture.md).
 | --------------- | ------------------------------------------------------------------------- |
 | Frontend        | React 19, Vite, React Router 7, Tailwind CSS 4, Recharts, Leaflet, PWA    |
 | Backend         | Laravel 13, PHP 8.3+, Sanctum, Dompdf                                     |
-| Datos           | MySQL compatible, Eloquent                                                |
+| Datos           | PostgreSQL (Supabase) en produccion; MySQL y SQLite en desarrollo/CI, Eloquent |
 | IA              | WebGPU, WebLLM y Ollama opcional                                          |
 | Calidad         | PHPUnit, Pint, Vitest, Testing Library, Playwright, oxlint y Prettier     |
-| Infraestructura | Vercel, Render, TiDB Cloud, almacenamiento S3 compatible y Docker Compose |
+| Infraestructura | Vercel, Render, Supabase (PostgreSQL y almacenamiento S3 compatible) S3 compatible y Docker Compose |
 
 ## Desarrollo local
 

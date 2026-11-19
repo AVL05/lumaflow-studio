@@ -1,6 +1,6 @@
 # Base de datos
 
-MySQL 8, `utf8mb4_unicode_ci`. Motor de produccion: la analitica agrupa por mes con `DATE_FORMAT` en MySQL y `strftime` equivalente en SQLite (tests/E2E), con identica semantica `YYYY-MM`.
+PostgreSQL (Supabase, esquema privado `lumaflow`) en produccion; MySQL 8 (`utf8mb4_unicode_ci`) y SQLite en desarrollo/CI. La analitica agrupa por mes con `to_char` en PostgreSQL, `DATE_FORMAT` en MySQL y `strftime` equivalente en SQLite (tests/E2E), con identica semantica `YYYY-MM`.
 
 ## Migraciones
 

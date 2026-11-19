@@ -97,7 +97,7 @@ La SPA conserva `/app/jobs` y el API histórico. El listado usa paginación opt-
 
 **Respuestas públicas transaccionales.** `PublicDeliveryService` aplica actualizaciones condicionales; `ContractPortalService` adquiere bloqueo antes de resolver el estado. La decisión y sus actividades/notificaciones son atómicas e idempotentes. Tests con dos procesos reales SQLite cubren seis carreras; la validación con MySQL/TiDB queda pendiente de un entorno aislado.
 
-**Despliegue real.** SPA en Vercel, API en Render (web service, sin cron activo), MySQL compatible en TiDB Cloud. Sin Redis obligatorio, sin APM, sin session replay.
+**Despliegue real.** SPA en Vercel, API en Render (web service, sin cron activo), PostgreSQL en Supabase (esquema privado `lumaflow`, conexion por el pooler Supavisor); MySQL y SQLite siguen soportados en desarrollo y CI. Sin Redis obligatorio, sin APM, sin session replay.
 
 ## Limites conscientes
 

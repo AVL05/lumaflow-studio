@@ -1,6 +1,6 @@
 # Backend
 
-Laravel 13, PHP 8.3+, MySQL 8, Sanctum con tokens Bearer.
+Laravel 13, PHP 8.3+, PostgreSQL (produccion) / MySQL 8 / SQLite, Sanctum con tokens Bearer.
 
 ## Estructura
 
@@ -38,12 +38,12 @@ backend/app/
 | `NotificationService` | Notificaciones persistidas. `User::notifications()` sobrescribe deliberadamente la relacion de `Notifiable`, que el proyecto no usa. |
 | `CalendarService` | Normaliza sesiones, entregas y tareas al shape `{id: "source-N", source, source_id, date, time, status, meta, url}`. `move()` traduce ese shape al campo de fecha propio de cada modelo. |
 | `SearchService` | Busqueda unificada por grupos, con limite por grupo. |
-| `AnalyticsService` | KPIs y series. Buckets mensuales portables (MySQL `DATE_FORMAT`, SQLite `strftime`). Resultado agregado cacheado por `AnalyticsCache`. |
+| `AnalyticsService` | KPIs y series. Buckets mensuales portables (PostgreSQL `to_char`, MySQL `DATE_FORMAT`, SQLite `strftime`). Resultado agregado cacheado por `AnalyticsCache`. |
 | `BulkActionService` | `MATRIX` define que accion admite cada recurso; es la fuente de verdad de la validacion. |
 | `ExportService` | `COLUMNS` define que se exporta. CSV en streaming, JSON como adjunto. |
 | `ChecklistService` | Plantillas, duplicado, reordenacion transaccional. |
 | `TaskSummaryService` | Totales de tareas compartidos por dashboard y pagina de tareas. |
-| `HealthService` | Sondas de API, MySQL, storage, cache y compatibilidad Ollama. |
+| `HealthService` | Sondas de API, base de datos, storage, cache y compatibilidad Ollama. |
 | `OnboardingService` | Persiste preferencias iniciales y reserva un slug unico para el estudio. |
 | `GettingStartedService` | Persiste la opcion posterior al onboarding y activa la muestra cuando corresponde. |
 | `SampleWorkspaceService` | Crea datos ficticios transaccionales e idempotentes para explorar el producto. |
@@ -95,4 +95,4 @@ php artisan route:list --path=api
 DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
 ```
 
-La analitica usa SQL de MySQL, asi que MySQL es tambien el motor de referencia en pruebas.
+El CI ejecuta la suite Feature en SQLite, MySQL 8 y PostgreSQL 16; las consultas deben seguir siendo portables entre los tres.
