@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lumaflow-local",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "start:showcase"],
+      "env": { "LUMAFLOW_WEB_PORT": "5180", "LUMAFLOW_API_PORT": "8010" },
+      "port": 5180,
+      "autoPort": false
+    }
+  ]
+}

@@ -8,14 +8,14 @@ La beta publica usa servicios con limite de gasto cero mientras se valida el pro
 | ------------- | --------------------------------------- | ------------------------------------ |
 | SPA           | Vercel                                  | `https://lumaflow.aleviclop.dev`     |
 | API Laravel   | Render (free web service)               | `https://lumaflow-api.aleviclop.dev` |
-| Base de datos | TiDB Cloud Starter, MySQL compatible    | Privada, TLS obligatorio             |
+| Base de datos | Supabase (PostgreSQL 17), esquema `lumaflow` | Pooler Supavisor, `sslmode=require`  |
 
 Las entregas no alojan originales: solo guardan enlace externo, proveedor, contraseña y
 caducidad. No hay bucket S3 de galerias ni costes de almacenamiento/transferencia.
 
 `render.yaml` define el servicio backend. Los valores marcados con `sync: false`
 son secretos y se introducen en Render; nunca se guardan en Git. El limite mensual
-de TiDB debe permanecer en `0` para impedir cargos. Render puede suspender el
+de uso de Supabase debe vigilarse para no pasar del plan gratuito. Render puede suspender el
 servicio gratuito por inactividad, por lo que la primera peticion puede tardar.
 
 La SPA se construye con:
@@ -245,3 +245,11 @@ No afirmar “backups automáticos” por `Schedule::command` ni por un workflow
 - **SPA (Vercel):** `frontend/vercel.json` envía CSP, HSTS, `nosniff`, `Referrer-Policy` y `Permissions-Policy`, con `frame-ancestors 'none'`. La CSP permite solo los orígenes reales: la API (`lumaflow-api.aleviclop.dev`), teselas CARTO, Hugging Face y `raw.githubusercontent.com` (modelos y wasm de WebLLM, con `wasm-unsafe-eval`) y Sentry. Si cambia el dominio de la API, el proveedor de mapas (#64) o el DSN de Sentry, hay que actualizar `connect-src`/`img-src`.
 - **API (Laravel):** el middleware `SecurityHeaders` añade las mismas cabeceras a toda respuesta (CSP `default-src 'none'`); HSTS solo sobre HTTPS. Lo cubre `SecurityHeadersTest`.
 - **Pendiente de verificar:** las cabeceras de Vercel no se prueban en CI. Antes de dar el cambio por bueno hay que comprobarlas en un Preview (consola sin violaciones de CSP en login, mapas, IA local y Sentry).
+
+## Base de datos de produccion: Supabase (PostgreSQL)
+
+- Proyecto `lumaflow-storage` (eu-west-1). La API usa el esquema privado `lumaflow`, no `public`: `public` queda expuesto por la API REST de Supabase. El esquema se creo con una migracion de Supabase que revoca todo a `anon` y `authenticated`.
+- Rol dedicado `lumaflow_app` (sin superusuario, solo permisos sobre `lumaflow`), con `search_path = lumaflow`. Conexion por el **Session pooler** (`aws-1-eu-west-1.pooler.supabase.com:5432`, usuario `lumaflow_app.<project-ref>`): Render no sale por IPv6 y la conexion directa de Supabase es solo IPv6.
+- Variables en Render: `DB_CONNECTION=pgsql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `DB_SCHEMA=lumaflow`, `DB_SSLMODE=require`. La contrasena solo vive en Render.
+- `dockerCommand` pasa por `entrypoint`: normaliza `APP_KEY`, espera a la base de datos (maximo 15 intentos), ejecuta `migrate --force` y cachea config, rutas y vistas. Por eso la configuracion no puede contener closures (`ConfigCacheableTest`).
+- **Backups:** `data:backup` y `production-backup.yml` solo soportan MySQL/SQLite (el runner se escribio para TiDB y esta desactivado). En Postgres dependen de los backups de Supabase; el plan de #53 debe rehacerse con `pg_dump`.
