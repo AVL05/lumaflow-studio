@@ -104,6 +104,9 @@ export default defineConfig({
         release: { name: appRelease },
         sourcemaps: { filesToDeleteAfterUpload: ["./dist/**/*.map"] },
         telemetry: false,
+        // Un fallo de Sentry (token caducado, caida) no debe romper el despliegue: solo se avisa.
+        errorHandler: (error) => console.warn(`[sentry] source maps no subidos: ${error.message.split("
+")[0]}`),
       }),
   ],
   test: {
