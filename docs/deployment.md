@@ -348,3 +348,7 @@ Pasos pendientes del responsable (no se pueden hacer desde el repositorio):
 Datos personales: los eventos pasan por `SentryScrubber` (backend) y por el scrubber del SDK (frontend); no se envian PII por defecto, cuerpos de peticion, cabeceras de auth ni contenido de contratos o prompts de IA.
 
 - **Backups:** `data:backup` / `data:restore` y `production-backup.yml` soportan PostgreSQL: `pg_dump` solo del esquema `lumaflow` (`--no-owner --no-privileges`), verificacion estructural del volcado y restauracion con `psql --single-transaction`. El runner usa `postgresql-client-17` (pg_dump no puede ser mas antiguo que el servidor). Sigue desactivado: faltan los secretos `BACKUP_DB_*` (datos del pooler y rol de la app) y las credenciales del bucket de backups (#53).
+
+## Tareas programadas (#57)
+
+Render no ejecuta el scheduler de Laravel. `.github/workflows/scheduled-maintenance.yml` (diario, 02:30 UTC) conecta con la base de datos de producción con los secretos `PROD_DB_*` (los mismos que el backup, ver `docs/backup-recovery.md`) y lanza `php artisan sanctum:prune-expired --hours=24`. Las tareas se invocan por su nombre y no con `schedule:run`, porque los cron de GitHub se retrasan unos minutos y las frecuencias exactas del scheduler se perderían. Las futuras tareas (por ejemplo la purga de cuentas borradas) se añaden como pasos de ese workflow.

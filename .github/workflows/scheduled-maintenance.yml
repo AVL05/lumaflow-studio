@@ -1,0 +1,68 @@
+name: Scheduled maintenance
+
+# Runner de tareas programadas sin servicios de pago: Render no ejecuta el scheduler de Laravel,
+# asi que un workflow de GitHub Actions lanza cada dia las tareas de mantenimiento contra la base
+# de datos de produccion (hoy: purga de tokens caducados de Sanctum). Los comandos se llaman
+# explicitamente en vez de `schedule:run`: los cron de GitHub se retrasan unos minutos y las
+# frecuencias exactas del scheduler (`daily()` = 00:00) se perderian.
+
+on:
+  schedule:
+    - cron: "30 2 * * *" # UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-maintenance
+  cancel-in-progress: false
+
+jobs:
+  maintenance:
+    name: Laravel maintenance tasks
+    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, zip, pdo_pgsql
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --no-progress
+
+      - name: Run maintenance commands
+        env:
+          APP_ENV: production
+          APP_DEBUG: "false"
+          LOG_CHANNEL: stderr
+          CACHE_STORE: file
+          DB_CONNECTION: pgsql
+          DB_SCHEMA: lumaflow
+          DB_SSLMODE: require
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_PORT: ${{ secrets.PROD_DB_PORT }}
+          DB_DATABASE: ${{ secrets.PROD_DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for key in DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD; do
+            if [ -z "${!key:-}" ]; then echo "::error::Falta el secreto PROD_$key (ver docs/deployment.md)"; exit 1; fi
+          done
+          # Estas tareas no descifran nada, asi que basta una clave efimera.
+          export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+
+          php artisan sanctum:prune-expired --hours=24
