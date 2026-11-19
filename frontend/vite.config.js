@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { VitePWA } from "vite-plugin-pwa";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { publicSeo } from "./scripts/publicSeo.mjs";
 
 // https://vite.dev/config/
@@ -15,6 +16,15 @@ const appRelease =
   process.env.GITHUB_SHA ||
   process.env.RENDER_GIT_COMMIT ||
   "";
+
+// Subida de source maps a Sentry (#62): solo con credenciales y una release conocida, para que
+// el stack de produccion sea legible. Sin ellas el build no genera mapas y funciona igual.
+const uploadSourceMaps = Boolean(
+  process.env.SENTRY_AUTH_TOKEN &&
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT &&
+  appRelease,
+);
 
 // Content hash of the marketing screenshots: URLs change when a screenshot is regenerated under
 // the same name, so the PWA's CacheFirst image cache never serves a stale one (see productImage.js).
@@ -35,6 +45,8 @@ export default defineConfig({
     __PRODUCT_IMAGES_VERSION__: JSON.stringify(productImagesVersion),
   },
   build: {
+    // `hidden`: los mapas se suben a Sentry y se borran tras la subida; nunca se sirven al publico.
+    sourcemap: uploadSourceMaps ? "hidden" : false,
     // Only the WebLLM chunk (lib-*, ~6 MB, loaded on demand by the local-AI feature and kept out
     // of the PWA precache) exceeds this. Everything else is held by `pnpm run check:bundle`.
     chunkSizeWarningLimit: 6500,
@@ -84,6 +96,18 @@ export default defineConfig({
         ],
       },
     }),
+    uploadSourceMaps &&
+      sentryVitePlugin({
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        release: { name: appRelease },
+        sourcemaps: { filesToDeleteAfterUpload: ["./dist/**/*.map"] },
+        telemetry: false,
+        // Un fallo de Sentry (token caducado, caida) no debe romper el despliegue: solo se avisa.
+        errorHandler: (error) =>
+          console.warn(`[sentry] source maps no subidos: ${String(error.message).slice(0, 120)}`),
+      }),
   ],
   test: {
     environment: "jsdom",

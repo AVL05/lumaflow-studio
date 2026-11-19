@@ -332,4 +332,19 @@ No afirmar “backups automáticos” por `Schedule::command` ni por un workflow
 - Rol dedicado `lumaflow_app` (sin superusuario, solo permisos sobre `lumaflow`), con `search_path = lumaflow`. Conexion por el **Session pooler** (`aws-1-eu-west-1.pooler.supabase.com:5432`, usuario `lumaflow_app.<project-ref>`): Render no sale por IPv6 y la conexion directa de Supabase es solo IPv6.
 - Variables en Render: `DB_CONNECTION=pgsql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `DB_SCHEMA=lumaflow`, `DB_SSLMODE=require`. La contrasena solo vive en Render.
 - `dockerCommand` pasa por `entrypoint`: normaliza `APP_KEY`, espera a la base de datos (maximo 15 intentos), ejecuta `migrate --force` y cachea config, rutas y vistas. Por eso la configuracion no puede contener closures (`ConfigCacheableTest`).
+- **Backups:** `data:backup` y `production-backup.yml` solo soportan MySQL/SQLite (el runner se escribio para TiDB y esta desactivado). En Postgres dependen de los backups de Supabase; el plan de #53 debe rehacerse con `pg_dump`.
+
+## Sentry: source maps y alertas (#62)
+
+El build del frontend sube los source maps a Sentry (`@sentry/vite-plugin`, `frontend/vite.config.js`) **solo** si existen `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` y una release conocida (`VERCEL_GIT_COMMIT_SHA`, el mismo SHA que usa el SDK en runtime). Los mapas se generan como `hidden` y se borran tras subirlos: nunca se sirven al publico. Sin esas variables el build es el de siempre.
+
+Pasos pendientes del responsable (no se pueden hacer desde el repositorio):
+
+1. En Sentry crear un **auth token de organizacion** con los permisos `project:releases` y `org:read`.
+2. En Vercel (variables de entorno de produccion del frontend) definir `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` y `SENTRY_PROJECT` (y mantener `VITE_SENTRY_DSN`).
+3. En Sentry crear las reglas de alerta con aviso por email al responsable: **issue nuevo** y **pico de eventos** (por ejemplo, mas de 10 eventos en 1 hora).
+4. Verificar: provocar un error en un Preview con las variables y comprobar en Sentry que el stack apunta a ficheros de `src/` legibles y que llega el aviso.
+
+Datos personales: los eventos pasan por `SentryScrubber` (backend) y por el scrubber del SDK (frontend); no se envian PII por defecto, cuerpos de peticion, cabeceras de auth ni contenido de contratos o prompts de IA.
+
 - **Backups:** `data:backup` / `data:restore` y `production-backup.yml` soportan PostgreSQL: `pg_dump` solo del esquema `lumaflow` (`--no-owner --no-privileges`), verificacion estructural del volcado y restauracion con `psql --single-transaction`. El runner usa `postgresql-client-17` (pg_dump no puede ser mas antiguo que el servidor). Sigue desactivado: faltan los secretos `BACKUP_DB_*` (datos del pooler y rol de la app) y las credenciales del bucket de backups (#53).
