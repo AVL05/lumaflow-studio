@@ -213,9 +213,9 @@ VITE_SENTRY_RELEASE=
 
 ## Monitorizacion
 
-- `GET /api/health` — sonda publica para orquestadores. 200 operativo, 503 caido. Solo expone el `status` de cada dependencia.
+- `GET /up` — **liveness**. Es la sonda de Render (`healthCheckPath` en `render.yaml`): solo comprueba que el proceso arranca y responde, sin tocar base de datos, disco ni Ollama. Una dependencia caida no reinicia la instancia.
+- `GET /api/health` — **readiness**. La consume el smoke de produccion (`production-smoke.yml`), que exige `database`, `storage` y `cache` en `up`. 200 operativo o `degraded`, 503 caido. Solo expone el `status` de cada dependencia. Un fallo del disco `s3` da 503 aqui pero ya no reinicia la instancia.
 - `GET /api/system` — detalle autenticado (latencias, driver, versiones, modelo de IA). Lo consume la pagina `/app/system`.
-- `GET /up` — sonda nativa de Laravel.
 
 `degraded` significa que solo la compatibilidad Ollama backend esta caida. La SPA puede seguir usando WebGPU si el navegador lo soporta.
 

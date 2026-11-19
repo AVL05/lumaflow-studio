@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\HealthService;
 use App\Services\OllamaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -34,6 +35,26 @@ class HealthTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'up')
             ->assertJsonStructure(['status', 'timestamp', 'checks' => ['api', 'database', 'storage', 'cache', 'ollama']]);
+    }
+
+    public function test_liveness_probe_does_not_depend_on_any_dependency(): void
+    {
+        $this->mock(HealthService::class)->shouldNotReceive('summary');
+        config(['filesystems.default' => 'broken', 'filesystems.disks.broken' => ['driver' => 'local', 'root' => __FILE__, 'throw' => true]]);
+
+        $this->get('/up')->assertOk();
+    }
+
+    public function test_readiness_reports_503_when_the_storage_disk_fails(): void
+    {
+        $this->fakeOllama(true);
+        config(['filesystems.default' => 'broken', 'filesystems.disks.broken' => ['driver' => 'local', 'root' => __FILE__, 'throw' => true]]);
+
+        $this->getJson('/api/health')
+            ->assertStatus(503)
+            ->assertJsonPath('status', 'down')
+            ->assertJsonPath('checks.storage.status', 'down')
+            ->assertJsonPath('checks.database.status', 'up');
     }
 
     public function test_health_degrades_but_stays_up_when_ollama_is_unreachable(): void
