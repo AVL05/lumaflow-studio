@@ -334,6 +334,17 @@ No afirmar “backups automáticos” por `Schedule::command` ni por un workflow
 - `dockerCommand` pasa por `entrypoint`: normaliza `APP_KEY`, espera a la base de datos (maximo 15 intentos), ejecuta `migrate --force` y cachea config, rutas y vistas. Por eso la configuracion no puede contener closures (`ConfigCacheableTest`).
 - **Backups:** `data:backup` y `production-backup.yml` solo soportan MySQL/SQLite (el runner se escribio para TiDB y esta desactivado). En Postgres dependen de los backups de Supabase; el plan de #53 debe rehacerse con `pg_dump`.
 
+## Servidor PHP de produccion: FrankenPHP (#52)
+
+La API ya no arranca con `php artisan serve` (servidor de desarrollo de PHP, un solo hilo). La imagen usa **FrankenPHP** (Caddy + PHP en un proceso, hilos en paralelo) en modo clasico, sin Octane; la config esta en `backend/docker/Caddyfile` y los ajustes de PHP en `backend/docker/php.ini`. Se eligio frente a php-fpm + nginx porque cabe en un solo proceso del contenedor, sin supervisor.
+
+- Hilos: `FRANKENPHP_THREADS` (4) y `FRANKENPHP_MAX_THREADS` (8); la instancia gratuita de Render tiene poca CPU, no subirlos sin medir.
+- El puerto lo fija `PORT` (10000 en Render). `dockerCommand` sigue pasando por `entrypoint`.
+- CI: el job `Deployment images` construye la imagen, la arranca con SQLite y comprueba `/up`, varias peticiones simultaneas y `/api/health`, de modo que un fallo del servidor se ve antes de desplegar.
+- `PHP_CLI_SERVER_WORKERS` en Render ya no hace falta y se puede borrar.
+- **Plan de Render:** se mantiene el plan gratuito: la instancia se duerme tras inactividad y el primer acceso tarda hasta ~1 min. Pasar a un plan de pago (o mantenerla despierta con el monitor externo de #63) elimina los arranques en frio; es una decision de coste del responsable.
+- **Rollback:** Render permite volver al deploy anterior; el ultimo con `php artisan serve` es el de #107/#80.
+
 ## Monitor de disponibilidad (#63)
 
 `.github/workflows/uptime-monitor.yml` comprueba cada 10 minutos la landing, `/up` y `/api/health` (con `database`, `storage` y `cache` en `up`). Si falla abre un issue con la etiqueta `incident`, que GitHub notifica por email a quien vigila el repositorio, y lo cierra solo al recuperarse. No usa servicios de terceros.

@@ -1,0 +1,17 @@
+{
+	# Sin TLS propio (lo termina el proxy de Render/Vercel) ni API de administracion.
+	auto_https off
+	admin off
+
+	frankenphp {
+		# Hilos de PHP en paralelo: un /api/health lento ya no bloquea /up.
+		num_threads {$FRANKENPHP_THREADS:4}
+		max_threads {$FRANKENPHP_MAX_THREADS:8}
+	}
+}
+
+:{$PORT:8000} {
+	root * /app/public
+	encode zstd gzip
+	php_server
+}

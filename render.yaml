@@ -10,7 +10,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     # Via entrypoint: normaliza APP_KEY, espera a la BD, ejecuta migrate y cachea la config.
-    dockerCommand: entrypoint php artisan serve --host=0.0.0.0 --port=10000
+    dockerCommand: entrypoint frankenphp run --config /etc/caddy/Caddyfile
     healthCheckPath: /up
     envVars:
       - key: PORT
