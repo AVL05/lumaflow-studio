@@ -22,7 +22,7 @@ ENV VITE_KOFI_URL=$VITE_KOFI_URL
 ENV VITE_GITHUB_SPONSORS_URL=$VITE_GITHUB_SPONSORS_URL
 RUN pnpm --dir frontend run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.29-alpine
 
 COPY frontend/docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/frontend/dist /usr/share/nginx/html

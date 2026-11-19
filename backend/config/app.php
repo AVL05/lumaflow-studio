@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\AppKey;
+
 return [
 
     /*
@@ -99,7 +101,7 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'key' => env('APP_KEY'),
+    'key' => AppKey::normalize(env('APP_KEY')),
 
     'previous_keys' => [
         ...array_filter(

@@ -35,8 +35,8 @@ class Quote extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('quote_number', 'like', "%{$search}%")
-                ->orWhereHas('client', fn ($client) => $client->where('name', 'like', "%{$search}%"));
+            $inner->whereLike('quote_number', "%{$search}%")
+                ->orWhereHas('client', fn ($client) => $client->whereLike('name', "%{$search}%"));
         }));
     }
 
