@@ -50,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Limite propio por IP y estudio: el techo general de 30/min es compartido por todos
         // los portales publicos y no basta para evitar spam en la bandeja de un estudio.
+        RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(10)
+            ->by('two-factor|'.$request->user()?->id));
+
         // La exportacion completa es pesada: limite propio por usuario (el contador de `throttle:N,1`
         // sin nombre se comparte con el techo general del grupo autenticado).
         RateLimiter::for('account-export', fn (Request $request) => Limit::perMinute(6)

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\Auth\GettingStartedController;
 use App\Http\Controllers\Api\Auth\OnboardingController;
+use App\Http\Controllers\Api\Auth\TwoFactorController;
 use App\Http\Controllers\Api\BookingRequestController;
 use App\Http\Controllers\Api\BulkActionController;
 use App\Http\Controllers\Api\CalendarController;
@@ -79,6 +80,11 @@ Route::middleware('throttle:30,1')->group(function (): void {
 Route::middleware(['auth:sanctum', 'throttle:'.config('api.throttle_per_minute', 180).',1'])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::middleware('throttle:two-factor')->group(function (): void {
+        Route::post('/two-factor/setup', [TwoFactorController::class, 'setup']);
+        Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm']);
+        Route::post('/two-factor/disable', [TwoFactorController::class, 'disable']);
+    });
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');

@@ -353,6 +353,21 @@ Superficie sin autenticar: `/public/studios/{slug}` (+ `/bookings`), `/public/de
 - **Tokens inválidos:** desconocidos, revocados o caducados devuelven un `404` uniforme en entregas, contratos y calendario, sin distinguir el motivo.
 - No hay captcha de terceros. Cubre `PublicEndpointAbuseTest`.
 
+## Verificación en dos pasos opcional (#60)
+
+TOTP (RFC 6238: SHA-1, 6 dígitos, 30 s, tolerancia ±1 intervalo) más 8 códigos de recuperación de un solo uso, sin dependencias externas. Solo afecta a las cuentas que lo activan.
+
+| Método | Ruta | Auth | Notas |
+| --- | --- | --- | --- |
+| POST | `/two-factor/setup` | sí | Crea un secreto pendiente y devuelve `{secret, otpauth_uri}`. No activa nada |
+| POST | `/two-factor/confirm` | sí | `{code}`: con un código válido activa el 2FA y devuelve `{recovery_codes}` **una sola vez** |
+| POST | `/two-factor/disable` | sí | `{password, code}`: exige contraseña y un código (TOTP o de recuperación) |
+
+- `POST /login` acepta `code` opcional. Con 2FA activo y sin `code`, tras validar la contraseña responde **422** `{message, two_factor_required: true}` sin emitir token; el cliente reenvía las credenciales con el código. Un código incorrecto o ya usado da 422 con error en `code`.
+- Un código TOTP no puede reutilizarse (se guarda el último intervalo aceptado) y cada código de recuperación se consume al usarse.
+- El secreto y los códigos de recuperación se guardan cifrados (cast `encrypted`, clave `APP_KEY`) y nunca se serializan; `UserResource` solo expone `two_factor_enabled`.
+- Los endpoints usan el limitador `two-factor` (10/min por usuario) y el login conserva `throttle:10,1`.
+
 ## Exportación completa de datos (#67)
 
 | Método | Ruta | Auth | Notas |

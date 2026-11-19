@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\TwoFactorService;
 use App\Services\WorkspaceService;
 use App\Support\AuditLog;
 use Illuminate\Auth\Events\Registered;
@@ -51,6 +52,28 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales no son correctas.'],
             ]);
+        }
+
+        $twoFactor = app(TwoFactorService::class);
+
+        if ($twoFactor->isEnabled($user)) {
+            $code = $request->validated('code');
+
+            if ($code === null || $code === '') {
+                // La contrasena fue correcta: el cliente debe reenviar las credenciales con el codigo.
+                return response()->json([
+                    'message' => 'Introduce el código de verificación de tu aplicación de autenticación.',
+                    'two_factor_required' => true,
+                ], 422);
+            }
+
+            if (! $twoFactor->attempt($user, $code)) {
+                AuditLog::authFailed($request->validated('email'));
+
+                throw ValidationException::withMessages([
+                    'code' => ['El código de verificación no es correcto.'],
+                ]);
+            }
         }
 
         // Sesion unica: emitir un token nuevo invalida los anteriores.
