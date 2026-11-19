@@ -64,6 +64,8 @@ export function publicSeo() {
         configFile: false,
         root: config.root,
         mode: config.mode,
+        // Same compile-time constants as the client build (e.g. product image version).
+        define: config.define,
         plugins: [react()],
         optimizeDeps: { noDiscovery: true, entries: [] },
         server: { middlewareMode: true, hmr: false, watch: null },
