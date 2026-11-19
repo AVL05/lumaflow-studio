@@ -20,7 +20,7 @@ test.describe("aislamiento entre estudios", () => {
     expect(read.status()).toBe(404);
     expect(await read.text()).not.toContain(clientName);
 
-    // El payload es valido a proposito: un 422 de validacion enmascararia el
+    // El payload es valido a propósito: un 422 de validación enmascararía el
     // fallo de autorizacion, que es lo que este test debe comprobar.
     const update = await apiRequest(outsiderPage, "PATCH", `/clients/${clientId}`, {
       name: "Secuestrado E2E",

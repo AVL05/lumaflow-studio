@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-/** Seleccion multiple para acciones masivas sobre listados. */
+/** Selección múltiple para acciones masivas sobre listados. */
 export function useSelection() {
   const [selected, setSelected] = useState([]);
 

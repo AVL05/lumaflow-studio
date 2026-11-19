@@ -45,14 +45,14 @@ export function ResetPasswordPage() {
 
   return (
     <AuthShell
-      eyebrow="Nuevo password"
+      eyebrow="Nueva contraseña"
       title="Define un acceso nuevo"
       description="El enlace solo puede usarse una vez y caduca por seguridad."
       footer={
         <>
           Volver a{" "}
           <Link className="font-medium text-stone-200 transition hover:text-amber-100" to="/login">
-            iniciar sesion
+            iniciar sesión
           </Link>
         </>
       }
@@ -76,7 +76,7 @@ export function ResetPasswordPage() {
             className={inputClass}
             type="password"
             autoComplete="new-password"
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={form.password}
             onChange={(event) => setForm({ ...form, password: event.target.value })}
           />

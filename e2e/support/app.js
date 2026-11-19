@@ -10,11 +10,11 @@ function authHeaders(token) {
   return { Authorization: `Bearer ${token}`, Accept: "application/json" };
 }
 
-/** Peticion autenticada contra la API usando la sesion de una pagina abierta. */
+/** Petición autenticada contra la API usando la sesión de una página abierta. */
 export async function apiRequest(page, method, path, data) {
   const token = await readAuthToken(page);
 
-  expect(token, "la pagina deberia tener una sesion iniciada").toBeTruthy();
+  expect(token, "la página debería tener una sesión iniciada").toBeTruthy();
 
   return page.request.fetch(`${apiUrl}${path}`, {
     method,
@@ -30,7 +30,7 @@ export async function apiRequest(page, method, path, data) {
 export async function findResourceId(page, path, field, value) {
   const response = await apiRequest(page, "GET", path);
 
-  expect(response.status(), `GET ${path} deberia responder 200`).toBe(200);
+  expect(response.status(), `GET ${path} debería responder 200`).toBe(200);
 
   const payload = await response.json();
   const items = payload.data ?? payload;
@@ -41,7 +41,7 @@ export async function findResourceId(page, path, field, value) {
   return match.id;
 }
 
-/** Inicia sesion desde el formulario real de la SPA. */
+/** Inicia sesión desde el formulario real de la SPA. */
 export async function signIn(page, account) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(account.email);

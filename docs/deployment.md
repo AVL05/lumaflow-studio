@@ -1,9 +1,28 @@
 # Despliegue
 
+## SEO P0/P1 — build y rutas
+
+> **Estado observado el 06/11/2026:** el frontend productivo de Vercel sirve desde el 03/11/2026 13:56 UTC un deployment `Production` creado desde `76c52dd` (`feat/seo-geo-public-pages`, no fusionada en `main`), pese a la decisión NO-GO de [§16.6](SEO_GEO_AUDIT.md#166-decisión-y-condiciones-para-reconsiderar). La API sigue en `main`. Antes de fusionar, confirmar en Vercel qué rama es la de producción y cómo se creó ese deployment.
+
+`pnpm run build` genera automáticamente seis documentos comerciales, `app-shell.html`, `404.html`, robots y sitemap. No hay dependencias nuevas, variables nuevas ni servicio SSR. El origen canónico es el público de LumaFlow; localhost/previews no lo sustituyen por su host. Los builds de preview deben mantener la protección de indexación propia del proveedor y no publicarse como dominios de producto.
+
+`frontend/vercel.json` usa reglas ordenadas: normalización de alias públicos, tratamiento de queries sensibles conocidas, HTML comercial, archivos estáticos, shell operativo y 404. No activar `cleanUrls`, `trailingSlash` ni el antiguo rewrite global junto a estas reglas. `/features.html` redirige a `/features`; login, `/app/*` y portales mantienen sus URLs y reciben shell `noindex`. No se normalizan tokens/firmas de API. La API sigue en otro origen.
+
+`frontend/docker/nginx.conf` mantiene la misma separación. El plugin de Vite preview interpreta el subconjunto de reglas usado por el repositorio para comprobar HTTP localmente; **no es una certificación del edge de Vercel**. Docker/Nginx real requiere una ejecución adicional si el daemon no está disponible. El Dockerfile existente ejecuta el mismo build y no necesita cambios.
+
+No sobrescribir HTML en `dist/` después de generar el SW. El build emite el HTML final antes del precache; las pruebas verifican sus hashes. Validar actualizaciones desde versiones productivas antiguas antes de publicar. Tras un despliegue autorizado: comprobar SHA, seis páginas, tipos TXT/XML, canonicals, noindex, 308/404 y portales, y después Search Console/Bing. No se activa ningún canal de donación por este cambio.
+
+Sprint 4: el código local de plantillas/postproducción requiere `2026_11_01_000001_add_project_workflows.php` además de las migraciones de Sprints 2/3. Ensayar primero sobre MySQL/TiDB sintético autorizado y comprobar restauración de plantilla, etapas, asignaciones y recibos. Preparar backup recuperable antes de cualquier integración; aplicar el esquema aditivo antes de activar código que consulta sus columnas. Esta sesión no ejecuta migraciones productivas ni acredita B2/CI remoto. No utilizar `down()` para retirar el esquema tras guardar datos nuevos: conservarlos y preparar una corrección hacia delante. Ver [informe](plans/2026-11-01-sprint4-workflows.md) y [runbook](backup-recovery.md).
+
 ## Beta publica gratuita
 
 La beta publica usa servicios con limite de gasto cero mientras se valida el producto:
 
+| Capa          | Servicio                             | URL                                  |
+| ------------- | ------------------------------------ | ------------------------------------ |
+| SPA           | Vercel                               | `https://lumaflow.aleviclop.dev`     |
+| API Laravel   | Render (free web service)            | `https://lumaflow-api.aleviclop.dev` |
+| Base de datos | TiDB Cloud Starter, MySQL compatible | Privada, TLS obligatorio             |
 | Capa          | Servicio                                | URL                                  |
 | ------------- | --------------------------------------- | ------------------------------------ |
 | SPA           | Vercel                                  | `https://lumaflow.aleviclop.dev`     |
@@ -24,7 +43,7 @@ La SPA se construye con:
 VITE_API_URL=https://lumaflow-api.aleviclop.dev/api
 ```
 
-El backend usa `FILESYSTEM_DISK=public` en local. No se requiere S3: no hay originales que alojar.
+El backend usa `FILESYSTEM_DISK=public` en local. No se requiere S3 para el producto: no hay originales que alojar. El `FILESYSTEM_DISK=s3` de `render.yaml` solo lo ejercita la sonda de salud (ver más abajo).
 
 ## Despliegue automático y controles
 
@@ -36,6 +55,32 @@ Cada `push` o merge a `main` inicia el ciclo de entrega:
 4. Vercel despliega automáticamente `frontend/` con Node 22.
 5. Render espera a que los checks de GitHub terminen correctamente antes de desplegar la API.
 6. Al finalizar un despliegue, y además cada seis horas, se comprueban el login público y `/api/health`.
+
+**Fusionar en `main` equivale a desplegar ambas capas.** El entrypoint del backend
+ejecuta `php artisan migrate --force` en cada arranque: cualquier migración pendiente
+se aplica sobre la base productiva sin paso manual. Tras la consolidación de
+noviembre de 2026 hay cuatro migraciones aditivas nuevas (Sprints 2–5); ver el
+[informe de consolidación](plans/2026-11-06-consolidation-release-assessment.md)
+antes de fusionar.
+
+El entrypoint espera a MySQL como máximo `DB_WAIT_TIMEOUT` segundos (180 por
+defecto). Si no conecta, termina con código distinto de cero y registra solo la
+clase y el código de la excepción PDO (nunca host, usuario ni contraseña). Antes
+la espera era infinita y silenciosa: una base inalcanzable dejaba el contenedor
+sin servir ni explicar el motivo.
+
+El smoke de producción no se ejecuta para despliegues `Preview` de Vercel (sus
+aserciones apuntan al dominio productivo fijo y generaban falsos fallos). Los
+despliegues de producción, Render y la ejecución programada mantienen todas las
+aserciones; si fallan, el job imprime el resumen público de `/api/health` y su
+código HTTP.
+
+`/api/health` marca `down` (503) si falla la base, la caché **o el disco por
+defecto**. En producción `render.yaml` declara `FILESYSTEM_DISK=s3`, aunque ninguna
+funcionalidad usa ese disco (solo la sonda de salud y, aparte, `backup_s3`). Unas
+credenciales S3/R2 caducadas bastan para devolver 503 y hacer fallar el health
+check de Render. Revisar ese disco forma parte del diagnóstico operativo; no se
+relaja la sonda en código.
 
 Los workflows están en `.github/workflows/ci.yml` y
 `.github/workflows/production-smoke.yml`. Un fallo queda visible en la pestaña
@@ -224,20 +269,53 @@ VITE_SENTRY_RELEASE=
 
 Ver [backup-recovery.md](backup-recovery.md): inventario, `data:backup`/`data:restore`, retención 7+4, drill reproducible y RPO/RTO orientativos. Los backups nunca forman parte del readiness.
 
-### Activar el scheduler en producción
+### Activar backup privado en Backblaze B2
 
-Runner: `.github/workflows/production-backup.yml`, Linux estándar de GitHub Actions, diario **03:00 UTC** y manual. No usa Render ni ejecuta `schedule:run`; llama directamente a `data:backup --prune`. **Tras merge queda versionado y desactivado por defecto**: schedule y dispatch usan el mismo gate de job (`repo original && main && vars.PRODUCTION_BACKUP_ENABLED == 'true'`). Sin activación queda `skipped`, sin runner, acceso a Secrets/TiDB, dumps ni fallo rojo diario. El repo público permite este runner sin coste de minutos; no hay artifacts de producción ni recursos de storage nuevos. #24 sigue abierto (`Refs #24`).
+Workflow `.github/workflows/production-backup.yml`, Actions Linux estándar, diario **03:00 UTC** y dispatch: `php artisan data:backup --remote --prune --no-interaction`. TiDB TLS → disk Laravel exclusivo `backup_s3` → B2 privado/verificado/retención remota. No cambia storage funcional/Render ni automatiza otros comandos Scheduler.
 
-1. Provisionar/verificar un **destino privado duradero** con aprobación si requiere coste, e implementar/verificar upload, checksum y retención remota 7+4. Hoy no hay bucket verificado y `Report missing durable destination` sigue fallando si se activa: no habilitar la variable todavía. `BACKUP_PATH` en Actions apunta a `$RUNNER_TEMP/lumaflow-backups`, efímero, y no constituye ese destino. Tras revisión y merge realizado por el operador, crear/configurar el environment **production-backup** en Settings → Environments y restringir deployment branches a `main`.
-2. Añadir únicamente Secrets de ese environment: `BACKUP_DB_HOST`, `BACKUP_DB_PORT` (producción usa 4000), `BACKUP_DB_DATABASE`, `BACKUP_DB_USERNAME`, `BACKUP_DB_PASSWORD`. Nombres dedicados separan backup de test/deploy. GitHub no lee los secretos de Render. Usar endpoint público TLS TiDB existente y usuario de backup con lectura mínima verificada; confirmar la allowlist sin abrir acceso global por comodidad. Nunca copiar valores al chat/PR.
-3. Crear **Repository Variable** no secreta `PRODUCTION_BACKUP_ENABLED=true` en Settings → Secrets and variables → Actions → **Variables → Repository variables**, solo tras completar los pasos 1 y 2 y aprobar activación. No crearla en `production-backup`: [las variables de environment](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#configuration-variable-precedence) solo están disponibles después de iniciar el job, mientras su `if` se evalúa antes. No hay bypass para dispatch. La variable activa ambos triggers; realizar este paso y el dispatch fuera de las 03:00 UTC para verificar primero la ejecución manual.
-4. Lanzar primero Actions → **Production backup** → **Run workflow** → rama `main`; o `gh workflow run production-backup.yml --ref main --repo AVL05/lumaflow-studio`. Dispatch requiere que el workflow exista en default branch y respeta la variable: sin activación queda `skipped`.
-5. Verificar el **objeto duradero y su checksum**, además de conexión, exit del comando, bytes y timestamp UTC. Registrar primera ejecución/run URL y fecha de activación en #24. En la implementación parcial, activar prematuramente genera fallo explícito por destino duradero pendiente y limpieza con `always()`; no acredita recuperación. No se publican dumps como artifacts.
-6. Observar **tres días UTC consecutivos** con objetos recuperables y rotación 7+4 comprobada; solo entonces cerrar #24. Hasta cumplir todo, mantener `Refs #24`. En esta tarea no hay merge, activación ni conexión a TiDB.
-7. Para desactivar, eliminar la Repository Variable o cambiarla a `false`: tanto schedule como dispatch quedan omitidos. Logs de jobs activados: Actions → **Generate and verify temporary backup** y **Report missing durable destination**. El readiness no cambia. Ante error revisar Secrets/TLS/allowlist/storage en privado. GitHub puede retrasar jobs y desactivarlos tras 60 días de inactividad del repo público.
+**NO activado.** Gate intacto `repo original && main && vars.PRODUCTION_BACKUP_ENABLED == 'true'`; variable ausente => ambos triggers skipped sin Secrets/TiDB/dumps/fallo diario. Código B2 listo, recursos/config reales NO provisionados/verificados. #24 abierto, `Refs #24`, primera producción/tres días pendientes.
 
-Cuando el gate permite iniciar el job, el workflow instala PHP 8.4/PDO MySQL, Composer con `--no-dev` y MySQL client solo si falta. CA: `/etc/ssl/certs/ca-certificates.crt`. `APP_KEY` es efímera generada para bootstrap; no se necesita la clave de producción ni migraciones/seed. Preflight PDO valida TLS y `SELECT 1` sin imprimir errores del driver. No se habilita R2/S3/Render de pago.
+El operador debe hacer manualmente, en este orden:
 
+1. Crear cuenta Backblaze y activar **B2 Cloud Storage**. [Registro actual sin tarjeta](https://www.backblaze.com/sign-up/cloud-storage); no contratar ni habilitar facturación sin aprobación. Comprobar [primeros 10 GB gratis y límites vigentes](https://www.backblaze.com/cloud-storage/pricing), versiones/tráfico incluidos; beta no debe excederlos, sin promesa permanente.
+2. Crear bucket **privado**, dedicado solo a backups LumaFlow, sin website hosting. Mantener actuales sin expiración lifecycle; no Object Lock/legal hold que impida prune. Aplicación controla 7+4 y elimina versiones exactas. Lifecycle opcional solo versiones ocultas, sin expirar actuales; no configurado automáticamente.
+3. Crear **standard application key** para único bucket, prefijo `database/`. UI: **Read and Write**, **Allow list all bucket names**, File name prefix. Mínimos: `listFiles`, `readFiles`, `writeFiles`, `deleteFiles`, `listAllBucketNames`; `listBuckets` solo para herramientas que comprueben/listen buckets. No master key, administración cuenta/keys/otros buckets, `writeBuckets` ni governance. Revisar preset; si añade privilegios, crear manualmente Native API key con capabilities exactas, bucket/prefijo restringidos. [Permisos S3 B2](https://www.backblaze.com/docs/cloud-storage-s3-compatible-app-keys), [opciones UI](https://www.backblaze.com/docs/cloud-storage-application-keys). Listar nombres no permite objetos de otros buckets. Guardar keyID/applicationKey privadamente.
+4. Copiar del bucket **endpoint S3 regional HTTPS** y región REALES, sin bucket/path/query ni credenciales en URL. Adapter usa path-style admitido B2. No inventar valores ni copiar fixtures.
+5. GitHub Settings → Environments → **production-backup**, deployment branches restringidas a `main`. Añadir **Environment Secrets**: `BACKUP_DB_HOST`, `BACKUP_DB_PORT`, `BACKUP_DB_DATABASE`, `BACKUP_DB_USERNAME`, `BACKUP_DB_PASSWORD`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`. DB: endpoint público TLS TiDB/usuario lectura mínima; copiar puerto real (actual producción 4000), verificar allowlist autorizada sin abrir global. GitHub no lee Secrets Render. Añadir **Environment Variables**: `BACKUP_S3_BUCKET`, `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`. No compartir valores al chat/PR/repo.
+6. Dejar **Repository Variable `PRODUCTION_BACKUP_ENABLED` ausente** hasta cuenta/bucket/permisos/config listos y prueba aprobada. No gate en environment: [variables llegan después de evaluar if del job](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#configuration-variable-precedence).
+7. Una vez listo/aprobado, Settings → Secrets and variables → Actions → Variables → **Repository variables**: `PRODUCTION_BACKUP_ENABLED=true`. Activa ambos triggers; hacerlo fuera de 03:00 UTC y probar inmediatamente. No bypass manual. Desactivar eliminando variable o `false`.
+8. Tras revisión/merge del operador, Actions → **Production backup** → **Run workflow** → `main`, o `gh workflow run production-backup.yml --ref main --repo AVL05/lumaflow-studio`. Instala PHP 8.4/PDO MySQL, Composer no-dev y MySQL client si falta; APP_KEY temporal, CA `/etc/ssl/certs/ca-certificates.crt`, preflight config B2 antes de PDO TLS `SELECT 1`. No APP_KEY/DSN productivo, migraciones/seeds ni artifacts.
+9. Verificar run success, logs **Back up, verify B2 and prune remote retention**, summary y objetos privados `database/lumaflow-db-YYYYMMDD-HHMMSS-mysql.sql.gz[.sha256]`. Comando verifica existencia/tamaños, download/SHA-256, prune remoto y cleanup; status vuelve a verificar. Desde entorno privado autorizado: `php artisan data:backup-status --remote` (nombre, fecha UTC, bytes, checksum, edad, OK/STALE, exit 1 ante fallo/>36h). Cleanup local en comando y always(), runner no destino final.
+10. Drill `php artisan data:restore <basename> --remote` en **DB aislada no productiva**, clientes/CA y permisos CREATE/DROP DATABASE que drill MySQL requiere. Guards apply/force-production intactos; no dump real al repo/PR/CI. Registrar fecha activación/run y verificación durable/checksum/restore en #24 sin secretos.
+11. Observar **tres días UTC consecutivos** y confirmar 7+4/versión antigua purgada; solo entonces cerrar #24. Mantener `Refs #24` hasta cumplirlo. No activación ni producción durante esta implementación.
+
+Ante fallo: exit no cero, revisar B2 permisos/cuota/config y TiDB TLS/allowlist en privado; mensajes técnicos estáticos/clase sin secrets/contenido, Sentry opcional, readiness independiente. Github puede retrasar/descartar schedules y desactivarlos tras 60 días inactivo. [TiDB Starter snapshot diario, retención 1 día](https://docs.pingcap.com/tidbcloud/backup-and-restore-serverless/?plan=essential) es segunda capa, no sustituye B2 independiente 7+4; cuenta real no auditada. Ver [backup-recovery.md](backup-recovery.md) para inventario, versiones, límites y drill sintético reproducible.
+
+## Endurecimiento de logs — Sprint 1 (implementado localmente)
+
+El handler de excepciones emite `AuditLog` con clase, archivo/línea, ruta plantilla y referencia; no duplica el mensaje/payload bruto en el logger de Laravel. `before_send` PHP recibe un `Sentry\Event` real, y ambos SDK redactan cuerpos, mensajes de excepción, variables de stack, credenciales, consultas y rutas privadas. DSN sigue opcional.
+
+`backend/server.php` es el router que `artisan serve` descubre automáticamente; el runner E2E lo usa también. Conserva el encaminamiento a `public/index.php` y redacta URI antes de stdout. El Dockerfile existente conserva su comando. No se han desplegado estos cambios. Los logs del proxy/proveedor quedan fuera de este proceso: antes de publicar verificar en privado su configuración, retención y redacción de rutas/queries; no copiar logs reales a issues.
+
+En `APP_ENV=production`, el transporte de correo `log` se rechaza antes de escribir cuerpos, también dentro del `failover` predeterminado SMTP/log. Configurar `MAIL_MAILER=smtp` y comprobar entrega real antes del release. No usar `failover` con `log` como sustituto de SMTP: daría por enviado un mensaje y expondría enlaces firmados. En local/E2E se conserva `log` únicamente para cuentas sintéticas; contiene cuerpos y enlaces y no debe recibir información real ni enviarse a Sentry/soporte/artefactos públicos.
+
+Si una revisión privada detecta exposición previa, el operador debe restringir acceso y retención de esos logs y revocar/regenerar los tokens afectados; rotar credenciales SMTP/B2/DB solo si estuvieron expuestas. Esta sesión no ha leído logs productivos ni acredita ausencia de incidentes anteriores. No pegar valores al registrar el incidente.
+
+### Gate de Sprint 5 (solo preparación local)
+
+La migración aditiva de revisiones requiere copia recuperable y ensayo aislado MySQL/TiDB antes de activarse. No ejecutar su down ni desplegar automáticamente. El código sigue compatible con IDs/URLs legacy; conservar el esquema nuevo si se revierte código y revisar clientes nulos con la versión anterior.
+
+Actualización Sprint 5.5: audit de producción pnpm y auditorías Composer completas/producción sin avisos. Los moderados de glob/minimatch están corregidos con overrides transitivos acotados y probados. El audit completo nativo sigue saliendo 1 por deepmerge 4.3.1 sin release corregida; el gate pasa con warning únicamente si verifica el parche local y la entrada instalada mediante SHA-256. No se aceptan avisos nuevos ni una instalación sin mitigar. Véase [informe actual](plans/2026-11-02-sprint55-dependency-security.md).
+
+Conservar `patches/deepmerge@4.3.1.patch`, `package.json` y lockfile juntos. `pnpm install --frozen-lockfile` aplica/verifica el parche; no sustituir por una instalación sin lock ni cambiar EOL del parche. `.gitattributes` fija LF y el Dockerfile copia `patches/` antes de instalar. Instalación desde cero, pruebas de contratos y build comprobados localmente con Node 22.23.4; el build de imagen completo no se ejecuta por falta de daemon Docker disponible.
+
+CI incorpora la PWA compilada y su prueba offline además de las suites anteriores. CI remoto, MySQL/TiDB, B2 e impresión física siguen pendientes; este trabajo no autoriza una release ni modifica producción.
+
+### Apoyo voluntario — Sprint 6
+
+/support pública está implementada localmente. Las variables VITE_KOFI_URL y VITE_GITHUB_SPONSORS_URL permanecen vacías y no hay perfiles verificados ni FUNDING.yml; no se activa ningún enlace real. Vite solo admite URLs HTTPS de perfiles de sus proveedores mediante validación local, sin comprobar identidad o disponibilidad remota. Cambiar variables requiere reconstrucción; no son claves de API ni configuración en base de datos.
+
+El Dockerfile conserva copia/parche/instalación frozen de Sprint 5.5 y admite ambas variables como build args vacíos por defecto; no se ha ejecutado imagen completa ni despliegue. CI prueba enlaces sintéticos en un servidor aislado que no modifica la configuración de la aplicación compilada. Antes de configurar URLs reales y publicar: cumplir [guía de apoyo](support.md), verificar titularidad, condiciones Vercel Hobby sobre el producto completo y revisión fiscal española individual. Nada de ello se considera aprobado por estas pruebas locales.
 No afirmar “backups automáticos” por `Schedule::command` ni por un workflow committed: hace falta una ejecución real con copia privada duradera. Render Free además carece de `mysqldump` en la imagen actual y de filesystem persistente; esta solución instala el cliente en Actions, sin modificar ni cobrar infraestructura Render.
 
 ## Cabeceras de seguridad (#56)

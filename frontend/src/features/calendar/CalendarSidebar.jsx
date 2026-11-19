@@ -34,7 +34,7 @@ export function CalendarSidebar({ sources, onToggleSource, counts, onCreateTask 
       </div>
 
       <p className="mt-6 text-xs leading-5 text-stone-400">
-        Arrastra cualquier evento a otro dia para reprogramarlo. Los cambios se guardan al soltar.
+        Arrastra cualquier evento a otro día para reprogramarlo. Los cambios se guardan al soltar.
       </p>
     </Panel>
   );

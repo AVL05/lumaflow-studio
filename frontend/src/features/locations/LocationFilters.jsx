@@ -5,7 +5,7 @@ import { accessDifficulties, accessModes, locationTypes } from "../../utils/cata
 
 export function LocationFilters({ resource }) {
   return (
-    <div className="mb-6 grid gap-3 lg:grid-cols-[1fr_140px_140px_140px_140px_120px_130px]">
+    <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-[minmax(0,2fr)_repeat(6,minmax(0,1fr))] sm:[&>:first-child]:col-span-2 2xl:[&>:first-child]:col-span-1">
       <SearchBar
         value={resource.filters.search ?? ""}
         onChange={(value) => resource.updateFilter("search", value)}
@@ -47,7 +47,7 @@ export function LocationFilters({ resource }) {
           { value: "name", label: "Nombre" },
           { value: "city", label: "Ciudad" },
           { value: "type", label: "Tipo" },
-          { value: "rating", label: "Rating" },
+          { value: "rating", label: "Mejor valoradas" },
         ]}
       />
     </div>

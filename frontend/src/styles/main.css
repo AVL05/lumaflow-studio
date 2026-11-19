@@ -44,10 +44,12 @@ html {
     linear-gradient(180deg, #090908 0%, #0b0a09 100%);
 }
 
+/* Oculta la barra lateral de las capturas de producto (20 % del ancho en las
+   que genera `pnpm run capture:showcase`, a 1440 px) y deja ver solo el contenido. */
 .marketing-product-crop {
-  width: 119%;
+  width: 125%;
   max-width: none;
-  transform: translateX(-16%);
+  transform: translateX(-20%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -91,6 +93,11 @@ textarea {
 
 .text-pretty {
   text-wrap: pretty;
+}
+
+/* Oscurece las teselas claras de OpenStreetMap para el tema del estudio. */
+.lumaflow-dark-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.92) saturate(0.35);
 }
 
 ::selection {

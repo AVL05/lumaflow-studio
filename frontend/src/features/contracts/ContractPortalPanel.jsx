@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { ErrorState } from "../../components/states/ErrorState";
+import { formatDate } from "../../utils/dates";
 
 /**
  * Controles del enlace público dentro del detalle interno.
@@ -109,7 +110,7 @@ export function ContractPortalPanel({ contract }) {
         <div className="mt-3 space-y-3">
           <p className="text-sm text-stone-300">
             {link.active ? "Enlace activo" : "Enlace no disponible"}
-            {link.expires_at ? ` · expira el ${link.expires_at.slice(0, 10)}` : null}
+            {link.expires_at ? ` · expira el ${formatDate(link.expires_at)}` : null}
           </p>
           {portalUrl ? (
             <div className="space-y-2">

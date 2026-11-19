@@ -13,7 +13,7 @@ import {
 
 describe("toIsoDate", () => {
   it("usa la fecha local, sin desplazarla por zona horaria", () => {
-    // Un new Date(...).toISOString() directo devolveria el dia anterior en UTC-x.
+    // Un new Date(...).toISOString() directo devolveria el día anterior en UTC-x.
     expect(toIsoDate(new Date(2026, 6, 8, 0, 30))).toBe("2026-07-08");
     expect(toIsoDate(new Date(2026, 0, 1, 23, 59))).toBe("2026-01-01");
   });
@@ -54,7 +54,7 @@ describe("monthGrid", () => {
 });
 
 describe("weekGrid", () => {
-  it("devuelve siete dias consecutivos desde el lunes", () => {
+  it("devuelve siete días consecutivos desde el lunes", () => {
     expect(weekGrid("2026-07-08")).toEqual([
       "2026-07-06",
       "2026-07-07",
@@ -75,7 +75,7 @@ describe("isSameMonth", () => {
 });
 
 describe("rangeForView", () => {
-  it("acota el rango consultado segun la vista", () => {
+  it("acota el rango consultado según la vista", () => {
     expect(rangeForView("day", "2026-07-08")).toEqual({ from: "2026-07-08", to: "2026-07-08" });
     expect(rangeForView("week", "2026-07-08")).toEqual({ from: "2026-07-06", to: "2026-07-12" });
     expect(rangeForView("month", "2026-07-08")).toEqual({ from: "2026-06-29", to: "2026-08-09" });
@@ -84,7 +84,7 @@ describe("rangeForView", () => {
 });
 
 describe("groupByDate", () => {
-  it("agrupa eventos por dia conservando el orden de llegada", () => {
+  it("agrupa eventos por día conservando el orden de llegada", () => {
     const events = [
       { id: "session-1", date: "2026-07-08" },
       { id: "task-2", date: "2026-07-09" },

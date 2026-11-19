@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'workspace_id', 'is_demo', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'client_id', 'location_id', 'title', 'specialty', 'workflow_key', 'status', 'event_date', 'description', 'budget', 'deposit_amount', 'contract_status', 'contract_url', 'contract_signed_at', 'project_type', 'participants', 'start_date', 'end_date', 'delivery_due_date', 'external_links', 'briefing', 'briefing_revision'])]
 class Job extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;
@@ -23,9 +23,13 @@ class Job extends Model
 
     public const CONTRACT_STATUSES = ['not_required', 'draft', 'sent', 'signed', 'declined'];
 
+    public const PROJECT_TYPES = ['photography', 'audiovisual', 'personal'];
+
+    public const FINISHED_STATUSES = ['delivered', 'closed', 'cancelled'];
+
     protected function casts(): array
     {
-        return ['event_date' => 'date', 'budget' => 'decimal:2', 'deposit_amount' => 'decimal:2', 'contract_signed_at' => 'datetime'];
+        return ['event_date' => 'date', 'budget' => 'decimal:2', 'deposit_amount' => 'decimal:2', 'contract_signed_at' => 'datetime', 'participants' => 'array', 'external_links' => 'array', 'briefing' => 'array', 'briefing_revision' => 'integer', 'start_date' => 'date', 'end_date' => 'date', 'delivery_due_date' => 'date'];
     }
 
     public function scopeOwnedBy($query, int $userId)
@@ -36,6 +40,21 @@ class Job extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($q) => $q->where(fn ($i) => $i->whereLike('title', "%{$search}%")->orWhereHas('client', fn ($c) => $c->whereLike('name', "%{$search}%"))));
+    }
+
+    /**
+     * Work in progress first with the soonest date on top, then finished work
+     * most recent first, so a long history never buries active projects.
+     * Undated projects close each group.
+     */
+    public function scopeBoardOrder($query)
+    {
+        $finished = "status IN ('".implode("', '", self::FINISHED_STATUSES)."')";
+
+        return $query->orderByRaw("CASE WHEN {$finished} THEN 1 ELSE 0 END")
+            ->orderByRaw('event_date IS NULL')
+            ->orderByRaw("CASE WHEN {$finished} THEN NULL ELSE event_date END")
+            ->orderByDesc('event_date')->orderByDesc('created_at')->orderByDesc('id');
     }
 
     public function user(): BelongsTo
@@ -56,6 +75,21 @@ class Job extends Model
     public function sessions(): HasMany
     {
         return $this->hasMany(Session::class);
+    }
+
+    public function shots(): HasMany
+    {
+        return $this->hasMany(Shot::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function stages(): HasMany
+    {
+        return $this->hasMany(PostproductionStage::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class);
     }
 
     public function quotes(): HasMany
@@ -85,11 +119,24 @@ class Job extends Model
 
     public function gearItems(): BelongsToMany
     {
-        return $this->belongsToMany(GearItem::class);
+        return $this->belongsToMany(GearItem::class)->whereExists(function ($query): void {
+            $query->selectRaw('1')->from('photography_jobs as gear_job')
+                ->whereColumn('gear_job.id', 'gear_item_job.job_id')
+                ->whereColumn('gear_job.workspace_id', 'gear_items.workspace_id');
+        });
     }
 
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject')->latest();
+    }
+
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class, 'job_location')->whereExists(function ($query): void {
+            $query->selectRaw('1')->from('photography_jobs as location_job')
+                ->whereColumn('location_job.id', 'job_location.job_id')
+                ->whereColumn('location_job.workspace_id', 'locations.workspace_id');
+        });
     }
 }

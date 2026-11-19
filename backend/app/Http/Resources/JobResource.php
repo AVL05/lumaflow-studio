@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\JobWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,9 +10,18 @@ class JobResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $details = $request->route('job') !== null || ! $request->isMethod('get');
+
         return [
             'id' => $this->id, 'client_id' => $this->client_id, 'location_id' => $this->location_id,
             'title' => $this->title, 'specialty' => $this->specialty, 'workflow_key' => $this->workflow_key,
+            'project_type' => $this->project_type ?? 'photography',
+            'production_phase' => JobWorkflowService::phaseFor($this->status),
+            'participants' => $this->when($details, fn () => $this->participants ?? []), 'external_links' => $this->when($details, fn () => $this->external_links ?? []),
+            'start_date' => $this->start_date?->toDateString(), 'end_date' => $this->end_date?->toDateString(), 'delivery_due_date' => $this->delivery_due_date?->toDateString(),
+            'locations' => $this->whenLoaded('locations'),
+            'briefing' => $this->when($request->route('job') !== null, fn () => (object) ($this->briefing ?? [])),
+            'briefing_revision' => $this->when($request->route('job') !== null, fn () => $this->briefing_revision ?? 0),
             'status' => $this->status, 'event_date' => $this->event_date?->toDateString(), 'description' => $this->description,
             'is_demo' => (bool) $this->is_demo,
             'budget' => $this->budget, 'deposit_amount' => $this->deposit_amount,

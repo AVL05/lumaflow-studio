@@ -3,6 +3,8 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { deliveryStatuses, paymentStatuses } from "../../utils/catalogs";
+import { formatDate } from "../../utils/dates";
+import { formatMoney } from "../../utils/money";
 
 export function DeliveryDetail({ delivery }) {
   const [copied, setCopied] = useState(false);
@@ -20,21 +22,21 @@ export function DeliveryDetail({ delivery }) {
         <div>
           <h1 className="text-2xl font-semibold">{delivery.title}</h1>
           <p className="mt-2 text-sm text-stone-400">
-            {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesion"}
+            {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesión"}
           </p>
         </div>
         <StatusBadge options={deliveryStatuses} value={delivery.status} />
       </div>
       <div className="mt-6 grid gap-4 text-sm text-stone-400 md:grid-cols-2">
         <p>
-          <span className="text-stone-100">Fecha:</span> {delivery.delivery_date || "Sin fecha"}
+          <span className="text-stone-100">Fecha:</span> {formatDate(delivery.delivery_date)}
         </p>
         <p>
           <span className="text-stone-100">Presupuesto:</span>{" "}
-          {delivery.budget ? `${delivery.budget} EUR` : "Sin presupuesto"}
+          {formatMoney(delivery.budget, "Sin presupuesto")}
         </p>
         <p>
-          <span className="text-stone-100">Pagado:</span> {delivery.amount_paid ?? 0} EUR
+          <span className="text-stone-100">Pagado:</span> {formatMoney(delivery.amount_paid)}
         </p>
         <p className="flex items-center gap-2">
           <span className="text-stone-100">Estado de pago:</span>{" "}
@@ -61,7 +63,7 @@ export function DeliveryDetail({ delivery }) {
               <span>Contraseña: {delivery.gallery_password}</span>
             ) : null}
             {delivery.gallery_expires_at ? (
-              <span>Caduca: {delivery.gallery_expires_at}</span>
+              <span>Caducidad del portal: {formatDate(delivery.gallery_expires_at)}</span>
             ) : null}
           </div>
           <p className="mt-2 text-xs text-stone-500">

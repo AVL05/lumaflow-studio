@@ -2,12 +2,12 @@
  * Cuentas de la suite E2E.
  *
  * Datos ficticios en el dominio reservado `.test`: nunca son usuarios reales.
- * Estas credenciales son la unica fuente de verdad y se inyectan por entorno al
+ * Estas credenciales son la única fuente de verdad y se inyectan por entorno al
  * seeder `Database\Seeders\E2ESeeder`, que las usa para crear los dos estudios
  * aislados entre los que se comprueba el aislamiento de recursos.
  */
 /**
- * `access` existe porque el backend emite una sesion unica por usuario: cada
+ * `access` existe porque el backend emite una sesión única por usuario: cada
  * login invalida los tokens anteriores. El test de acceso usa esta cuenta para
  * que su login no invalide las sesiones reutilizadas de `owner` y `outsider`.
  */

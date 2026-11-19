@@ -11,18 +11,18 @@ const RECOMMENDED_WEBGPU_MODELS = [
     vram: ">= 3 GB",
     profile: "Equilibrado",
     hardware: "Portatil moderno o sobremesa con WebGPU estable.",
-    description: "Equilibrado para chat, planificacion y portatiles con GPU modesta.",
+    description: "Equilibrado para chat, planificación y portátiles con GPU modesta.",
   },
   {
     id: "gemma3-1b-it-q4f16_1-MLC",
     name: "Gemma 3 1B",
-    badge: "Rapido",
+    badge: "Rápido",
     size: "ligero",
     downloadSize: "0.8-1.2 GB",
     vram: ">= 3 GB",
-    profile: "Rapido",
+    profile: "Rápido",
     hardware: "Buen primer modelo para navegadores con memoria ajustada.",
-    description: "Buena opcion para respuestas cortas y tareas rapidas con poca memoria.",
+    description: "Buena opción para respuestas cortas y tareas rápidas con poca memoria.",
   },
   {
     id: "Qwen3-0.6B-q4f16_1-MLC",
@@ -31,20 +31,20 @@ const RECOMMENDED_WEBGPU_MODELS = [
     size: "muy ligero",
     downloadSize: "0.5-0.8 GB",
     vram: ">= 2 GB",
-    profile: "Prueba rapida",
-    hardware: "Equipos modestos o validacion inicial de WebGPU.",
+    profile: "Prueba rápida",
+    hardware: "Equipos modestos o validación inicial de WebGPU.",
     description: "Pensado para probar WebGPU en equipos limitados antes de modelos mayores.",
   },
   {
     id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
     name: "Llama 3.2 3B",
-    badge: "Mas calidad",
+    badge: "Más calidad",
     size: "medio",
     downloadSize: "2.0-3.0 GB",
     vram: ">= 6 GB",
     profile: "Calidad",
-    hardware: "GPU dedicada o integrada potente; primera carga mas lenta.",
-    description: "Mejor razonamiento, a cambio de mas descarga, VRAM y tiempo de carga.",
+    hardware: "GPU dedicada o integrada potente; primera carga más lenta.",
+    description: "Mejor razonamiento, a cambio de más descarga, VRAM y tiempo de carga.",
     warning: "Evitalo en equipos con poca VRAM o navegador inestable con WebGPU.",
   },
   {
@@ -69,8 +69,8 @@ export const WEBGPU_MODELS = RECOMMENDED_WEBGPU_MODELS.some((model) => model.id 
         name: DEFAULT_MODEL,
         badge: "Env",
         size: "personalizado",
-        downloadSize: "segun modelo",
-        vram: "segun modelo",
+        downloadSize: "según modelo",
+        vram: "según modelo",
         profile: "Personalizado",
         hardware: "Depende del modelo configurado.",
         description: "Modelo configurado desde VITE_WEBGPU_AI_MODEL.",
@@ -81,10 +81,10 @@ export const WEBGPU_MODELS = RECOMMENDED_WEBGPU_MODELS.some((model) => model.id 
 let enginePromise = null;
 let engineModelId = null;
 
-const SYSTEM_PROMPT = `Eres LumaFlow Studio, un asistente fotografico local.
+const SYSTEM_PROMPT = `Eres LumaFlow Studio, un asistente fotográfico local.
 Responde en español, con criterio profesional y sin inventar datos del usuario.
-Si falta contexto, dilo y propone el siguiente paso practico.
-Centra tus respuestas en fotografia, sesiones, clientes, equipo y flujo de trabajo.`;
+Si falta contexto, dilo y propone el siguiente paso práctico.
+Centra tus respuestas en fotografía, sesiones, clientes, equipo y flujo de trabajo.`;
 
 export function getWebGpuSupport() {
   const model = getActiveWebGpuModel();
@@ -253,7 +253,7 @@ function parseJsonAnswer(answer) {
 
 function throwIfAborted(signal) {
   if (signal?.aborted) {
-    throw new DOMException("Operacion cancelada.", "AbortError");
+    throw new DOMException("Operación cancelada.", "AbortError");
   }
 }
 

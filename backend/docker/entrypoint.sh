@@ -1,39 +1,47 @@
 #!/bin/sh
 set -e
 
-# Espera a la base de datos: `depends_on` solo garantiza que el contenedor arranco,
-# no que el motor acepte conexiones. Con limite: si nunca responde, `migrate` falla con un
-# error claro en vez de dejar el arranque colgado sin abrir el puerto.
+# Espera a la base de datos (PostgreSQL o MySQL): `depends_on` solo garantiza que el contenedor
+# arranco, no que el motor acepte conexiones. La espera es acotada: sin limite, una base
+# inalcanzable dejaba el contenedor colgado sin servir ni registrar el motivo (deploy fallido
+# por timeout y API sin respuesta). Solo se registra el codigo SQLSTATE/driver, nunca host,
+# usuario ni contrasena.
 if [ -n "$DB_HOST" ]; then
-  echo "Esperando a ${DB_CONNECTION:-mysql} en ${DB_HOST}:${DB_PORT:-3306}..."
-  attempts=0
-  until php -r '
+  db_wait_limit="${DB_WAIT_TIMEOUT:-180}"
+  db_waited=0
+  echo "Esperando a ${DB_CONNECTION:-mysql} en ${DB_HOST}:${DB_PORT:-3306} (maximo ${db_wait_limit}s)..."
+  until db_error=$(php -r '
     $options = [PDO::ATTR_TIMEOUT => 5];
-    if (getenv("DB_CONNECTION") === "pgsql") {
-        new PDO(
-            "pgsql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "5432").";dbname=".(getenv("DB_DATABASE") ?: "postgres").";sslmode=".(getenv("DB_SSLMODE") ?: "prefer"),
-            getenv("DB_USERNAME"),
-            getenv("DB_PASSWORD"),
-            $options
-        );
-    } else {
-        if (getenv("MYSQL_ATTR_SSL_CA")) {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = getenv("MYSQL_ATTR_SSL_CA");
+    try {
+        if (getenv("DB_CONNECTION") === "pgsql") {
+            new PDO(
+                "pgsql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "5432").";dbname=".(getenv("DB_DATABASE") ?: "postgres").";sslmode=".(getenv("DB_SSLMODE") ?: "prefer"),
+                getenv("DB_USERNAME"),
+                getenv("DB_PASSWORD"),
+                $options
+            );
+        } else {
+            if (getenv("MYSQL_ATTR_SSL_CA")) {
+                $options[PDO::MYSQL_ATTR_SSL_CA] = getenv("MYSQL_ATTR_SSL_CA");
+            }
+            new PDO(
+                "mysql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "3306"),
+                getenv("DB_USERNAME"),
+                getenv("DB_PASSWORD"),
+                $options
+            );
         }
-        new PDO(
-            "mysql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "3306"),
-            getenv("DB_USERNAME"),
-            getenv("DB_PASSWORD"),
-            $options
-        );
+    } catch (Throwable $e) {
+        echo get_class($e)." code ".$e->getCode();
+        exit(1);
     }
-  ' 2>/dev/null; do
-    attempts=$((attempts + 1))
-    if [ "$attempts" -ge 15 ]; then
-      echo "La base de datos no responde tras ${attempts} intentos; continuo para que migrate informe del error."
-      break
+  ' 2>/dev/null); do
+    if [ "$db_waited" -ge "$db_wait_limit" ]; then
+      echo "Base de datos no disponible tras ${db_waited}s (${db_error:-sin detalle}). Arranque abortado." >&2
+      exit 1
     fi
     sleep 2
+    db_waited=$((db_waited + 2))
   done
 fi
 

@@ -1,10 +1,11 @@
 import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
-import { accessDifficulties, labelFor, locationTypes } from "../../utils/catalogs";
+import { accessDifficulties, labelFor, locationTypes, sessionStatuses } from "../../utils/catalogs";
 import { LocationHeader } from "./LocationHeader";
 import { LocationMap } from "./LocationMap";
 import { LocationSidebar } from "./LocationSidebar";
 import { LocationStats } from "./LocationStats";
+import { formatDate } from "../../utils/dates";
 
 export function LocationDetail({ location, onCopy }) {
   return (
@@ -15,7 +16,7 @@ export function LocationDetail({ location, onCopy }) {
         <div className="space-y-6">
           <LocationMap location={location} />
           <Card className="p-5">
-            <h2 className="font-semibold">Notas y datos tecnicos</h2>
+            <h2 className="font-semibold">Notas y datos técnicos</h2>
             <div className="mt-6 grid gap-4 text-sm text-stone-400 md:grid-cols-2">
               <p>
                 <span className="text-stone-100">Tipo:</span>{" "}
@@ -49,12 +50,12 @@ export function LocationDetail({ location, onCopy }) {
                   <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
                     <p className="text-sm text-stone-100">{session.name}</p>
                     <p className="mt-1 text-xs text-stone-400">
-                      {session.date} · {session.status}
+                      {formatDate(session.date)} · {labelFor(sessionStatuses, session.status)}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-stone-400">Sin sesiones asociadas todavia.</p>
+                <p className="text-sm text-stone-400">Sin sesiones asociadas todavía.</p>
               )}
             </div>
           </Card>

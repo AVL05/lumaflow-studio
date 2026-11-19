@@ -7,6 +7,7 @@ use App\Models\Session;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class CalendarService
 {
@@ -16,15 +17,16 @@ class CalendarService
      * Eventos normalizados del rango [from, to] para el calendario y la agenda.
      * Cada fuente se consulta una vez con eager loading para evitar N+1.
      */
-    public function events(User $user, string $from, string $to, array $sources = []): array
+    public function events(User $user, string $from, string $to, array $sources = [], ?int $workspaceId = null): array
     {
+        $to = Carbon::parse($to)->endOfDay()->toDateTimeString();
         $sources = array_values(array_intersect($sources ?: self::SOURCES, self::SOURCES));
 
         return collect($sources)
             ->flatMap(fn (string $source) => match ($source) {
-                'session' => $this->sessions($user, $from, $to),
-                'delivery' => $this->deliveries($user, $from, $to),
-                'task' => $this->tasks($user, $from, $to),
+                'session' => $this->sessions($user, $from, $to, $workspaceId),
+                'delivery' => $this->deliveries($user, $from, $to, $workspaceId),
+                'task' => $this->tasks($user, $from, $to, $workspaceId),
             })
             ->sortBy([['date', 'asc'], ['time', 'asc']])
             ->values()
@@ -60,10 +62,11 @@ class CalendarService
         return $query->accessibleBy($user)->findOrFail($id);
     }
 
-    private function sessions(User $user, string $from, string $to): array
+    private function sessions(User $user, string $from, string $to, ?int $workspaceId): array
     {
         return Session::query()
             ->accessibleBy($user)
+            ->inWorkspace($workspaceId)
             ->with('location:id,name,city')
             ->whereBetween('date', [$from, $to])
             ->get()
@@ -76,6 +79,7 @@ class CalendarService
                 $session->status,
                 [
                     'session_type' => $session->session_type,
+                    'end_time' => $session->end_time ? substr($session->end_time, 0, 5) : null,
                     'client_name' => $session->client_name,
                     'location' => $session->location?->name ?? $session->location_name,
                 ],
@@ -84,10 +88,11 @@ class CalendarService
             ->all();
     }
 
-    private function deliveries(User $user, string $from, string $to): array
+    private function deliveries(User $user, string $from, string $to, ?int $workspaceId): array
     {
         return Delivery::query()
             ->accessibleBy($user)
+            ->inWorkspace($workspaceId)
             ->with('client:id,name')
             ->whereNotNull('delivery_date')
             ->whereBetween('delivery_date', [$from, $to])
@@ -105,10 +110,11 @@ class CalendarService
             ->all();
     }
 
-    private function tasks(User $user, string $from, string $to): array
+    private function tasks(User $user, string $from, string $to, ?int $workspaceId): array
     {
         return Task::query()
             ->accessibleBy($user)
+            ->inWorkspace($workspaceId)
             ->with(['session:id,name', 'client:id,name'])
             ->whereNotNull('due_date')
             ->whereBetween('due_date', [$from, $to])

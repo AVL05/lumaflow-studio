@@ -19,6 +19,40 @@ import {
 } from "./sentry";
 
 describe("sentry", () => {
+  it("redacta breadcrumbs en el formato real de array del SDK", () => {
+    const clean = sanitizeSentryEvent({
+      breadcrumbs: [{ message: "MESSAGE_CANARY", data: { token: "TOKEN_CANARY" } }],
+    });
+    expect(Array.isArray(clean.breadcrumbs)).toBe(true);
+    expect(JSON.stringify(clean)).not.toContain("CANARY");
+  });
+
+  it("elimina canarios de excepciones, variables, cabeceras y enlaces privados", () => {
+    const clean = sanitizeSentryEvent({
+      message: "MESSAGE_CANARY",
+      extra: { payload: "EXTRA_CANARY" },
+      request: {
+        headers: { AUTHORIZATION: "HEADER_CANARY" },
+        url: "https://user:PASS_CANARY@example.test/deliver/PATH_CANARY?token=QUERY_CANARY#HASH_CANARY",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "EXCEPTION_CANARY",
+            stacktrace: {
+              frames: [{ filename: "app.jsx", lineno: 10, vars: { token: "VARS_CANARY" } }],
+            },
+          },
+        ],
+      },
+      breadcrumbs: { values: [{ message: "CRUMB_CANARY", data: { token: "DATA_CANARY" } }] },
+    });
+    expect(JSON.stringify(clean)).not.toContain("CANARY");
+    expect(clean.exception.values[0].type).toBe("Error");
+    expect(clean.exception.values[0].stacktrace.frames[0].lineno).toBe(10);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.unstubAllEnvs();

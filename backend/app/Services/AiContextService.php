@@ -8,24 +8,26 @@ use Illuminate\Support\Collection;
 
 class AiContextService
 {
-    public function forUser(User $user, array $focus = []): array
+    public function forUser(User $user, array $focus = [], ?int $workspaceId = null): array
     {
+        $workspaceId ??= (int) $user->current_workspace_id;
         $context = [
             'user' => Arr::only($user->toArray(), ['name']),
-            'sessions' => $this->sessions($user),
-            'gear' => $this->gear($user),
-            'locations' => $this->locations($user),
-            'clients' => $this->clients($user),
-            'deliveries' => $this->deliveries($user),
+            'sessions' => $this->sessions($user, $workspaceId),
+            'gear' => $this->gear($user, $workspaceId),
+            'locations' => $this->locations($user, $workspaceId),
+            'clients' => $this->clients($user, $workspaceId),
+            'deliveries' => $this->deliveries($user, $workspaceId),
             'focus' => $this->sanitize($focus),
         ];
 
         return $this->limit($context);
     }
 
-    private function sessions(User $user): array
+    private function sessions(User $user, int $workspaceId): array
     {
         return $user->sessions()
+            ->accessibleBy($user)->where('workspace_id', $workspaceId)
             ->with('location:id,name,city,country,type,best_time,rating,is_favorite')
             ->select('id', 'location_id', 'name', 'date', 'time', 'session_type', 'status', 'location_name', 'client_name')
             ->latest('date')
@@ -34,9 +36,10 @@ class AiContextService
             ->toArray();
     }
 
-    private function gear(User $user): array
+    private function gear(User $user, int $workspaceId): array
     {
         return $user->gearItems()
+            ->accessibleBy($user)->where('workspace_id', $workspaceId)
             ->select('name', 'category', 'brand', 'model', 'condition', 'is_favorite')
             ->orderByDesc('is_favorite')
             ->limit(20)
@@ -44,9 +47,10 @@ class AiContextService
             ->toArray();
     }
 
-    private function locations(User $user): array
+    private function locations(User $user, int $workspaceId): array
     {
         return $user->locations()
+            ->accessibleBy($user)->where('workspace_id', $workspaceId)
             ->select('id', 'name', 'city', 'country', 'latitude', 'longitude', 'type', 'best_time', 'access_difficulty', 'rating', 'is_favorite', 'access_mode', 'recommended_weather', 'recommended_seasons', 'tags', 'recommended_gear')
             ->orderByDesc('is_favorite')
             ->latest()
@@ -55,9 +59,10 @@ class AiContextService
             ->toArray();
     }
 
-    private function clients(User $user): array
+    private function clients(User $user, int $workspaceId): array
     {
         return $user->clients()
+            ->accessibleBy($user)->where('workspace_id', $workspaceId)
             ->select('id', 'name', 'company', 'status', 'notes')
             ->latest()
             ->limit(12)
@@ -65,9 +70,10 @@ class AiContextService
             ->toArray();
     }
 
-    private function deliveries(User $user): array
+    private function deliveries(User $user, int $workspaceId): array
     {
         return $user->deliveries()
+            ->accessibleBy($user)->where('workspace_id', $workspaceId)
             ->with(['client:id,name', 'session:id,name'])
             ->select('id', 'client_id', 'session_id', 'title', 'status', 'budget', 'delivery_date')
             ->latest()

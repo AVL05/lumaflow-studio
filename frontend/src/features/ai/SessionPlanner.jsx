@@ -20,7 +20,7 @@ export function SessionPlanner({ sessions, onPlan, loading, plan }) {
           value={form.session_id}
           onChange={(event) => update("session_id", event.target.value)}
           options={[
-            { value: "", label: "Selecciona sesion" },
+            { value: "", label: "Selecciona sesión" },
             ...sessions.map((session) => ({ value: String(session.id), label: session.name })),
           ]}
         />
@@ -28,7 +28,7 @@ export function SessionPlanner({ sessions, onPlan, loading, plan }) {
           rows="3"
           value={form.goals}
           onChange={(event) => update("goals", event.target.value)}
-          placeholder="Objetivos de la sesion"
+          placeholder="Objetivos de la sesión"
         />
         <Textarea
           rows="3"

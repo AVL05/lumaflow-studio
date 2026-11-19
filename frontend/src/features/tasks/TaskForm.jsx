@@ -6,7 +6,7 @@ import { Textarea } from "../../components/ui/Textarea";
 import { ErrorState } from "../../components/states/ErrorState";
 import { taskPriorities, taskStatuses } from "../../utils/catalogs";
 
-export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, clients }) {
+export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, clients, members }) {
   const setValue = (name, value) => setForm((current) => ({ ...current, [name]: value }));
 
   return (
@@ -18,7 +18,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
       ) : null}
 
       <div className="md:col-span-2">
-        <Field label="Titulo">
+        <Field label="Título">
           <Input required value={form.title} onChange={(e) => setValue("title", e.target.value)} />
         </Field>
       </div>
@@ -38,7 +38,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
         />
       </Field>
 
-      <Field label="Fecha limite">
+      <Field label="Fecha límite">
         <Input
           type="date"
           value={form.due_date ?? ""}
@@ -52,13 +52,29 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
           onChange={(e) => setValue("due_time", e.target.value)}
         />
       </Field>
+      {members && (
+        <Field label="Responsable de la tarea">
+          <Select
+            value={form.assigned_user_id ?? ""}
+            onChange={(e) => setValue("assigned_user_id", e.target.value)}
+            options={[
+              { value: "", label: "Sin responsable" },
+              ...members.map((m) => ({ value: m.id, label: m.name })),
+              ...(form.assigned_user_id &&
+              !members.some((m) => m.id === Number(form.assigned_user_id))
+                ? [{ value: form.assigned_user_id, label: "Miembro no disponible" }]
+                : []),
+            ]}
+          />
+        </Field>
+      )}
 
-      <Field label="Sesion">
+      <Field label="Sesión">
         <Select
           value={form.session_id ?? ""}
           onChange={(e) => setValue("session_id", e.target.value)}
           options={[
-            { value: "", label: "Sin sesion" },
+            { value: "", label: "Sin sesión" },
             ...sessions.map((session) => ({ value: String(session.id), label: session.name })),
           ]}
         />
@@ -75,7 +91,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
       </Field>
 
       <div className="md:col-span-2">
-        <Field label="Descripcion">
+        <Field label="Descripción">
           <Textarea
             rows="3"
             value={form.description ?? ""}

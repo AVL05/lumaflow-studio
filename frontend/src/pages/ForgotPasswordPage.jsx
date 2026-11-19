@@ -37,7 +37,7 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthShell
-      eyebrow="Recuperacion"
+      eyebrow="Recuperación"
       title="Recupera el acceso"
       description="Te enviaremos un enlace seguro para crear un password nuevo."
       footer={

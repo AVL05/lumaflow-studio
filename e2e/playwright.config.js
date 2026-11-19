@@ -38,7 +38,7 @@ export default defineConfig({
     {
       command: `node node_modules/vite/bin/vite.js --host 127.0.0.1 --port ${frontendPort} --strictPort --no-open`,
       cwd: frontendDir,
-      env: { VITE_API_URL: apiUrl },
+      env: { VITE_API_URL: apiUrl, VITE_KOFI_URL: "", VITE_GITHUB_SPONSORS_URL: "" },
       url: `${frontendUrl}/`,
       reuseExistingServer: false,
       timeout: 180_000,

@@ -1,7 +1,7 @@
 import { apiClient } from "./client";
 
 /**
- * Descarga la exportacion como blob para respetar el interceptor de auth.
+ * Descarga la exportación como blob para respetar el interceptor de auth.
  * PDF queda fuera de esta fase: el backend solo acepta csv y json.
  */
 async function download(resource, format, ids) {

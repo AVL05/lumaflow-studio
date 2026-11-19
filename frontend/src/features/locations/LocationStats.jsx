@@ -2,7 +2,7 @@ import { Card } from "../../components/ui/Card";
 
 export function LocationStats({ location }) {
   const stats = [
-    ["Rating", location.rating ? `${location.rating}/5` : "Sin valorar"],
+    ["Valoración", location.rating ? `${location.rating}/5` : "Sin valorar"],
     ["Sesiones", location.sessions_count ?? location.sessions?.length ?? 0],
     ["Favorita", location.is_favorite ? "Si" : "No"],
   ];

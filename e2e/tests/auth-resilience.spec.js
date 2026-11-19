@@ -1,7 +1,7 @@
 import { expect, test } from "../fixtures/test.js";
 import { apiRequest } from "../support/app.js";
 
-test.describe("resiliencia de sesion", () => {
+test.describe("resiliencia de sesión", () => {
   test("un 500 en /user muestra degradado con retry y recupera sin login", async ({
     ownerPage,
   }) => {
@@ -32,7 +32,7 @@ test.describe("resiliencia de sesion", () => {
     await expect(ownerPage).not.toHaveURL(/\/login$/);
   });
 
-  test("un 401 en /user limpia la sesion y pide login", async ({ ownerPage }) => {
+  test("un 401 en /user limpia la sesión y pide login", async ({ ownerPage }) => {
     await ownerPage.goto("/app/dashboard");
     await expect(ownerPage.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
@@ -47,7 +47,7 @@ test.describe("resiliencia de sesion", () => {
 
     await expect(ownerPage).toHaveURL(/\/login$/);
     const token = await ownerPage.evaluate(() => window.localStorage.getItem("lumaflow_token"));
-    expect(token, "el token invalido se elimina").toBeNull();
+    expect(token, "el token inválido se elimina").toBeNull();
   });
 
   test("el token real sigue siendo valido tras el modo degradado", async ({ ownerPage }) => {

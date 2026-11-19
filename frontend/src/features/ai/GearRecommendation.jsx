@@ -23,12 +23,12 @@ export function GearRecommendation({ onRecommend, loading, recommendation }) {
         <Input
           value={form.session_type}
           onChange={(event) => update("session_type", event.target.value)}
-          placeholder="Tipo de sesion"
+          placeholder="Tipo de sesión"
         />
         <Input
           value={form.location}
           onChange={(event) => update("location", event.target.value)}
-          placeholder="Localizacion"
+          placeholder="Localización"
         />
         <Input
           value={form.weather}

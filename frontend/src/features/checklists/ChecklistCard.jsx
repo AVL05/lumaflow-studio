@@ -82,11 +82,11 @@ export function ChecklistCard({
       <form className="mt-4 flex gap-2" onSubmit={submitItem}>
         <Input
           value={draft}
-          placeholder="Anadir elemento"
+          placeholder="Añadir elemento"
           onChange={(event) => setDraft(event.target.value)}
         />
         <Button variant="secondary" type="submit">
-          Anadir
+          Añadir
         </Button>
       </form>
 

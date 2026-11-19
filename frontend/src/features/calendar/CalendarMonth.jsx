@@ -65,7 +65,7 @@ export const CalendarMonth = memo(function CalendarMonth({
                 <CalendarEvent key={event.id} event={event} onSelect={onSelect} compact />
               ))}
               {(byDate[iso]?.length ?? 0) > 3 ? (
-                <p className="px-1 text-xs text-stone-400">+{byDate[iso].length - 3} mas</p>
+                <p className="px-1 text-xs text-stone-400">+{byDate[iso].length - 3} más</p>
               ) : null}
             </div>
           </DayDropZone>

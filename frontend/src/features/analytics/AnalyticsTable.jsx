@@ -1,7 +1,7 @@
 import { Panel } from "../../components/ui/Panel";
 import { EmptyState } from "../../components/states/EmptyState";
 
-/** Tabla compacta reutilizable para comparativas de la pagina de analitica. */
+/** Tabla compacta reutilizable para comparativas de la página de analítica. */
 export function AnalyticsTable({ title, description, rows, valueLabel = "Total", metaLabel }) {
   const total = rows.reduce((sum, row) => sum + row.total, 0);
 

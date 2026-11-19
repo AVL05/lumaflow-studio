@@ -1,4 +1,4 @@
-/** Paleta y estilos compartidos por todas las graficas Recharts. */
+/** Paleta y estilos compartidos por todas las gráficas Recharts. */
 export const chartPalette = [
   "#d6a15f",
   "#7c8ea6",

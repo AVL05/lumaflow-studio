@@ -11,6 +11,7 @@ use App\Services\JobTransitionService;
 use App\Services\NotificationService;
 use App\Services\WorkspaceAuthorizer;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class SessionController extends Controller
 {
@@ -56,28 +57,34 @@ class SessionController extends Controller
     {
         $this->ensureOwnership($session);
 
-        $previousStatus = $session->status;
-        $session->update($request->validated());
+        return DB::transaction(function () use ($request, $session): SessionResource {
+            if (DB::getDriverName() === 'sqlite') {
+                DB::table('sessions')->where('id', $session->id)->update(['id' => $session->id]);
+            }
+            $session = Session::query()->whereKey($session->id)->lockForUpdate()->firstOrFail();
+            $previousStatus = $session->status;
+            $session->update($request->validated());
 
-        $targetJobStatus = match ($session->status) {
-            'confirmed' => 'preparation', 'completed', 'editing' => 'editing', 'delivered' => 'delivered', default => null,
-        };
-        if ($targetJobStatus) {
-            $this->jobs->advance($session->job, $targetJobStatus, "Sesión actualizada a {$session->status}");
-        }
+            $targetJobStatus = match ($session->status) {
+                'confirmed' => 'preparation', 'completed', 'editing' => 'editing', 'delivered' => 'delivered', default => null,
+            };
+            if ($targetJobStatus) {
+                $this->jobs->advance($session->job, $targetJobStatus, "Sesión actualizada a {$session->status}");
+            }
 
-        if ($previousStatus === $session->status) {
-            $this->activity->log($request->user(), $session, ActivityLogger::UPDATED, 'Sesion editada');
-        } else {
-            $this->activity->logStatusChange($request->user(), $session, $previousStatus, $session->status);
-        }
+            if ($previousStatus === $session->status) {
+                $this->activity->log($request->user(), $session, ActivityLogger::UPDATED, 'Sesion editada');
+            } else {
+                $this->activity->logStatusChange($request->user(), $session, $previousStatus, $session->status);
+            }
 
-        if ($previousStatus !== 'delivered' && $session->status === 'delivered') {
-            $this->activity->log($request->user(), $session, ActivityLogger::DELIVERED, 'Sesion marcada como entregada');
-            $this->notifications->success($request->user(), 'Sesion entregada', $session->name, '/app/sessions');
-        }
+            if ($previousStatus !== 'delivered' && $session->status === 'delivered') {
+                $this->activity->log($request->user(), $session, ActivityLogger::DELIVERED, 'Sesion marcada como entregada');
+                $this->notifications->success($request->user(), 'Sesion entregada', $session->name, '/app/sessions');
+            }
 
-        return new SessionResource($session->refresh()->load('location'));
+            return new SessionResource($session->refresh()->load('location'));
+        }, 3);
     }
 
     public function destroy(Session $session): mixed

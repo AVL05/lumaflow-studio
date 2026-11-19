@@ -31,7 +31,9 @@ class PublicBookingController extends Controller
             return $response;
         }
 
-        $booking = $user->bookingRequests()->create($request->safe()->except('website') + ['status' => 'new']);
+        $workspaceId = $user->workspaces()->value('id');
+        abort_unless($workspaceId, 404);
+        $booking = $user->bookingRequests()->create($request->safe()->except('website') + ['status' => 'new', 'workspace_id' => $workspaceId]);
 
         $this->notifications->info(
             $user,

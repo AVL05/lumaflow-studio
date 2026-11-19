@@ -14,6 +14,25 @@ class Activity extends Model
 {
     use BelongsToWorkspace, HasFactory;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope('subject_workspace', function ($query): void {
+            $query->where(function ($query): void {
+                foreach ([Job::class, Session::class, Task::class, Client::class, Delivery::class, Contract::class] as $subject) {
+                    $table = (new $subject)->getTable();
+                    $query->orWhere(function ($query) use ($subject, $table): void {
+                        $query->where('activities.subject_type', (new $subject)->getMorphClass())
+                            ->whereExists(function ($related) use ($table): void {
+                                $related->selectRaw('1')->from($table)
+                                    ->whereColumn("{$table}.id", 'activities.subject_id')
+                                    ->whereColumn("{$table}.workspace_id", 'activities.workspace_id');
+                            });
+                    });
+                }
+            });
+        });
+    }
+
     protected function casts(): array
     {
         return [

@@ -30,6 +30,23 @@ return [
 
     'disks' => [
 
+        'backup_s3' => [
+            'driver' => 's3',
+            'key' => env('BACKUP_S3_ACCESS_KEY_ID'),
+            'secret' => env('BACKUP_S3_SECRET_ACCESS_KEY'),
+            'region' => env('BACKUP_S3_REGION'),
+            'bucket' => env('BACKUP_S3_BUCKET'),
+            'endpoint' => env('BACKUP_S3_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+            'http' => ['connect_timeout' => 15, 'timeout' => 120],
+            // Only protocol-required AWS checksums; integrity uses our SHA-256 download.
+            'request_checksum_calculation' => 'when_required',
+            'response_checksum_validation' => 'when_required',
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

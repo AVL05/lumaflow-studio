@@ -20,6 +20,7 @@ import { addDays, todayIso } from "../features/calendar/calendarUtils";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { useResource } from "../hooks/useResource";
+import { formatDate } from "../utils/dates";
 
 const exportResources = [
   { value: "sessions", label: "Sesiones" },
@@ -44,18 +45,18 @@ export function AnalyticsPage() {
   async function exportCsv() {
     try {
       await exportsApi.csv(exportResource);
-      toast.success("Exportacion generada.");
+      toast.success("Exportación generada.");
     } catch {
-      toast.error("No se pudo generar la exportacion.");
+      toast.error("No se pudo generar la exportación.");
     }
   }
 
   return (
     <>
       <PageHeader
-        eyebrow="Business"
-        title="Analitica"
-        description="KPIs, graficas y comparativas calculadas sobre datos reales de tu estudio."
+        eyebrow="Negocio"
+        title="Analítica"
+        description="KPIs, gráficas y comparativas calculadas sobre datos reales de tu estudio."
         action={
           <Select
             value={exportResource}
@@ -97,16 +98,16 @@ export function AnalyticsPage() {
           </div>
 
           <AnalyticsTable
-            title="Localizaciones mas utilizadas"
-            description="Sesiones asociadas a cada spot guardado"
+            title="Localizaciones más utilizadas"
+            description="Sesiones asociadas a cada lugar guardado"
             rows={data.topLocations}
             valueLabel="Sesiones"
             metaLabel="Ciudad"
           />
 
           <p className="text-xs text-stone-400">
-            Rango analizado: {data.range.from} → {data.range.to}. Exportacion PDF prevista para la
-            siguiente fase; CSV y JSON ya disponibles desde el backend.
+            Rango analizado: {formatDate(data.range.from)} – {formatDate(data.range.to)}. Puedes
+            exportar estos datos en CSV.
           </p>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { Button } from "./Button";
 
-/** Barra flotante de acciones masivas. Se muestra solo con seleccion activa. */
+/** Barra flotante de acciones masivas. Se muestra solo con selección activa. */
 export function BulkActionBar({ count, onClear, children }) {
   if (count === 0) return null;
 

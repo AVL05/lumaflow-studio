@@ -12,6 +12,16 @@ class ChecklistItem extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saved(function (ChecklistItem $item): void {
+            if ($item->wasRecentlyCreated || $item->wasChanged()) {
+                PostproductionStage::contentChanged($item->checklist?->stage_id, ! $item->is_completed);
+            }
+        });
+        static::deleted(fn (ChecklistItem $item) => PostproductionStage::contentChanged($item->checklist?->stage_id, false));
+    }
+
     protected function casts(): array
     {
         return [

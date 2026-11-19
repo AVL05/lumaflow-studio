@@ -9,12 +9,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'workspace_id', 'session_id', 'name', 'type', 'position'])]
+#[Fillable(['user_id', 'workspace_id', 'session_id', 'name', 'type', 'position', 'job_id', 'stage_id'])]
 class Checklist extends Model
 {
     use BelongsToWorkspace, HasFactory;
 
     public const TYPES = ['gear', 'preparation', 'editing', 'delivery', 'custom'];
+
+    protected static function booted(): void
+    {
+        static::saved(function (Checklist $checklist): void {
+            if ($checklist->wasRecentlyCreated || $checklist->wasChanged()) {
+                PostproductionStage::contentChanged($checklist->stage_id, false);
+            }
+        });
+        static::deleted(fn (Checklist $checklist) => PostproductionStage::contentChanged($checklist->stage_id, false));
+    }
 
     public function scopeOwnedBy($query, int $userId)
     {

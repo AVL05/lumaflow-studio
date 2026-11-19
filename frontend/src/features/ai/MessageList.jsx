@@ -5,7 +5,7 @@ export function MessageList({ messages, loading }) {
   if (messages.length === 0) {
     return (
       <p className="text-sm text-stone-400">
-        Inicia una conversacion sobre sesiones, equipo, clientes u organizacion.
+        Inicia una conversación sobre sesiones, equipo, clientes u organización.
       </p>
     );
   }

@@ -31,7 +31,7 @@ const commands = [
   action,
 }));
 
-/** Buscador unificado con atajo Ctrl/Cmd + K y navegacion por teclado. */
+/** Buscador unificado con atajo Ctrl/Cmd + K y navegación por teclado. */
 export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
   const navigate = useNavigate();
   const inputRef = useRef(null);
@@ -90,7 +90,7 @@ export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
-        setError(getApiError(err, "No se pudo completar la busqueda."));
+        setError(getApiError(err, "No se pudo completar la búsqueda."));
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -136,7 +136,7 @@ export function GlobalSearch({ open, onOpen, onClose, onOpenLuma }) {
       className="fixed inset-0 z-[70] bg-black/70 px-4 pt-24 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Busqueda global"
+      aria-label="Búsqueda global"
       onClick={onClose}
     >
       <div

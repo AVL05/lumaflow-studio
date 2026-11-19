@@ -16,7 +16,7 @@ import { ChecklistCard } from "./ChecklistCard";
 
 const defaults = { name: "", type: "gear", use_template: true };
 
-/** Panel autocontenido de checklists para una sesion concreta. */
+/** Panel autocontenido de checklists para una sesión concreta. */
 export function ChecklistPanel({ sessionId }) {
   const toast = useToast();
   const fetcher = useCallback(() => checklistsApi.list({ session_id: sessionId }), [sessionId]);
@@ -54,7 +54,7 @@ export function ChecklistPanel({ sessionId }) {
           <Input
             required
             value={form.name}
-            placeholder="Equipo para la sesion"
+            placeholder="Equipo para la sesión"
             onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
           />
         </Field>
@@ -89,7 +89,7 @@ export function ChecklistPanel({ sessionId }) {
       ) : checklists.length === 0 ? (
         <EmptyState
           title="Sin checklists"
-          description="Crea una checklist con plantilla para preparar equipo, edicion o entrega."
+          description="Crea una checklist con plantilla para preparar equipo, edición o entrega."
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">

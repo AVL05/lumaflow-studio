@@ -46,7 +46,7 @@ export const CalendarDay = memo(function CalendarDay({ cursor, events, onMove, o
 
       {events.length === 0 ? (
         <div className="mt-4">
-          <EmptyState title="Dia libre" description="No hay eventos programados para esta fecha." />
+          <EmptyState title="Día libre" description="No hay eventos programados para esta fecha." />
         </div>
       ) : null}
     </div>

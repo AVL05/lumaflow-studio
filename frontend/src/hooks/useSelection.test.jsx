@@ -33,7 +33,7 @@ describe("useSelection", () => {
     expect(result.current.count).toBe(0);
   });
 
-  it("clear vacia la seleccion", () => {
+  it("clear vacia la selección", () => {
     const { result } = renderHook(() => useSelection());
 
     act(() => result.current.toggleAll([4, 5]));

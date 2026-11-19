@@ -8,7 +8,7 @@ describe("contractTransitions", () => {
     expect(canDeleteContract("draft")).toBe(true);
   });
 
-  it("bloquea edicion y borrado tras enviar", () => {
+  it("bloquea edición y borrado tras enviar", () => {
     expect(canEditContract("sent")).toBe(false);
     expect(canDeleteContract("sent")).toBe(false);
     expect(allowedTransitions("sent")).toEqual(["accepted", "rejected", "expired"]);

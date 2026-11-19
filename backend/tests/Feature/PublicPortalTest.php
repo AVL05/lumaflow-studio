@@ -151,7 +151,7 @@ class PublicPortalTest extends TestCase
         $channel = Mockery::mock();
         $channel->shouldReceive('warning')->once()->with('mail.failed', Mockery::on(
             fn (array $context) => $context['mailable'] === DeliveryReadyMail::class
-                && $context['reason'] === 'smtp down'
+                && $context['reason'] === 'RuntimeException'
                 && $context['user_id'] === $this->user->id,
         ));
         Log::partialMock()->shouldReceive('channel')->with('lumaflow')->andReturn($channel);

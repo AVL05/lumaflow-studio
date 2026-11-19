@@ -33,7 +33,7 @@ export function MapView({
 
   const initialViewRef = useRef({ center, markers, selected, zoom });
 
-  // El mapa se crea una unica vez por montaje: incluir center/markers/zoom en las
+  // El mapa se crea una única vez por montaje: incluir center/markers/zoom en las
   // dependencias destruia y recreaba la instancia en cada render, dejando efectos
   // posteriores operando sobre un mapa ya eliminado.
   useEffect(() => {
@@ -52,10 +52,13 @@ export function MapView({
       })
       .setView(normalizedCenter(initialCenter, initialMarkers, initialSelected), initialZoom);
 
+    // CARTO basemaps now answer every keyless request with an "API key required"
+    // tile. Standard OSM tiles need no key; the dark look comes from a CSS filter.
     leaflet
-      .tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution: "&copy; OpenStreetMap &copy; CARTO",
-        maxZoom: 20,
+      .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        className: "lumaflow-dark-tiles",
+        maxZoom: 19,
       })
       .addTo(instance);
 
@@ -83,9 +86,14 @@ export function MapView({
       const point = [Number(marker.latitude), Number(marker.longitude)];
       bounds.push(point);
       leaflet
-        .marker(point, { icon: buildMarkerIcon(leaflet, marker.id === selected?.id) })
+        .marker(point, {
+          icon: buildMarkerIcon(leaflet, marker.id === selected?.id),
+          // Nombre accesible del marcador (lectores de pantalla y axe `aria-command-name`).
+          alt: marker.name || "Localización",
+          title: marker.name || "Localización",
+        })
         .bindPopup(
-          `<strong>${escapeHtml(marker.name || "Localizacion")}</strong><br>${escapeHtml(marker.meta || "")}`,
+          `<strong>${escapeHtml(marker.name || "Localización")}</strong><br>${escapeHtml(marker.meta || "")}`,
         )
         .addTo(layerRef.current);
     });
@@ -94,8 +102,12 @@ export function MapView({
       const point = [Number(selected.latitude), Number(selected.longitude)];
       bounds.push(point);
       leaflet
-        .marker(point, { icon: buildMarkerIcon(leaflet, true) })
-        .bindPopup(`<strong>${escapeHtml(selected.name || "Seleccion")}</strong>`)
+        .marker(point, {
+          icon: buildMarkerIcon(leaflet, true),
+          alt: selected.name || "Selección",
+          title: selected.name || "Selección",
+        })
+        .bindPopup(`<strong>${escapeHtml(selected.name || "Selección")}</strong>`)
         .addTo(layerRef.current);
     }
 
@@ -106,7 +118,7 @@ export function MapView({
     }
   }, [leaflet, map, markers, selected, zoom]);
 
-  // Recentrado cuando el consumidor cambia `center` despues del montaje.
+  // Recentrado cuando el consumidor cambia `center` después del montaje.
   useEffect(() => {
     if (!map || map !== mapInstanceRef.current || !center) return;
     if (!isValidCoord(center[0], center[1])) return;

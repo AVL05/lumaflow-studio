@@ -10,85 +10,170 @@ Estrategia mínima y verificable para la beta (Issue #12). Sin costes obligatori
 
 **Fuera de LumaFlow** (nunca en backup): fotografías originales en Drive/Dropbox/Pixieset/etc. e historial IA de IndexedDB (`lumaflow-ai:*`, solo navegador).
 
-## Motor y mecanismo
+## Estado: implementado, NO activado
 
-MySQL/MariaDB compatible en Docker y producción (TiDB Cloud): `mysqldump --single-transaction` vía `MYSQL_PWD` por entorno (nunca en argv ni logs). Con CA configurada (`MYSQL_ATTR_SSL_CA`, obligatorio en TiDB) se pasa `--ssl-ca` y se verifica legible antes de ejecutar. PostgreSQL: `pg_dump` con `PGPASSWORD`. SQLite local: snapshot `VACUUM INTO` + dump SQL portable (sin binarios). Salida `storage/backups/lumaflow-db-YYYYMMDD-HHMMSS-{motor}.sql.gz` + sidecar `.sha256`, sin PII en nombres.
+Runner GitHub Actions integrado en `main` (#34). Integración Backblaze B2 implementada con Laravel/Flysystem S3 existente, sin SDK nuevo. **Cuenta/bucket/key/config B2 reales NO creados ni verificados. `PRODUCTION_BACKUP_ENABLED` sigue sin configurar. Primera copia productiva y tres días consecutivos NO realizados. #24 sigue abierto (`Refs #24`).**
 
-## Comandos
+Sin Repository Variable `PRODUCTION_BACKUP_ENABLED=true`, schedule y dispatch quedan `skipped`: sin runner, acceso a Secrets/TiDB, dumps ni fallo rojo diario. Gate exige también repositorio original y `main`, sin bypass manual. Environment `production-backup` protege Secrets/config del job. Gate debe ser de repositorio: [Environment Variables solo llegan tras iniciar el job](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#configuration-variable-precedence).
+
+## Flujo y destino privado
+
+TiDB → Actions → `data:backup --remote --prune` → `.sql.gz` + `.sha256` → B2 privado → download/verificación SHA-256 → retención remota → limpieza local.
+
+Generación canónica #12 intacta: MySQL/TiDB `mysqldump --single-transaction`, contraseña vía `MYSQL_PWD`, CA y verificación de identidad TLS; SQLite sintético reutiliza dump existente. No añadimos fotos, IndexedDB, caches, logs ni builds.
+
+Disk exclusivo `backup_s3`, namespace `BACKUP_S3_*`, independiente de `FILESYSTEM_DISK`. HTTPS regional B2 obligatorio, path-style, visibility privada, excepciones activadas, timeouts HTTP. [B2 admite path-style y virtual-host](https://www.backblaze.com/docs/cloud-storage-call-the-s3-compatible-api); endpoint sin bucket ni credenciales embebidas. Config vacía/inválida falla antes del dump, sin imprimir valores. [Opciones del SDK](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/configuration.html) `request_checksum_calculation`/`response_checksum_validation=when_required` evitan checksums AWS opcionales; integridad propia siempre mediante download y SHA-256.
+
+Objetos sin PII en bucket privado dedicado, sin website hosting:
+
+```text
+database/lumaflow-db-YYYYMMDD-HHMMSS-mysql.sql.gz
+database/lumaflow-db-YYYYMMDD-HHMMSS-mysql.sql.gz.sha256
+```
+
+`BACKUP_PATH` sigue siendo staging: local por defecto `storage/backups`; Actions `$RUNNER_TEMP/lumaflow-backups`, efímero. Render también efímero y Compose solo persiste storage público: no son destino final. B2, cuando el operador lo provisione y verifique, conserva objetos independientemente del runner y proveedor DB.
+
+Upload exige checksum local válido y rechaza overwrites. Sube ambos objetos privados, verifica existencia/tamaño de ambos, descarga mediante streams a directorio aleatorio 0700/archivos 0600, comprueba SHA-256 completo con sidecar y origen. ETag no se usa como SHA-256. Solo después reporta copia verificada. Fallo de upload/download/checksum/prune => exit 1, sin falso éxito. Staging se elimina también ante fallo; workflow añade cleanup `always()`, sin artifacts. Un upload parcial no es copia válida y se elimina en el próximo prune exitoso.
+
+## Comandos y restore
 
 ```bash
-php artisan data:backup [--prune] [--keep-daily=7] [--keep-weekly=4] [--dry-run]
-php artisan data:restore <basename> [--apply] [--force] [--force-production]
+# Local compatible con #12
+php artisan data:backup --prune
+php artisan data:restore <basename>
 php artisan data:backup-status
+# Remoto opt-in, B2 previamente configurado
+php artisan data:backup --remote --prune --no-interaction
+php artisan data:backup-status --remote
+php artisan data:restore <basename> --remote
+# Solo con autorización y tras drill
+php artisan data:restore <basename> --remote --apply
 ```
 
-`data:backup` falla con exit 1 y mensaje claro si falta binario/config, y reporta a Sentry cuando existe. `data:restore` por defecto solo hace drill en destino temporal aislado; `--apply` restaura de verdad; producción exige `--force-production` (+ confirmación sin `--force`). `data:backup-status` responde “¿Se hizo el backup de hoy?” (último archivo, edad, checksum, aviso STALE >36h).
+Restore remoto exige basename reconocido, nunca key/path arbitrario (traversal/nesting rechazados), descarga SQL y checksum a temporal privado, verifica y reutiliza drill existente. Limpia temporal incluso ante fallo. Sin `--apply` no modifica DB configurada. Guards intactos: `--apply`, producción exige `--force-production`, confirmación salvo `--force`.
 
-## Frecuencia y retención
+**Drill MySQL requiere DB aislada y permiso CREATE/DROP DATABASE**, además de cliente MySQL/CA. Ejecutarlo en entorno no productivo autorizado, no conceder esos permisos al usuario diario ni usar producción por comodidad. Nunca descargar datos reales al repo/PR/CI.
 
-Beta: **diario 03:00 UTC** (`0 3 * * *` en GitHub Actions; app y Scheduler también `UTC`) con `--prune`, 7 diarios + 4 semanales (el más nuevo por día/semana ISO; solo archivos `lumaflow-db-*.sql.gz`, nunca rutas arbitrarias, con `--dry-run` disponible). En Madrid equivale a 04:00 en invierno y 05:00 en verano. Actions puede retrasar o descartar ejecuciones bajo carga: no es un SLA.
+## Frecuencia, retención y versiones B2
 
-La retención local solo funciona sobre archivos presentes. **En un runner efímero no conserva 7+4 entre ejecuciones**: falta implementar y verificar la persistencia y rotación del destino duradero. El comando usa `flock` (sin Redis); Actions serializa los jobs con `concurrency: production-backup`, sin cancelar el job activo. Scheduler conserva `withoutOverlapping(30)` para otros despliegues; ese mutex local no es un lock entre runners distintos.
+Diario **03:00 UTC**, `0 3 * * *`; app/Scheduler UTC. Madrid 04:00 invierno/05:00 verano. Workflow llama directamente `php artisan data:backup --remote --prune --no-interaction`, evita 1.440 invocaciones diarias de `schedule:run`. Nadie ejecuta Scheduler en Render; otros scheduled commands no quedan automatizados.
 
-## Runner: estado y decisión
+Selección #12 reutilizada: último por día de los últimos 7 días + último por semana ISO de 4 semanas anteriores. Fuente de verdad **listado remoto**, no archivos anteriores del runner. Solo nombres reconocidos bajo `database/` y sidecars; ajenos/nested intactos. Parejas incompletas no cuentan como retenidas. `--dry-run` muestra selección sin borrar (todavía genera/sube nueva copia).
 
-Runner elegido y preparado para #24: **GitHub Actions**, `.github/workflows/production-backup.yml`, con `schedule` diario y `workflow_dispatch`. Ejecuta directamente `php artisan data:backup --prune --no-interaction`: un job diario evita 1.440 invocaciones de `schedule:run` por día. Nadie ejecuta `schedule:run` en Render; los demás scheduled commands no quedan automatizados por este workflow.
+[B2 borrar por nombre añade delete marker; no libera versiones](https://www.backblaze.com/apidocs/s3-delete-objects). Prune usa cliente S3 YA instalado en el disk: ListObjectVersions paginado y DeleteObjects por **VersionId exacto**, lotes hasta 1.000. Purga todas las versiones de copias expiradas/incompletas, versiones no actuales y markers reconocidos; conserva actuales seleccionadas. Errores individuales también fallan. Nombres por timestamp y rechazo de sobrescritura minimizan versiones.
 
-**Tras merge: runner versionado y desactivado por defecto.** El gate del job exige repo original, `main` y `vars.PRODUCTION_BACKUP_ENABLED == 'true'`. Sin la variable (o con un valor que no habilite el gate), tanto schedule como dispatch quedan `skipped`: no se inicia runner, no se accede a Secrets/TiDB, no se genera dump ni fallo rojo diario. No hay bypass manual. El environment `production-backup` sigue protegiendo los Secrets.
+Aplicación controla 7+4; **no configuramos lifecycle ni permisos para administrarlo**. Mantener actuales sin expiración; no TTL que elimine semanales retenidos. Operador puede usar [lifecycle solo de versiones ocultas/no actuales](https://www.backblaze.com/docs/cloud-storage-lifecycle-rules) como safety net sin expirar actuales. No Object Lock/legal holds incompatibles con prune. Ante fallos repetidos revisar también multipart incompletos/cuota en consola. Borrar manualmente por nombre no equivale a liberar espacio.
 
-La variable no secreta vive en **Settings → Secrets and variables → Actions → Variables → Repository variables**, no en el environment. [GitHub documenta](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#configuration-variable-precedence) que las variables del environment solo están disponibles cuando el job ya ha empezado; no sirven para este gate previo al runner. Crear `PRODUCTION_BACKUP_ENABLED` con valor `true` solo cuando se apruebe activar; para desactivar, eliminarla o usar `false`. No se configura en esta tarea.
+Concurrencia: Actions `production-backup`, `cancel-in-progress: false`; lock local `flock` sin Redis. Scheduler conserva `withoutOverlapping(30)` en otros despliegues. Lock local no sincroniza escritores externos: no lanzar otro host independiente simultáneo.
 
-Orden de activación futura: (1) provisionar/verificar destino privado duradero e implementar/verificar upload y retención remota; (2) configurar Secrets del environment; (3) configurar Repository Variable `PRODUCTION_BACKUP_ENABLED=true`; (4) lanzar primero `workflow_dispatch`; (5) verificar objeto duradero y checksum; (6) observar tres días UTC consecutivos; (7) cerrar #24. El schedule queda habilitado con la misma variable, por lo que conviene hacer la activación y el dispatch fuera del horario de las 03:00 UTC. Mientras este PR conserve `Report missing durable destination`, un job activado falla explícitamente: no activar la variable todavía.
+## Application Key y configuración
 
-Opciones evaluadas:
+Standard application key, nunca master (no soportada S3), restringida al único bucket y prefijo `database/`. Capacidades mínimas: `listFiles`, `readFiles`, `writeFiles`, `deleteFiles`, `listAllBucketNames` por compatibilidad SDK; `listBuckets` solo si herramienta comprueba/lista buckets. [Particularidades oficiales B2 S3](https://www.backblaze.com/docs/cloud-storage-s3-compatible-app-keys). Listar nombres de buckets no autoriza acceso a sus objetos.
 
-- **Cron nativo de Render**: requiere plan de pago → NO activado (coste sin aprobación).
-- **GitHub Actions**: autorizado expresamente para esta tarea; credenciales dedicadas en el environment `production-backup`, no en CI de PRs. Solo repositorio original y `main`, permisos `contents: read`, sin artefactos ni cache de dumps.
-- **Ping/cron externo a un endpoint HTTP**: no existe trigger seguro (crear uno abriría superficie de abuso) → rechazado.
-- **Sidecar cron en Docker**: solo sirve a self-hosted, no a Render → documentado, no implementado.
+Consola: bucket concreto, **Read and Write**, **Allow list all bucket names**, File name prefix `database/`. Revisar capabilities emitidas; no necesitamos administración de cuenta/buckets, `writeBuckets`, `writeKeys`, `listKeys`, `deleteKeys`, policies/retentions ni `bypassGovernance`. Si preset añade privilegios, operador puede crear manualmente standard key vía Native API con `bucketIds` del único bucket, `namePrefix=database/` y capabilities exactas anteriores. No se hace administración B2 desde LumaFlow. [Opciones UI y restricciones](https://www.backblaze.com/docs/cloud-storage-application-keys).
 
-**Estado auditado el 2026-10-07: implementación parcial, no activada en producción.** El workflow aún está en el PR (sin merge), no se han encontrado Secrets de backup en el repositorio y no existe evidencia verificable de storage privado duradero provisionado. `render.yaml` y el adapter S3 instalado son configuración, no prueba de un bucket accesible. No se ha consultado ningún valor secreto ni creado recurso facturable.
+| GitHub | Nombres (nunca valores en repo/PR) |
+| --- | --- |
+| Environment Secrets `production-backup` | `BACKUP_DB_HOST`, `BACKUP_DB_PORT`, `BACKUP_DB_DATABASE`, `BACKUP_DB_USERNAME`, `BACKUP_DB_PASSWORD` |
+| Environment Secrets `production-backup` | `BACKUP_S3_ACCESS_KEY_ID` (keyID), `BACKUP_S3_SECRET_ACCESS_KEY` (applicationKey) |
+| Environment Variables `production-backup` | `BACKUP_S3_BUCKET`, `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION` |
+| Repository Variable, gate previo al job | `PRODUCTION_BACKUP_ENABLED`, ausente hasta activación aprobada |
 
-Solo si está activado, el workflow comprueba configuración y conexión TLS con `SELECT 1` sin imprimir errores del driver; genera el dump con el comando canónico, verifica SHA-256 con `sha256sum --check --strict` y muestra nombre, bytes y timestamp. Después **termina con fallo operativo explícito por falta de destino duradero**, incluso si el dump temporal fue válido. `always()` limpia el directorio temporal; no publica datos de producción como artifact. No se considera backup automático completo.
+Copiar endpoint HTTPS/región reales de B2, no fixtures; no usar AWS_* globales ni Secrets Render.
 
-## Destino y privacidad
+## Verificación y fallos
 
-Desarrollo/test: `storage/backups/` (ignorado por Git). `BACKUP_PATH` permite elegir un directorio privado fuera del checkout/webroot, reutilizado por backup, restore, status y prune; sin configurar conserva el destino local existente. En Actions usa `${{ runner.temp }}/lumaflow-backups`: **efímero, eliminado al terminar**. En Render sería `/app/storage/backups`, también efímero. Compose persiste `/app/storage/app/public`, no el directorio de backups. Nunca usar ese volumen público para dumps.
+Para “¿Se hizo el backup de hoy?”:
 
-Destino final: **pendiente de confirmar/provisionar con aprobación**. El adapter S3-compatible ya instalado puede reutilizarse más adelante con un disk dedicado privado, upload tras checksum, verificación del objeto, retención remota y fallo no cero si falla upload. No se implementa upload hacia un recurso inexistente ni se habilita facturación. `FILESYSTEM_DISK=s3` no cambia por sí solo el destino del comando.
+1. Actions → **Production backup** → run del día → **Back up, verify B2 and prune remote retention**: conexión TLS, copia verificada, nombre/bytes, checksum/timestamp UTC, retención; run success y summary B2. `skipped` significa no copia.
+2. Consola bucket privado: ambos objetos `database/`, tamaño/fecha y versiones antiguas purgadas.
+3. Entorno privado autorizado: `php artisan data:backup-status --remote` descarga/verifica último objeto; muestra nombre, timestamp UTC, bytes, SHA-256 completo, edad y OK/STALE (>36h). Retorna 1 ante ausencia, checksum/IO fallido o STALE. Sin endpoint público; `/api/ready` independiente.
+4. `php artisan data:restore <basename> --remote` en DB aislada; comprobar migrations/tablas/conteos sin subir datos productivos a CI/repo.
 
-## Restore drill (reproducible)
+Ante fallo revisar logs mínimos, B2 endpoint/permisos/cuota y Secrets/TiDB TLS/allowlist en privado, corregir y dispatch. No abrir acceso global por comodidad. Mensajes SDK/driver se descartan (pueden contener URL firmada/secrets); stdout/excepciones/log/Sentry solo reciben error estático/clase, sin dumps, passwords o DATABASE_URL. Workflow no agrega DSN productivo. Summary texto estático solo tras éxito.
+
+`php artisan test --filter=Backup` verifica backup SQLite real sintético, S3 fake, prune, download/SHA-256 y drill, errores/canaries/traversal y SDK mock para paginación/borrado exacto de versiones. CI no recibe Secrets productivos.
+
+## Activación pendiente y recuperación
+
+Pasos exactos en [deployment.md](deployment.md#activar-backup-privado-en-backblaze-b2): crear/verificar B2 privado → Secrets/Variables → aprobación y gate → primer dispatch → objeto durable/checksum y restore aislado → tres días UTC consecutivos y retención → cerrar #24. Registrar fecha/run URLs sin datos sensibles. Tres dispatches en un día NO cumplen tres días.
+
+**Primera producción NO realizada; tres días NO observados.** No recursos facturables creados, prod dispatch ni gate activo. RPO orientativo tras activación ~24h, sin SLA; hoy depende de manual/proveedor. Incidente: detener escrituras si procede, elegir copia verificada, drill aislado, restore con guards, validar antes de reabrir tráfico.
+
+## Coste y segunda capa TiDB
+
+Verificado 2026-10-07: [primeros 10 GB B2 gratuitos](https://www.backblaze.com/cloud-storage/pricing), [registro sin tarjeta requerida](https://www.backblaze.com/sign-up/cloud-storage). Superar cuota/tráfico gratis puede generar coste; cuentan versiones y multipart. Download/verificación consume tráfico (backup verifica dump completo y status repite). No promesa gratis para siempre: comprobar cuota/egress y límites/avisos antes de activar; beta no debe depender de excederlos. No habilitamos facturación.
+
+[TiDB Cloud Starter gratuito: snapshot automático diario, retención 1 día](https://docs.pingcap.com/tidbcloud/backup-and-restore-serverless/?plan=essential). Protección adicional, no reemplaza B2: sin 7+4 ni independencia DB. No hemos inspeccionado snapshots de la cuenta real.
+
+[Render Cron](https://render.com/docs/cronjobs) de pago y [Render Free](https://render.com/docs/free) efímero no usados. [Actions estándar público](https://docs.github.com/en/billing/concepts/product-billing/github-actions) sin coste de minutos, sin artifacts productivos. [Schedules](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) pueden retrasarse/descartarse y desactivarse tras 60 días inactivo: operador debe observar ejecuciones/cuota, sin SLA.
+
+## Revalidación Sprint 1 — 29/10/2026
+
+`php artisan test --filter=Backup`: **PASS, 32 tests, 264 assertions** después de actualizar Flysystem a 3.35.3. Se ejecuta generación/restauración SQLite sintética con checksum y verificación de datos; S3 fake y SDK mock comprueban descarga, retención, paginación, VersionId, objetos ajenos, checksums ausentes/corruptos, AccessDenied y limpieza ante fallo. Configuración/errores usan canarios, nunca credenciales reales. Los guards de restauración permanecen intactos.
+
+**No ejecutado:** acceso B2 real, ACL/capacidades de una application key real, recuperación MySQL/TiDB y observación de tres días UTC. Los mocks no prueban esos permisos. chmod de tests Windows no acredita ACL/POSIX del host Linux. #24 sigue abierto; no se ha activado `PRODUCTION_BACKUP_ENABLED` ni ejecutado workflow productivo.
+
+Ensayo pendiente de aprobación/infraestructura aislada:
+
+1. Preparar una DB MySQL compatible exclusivamente sintética y un destino privado autorizado con cuota comprobada; guardar secretos fuera del repo y logs. No sustituir variables de producción.
+2. Desde ese entorno, ejecutar `data:backup --remote`, verificar con `data:backup-status --remote` y confirmar objetos + sidecar, SHA-256, tamaño y timestamp. Revisar acceso mínimo y denegación de lectura anónima en el proveedor.
+3. Ejecutar `data:restore <basename> --remote` contra entorno aislado (drill, sin `--apply`); confirmar integridad, tablas, conteos y aislamiento de dos workspaces sintéticos. Si se ensaya `--apply`, usar únicamente otra DB sintética dedicada y validar nuevamente; nunca la DB de origen ni producción.
+4. Ensayar pérdida de permiso/checksum y recuperación del error sin registrar secretos. Antes de prune, inspeccionar selección con dry-run y datos sintéticos con fechas representativas. `--dry-run` aún genera/sube una copia: no usarlo contra producción como si fuera solo lectura.
+5. Registrar evidencia privada y un resumen sin datos en #24. Activar automatización productiva solo mediante autorización separada; después verificar primera copia durable, restore aislado y tres días UTC consecutivos, junto a retención 7+4. El ensayo local no satisface esos criterios.
+
+## Ensayo MySQL/B2 pendiente — Sprint 1.5
+
+Sprint 4 añade `project_templates`, `postproduction_stages` y `project_template_applications` al inventario crítico, además de referencias/asignación/revisión en Task y contexto Job/etapa en Checklist. BackupRestoreTest recupera estos datos, incluidos responsables y fechas introducidos explícitamente. El dump es completo, no depende de una lista fija de tablas. Incluirlos en el ensayo sintético MySQL/TiDB/B2 pendiente. CI remoto, impresión física y tres días UTC no quedan acreditados por estos tests; #24 continúa abierto.
+
+Sprint 3 añade `shots` y `gear_item_shot` al inventario crítico del dump completo, además de hora final, participantes e incidencias de Session. El drill SQLite de `BackupRestoreTest` comprueba restauración de toma/estado/notas/revisión, sesión, horario, participantes y equipo; no valida almacenamiento remoto ni motor MySQL. Añadir estas entidades sintéticas y relaciones al ensayo externo pendiente. No cerrar #24 ni aplicar migraciones/restauraciones a producción para comprobarlas.
+
+Sprint 2 mantiene este ensayo **NOT RUN** y #24 abierto. El backup de BD completa incluye ahora también metadatos/briefing/revisión en `photography_jobs` y el pivot `job_location`; no hay nuevos archivos multimedia que copiar. `BackupRestoreTest` verifica recuperación de estos datos únicamente en SQLite temporal. En el ensayo externo, añadir proyecto personal con briefing y localización a las dos workspaces sintéticas, y comparar valores, revisión y pivots después de restaurar. No aplicar la migración ni restaurar sobre datos reales para validar este cambio.
+
+**NOT RUN.** En el equipo de esta sesión no hay daemon Docker activo, clientes mysql/mysqldump disponibles ni variables de credenciales de ensayo autorizadas. No utilizar secretos productivos como alternativa. Las pruebas fake/SQLite existentes siguen verificando lógica, no conectividad externa.
+
+Procedimiento reproducible para un operador con acceso autorizado:
+
+1. Usar checkout privado aislado sin `.env` productivo ni configuración cacheada. Preparar MySQL/TiDB de ensayo con clientes mysql/mysqldump, PDO MySQL y CA/TLS compatibles. Crear dos bases vacías llamadas `lumaflow_recovery_test_source` y `lumaflow_recovery_test_target`; usar una cuenta temporal de ensayo con CREATE/DROP DATABASE para el drill, nunca la cuenta diaria productiva. Comprobar cuota/permisos antes de crear recursos; esta sesión no los provisiona.
+2. Inyectar variables por entorno privado: `APP_ENV=testing`, `APP_DEBUG=false`, APP_KEY sintética, `DB_CONNECTION=mysql`, DB_DATABASE de ensayo, DB_HOST/PORT/USERNAME/PASSWORD autorizados y `MYSQL_ATTR_SSL_CA` cuando corresponda. No definir DB_URL; desactivar DSN Sentry y usar `MAIL_MAILER=array`, caché array y BACKUP_PATH privado fuera del repo. Configurar BACKUP_S3_* únicamente para bucket B2 privado de ensayo, sin objetos reales. No volcar configuración ni secretos por consola. Verificar explícitamente entorno, nombre de DB y bucket de ensayo antes de cualquier comando.
+3. Desde backend, con source seleccionada y vacía:
 
 ```bash
-# 1. DB temporal con datos sintéticos (ver BackupRestoreTest)
-php artisan data:backup
-# 2. destruir/recrear la DB de prueba
-php artisan data:restore lumaflow-db-<fecha>.sql.gz            # drill aislado
-php artisan data:restore lumaflow-db-<fecha>.sql.gz --apply --force  # solo no-prod
+php artisan migrate --no-interaction
+php artisan db:seed --class='Database\Seeders\E2ESeeder' --no-interaction
+php artisan data:backup --remote --no-interaction
+php artisan data:backup-status --remote
 ```
 
-Verificación: archivo existe, tamaño >0, checksum coincide, dump legible, tabla `migrations` presente y conteos esperados.
+El seeder actual crea cinco cuentas sintéticas y sus cinco estudios/memberships; no usa clientes reales. Añadir estas filas de dominio **solo en esa source sintética** mediante el cliente SQL privado:
 
-## Incidente real
+```sql
+INSERT INTO clients (user_id, workspace_id, name, status, created_at, updated_at)
+SELECT id, current_workspace_id, CONCAT('Recovery synthetic ', id), 'active', NOW(), NOW() FROM users;
+INSERT INTO photography_jobs (user_id, workspace_id, client_id, title, specialty, workflow_key, status, contract_status, created_at, updated_at)
+SELECT user_id, workspace_id, id, 'Recovery synthetic project', 'general', 'general', 'lead', 'not_required', NOW(), NOW() FROM clients;
+```
 
-Para responder “¿Se hizo el backup de hoy?”: abrir **Actions → Production backup → ejecución del día** y comprobar conexión, exit del comando, bytes >0, SHA-256 y timestamp UTC. Mientras figure el fallo de destino duradero, la respuesta es **no hay backup recuperable**, aunque se haya generado un dump temporal. Los logs no contienen dumps ni contraseñas. `data:backup-status` sirve en un host con el mismo destino persistente; no puede consultar los dumps eliminados de Actions. `/api/ready` no depende de este historial.
+Generar otra copia con `data:backup --remote --no-interaction` y registrar su basename/sidecar/timestamp/checksum sin credenciales. No usar `--prune` durante este ensayo de conectividad ni contra un destino compartido.
 
-Ante fallo: revisar logs técnicos del job; verificar privadamente Secrets, CA, conectividad y allowlist TiDB; corregir y ejecutar `workflow_dispatch`. No abrir rangos globales ni crear un endpoint HTTP para evitar la allowlist. Falta de checksum se muestra como `FALLO`, nunca `OK`. Sentry recibe un error de clase sin el mensaje sensible si está configurado; el workflow no añade un DSN de producción.
+4. Cambiar únicamente a target vacía y comprobar de nuevo DB/entorno/bucket. `php artisan data:restore <basename-sintético> --remote` debe completar el drill temporal. Solo en target sintética vacía, `php artisan data:restore <basename-sintético> --remote --apply` permite verificar la aplicación interactiva; no usar `--force-production` ni omitir confirmación. Comparar source/target: cinco usuarios, cinco workspaces, cinco memberships, cinco clientes y cinco trabajos, mismo conjunto de migraciones y cero relaciones incoherentes:
 
-Primera ejecución de producción: **NO realizada** (workflow fuera de `main`, credenciales y destino pendientes). El drill real reproducible usa SQLite sintético en `BackupRestoreTest` e incluye `--prune`, tamaño, checksum y restauración. **Tres días consecutivos NO observados**. #24 permanece abierto; PR usa `Refs #24`. Al activar, registrar fecha/run URL y tres fechas UTC distintas con objeto duradero verificado; tres dispatches el mismo día no satisfacen el criterio.
+```sql
+SELECT COUNT(*) FROM photography_jobs j JOIN clients c ON c.id = j.client_id WHERE j.workspace_id <> c.workspace_id;
+SELECT COUNT(*) FROM workspace_memberships m JOIN workspaces w ON w.id = m.workspace_id WHERE m.role = 'owner' AND m.user_id = w.user_id;
+```
 
-1. Detener escrituras si procede (mantenimiento).
-2. Elegir último backup con checksum válido.
-3. Provisionar DB limpia y restaurar con `data:restore --apply` (producción: `--force-production` + confirmación).
-4. Validar migraciones al día y datos críticos.
-5. Cambiar la conexión solo tras verificar; monitorizar; documentar el incidente.
+Esperados: 0 y 5. Una discrepancia bloquea la validación. No afirmar que el chequeo genérico de tablas/usuarios del drill comprueba por sí solo estas relaciones.
 
-## RPO/RTO orientativos (sin SLA)
+5. Verificar en B2 privacidad, aplicación de permisos mínimos, lectura anónima denegada, descarga íntegra y denegación esperada al retirar permisos de una key de ensayo. Contrastar retención/borrado de versiones con fixtures sintéticas en bucket exclusivo y el dry-run del runbook; ese dry-run también sube una copia. Adjuntar únicamente resultados agregados a #24. Activación productiva y tres días UTC siguen siendo una validación separada.
 
-Con backup diario automatizado: RPO ~24h, RTO procedimental ~1h. Hoy (manual): RPO = último backup manual. Un backup histórico puede contener datos borrados hasta que expire la retención; después desaparecen con la rotación (sin borrado instantáneo).
+Los comandos anteriores están preparados, **no ejecutados**. No cerrar #24 hasta disponer de la evidencia externa necesaria.
 
-## Limitaciones del free tier
+### Ampliación del ensayo sintético — Sprint 5
 
+`BackupRestoreTest` incluye entrega personal, enlace original, segunda revisión, notas públicas, token y revocación, además de Activity. El dump completo recoge delivery_revisions automáticamente. El ensayo local recupera esos registros y sus relaciones en SQLite temporal; no hay material audiovisual. No ejecutar rollback de la migración de revisiones: su down está bloqueado para preservar historial y clientes nulos.
+
+Sigue pendiente ejecutar este mismo escenario en MySQL/TiDB y el roundtrip privado B2 del runbook, con credenciales y entornos autorizados. Verificar números de revisión, URLs exactas, marcas de publicación, UUIDs, eventos, FK y revocación; no copiar datos reales a un ensayo ni publicar tokens. Esta ampliación local no completa #24 ni acredita permisos/retención B2.
 Auditoría: [Render Cron](https://render.com/docs/cronjobs) exige mínimo 1 USD/mes y no permite discos persistentes; [Render Free](https://render.com/docs/free) pierde archivos al reiniciar/redeploy/suspenderse, no permite discos, shell ni one-off jobs. No activados. Repositorio público confirmado con `gh repo view`: [Actions estándar](https://docs.github.com/en/billing/concepts/product-billing/github-actions) gratuito, sin artifacts ni storage contratado. TiDB debe mantener límite de gasto cero (no verificado en su consola en esta tarea); permisos, tráfico y conexión reales requieren verificación antes de activación. [Schedules GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) solo corren desde default branch, pueden retrasarse y en repos públicos se desactivan tras 60 días sin actividad. No se afirma que estos comandos cubran recuperación de producción hasta disponer de destino duradero.
 
 > **Nota (19/11/2026):** produccion pasó a PostgreSQL en Supabase. `data:backup`, `data:restore` y `production-backup.yml` describen el flujo MySQL/TiDB y no son aplicables a Postgres; el backup de produccion debe rehacerse con `pg_dump` (issue #53).

@@ -85,10 +85,10 @@ export function LocationsPage() {
       const payload = normalizeLocation(form);
       if (editing) {
         await locationsApi.update(editing.id, payload);
-        toast.success("Localizacion actualizada.");
+        toast.success("Localización actualizada.");
       } else {
         await locationsApi.create(payload);
-        toast.success("Localizacion creada.");
+        toast.success("Localización creada.");
       }
       setFormOpen(false);
       await resource.refresh();
@@ -101,7 +101,7 @@ export function LocationsPage() {
 
   async function confirmDelete() {
     await locationsApi.remove(deleting.id);
-    toast.success("Localizacion eliminada.");
+    toast.success("Localización eliminada.");
     setDeleting(null);
     await resource.refresh();
   }
@@ -109,10 +109,10 @@ export function LocationsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Locations"
+        eyebrow="Localizaciones"
         title="Localizaciones"
-        description="Guarda spots fotograficos con coordenadas, mejor hora, dificultad, tags y equipo recomendado."
-        action={<Button onClick={openCreate}>Nueva localizacion</Button>}
+        description="Guarda lugares de sesión con coordenadas, mejor hora, dificultad, etiquetas y equipo recomendado."
+        action={<Button onClick={openCreate}>Nueva localización</Button>}
       />
 
       <LocationFilters resource={resource} />
@@ -122,8 +122,8 @@ export function LocationsPage() {
       ) : resource.items.length === 0 ? (
         <EmptyState
           title="Sin localizaciones"
-          description="Crea tu primera localizacion fotografica."
-          action={<Button onClick={openCreate}>Crear localizacion</Button>}
+          description="Crea tu primera localización fotográfica."
+          action={<Button onClick={openCreate}>Crear localización</Button>}
         />
       ) : (
         <>
@@ -143,7 +143,7 @@ export function LocationsPage() {
 
       <Modal
         open={formOpen}
-        title={editing ? "Editar localizacion" : "Nueva localizacion"}
+        title={editing ? "Editar localización" : "Nueva localización"}
         onClose={() => setFormOpen(false)}
       >
         <LocationForm
@@ -156,8 +156,8 @@ export function LocationsPage() {
       </Modal>
       <ConfirmDialog
         open={Boolean(deleting)}
-        title="Eliminar localizacion"
-        description="Esta accion elimina la localizacion guardada. No afecta a las sesiones asociadas."
+        title="Eliminar localización"
+        description="Esta acción elimina la localización guardada. No afecta a las sesiones asociadas."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />

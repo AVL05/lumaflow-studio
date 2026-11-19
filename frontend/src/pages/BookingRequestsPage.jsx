@@ -14,7 +14,8 @@ import { ErrorState } from "../components/states/ErrorState";
 import { useAuth } from "../features/auth/AuthContext";
 import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
-import { bookingRequestStatuses, labelFor, toneFor } from "../utils/catalogs";
+import { bookingRequestStatuses, labelFor, sessionTypes, toneFor } from "../utils/catalogs";
+import { formatDate } from "../utils/dates";
 
 export function BookingRequestsPage() {
   const { user } = useAuth();
@@ -61,16 +62,16 @@ export function BookingRequestsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Business"
+        eyebrow="Negocio"
         title="Solicitudes de reserva"
-        description="Leads recibidos desde tu pagina publica de reserva."
+        description="Leads recibidos desde tu página pública de reserva."
       />
 
       {bookingUrl ? (
         <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 p-5">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              Tu enlace publico de reserva
+              Tu enlace público de reserva
             </p>
             <p className="mt-1 truncate text-sm text-amber-100">{bookingUrl}</p>
           </div>
@@ -111,9 +112,13 @@ export function BookingRequestsPage() {
                   </Badge>
                 </div>
                 <div className="mt-4 space-y-1 text-sm text-stone-400">
-                  {booking.session_type ? <p>Tipo: {booking.session_type}</p> : null}
-                  {booking.preferred_date ? <p>Fecha preferida: {booking.preferred_date}</p> : null}
-                  {booking.phone ? <p>Telefono: {booking.phone}</p> : null}
+                  {booking.session_type ? (
+                    <p>Tipo: {labelFor(sessionTypes, booking.session_type)}</p>
+                  ) : null}
+                  {booking.preferred_date ? (
+                    <p>Fecha preferida: {formatDate(booking.preferred_date)}</p>
+                  ) : null}
+                  {booking.phone ? <p>Teléfono: {booking.phone}</p> : null}
                 </div>
                 {booking.message ? (
                   <p className="mt-3 line-clamp-3 text-sm text-stone-300">{booking.message}</p>
@@ -148,7 +153,7 @@ export function BookingRequestsPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar solicitud"
-        description="Esta accion elimina la solicitud de reserva permanentemente."
+        description="Esta acción elimina la solicitud de reserva permanentemente."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />

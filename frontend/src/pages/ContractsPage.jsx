@@ -29,6 +29,7 @@ import {
   canEditContract,
 } from "../features/contracts/contractTransitions";
 import { ContractPortalPanel } from "../features/contracts/ContractPortalPanel";
+import { formatMoney } from "../utils/money";
 
 const defaults = {
   job_id: "",
@@ -65,7 +66,7 @@ export function ContractsPage() {
     ])
       .then(([clientResponse, jobResponse, quoteResponse]) => {
         setClients(clientResponse.data);
-        setJobs(jobResponse.data);
+        setJobs(jobResponse);
         setQuotes(quoteResponse.data);
       })
       .catch(() => {});
@@ -344,7 +345,7 @@ function ContractForm({ form, setForm, clients, jobs, quotes, onSubmit, saving, 
               { value: "", label: "Sin presupuesto" },
               ...quotes.map((quote) => ({
                 value: String(quote.id),
-                label: `${quote.quote_number} · ${quote.total} EUR`,
+                label: `${quote.quote_number} · ${formatMoney(quote.total)}`,
               })),
             ]}
           />

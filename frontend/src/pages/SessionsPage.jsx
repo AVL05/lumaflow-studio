@@ -31,6 +31,7 @@ import { useToast } from "../features/notifications/ToastContext";
 import { LocationSelector } from "../features/locations/LocationSelector";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 import { labelFor, sessionStatuses, sessionTypes, toneForStatus } from "../utils/catalogs";
+import { formatDate } from "../utils/dates";
 
 const defaults = {
   job_id: "",
@@ -51,7 +52,7 @@ export function SessionsPage() {
   const resource = usePaginatedResource(sessionsApi.list, {
     per_page: 12,
     sort: "date",
-    direction: "asc",
+    direction: "desc",
   });
   const [form, setForm] = useState(defaults);
   const [editing, setEditing] = useState(null);
@@ -106,10 +107,10 @@ export function SessionsPage() {
     try {
       if (editing) {
         await sessionsApi.update(editing.id, normalizeSession(form));
-        toast.success("Sesion actualizada.");
+        toast.success("Sesión actualizada.");
       } else {
         await sessionsApi.create(normalizeSession(form));
-        toast.success("Sesion creada.");
+        toast.success("Sesión creada.");
       }
       setFormOpen(false);
       await resource.refresh();
@@ -122,7 +123,7 @@ export function SessionsPage() {
 
   async function confirmDelete() {
     await sessionsApi.remove(deleting.id);
-    toast.success("Sesion eliminada.");
+    toast.success("Sesión eliminada.");
     setDeleting(null);
     await resource.refresh();
   }
@@ -130,15 +131,15 @@ export function SessionsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Planning"
+        eyebrow="Planificación"
         title="Sesiones"
-        description="Gestiona sesiones con cliente, tipo, estado, localizacion, checklists, timeline y filtros reales."
+        description="Gestiona sesiones con cliente, tipo, estado, localización, checklists, timeline y filtros reales."
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => exportsApi.csv("sessions")}>
               Exportar CSV
             </Button>
-            <Button onClick={openCreate}>Nueva sesion</Button>
+            <Button onClick={openCreate}>Nueva sesión</Button>
           </div>
         }
       />
@@ -147,7 +148,7 @@ export function SessionsPage() {
         <SearchBar
           value={resource.filters.search ?? ""}
           onChange={(value) => resource.updateFilter("search", value)}
-          placeholder="Buscar por nombre, cliente o localizacion"
+          placeholder="Buscar por nombre, cliente o localización"
         />
         <Select
           value={resource.filters.status ?? ""}
@@ -214,7 +215,7 @@ export function SessionsPage() {
                       </h2>
                       <p className="mt-1 text-sm text-stone-400">
                         {session.client_name || "Sin cliente"} ·{" "}
-                        {session.location?.name || session.location_name || "Sin localizacion"}
+                        {session.location?.name || session.location_name || "Sin localización"}
                       </p>
                     </div>
                   </div>
@@ -223,12 +224,12 @@ export function SessionsPage() {
                   </Badge>
                 </div>
                 <div className="mt-5 grid grid-cols-3 gap-3 text-sm text-stone-400">
-                  <span>{session.date}</span>
+                  <span>{formatDate(session.date)}</span>
                   <span>{session.time || "Sin hora"}</span>
                   <span>{labelFor(sessionTypes, session.session_type)}</span>
                 </div>
                 <p className="mt-4 line-clamp-2 text-sm text-stone-400">
-                  {session.description || session.notes || "Sin descripcion."}
+                  {session.description || session.notes || "Sin descripción."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button variant="secondary" onClick={() => setDetail(session)}>
@@ -258,7 +259,7 @@ export function SessionsPage() {
           Cambiar estado
         </Button>
         <Button variant="secondary" onClick={() => exportsApi.csv("sessions", selection.selected)}>
-          Exportar seleccion
+          Exportar selección
         </Button>
         <Button variant="danger" onClick={() => runBulk("delete")}>
           Eliminar
@@ -267,7 +268,7 @@ export function SessionsPage() {
 
       <Modal
         open={formOpen}
-        title={editing ? "Editar sesion" : "Nueva sesion"}
+        title={editing ? "Editar sesión" : "Nueva sesión"}
         onClose={() => setFormOpen(false)}
       >
         <SessionForm
@@ -283,8 +284,8 @@ export function SessionsPage() {
       </Modal>
       <ConfirmDialog
         open={Boolean(deleting)}
-        title="Eliminar sesion"
-        description="Esta accion eliminara la sesion de forma permanente."
+        title="Eliminar sesión"
+        description="Esta acción eliminará la sesión de forma permanente."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />
@@ -340,7 +341,7 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
           options={sessionStatuses}
         />
       </Field>
-      <Field label="Localizacion">
+      <Field label="Localización">
         <Input
           value={form.location_name ?? ""}
           onChange={(e) => setValue("location_name", e.target.value)}
@@ -352,7 +353,7 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
         onCreate={() => window.open("/app/locations", "_blank", "noopener,noreferrer")}
       />
       <div className="md:col-span-2">
-        <Field label="Descripcion">
+        <Field label="Descripción">
           <Textarea
             rows="3"
             value={form.description ?? ""}
@@ -370,7 +371,7 @@ function SessionForm({ form, setForm, onSubmit, error, saving }) {
         </Field>
       </div>
       <div className="md:col-span-2 flex justify-end">
-        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar sesion"}</Button>
+        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar sesión"}</Button>
       </div>
     </form>
   );
@@ -402,7 +403,8 @@ function SessionSummary({ session }) {
         <span className="text-stone-100">Cliente:</span> {session.client_name || "Sin cliente"}
       </p>
       <p>
-        <span className="text-stone-100">Fecha:</span> {session.date} {session.time || ""}
+        <span className="text-stone-100">Fecha:</span> {formatDate(session.date)}{" "}
+        {session.time?.slice(0, 5) || ""}
       </p>
       <p>
         <span className="text-stone-100">Tipo:</span> {labelFor(sessionTypes, session.session_type)}
@@ -411,8 +413,8 @@ function SessionSummary({ session }) {
         <span className="text-stone-100">Estado:</span> {labelFor(sessionStatuses, session.status)}
       </p>
       <p className="md:col-span-2">
-        <span className="text-stone-100">Localizacion:</span>{" "}
-        {session.location?.name || session.location_name || "Sin localizacion"}
+        <span className="text-stone-100">Localización:</span>{" "}
+        {session.location?.name || session.location_name || "Sin localización"}
       </p>
       {session.location ? (
         <div className="md:col-span-2">
@@ -424,8 +426,8 @@ function SessionSummary({ session }) {
         </div>
       ) : null}
       <p className="md:col-span-2">
-        <span className="text-stone-100">Descripcion:</span>{" "}
-        {session.description || "Sin descripcion"}
+        <span className="text-stone-100">Descripción:</span>{" "}
+        {session.description || "Sin descripción"}
       </p>
       <p className="md:col-span-2">
         <span className="text-stone-100">Notas:</span> {session.notes || "Sin notas"}

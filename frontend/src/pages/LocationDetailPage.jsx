@@ -25,8 +25,8 @@ export function LocationDetailPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Location detail"
-        title={location?.name ?? "Localizacion"}
+        eyebrow="Detalle de localización"
+        title={location?.name ?? "Localización"}
         description="Detalle operativo y preview preparado para Leaflet."
         action={
           <Link to="/app/locations">

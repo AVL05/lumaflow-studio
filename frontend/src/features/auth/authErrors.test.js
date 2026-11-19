@@ -14,7 +14,7 @@ function response(status, headers = {}) {
 }
 
 describe("classifyAuthError", () => {
-  it("marca 401 como sesion invalida", () => {
+  it("marca 401 como sesión invalida", () => {
     expect(classifyAuthError(response(401))).toBe(AUTH_ERROR_UNAUTHORIZED);
     expect(isUnauthorized(response(401))).toBe(true);
   });
@@ -28,7 +28,7 @@ describe("classifyAuthError", () => {
     expect(classifyAuthError({ code: "ECONNABORTED" })).toBe(AUTH_ERROR_TRANSIENT);
   });
 
-  it("trata 403, 419 y 422 como inesperados sin destruir sesion", () => {
+  it("trata 403, 419 y 422 como inesperados sin destruir sesión", () => {
     for (const status of [403, 404, 419, 422]) {
       expect(classifyAuthError(response(status))).toBe(AUTH_ERROR_UNEXPECTED);
       expect(isUnauthorized(response(status))).toBe(false);

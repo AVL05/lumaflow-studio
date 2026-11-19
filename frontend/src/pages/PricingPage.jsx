@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { MarketingPage } from "../components/marketing/MarketingPage";
-import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 const included = [
   "Clientes, sesiones, tareas y calendario",
   "Presupuestos, facturas y documentos PDF",
-  "Galerías de entrega y favoritas",
+  "Entregas por enlaces externos",
   "Equipo, localizaciones y presets",
   "Analítica e IA WebGPU en el navegador",
   "PWA instalable para escritorio y móvil",
@@ -14,42 +13,37 @@ const included = [
 const pricingFaqs = [
   ["¿Necesito una tarjeta?", "No. El registro de la beta no solicita datos de pago."],
   [
-    "¿Me cobraréis al terminar la beta?",
-    "No habrá cargos automáticos. Cualquier plan futuro se anunciará antes y requerirá una decisión explícita por tu parte.",
+    "¿Seguirá siendo gratuito?",
+    "Sí. LumaFlow seguirá siendo gratuito, sin planes premium, cuotas ni funciones exclusivas por donar.",
   ],
   [
-    "¿Hay módulos de pago ahora?",
-    "No. Durante la beta, todos los módulos disponibles forman parte del acceso gratuito.",
+    "¿Es necesario donar?",
+    "No. Las aportaciones son voluntarias y no cambian las funcionalidades disponibles para tu cuenta.",
   ],
 ];
 
 export function PricingPage() {
-  useDocumentMeta(
-    "Precio de LumaFlow | Beta gratuita",
-    "Usa todos los módulos actuales de LumaFlow gratis durante la beta, sin tarjeta ni cargos automáticos.",
-  );
-
   return (
     <MarketingPage>
       <section className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
         <div className="landing-enter max-w-4xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-            Beta pública
+            Gratuito y open source
           </p>
           <h1 className="mt-5 max-w-[13ch] text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-stone-50 sm:text-6xl lg:text-[4.5rem]">
-            Un precio claro mientras validamos.
+            Todas las funciones. Sin planes de pago.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-stone-400 sm:text-lg">
-            Todo LumaFlow, gratis durante la beta y sin tarjeta.
+            Todo LumaFlow, gratis para todos y sin tarjeta.
           </p>
         </div>
 
         <div className="mt-14 grid overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] lg:grid-cols-[0.72fr_1.28fr]">
           <div className="flex flex-col justify-between bg-[linear-gradient(145deg,#241f16,#15120e)] p-7 sm:p-10 lg:p-14">
             <div>
-              <p className="text-sm font-semibold text-amber-200">Beta</p>
+              <p className="text-sm font-semibold text-amber-200">LumaFlow</p>
               <p className="mt-5 text-7xl font-semibold tracking-[-0.07em] text-stone-50">0 €</p>
-              <p className="mt-3 text-sm text-stone-400">por mes durante la beta</p>
+              <p className="mt-3 text-sm text-stone-400">para todos, dones o no</p>
             </div>
             <div className="mt-12">
               <Link
@@ -84,24 +78,24 @@ export function PricingPage() {
       <section className="border-y border-white/8 bg-[#0d0c0b] px-4 py-24 sm:px-6 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-[1400px]">
           <h2 className="max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-stone-50 sm:text-5xl">
-            Qué ocurrirá después.
+            Cómo se sostiene el proyecto.
           </h2>
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
               [
                 "01",
-                "Validamos la beta",
-                "Mejoramos el producto con uso real antes de fijar planes definitivos.",
+                "Mejoras con uso real",
+                "La comunidad aporta ideas, reporta errores y ayuda a mejorar el producto.",
               ],
               [
                 "02",
-                "Avisamos con antelación",
-                "Cualquier cambio económico se explicará antes de entrar en vigor.",
+                "Apoyo voluntario",
+                "Las donaciones ayudan a mantener la infraestructura y continuar el desarrollo.",
               ],
               [
                 "03",
-                "Tú decides",
-                "No existe renovación ni cobro automático ligado a tu cuenta beta.",
+                "Sin privilegios por aportar",
+                "Todas las funciones siguen disponibles independientemente de las donaciones.",
               ],
             ].map(([number, title, text]) => (
               <article key={title} className="border-t border-white/12 pt-6">

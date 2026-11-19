@@ -114,7 +114,7 @@ export function ClientsPage() {
       <PageHeader
         eyebrow="CRM"
         title="Clientes"
-        description="Gestiona leads, clientes activos y contactos listos para entregas fotograficas."
+        description="Gestiona leads, clientes activos y contactos listos para entregas fotográficas."
         action={
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setImportOpen(true)}>
@@ -199,7 +199,7 @@ export function ClientsPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar cliente"
-        description="Esta accion elimina el cliente. No elimina entregas existentes, pero quedaran bloqueadas por integridad si estan asociadas."
+        description="Esta acción elimina el cliente. No elimina entregas existentes, pero quedarán bloqueadas por integridad si estan asociadas."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />

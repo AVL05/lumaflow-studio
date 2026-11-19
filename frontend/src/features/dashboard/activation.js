@@ -1,9 +1,9 @@
 /**
- * Siguiente accion util del estudio (Issue #6).
+ * Siguiente acción útil del estudio (Issue #6).
  *
- * Fuente unica para el checklist y el panel: se deriva del estado real de
- * activacion que devuelve el backend. Sin cliente primero el cliente, despues
- * el trabajo, despues la sesion; con el flujo inicial completo, activar
+ * Fuente única para el checklist y el panel: se deriva del estado real de
+ * activación que devuelve el backend. Sin cliente primero el cliente, después
+ * el trabajo, después la sesión; con el flujo inicial completo, activar
  * reservas; en otro caso no hay CTA (el panel muestra el estado operativo).
  */
 export function getNextAction(activation) {

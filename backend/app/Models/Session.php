@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Validation\ValidationException;
 
-#[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'location_id', 'name', 'date', 'time', 'location_name', 'session_type', 'status', 'description', 'notes', 'client_name'])]
+#[Fillable(['user_id', 'workspace_id', 'is_demo', 'job_id', 'location_id', 'name', 'date', 'time', 'location_name', 'session_type', 'status', 'description', 'notes', 'client_name', 'end_time', 'participants', 'incidents'])]
 class Session extends Model
 {
     use BelongsToWorkspace, CleansUpWorkflowRelations, HasFactory;
@@ -20,7 +21,25 @@ class Session extends Model
     {
         return [
             'date' => 'date',
+            'participants' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Session $session): void {
+            if ($session->end_time && (! $session->time || substr($session->end_time, 0, 5) < substr($session->time, 0, 5))) {
+                throw ValidationException::withMessages(['end_time' => 'La hora final debe ser posterior al inicio, dentro del mismo día.']);
+            }
+            if ($session->exists && $session->isDirty('job_id') && $session->shots()->exists()) {
+                throw ValidationException::withMessages(['job_id' => 'Retira las tomas asignadas antes de trasladar esta sesión.']);
+            }
+        });
+    }
+
+    public function shots(): HasMany
+    {
+        return $this->hasMany(Shot::class);
     }
 
     public function scopeOwnedBy($query, int $userId)

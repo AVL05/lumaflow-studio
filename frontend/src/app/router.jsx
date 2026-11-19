@@ -4,166 +4,159 @@ import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { lazyRoute } from "./lazyRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
-import { LandingPage } from "../pages/LandingPage";
+import { publicRoutes } from "./publicRoutes";
+import { RouteMetadata } from "./RouteMetadata";
 
 const errorElement = <NotFoundPage asErrorBoundary />;
 
 export const router = createBrowserRouter([
-  { path: "/", element: <LandingPage />, errorElement },
   {
-    path: "/demo",
-    element: lazyRoute(() => import("../pages/DemoPage"), "DemoPage"),
-    errorElement,
-  },
-  {
-    path: "/features",
-    element: lazyRoute(() => import("../pages/FeaturesPage"), "FeaturesPage"),
-    errorElement,
-  },
-  {
-    path: "/pricing",
-    element: lazyRoute(() => import("../pages/PricingPage"), "PricingPage"),
-    errorElement,
-  },
-  {
-    path: "/privacy",
-    element: lazyRoute(() => import("../pages/PrivacyPage"), "PrivacyPage"),
-    errorElement,
-  },
-  { path: "/security", element: <Navigate to="/privacy" replace />, errorElement },
-  { path: "/login", element: <LoginPage />, errorElement },
-  {
-    path: "/register",
-    element: lazyRoute(() => import("../pages/RegisterPage"), "RegisterPage"),
-    errorElement,
-  },
-  {
-    path: "/verify-email",
-    element: lazyRoute(() => import("../pages/EmailVerificationPage"), "EmailVerificationPage"),
-    errorElement,
-  },
-  {
-    path: "/onboarding",
-    element: lazyRoute(() => import("../pages/OnboardingPage"), "OnboardingPage"),
-    errorElement,
-  },
-  {
-    path: "/getting-started",
-    element: lazyRoute(() => import("../pages/GettingStartedPage"), "GettingStartedPage"),
-    errorElement,
-  },
-  {
-    path: "/forgot-password",
-    element: lazyRoute(() => import("../pages/ForgotPasswordPage"), "ForgotPasswordPage"),
-    errorElement,
-  },
-  {
-    path: "/reset-password",
-    element: lazyRoute(() => import("../pages/ResetPasswordPage"), "ResetPasswordPage"),
-    errorElement,
-  },
-  {
-    path: "/about-project",
-    element: lazyRoute(() => import("../pages/AboutProjectPage"), "AboutProjectPage"),
-    errorElement,
-  },
-  {
-    path: "/book/:slug",
-    element: lazyRoute(() => import("../pages/BookingPage"), "BookingPage"),
-    errorElement,
-  },
-  {
-    path: "/deliver/:token",
-    element: lazyRoute(() => import("../pages/ClientPortalPage"), "ClientPortalPage"),
-    errorElement,
-  },
-  {
-    path: "/contract/:token",
-    element: lazyRoute(() => import("../pages/ContractPortalPage"), "ContractPortalPage"),
-    errorElement,
-  },
-  {
-    path: "/app",
-    element: (
-      <ProtectedRoute>
-        <AppLayout />
-      </ProtectedRoute>
-    ),
+    element: <RouteMetadata />,
     errorElement,
     children: [
-      { index: true, element: <Navigate to="/app/dashboard" replace /> },
+      ...publicRoutes,
       {
-        path: "dashboard",
-        element: lazyRoute(() => import("../pages/DashboardPage"), "DashboardPage"),
+        path: "/demo",
+        element: lazyRoute(() => import("../pages/DemoPage"), "DemoPage"),
+        errorElement,
       },
-      { path: "jobs", element: lazyRoute(() => import("../pages/JobsPage"), "JobsPage") },
+      { path: "/security", element: <Navigate to="/privacy" replace />, errorElement },
+      { path: "/login", element: <LoginPage />, errorElement },
       {
-        path: "jobs/:id",
-        element: lazyRoute(() => import("../pages/JobDetailPage"), "JobDetailPage"),
-      },
-      {
-        path: "calendar",
-        element: lazyRoute(() => import("../pages/CalendarPage"), "CalendarPage"),
-      },
-      { path: "tasks", element: lazyRoute(() => import("../pages/TasksPage"), "TasksPage") },
-      {
-        path: "analytics",
-        element: lazyRoute(() => import("../pages/AnalyticsPage"), "AnalyticsPage"),
+        path: "/register",
+        element: lazyRoute(() => import("../pages/RegisterPage"), "RegisterPage"),
+        errorElement,
       },
       {
-        path: "sessions",
-        element: lazyRoute(() => import("../pages/SessionsPage"), "SessionsPage"),
-      },
-      { path: "gear", element: lazyRoute(() => import("../pages/GearPage"), "GearPage") },
-      { path: "presets", element: lazyRoute(() => import("../pages/PresetsPage"), "PresetsPage") },
-      { path: "clients", element: lazyRoute(() => import("../pages/ClientsPage"), "ClientsPage") },
-      {
-        path: "clients/:id",
-        element: lazyRoute(() => import("../pages/ClientDetailPage"), "ClientDetailPage"),
+        path: "/verify-email",
+        element: lazyRoute(() => import("../pages/EmailVerificationPage"), "EmailVerificationPage"),
+        errorElement,
       },
       {
-        path: "deliveries",
-        element: lazyRoute(() => import("../pages/DeliveriesPage"), "DeliveriesPage"),
+        path: "/onboarding",
+        element: lazyRoute(() => import("../pages/OnboardingPage"), "OnboardingPage"),
+        errorElement,
       },
       {
-        path: "deliveries/:id",
-        element: lazyRoute(() => import("../pages/DeliveryDetailPage"), "DeliveryDetailPage"),
-      },
-      { path: "quotes", element: lazyRoute(() => import("../pages/QuotesPage"), "QuotesPage") },
-      {
-        path: "contracts",
-        element: lazyRoute(() => import("../pages/ContractsPage"), "ContractsPage"),
+        path: "/getting-started",
+        element: lazyRoute(() => import("../pages/GettingStartedPage"), "GettingStartedPage"),
+        errorElement,
       },
       {
-        path: "invoices",
-        element: lazyRoute(() => import("../pages/InvoicesPage"), "InvoicesPage"),
+        path: "/forgot-password",
+        element: lazyRoute(() => import("../pages/ForgotPasswordPage"), "ForgotPasswordPage"),
+        errorElement,
       },
       {
-        path: "booking-requests",
-        element: lazyRoute(() => import("../pages/BookingRequestsPage"), "BookingRequestsPage"),
+        path: "/reset-password",
+        element: lazyRoute(() => import("../pages/ResetPasswordPage"), "ResetPasswordPage"),
+        errorElement,
       },
       {
-        path: "locations",
-        element: lazyRoute(() => import("../pages/LocationsPage"), "LocationsPage"),
+        path: "/book/:slug",
+        element: lazyRoute(() => import("../pages/BookingPage"), "BookingPage"),
+        errorElement,
       },
       {
-        path: "locations/:id",
-        element: lazyRoute(() => import("../pages/LocationDetailPage"), "LocationDetailPage"),
+        path: "/deliver/:token",
+        element: lazyRoute(() => import("../pages/ClientPortalPage"), "ClientPortalPage"),
+        errorElement,
       },
       {
-        path: "ai-assistant",
-        element: lazyRoute(() => import("../pages/AiAssistantPage"), "AiAssistantPage"),
-      },
-      { path: "system", element: <Navigate to="/app/settings/advanced" replace /> },
-      {
-        path: "settings",
-        element: lazyRoute(() => import("../pages/SettingsPage"), "SettingsPage"),
+        path: "/contract/:token",
+        element: lazyRoute(() => import("../pages/ContractPortalPage"), "ContractPortalPage"),
+        errorElement,
       },
       {
-        path: "settings/advanced",
-        element: lazyRoute(() => import("../pages/SystemPage"), "SystemPage"),
+        path: "/app",
+        element: (
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        ),
+        errorElement,
+        children: [
+          { index: true, element: <Navigate to="/app/dashboard" replace /> },
+          {
+            path: "dashboard",
+            element: lazyRoute(() => import("../pages/DashboardPage"), "DashboardPage"),
+          },
+          { path: "jobs", element: lazyRoute(() => import("../pages/JobsPage"), "JobsPage") },
+          {
+            path: "jobs/:id",
+            element: lazyRoute(() => import("../pages/JobDetailPage"), "JobDetailPage"),
+          },
+          {
+            path: "calendar",
+            element: lazyRoute(() => import("../pages/CalendarPage"), "CalendarPage"),
+          },
+          { path: "tasks", element: lazyRoute(() => import("../pages/TasksPage"), "TasksPage") },
+          {
+            path: "analytics",
+            element: lazyRoute(() => import("../pages/AnalyticsPage"), "AnalyticsPage"),
+          },
+          {
+            path: "sessions",
+            element: lazyRoute(() => import("../pages/SessionsPage"), "SessionsPage"),
+          },
+          { path: "gear", element: lazyRoute(() => import("../pages/GearPage"), "GearPage") },
+          {
+            path: "presets",
+            element: lazyRoute(() => import("../pages/PresetsPage"), "PresetsPage"),
+          },
+          {
+            path: "clients",
+            element: lazyRoute(() => import("../pages/ClientsPage"), "ClientsPage"),
+          },
+          {
+            path: "clients/:id",
+            element: lazyRoute(() => import("../pages/ClientDetailPage"), "ClientDetailPage"),
+          },
+          {
+            path: "deliveries",
+            element: lazyRoute(() => import("../pages/DeliveriesPage"), "DeliveriesPage"),
+          },
+          {
+            path: "deliveries/:id",
+            element: lazyRoute(() => import("../pages/DeliveryDetailPage"), "DeliveryDetailPage"),
+          },
+          { path: "quotes", element: lazyRoute(() => import("../pages/QuotesPage"), "QuotesPage") },
+          {
+            path: "contracts",
+            element: lazyRoute(() => import("../pages/ContractsPage"), "ContractsPage"),
+          },
+          {
+            path: "invoices",
+            element: lazyRoute(() => import("../pages/InvoicesPage"), "InvoicesPage"),
+          },
+          {
+            path: "booking-requests",
+            element: lazyRoute(() => import("../pages/BookingRequestsPage"), "BookingRequestsPage"),
+          },
+          {
+            path: "locations",
+            element: lazyRoute(() => import("../pages/LocationsPage"), "LocationsPage"),
+          },
+          {
+            path: "locations/:id",
+            element: lazyRoute(() => import("../pages/LocationDetailPage"), "LocationDetailPage"),
+          },
+          {
+            path: "ai-assistant",
+            element: lazyRoute(() => import("../pages/AiAssistantPage"), "AiAssistantPage"),
+          },
+          { path: "system", element: <Navigate to="/app/settings/advanced" replace /> },
+          {
+            path: "settings",
+            element: lazyRoute(() => import("../pages/SettingsPage"), "SettingsPage"),
+          },
+          {
+            path: "settings/advanced",
+            element: lazyRoute(() => import("../pages/SystemPage"), "SystemPage"),
+          },
+        ],
       },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
-  { path: "*", element: <NotFoundPage /> },
 ]);

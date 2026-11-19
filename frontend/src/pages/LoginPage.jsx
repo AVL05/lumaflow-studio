@@ -29,7 +29,7 @@ export function LoginPage() {
       const authenticatedUser = await login(form);
       navigate(getAuthDestination(authenticatedUser));
     } catch (err) {
-      setError(getApiError(err, "No se pudo iniciar sesion."));
+      setError(getApiError(err, "No se pudo iniciar sesión."));
     } finally {
       setLoading(false);
     }

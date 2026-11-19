@@ -12,7 +12,8 @@ class SecurityHeadersTest extends TestCase
 
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
-        $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        // Otro middleware (portales publicos) puede fijar una politica mas estricta.
+        $this->assertContains($response->headers->get('Referrer-Policy'), ['strict-origin-when-cross-origin', 'no-referrer']);
         $this->assertNotEmpty($response->headers->get('Permissions-Policy'));
     }
 

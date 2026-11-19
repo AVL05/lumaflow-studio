@@ -23,6 +23,8 @@ import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useCreateIntent } from "../hooks/useCreateIntent";
 import { quoteStatuses } from "../utils/catalogs";
+import { formatDate } from "../utils/dates";
+import { formatMoney } from "../utils/money";
 
 const emptyItem = { description: "", quantity: 1, unit_price: "" };
 const defaults = {
@@ -220,7 +222,7 @@ export function QuotesPage() {
                     <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Total</p>
                     <p className="mt-1 text-2xl font-semibold tabular-nums">{money(quote.total)}</p>
                   </div>
-                  <p className="text-xs text-stone-400">{quote.issue_date}</p>
+                  <p className="text-xs text-stone-400">{formatDate(quote.issue_date)}</p>
                 </div>
                 <div className="mt-5">
                   <Select
@@ -418,9 +420,7 @@ function QuoteForm({ form, setForm, clients, sessions, onSubmit, saving, error }
 }
 
 function money(value) {
-  return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(
-    Number(value || 0),
-  );
+  return formatMoney(value);
 }
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);

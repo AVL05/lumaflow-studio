@@ -11,6 +11,7 @@ import {
   taskStatuses,
   toneFor,
 } from "../../utils/catalogs";
+import { formatDate } from "../../utils/dates";
 
 function WidgetCard({ title, action, children }) {
   return (
@@ -47,7 +48,7 @@ export function AgendaWidget({ events }) {
               <span className={`h-2 w-2 shrink-0 rounded-full ${sourceDots[event.source]}`} />
               <span className="min-w-0 flex-1 truncate text-sm text-stone-200">{event.title}</span>
               <span className="shrink-0 text-xs tabular-nums text-stone-400">
-                {event.time ?? "--:--"}
+                {event.time?.slice(0, 5) ?? "Todo el día"}
               </span>
             </li>
           ))}
@@ -86,7 +87,7 @@ export function PendingTasksWidget({ tasks, summary }) {
                 </Badge>
               </div>
               <p className={`mt-1 text-xs ${task.is_overdue ? "text-red-300" : "text-stone-400"}`}>
-                {task.due_date ?? "Sin fecha"} · {labelFor(taskStatuses, task.status)}
+                {formatDate(task.due_date)} · {labelFor(taskStatuses, task.status)}
               </p>
             </li>
           ))}
@@ -137,7 +138,7 @@ export function FavoriteGearWidget({ gear }) {
       }
     >
       {gear.length === 0 ? (
-        <Empty text="Marca equipo como favorito para verlo aqui." />
+        <Empty text="Marca equipo como favorito para verlo aquí." />
       ) : (
         <ul className="space-y-2">
           {gear.map((item) => (
@@ -158,7 +159,7 @@ export function FavoriteGearWidget({ gear }) {
 export function TopLocationsWidget({ locations }) {
   return (
     <WidgetCard
-      title="Localizaciones mas utilizadas"
+      title="Localizaciones más utilizadas"
       action={
         <Link to="/app/locations" className="text-xs text-amber-200 hover:text-amber-100">
           Mapa

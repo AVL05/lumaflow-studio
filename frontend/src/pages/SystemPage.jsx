@@ -11,9 +11,9 @@ import { ServiceCard } from "../features/system/ServiceCard";
 import { useResource } from "../hooks/useResource";
 
 const services = [
-  ["api", "API", "Aplicacion Laravel que sirve la REST API."],
+  ["api", "API", "Aplicación Laravel que sirve la REST API."],
   ["database", "Base de datos", "Conexión y esquema de datos de la aplicación."],
-  ["storage", "Storage", "Disco publico donde viven las fotografias."],
+  ["storage", "Storage", "Disco público donde viven las fotografías."],
   ["cache", "Cache", "Store usado por el rate limiting y sondas de estado."],
   ["ollama", "Ollama backend", "Compatibilidad opcional; la SPA usa WebGPU en navegador."],
 ];
@@ -21,7 +21,7 @@ const services = [
 const overall = {
   up: ["green", "Todos los servicios operativos"],
   degraded: ["warm", "Servicio opcional no disponible"],
-  down: ["red", "Hay un servicio critico caido"],
+  down: ["red", "Hay un servicio crítico caído"],
 };
 
 const REFRESH_MS = 30_000;
@@ -102,7 +102,7 @@ export function SystemPage() {
             <Panel className="flex flex-wrap items-center justify-between gap-3 p-5">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.16em] text-stone-400">
-                  Sincronizacion de calendario
+                  Sincronización de calendario
                 </p>
                 <p className="mt-2 truncate text-sm text-stone-300">
                   Suscribe este feed en Google Calendar, Apple Calendar u Outlook para ver tus

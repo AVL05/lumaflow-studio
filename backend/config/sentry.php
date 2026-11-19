@@ -46,6 +46,5 @@ return [
         UnauthorizedHttpException::class,
     ],
 
-    // Callable en forma de array: una closure impide `php artisan config:cache` (produccion).
-    'before_send' => [SentryScrubber::class, 'scrub'],
+    'before_send' => [SentryScrubber::class, 'scrubSdkEvent'],
 ];

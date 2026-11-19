@@ -32,7 +32,7 @@ export function KpiGrid({ kpis }) {
         value={kpis.openTasks}
         detail={`${kpis.overdueTasks} vencidas`}
       />
-      <StatCard label="Interacciones IA" value={kpis.aiInteractions} detail="Analisis y chats" />
+      <StatCard label="Interacciones IA" value={kpis.aiInteractions} detail="Análisis y chats" />
       <StatCard
         label="Tasa de cierre"
         value={`${kpis.sessions > 0 ? Math.round((kpis.completedSessions / kpis.sessions) * 100) : 0}%`}

@@ -1,6 +1,6 @@
 /**
  * Transiciones del lifecycle contractual (reflejo del backend).
- * Fuente unica para habilitar/deshabilitar acciones en la UI.
+ * Fuente única para habilitar/deshabilitar acciones en la UI.
  */
 export const CONTRACT_TRANSITIONS = {
   draft: ["sent"],

@@ -18,7 +18,10 @@ class IcsFeedService
     {
         $from = now()->subDays(30)->toDateString();
         $to = now()->addDays(180)->toDateString();
-        $events = $this->calendar->events($user, $from, $to);
+        // El token publica únicamente el estudio propio, no otras memberships.
+        $workspaceId = (int) $user->workspaces()->value('id');
+        abort_unless($workspaceId, 404);
+        $events = $this->calendar->events($user, $from, $to, [], $workspaceId);
 
         $lines = [
             'BEGIN:VCALENDAR',
@@ -45,7 +48,8 @@ class IcsFeedService
             [$hour, $minute] = explode(':', $event['time']);
             $start = $date->copy()->setTime((int) $hour, (int) $minute);
             $dtStart = 'DTSTART:'.$start->utc()->format('Ymd\THis\Z');
-            $dtEnd = 'DTEND:'.$start->copy()->addHour()->utc()->format('Ymd\THis\Z');
+            $end = isset($event['meta']['end_time']) ? Carbon::parse($event['date'].' '.$event['meta']['end_time']) : $start->copy()->addHour();
+            $dtEnd = 'DTEND:'.$end->utc()->format('Ymd\THis\Z');
         } else {
             $dtStart = 'DTSTART;VALUE=DATE:'.$date->format('Ymd');
             $dtEnd = 'DTEND;VALUE=DATE:'.$date->copy()->addDay()->format('Ymd');

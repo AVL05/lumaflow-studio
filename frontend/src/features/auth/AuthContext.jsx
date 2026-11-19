@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
   }
 
   function applySessionError(error) {
-    // Solo un 401 demuestra sesion invalida. Cualquier otro fallo
+    // Solo un 401 demuestra sesión invalida. Cualquier otro fallo
     // conserva el token local y deja la app en estado degradado.
     if (isUnauthorized(error)) {
       clearLocalSession();

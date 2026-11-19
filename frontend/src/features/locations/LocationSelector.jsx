@@ -16,13 +16,13 @@ export function LocationSelector({ value, onChange, onCreate }) {
 
   return (
     <div className="md:col-span-2">
-      <Field label="Localizacion guardada">
+      <Field label="Localización guardada">
         <div className="grid gap-2 md:grid-cols-[1fr_auto]">
           <Select
             value={value ?? ""}
             onChange={(event) => onChange(event.target.value)}
             options={[
-              { value: "", label: "Sin localizacion guardada" },
+              { value: "", label: "Sin localización guardada" },
               ...locations.map((location) => ({
                 value: String(location.id),
                 label: `${location.name}${location.city ? ` · ${location.city}` : ""}`,
@@ -30,7 +30,7 @@ export function LocationSelector({ value, onChange, onCreate }) {
             ]}
           />
           <Button type="button" variant="secondary" onClick={onCreate}>
-            Nueva localizacion
+            Nueva localización
           </Button>
         </div>
       </Field>

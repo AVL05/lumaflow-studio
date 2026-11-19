@@ -1,9 +1,27 @@
+import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Modal } from "./Modal";
 
 describe("Modal", () => {
+  it("mantiene el foco al escribir aunque el callback de cierre cambie", async () => {
+    function Harness() {
+      const [value, setValue] = useState("");
+      return (
+        <Modal open title="Editar" onClose={() => {}}>
+          <input aria-label="Nombre" value={value} onChange={(e) => setValue(e.target.value)} />
+        </Modal>
+      );
+    }
+    render(<Harness />);
+    const user = userEvent.setup();
+    const input = screen.getByLabelText("Nombre");
+    await user.type(input, "Texto completo");
+    expect(input).toHaveValue("Texto completo");
+    expect(input).toHaveFocus();
+  });
+
   it("no renderiza nada cerrado", () => {
     render(
       <Modal open={false} title="Oculto" onClose={vi.fn()}>
@@ -14,7 +32,7 @@ describe("Modal", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("expone el titulo como nombre accesible del dialogo", () => {
+  it("expone el título como nombre accesible del dialogo", () => {
     render(
       <Modal open title="Nueva tarea" onClose={vi.fn()}>
         <p>contenido</p>
@@ -28,7 +46,7 @@ describe("Modal", () => {
     const onClose = vi.fn();
     render(
       <Modal open title="Editar" onClose={onClose}>
-        <button type="button">accion</button>
+        <button type="button">acción</button>
       </Modal>,
     );
 

@@ -39,8 +39,8 @@ export function NotificationCenter({ open, onClose }) {
           </>
         ) : items.length === 0 ? (
           <EmptyState
-            title="Todo al dia"
-            description="Aqui apareceran avisos de entregas, tareas y eventos del sistema."
+            title="Todo al día"
+            description="Aquí aparecerán avisos de entregas, tareas y eventos del sistema."
           />
         ) : (
           items.map((notification) => (

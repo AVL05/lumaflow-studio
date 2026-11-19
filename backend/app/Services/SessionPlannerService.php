@@ -18,12 +18,13 @@ class SessionPlannerService
     {
         $session->load('location');
         $result = $this->ollama->json($this->prompts->sessionPlan(
-            $this->context->forUser($user, ['task' => 'session_plan', 'session_id' => $session->id]),
+            $this->context->forUser($user, ['task' => 'session_plan', 'session_id' => $session->id], $session->workspace_id),
             $session->toArray(),
             $input
         ));
 
         $plan = $user->aiSessionPlans()->create([
+            'workspace_id' => $session->workspace_id,
             'session_id' => $session->id,
             'title' => 'Plan IA - '.$session->name,
             'plan' => $result,
@@ -31,6 +32,7 @@ class SessionPlannerService
         ]);
 
         $user->aiAnalyses()->create([
+            'workspace_id' => $session->workspace_id,
             'type' => 'session_plan',
             'prompt' => json_encode(['session_id' => $session->id] + $input, JSON_UNESCAPED_UNICODE),
             'result' => ['plan_id' => $plan->id, 'plan' => $result],

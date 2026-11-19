@@ -20,10 +20,10 @@ export function ChatPanel({
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">
-            {conversation?.title || "Asistente fotografico"}
+            {conversation?.title || "Asistente fotográfico"}
           </h2>
           <p className="mt-1 text-sm text-stone-400">
-            Planificacion, composicion, iluminacion, edicion y organizacion con tus datos.
+            Planificación, composición, iluminación, edición y organización con tus datos.
           </p>
         </div>
         <div className="flex gap-2">

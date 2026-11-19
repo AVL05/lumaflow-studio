@@ -8,7 +8,7 @@ export function ChatInput({ value, onChange, onSubmit, onCancel, disabled }) {
         rows="4"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Ej: prepara checklist para sesion urbana nocturna con mi equipo favorito"
+        placeholder="Ej: prepara checklist para sesión urbana nocturna con mi equipo favorito"
       />
       <div className="flex gap-2">
         <Button disabled={disabled || !value.trim()}>{disabled ? "Pensando..." : "Enviar"}</Button>

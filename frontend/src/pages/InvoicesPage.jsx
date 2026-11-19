@@ -19,6 +19,8 @@ import { useToast } from "../features/notifications/ToastContext";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useCreateIntent } from "../hooks/useCreateIntent";
 import { invoiceStatuses } from "../utils/catalogs";
+import { formatDate } from "../utils/dates";
+import { formatMoney } from "../utils/money";
 
 export function InvoicesPage() {
   const toast = useToast();
@@ -137,7 +139,7 @@ export function InvoicesPage() {
                   </div>
                   <div>
                     <p className="text-xs text-stone-400">Vencimiento</p>
-                    <p className="mt-1 text-sm">{invoice.due_date || "Sin fecha"}</p>
+                    <p className="mt-1 text-sm">{formatDate(invoice.due_date)}</p>
                   </div>
                 </div>
                 <div className="mt-5">
@@ -215,7 +217,5 @@ export function InvoicesPage() {
 }
 
 function money(value) {
-  return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(
-    Number(value || 0),
-  );
+  return formatMoney(value);
 }

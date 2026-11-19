@@ -10,6 +10,7 @@ import {
   toneFor,
 } from "../../utils/catalogs";
 import { sourceDots } from "./calendarUtils";
+import { formatDate } from "../../utils/dates";
 
 const statusCatalogs = {
   session: sessionStatuses,
@@ -31,7 +32,7 @@ export const CalendarList = memo(function CalendarList({ events, onSelect }) {
             <th className="px-3 py-2 font-medium">Fecha</th>
             <th className="px-3 py-2 font-medium">Hora</th>
             <th className="px-3 py-2 font-medium">Tipo</th>
-            <th className="px-3 py-2 font-medium">Titulo</th>
+            <th className="px-3 py-2 font-medium">Título</th>
             <th className="px-3 py-2 font-medium">Estado</th>
           </tr>
         </thead>
@@ -42,8 +43,11 @@ export const CalendarList = memo(function CalendarList({ events, onSelect }) {
               onClick={() => onSelect?.(event)}
               className="cursor-pointer border-b border-white/[0.05] transition last:border-0 hover:bg-white/[0.03]"
             >
-              <td className="px-3 py-2 tabular-nums text-stone-400">{event.date}</td>
-              <td className="px-3 py-2 tabular-nums text-stone-400">{event.time ?? "--:--"}</td>
+              <td className="px-3 py-2 tabular-nums text-stone-400">{formatDate(event.date)}</td>
+              <td className="px-3 py-2 tabular-nums text-stone-400">
+                {event.time?.slice(0, 5) ?? "Todo el día"}
+                {event.meta?.end_time ? `–${event.meta.end_time}` : ""}
+              </td>
               <td className="px-3 py-2">
                 <span className="flex items-center gap-2 text-stone-400">
                   <span className={`h-2 w-2 rounded-full ${sourceDots[event.source]}`} />

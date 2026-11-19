@@ -16,7 +16,10 @@ use App\Observers\UserObserver;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Transport\LogTransport;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,6 +38,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Mail::extend('log', function (array $config): LogTransport {
+            if (app()->environment('production')) {
+                throw new \RuntimeException('The log mail transport is disabled in production. Configure SMTP.');
+            }
+
+            return new LogTransport(Log::channel($config['channel'] ?? config('mail.log_channel')));
+        });
+
         User::observe(UserObserver::class);
 
         // Limite propio por IP y estudio: el techo general de 30/min es compartido por todos
