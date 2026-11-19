@@ -268,7 +268,7 @@ export function ClientPortalPage() {
         {delivery.studio_name ? (
           <p className="text-sm text-stone-400">Entregado por {delivery.studio_name}</p>
         ) : null}
-        <p className="mt-1 text-xs text-stone-600">Powered by LumaFlow</p>
+        <p className="mt-1 text-xs text-stone-400">Powered by LumaFlow</p>
       </footer>
     </PublicShell>
   );

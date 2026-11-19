@@ -112,6 +112,12 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 | Flujo de usuario de principio a fin               | Recorrido E2E                                            |
 | Correccion de error reproducible                  | Test de regresion en el nivel mas bajo posible y, si rompia un flujo, E2E |
 
+## Accesibilidad automatizada (#69)
+
+`e2e/tests/zz-accessibility.spec.js` ejecuta axe (`@axe-core/playwright`, dependencia de desarrollo del paquete `e2e`: la alternativa sería mantener reglas WCAG propias) sobre landing, login, dashboard, portal de entrega y portal de contrato, con las etiquetas WCAG 2.x A/AA. Falla ante violaciones `serious` o `critical`; las menores no bloquean. Antes de analizar espera a que terminen las animaciones de entrada, que falsean el contraste.
+
+Su primera ejecución encontró y se corrigieron: texto `stone-500/600` con contraste insuficiente en landing, footer y portal de entrega, y una barra de progreso sin nombre accesible (`ProgressBar`). Otras pantallas con `text-stone-500` (por ejemplo ajustes, contratos o IA) no están cubiertas por el test y no se han auditado. No sustituye una auditoría manual.
+
 ## Migraciones y Feature tests en MySQL (#54)
 
 El job `Backend on MySQL 8` de CI levanta un servicio `mysql:8.0`, ejecuta `php artisan migrate --force` desde cero y después la suite `Feature` contra MySQL (las variables `DB_*` del job prevalecen sobre las de `phpunit.xml`). Si una migración no funciona en MySQL, CI falla. Los tests de concurrencia con workers SQLite/WAL no acreditan bloqueos MySQL. El ensayo sobre un clon de TiDB sigue pendiente y requiere acceso del operador.
