@@ -90,6 +90,8 @@ class DataRestoreCommand extends Command
             if ($driver === 'sqlite') {
                 $target = (string) config('database.connections.sqlite.database');
                 $backups->applySqlite($file, $target);
+            } elseif ($driver === 'pgsql') {
+                $backups->applyPostgres($file);
             } else {
                 $backups->applyMysql($file, $driver);
             }
