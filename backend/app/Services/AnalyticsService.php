@@ -125,14 +125,16 @@ class AnalyticsService
     }
 
     /**
-     * Buckets mensuales YYYY-MM en el motor activo. MySQL usa DATE_FORMAT;
-     * SQLite (tests/E2E) usa strftime con identica semantica.
+     * Buckets mensuales YYYY-MM en el motor activo. MySQL usa DATE_FORMAT,
+     * PostgreSQL to_char y SQLite (tests/E2E) strftime, con identica semantica.
      */
     private function monthBucket(string $column): string
     {
-        return DB::getDriverName() === 'sqlite'
-            ? "strftime('%Y-%m', {$column})"
-            : "DATE_FORMAT({$column}, '%Y-%m')";
+        return match (DB::getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', {$column})",
+            'pgsql' => "to_char({$column}, 'YYYY-MM')",
+            default => "DATE_FORMAT({$column}, '%Y-%m')",
+        };
     }
 
     private function topLocations(User $user): array

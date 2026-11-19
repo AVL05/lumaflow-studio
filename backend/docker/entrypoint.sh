@@ -1,22 +1,38 @@
 #!/bin/sh
 set -e
 
-# Espera a MySQL: `depends_on` solo garantiza que el contenedor arranco,
-# no que el motor acepte conexiones.
+# Espera a la base de datos: `depends_on` solo garantiza que el contenedor arranco,
+# no que el motor acepte conexiones. Con limite: si nunca responde, `migrate` falla con un
+# error claro en vez de dejar el arranque colgado sin abrir el puerto.
 if [ -n "$DB_HOST" ]; then
-  echo "Esperando a MySQL en ${DB_HOST}:${DB_PORT:-3306}..."
+  echo "Esperando a ${DB_CONNECTION:-mysql} en ${DB_HOST}:${DB_PORT:-3306}..."
+  attempts=0
   until php -r '
-    $options = [];
-    if (getenv("MYSQL_ATTR_SSL_CA")) {
-        $options[PDO::MYSQL_ATTR_SSL_CA] = getenv("MYSQL_ATTR_SSL_CA");
+    $options = [PDO::ATTR_TIMEOUT => 5];
+    if (getenv("DB_CONNECTION") === "pgsql") {
+        new PDO(
+            "pgsql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "5432").";dbname=".(getenv("DB_DATABASE") ?: "postgres").";sslmode=".(getenv("DB_SSLMODE") ?: "prefer"),
+            getenv("DB_USERNAME"),
+            getenv("DB_PASSWORD"),
+            $options
+        );
+    } else {
+        if (getenv("MYSQL_ATTR_SSL_CA")) {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = getenv("MYSQL_ATTR_SSL_CA");
+        }
+        new PDO(
+            "mysql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "3306"),
+            getenv("DB_USERNAME"),
+            getenv("DB_PASSWORD"),
+            $options
+        );
     }
-    new PDO(
-        "mysql:host=".getenv("DB_HOST").";port=".(getenv("DB_PORT") ?: "3306"),
-        getenv("DB_USERNAME"),
-        getenv("DB_PASSWORD"),
-        $options
-    );
   ' 2>/dev/null; do
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge 15 ]; then
+      echo "La base de datos no responde tras ${attempts} intentos; continuo para que migrate informe del error."
+      break
+    fi
     sleep 2
   done
 fi
