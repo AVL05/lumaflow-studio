@@ -239,3 +239,9 @@ Runner: `.github/workflows/production-backup.yml`, Linux estándar de GitHub Act
 Cuando el gate permite iniciar el job, el workflow instala PHP 8.4/PDO MySQL, Composer con `--no-dev` y MySQL client solo si falta. CA: `/etc/ssl/certs/ca-certificates.crt`. `APP_KEY` es efímera generada para bootstrap; no se necesita la clave de producción ni migraciones/seed. Preflight PDO valida TLS y `SELECT 1` sin imprimir errores del driver. No se habilita R2/S3/Render de pago.
 
 No afirmar “backups automáticos” por `Schedule::command` ni por un workflow committed: hace falta una ejecución real con copia privada duradera. Render Free además carece de `mysqldump` en la imagen actual y de filesystem persistente; esta solución instala el cliente en Actions, sin modificar ni cobrar infraestructura Render.
+
+## Cabeceras de seguridad (#56)
+
+- **SPA (Vercel):** `frontend/vercel.json` envía CSP, HSTS, `nosniff`, `Referrer-Policy` y `Permissions-Policy`, con `frame-ancestors 'none'`. La CSP permite solo los orígenes reales: la API (`lumaflow-api.aleviclop.dev`), teselas CARTO, Hugging Face y `raw.githubusercontent.com` (modelos y wasm de WebLLM, con `wasm-unsafe-eval`) y Sentry. Si cambia el dominio de la API, el proveedor de mapas (#64) o el DSN de Sentry, hay que actualizar `connect-src`/`img-src`.
+- **API (Laravel):** el middleware `SecurityHeaders` añade las mismas cabeceras a toda respuesta (CSP `default-src 'none'`); HSTS solo sobre HTTPS. Lo cubre `SecurityHeadersTest`.
+- **Pendiente de verificar:** las cabeceras de Vercel no se prueban en CI. Antes de dar el cambio por bueno hay que comprobarlas en un Preview (consola sin violaciones de CSP en login, mapas, IA local y Sentry).
