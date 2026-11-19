@@ -1,0 +1,82 @@
+name: Uptime Monitor
+
+# Monitor de disponibilidad sin servicios de terceros: cada 10 minutos comprueba la landing,
+# /up y /api/health. Si falla abre un issue `incident` (GitHub avisa por email a quien vigila
+# el repositorio) y lo cierra solo cuando la produccion se recupera.
+#
+# Aviso de coste: un ping cada 10 min mantiene despierta la instancia gratuita de Render
+# (que se duerme a los 15 min), y las horas gratuitas (750/mes) se comparten entre todos los
+# servicios gratuitos del workspace. Para permitir que duerma, alargar el cron (p. ej. */30).
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: uptime-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: Production reachable
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Probe production
+        id: probe
+        shell: bash
+        run: |
+          set +e
+          failures=""
+          probe() { # name url
+            code=$(curl -s -o /tmp/body -m 90 --retry 2 --retry-delay 10 --retry-all-errors -w '%{http_code}' "$2")
+            echo "$1 -> HTTP $code"
+            [ "$code" = "200" ] || failures="$failures\n- $1: HTTP $code"
+          }
+          probe "Landing (https://lumaflow.aleviclop.dev)" https://lumaflow.aleviclop.dev/
+          probe "API /up" https://lumaflow-api.aleviclop.dev/up
+          probe "API /api/health" https://lumaflow-api.aleviclop.dev/api/health
+          if [ -s /tmp/body ] && ! jq -e '.checks.database.status == "up" and .checks.storage.status == "up" and .checks.cache.status == "up"' /tmp/body >/dev/null 2>&1; then
+            failures="$failures\n- /api/health responde pero database, storage o cache no estan en up"
+          fi
+          if [ -n "$failures" ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            { echo 'summary<<EOF'; printf "$failures\n"; echo EOF; } >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update incident
+        if: steps.probe.outputs.ok == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUMMARY: ${{ steps.probe.outputs.summary }}
+        run: |
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --label incident --state open --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --label incident \
+              --title "Producción no responde ($(date -u +%Y-%m-%d\ %H:%M) UTC)" \
+              --body "El monitor de disponibilidad detectó fallos:
+          $SUMMARY
+
+          Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          Este issue se cierra solo cuando la producción vuelve a responder."
+          fi
+
+      - name: Close incident on recovery
+        if: steps.probe.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --repo "$GITHUB_REPOSITORY" --label incident --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --repo "$GITHUB_REPOSITORY" --comment "Producción vuelve a responder ($(date -u +%H:%M) UTC). Cerrado por el monitor."
+          done
+
+      - name: Fail the run when production is down
+        if: steps.probe.outputs.ok == 'false'
+        run: exit 1

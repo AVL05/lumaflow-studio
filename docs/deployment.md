@@ -334,6 +334,14 @@ No afirmar “backups automáticos” por `Schedule::command` ni por un workflow
 - `dockerCommand` pasa por `entrypoint`: normaliza `APP_KEY`, espera a la base de datos (maximo 15 intentos), ejecuta `migrate --force` y cachea config, rutas y vistas. Por eso la configuracion no puede contener closures (`ConfigCacheableTest`).
 - **Backups:** `data:backup` y `production-backup.yml` solo soportan MySQL/SQLite (el runner se escribio para TiDB y esta desactivado). En Postgres dependen de los backups de Supabase; el plan de #53 debe rehacerse con `pg_dump`.
 
+## Monitor de disponibilidad (#63)
+
+`.github/workflows/uptime-monitor.yml` comprueba cada 10 minutos la landing, `/up` y `/api/health` (con `database`, `storage` y `cache` en `up`). Si falla abre un issue con la etiqueta `incident`, que GitHub notifica por email a quien vigila el repositorio, y lo cierra solo al recuperarse. No usa servicios de terceros.
+
+- **Alerta:** menos de ~10 min en condiciones normales; los `cron` de GitHub pueden retrasarse unos minutos en picos de carga. Para recibir el email hay que estar suscrito al repositorio (Watch → All activity o Issues) con las notificaciones por email activas.
+- **Coste en Render:** un ping cada 10 min mantiene despierta la instancia gratuita (se duerme a los 15 min) y consume horas del cupo gratuito de 750 h/mes compartido por todos los servicios gratuitos del workspace. Para dejar que duerma, alargar el cron (por ejemplo `*/30`).
+- **Pagina de estado:** el workflow y los issues `incident` hacen de historial; no hay pagina publica de estado.
+
 ## Sentry: source maps y alertas (#62)
 
 El build del frontend sube los source maps a Sentry (`@sentry/vite-plugin`, `frontend/vite.config.js`) **solo** si existen `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` y una release conocida (`VERCEL_GIT_COMMIT_SHA`, el mismo SHA que usa el SDK en runtime). Los mapas se generan como `hidden` y se borran tras subirlos: nunca se sirven al publico. Sin esas variables el build es el de siempre.
