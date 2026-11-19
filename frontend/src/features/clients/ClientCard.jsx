@@ -14,18 +14,18 @@ export function ClientCard({ client, onEdit, onDelete }) {
             {client.name}
             <DemoBadge show={client.is_demo} />
           </h2>
-          <p className="mt-1 text-sm text-stone-400">
-            {client.company || client.email || "Sin empresa/email"}
-          </p>
+          <p className="mt-1 text-sm text-stone-400">{client.company || "Particular"}</p>
         </div>
         <StatusBadge options={clientStatuses} value={client.status} />
       </div>
       <div className="mt-5 space-y-2 text-sm text-stone-400">
         <p>{client.email || "Sin email"}</p>
         <p>
-          {client.phone || "Sin telefono"} · {client.instagram || "Sin Instagram"}
+          {client.phone || "Sin teléfono"} · {client.instagram || "Sin Instagram"}
         </p>
-        <p>{client.deliveries_count ?? 0} entregas</p>
+        <p>
+          {client.deliveries_count ?? 0} {client.deliveries_count === 1 ? "entrega" : "entregas"}
+        </p>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
         <Link to={`/app/clients/${client.id}`}>

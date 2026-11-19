@@ -101,9 +101,9 @@ it("reutiliza el formulario de tareas con asignación y fechas explícitas", asy
   const card = await screen.findByRole("article", { name: "Etapa Selección" });
   await user.click(within(card).getByRole("button", { name: "Añadir tarea", exact: true }));
   const dialog = screen.getByRole("dialog", { name: "Tarea del proyecto" });
-  expect(within(dialog).getByLabelText("Fecha limite")).toHaveValue("");
+  expect(within(dialog).getByLabelText("Fecha límite")).toHaveValue("");
   expect(within(dialog).getByLabelText("Responsable de la tarea")).toHaveValue("");
-  await user.type(within(dialog).getByLabelText("Titulo"), "Revisar selección");
+  await user.type(within(dialog).getByLabelText("Título"), "Revisar selección");
   await user.selectOptions(within(dialog).getByLabelText("Responsable de la tarea"), "1");
   await user.click(within(dialog).getByRole("button", { name: "Guardar tarea" }));
   expect(workflowsApi.createTask).toHaveBeenCalledWith(

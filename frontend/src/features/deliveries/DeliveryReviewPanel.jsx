@@ -7,6 +7,7 @@ import { Card } from "../../components/ui/Card";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Textarea } from "../../components/ui/Textarea";
+import { formatDate, formatDateTime } from "../../utils/dates";
 
 const reviewLabels = {
   sent: "Enviada",
@@ -359,9 +360,9 @@ export function DeliveryReviewPanel({ delivery, token, onChanged }) {
               ) : null}
               <p className="text-xs text-stone-400">
                 {revision.gallery_provider}{" "}
-                {revision.delivery_date ? `· Entrega: ${revision.delivery_date}` : ""} ·{" "}
+                {revision.delivery_date ? `· Entrega: ${formatDate(revision.delivery_date)}` : ""} ·{" "}
                 {revision.author || "Importación histórica"} · Registro:{" "}
-                {new Date(revision.recorded_at).toLocaleString("es-ES")}
+                {formatDateTime(revision.recorded_at)}
               </p>
               {revision.gallery_password ? (
                 <p>Contraseña externa: {revision.gallery_password}</p>
@@ -390,7 +391,7 @@ export function DeliveryReviewPanel({ delivery, token, onChanged }) {
             <p className="whitespace-pre-wrap">{event.description}</p>
             <p className="mt-1 text-xs text-stone-400">
               {event.actor} · Revisión {event.revision_number || "histórica"} ·{" "}
-              {new Date(event.at).toLocaleString("es-ES")}
+              {formatDateTime(event.at)}
             </p>
           </article>
         ))}

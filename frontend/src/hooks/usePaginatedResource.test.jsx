@@ -26,7 +26,7 @@ describe("usePaginatedResource", () => {
     expect(fetcher).toHaveBeenCalledWith({ status: "active" });
   });
 
-  it("vuelve a la primera pagina al cambiar un filtro", async () => {
+  it("vuelve a la primera página al cambiar un filtro", async () => {
     const fetcher = vi.fn().mockResolvedValue(page([]));
     const { result } = renderHook(() => usePaginatedResource(fetcher, { page: 4 }));
 
@@ -37,7 +37,7 @@ describe("usePaginatedResource", () => {
     await waitFor(() => expect(fetcher).toHaveBeenLastCalledWith({ page: 1, status: "lead" }));
   });
 
-  it("conserva la pagina cuando se navega explicitamente", async () => {
+  it("conserva la página cuando se navega explicitamente", async () => {
     const fetcher = vi.fn().mockResolvedValue(page([]));
     const { result } = renderHook(() => usePaginatedResource(fetcher, { page: 1 }));
 

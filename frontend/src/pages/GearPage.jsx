@@ -19,6 +19,7 @@ import { ErrorState } from "../components/states/ErrorState";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useToast } from "../features/notifications/ToastContext";
 import { gearCategories, gearConditions, labelFor } from "../utils/catalogs";
+import { formatMoney } from "../utils/money";
 
 const defaults = {
   name: "",
@@ -106,10 +107,10 @@ export function GearPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Equipment"
+        eyebrow="Equipo"
         title="Equipo"
-        description="Inventario fotografico con categorias, favoritos, estado, compra y busqueda."
-        action={<Button onClick={openCreate}>Nuevo item</Button>}
+        description="Inventario fotográfico con categorías, favoritos, estado, compra y búsqueda."
+        action={<Button onClick={openCreate}>Nuevo equipo</Button>}
       />
 
       <div className="mb-6 grid gap-3 lg:grid-cols-[1fr_190px_150px_160px_140px]">
@@ -121,7 +122,7 @@ export function GearPage() {
         <Select
           value={resource.filters.category ?? ""}
           onChange={(e) => resource.updateFilter("category", e.target.value)}
-          options={[{ value: "", label: "Todas las categorias" }, ...gearCategories]}
+          options={[{ value: "", label: "Todas las categorías" }, ...gearCategories]}
         />
         <Select
           value={resource.filters.favorites ?? ""}
@@ -138,7 +139,7 @@ export function GearPage() {
           options={[
             { value: "created_at", label: "Reciente" },
             { value: "name", label: "Nombre" },
-            { value: "category", label: "Categoria" },
+            { value: "category", label: "Categoría" },
             { value: "brand", label: "Marca" },
             { value: "purchase_date", label: "Compra" },
           ]}
@@ -187,7 +188,9 @@ export function GearPage() {
                     <span>{labelFor(gearCategories, item.category)}</span>
                     <span>{labelFor(gearConditions, item.condition)}</span>
                     <span>{item.weight_grams ? `${item.weight_grams} g` : "Sin peso"}</span>
-                    <span>{item.purchase_price ? `${item.purchase_price} EUR` : "Sin precio"}</span>
+                    <span>
+                      {item.purchase_price ? formatMoney(item.purchase_price) : "Sin precio"}
+                    </span>
                   </div>
                   <div className="mt-5 flex flex-wrap gap-2">
                     <Button variant="secondary" onClick={() => openEdit(item)}>
@@ -221,7 +224,7 @@ export function GearPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar equipo"
-        description="Esta accion eliminara el item del inventario."
+        description="Esta acción eliminará este equipo del inventario."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />
@@ -242,7 +245,7 @@ function GearForm({ form, setForm, onSubmit, error, saving }) {
       <Field label="Nombre">
         <Input required value={form.name} onChange={(e) => setValue("name", e.target.value)} />
       </Field>
-      <Field label="Categoria">
+      <Field label="Categoría">
         <Select
           value={form.category}
           onChange={(e) => setValue("category", e.target.value)}

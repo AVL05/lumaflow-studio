@@ -32,7 +32,7 @@ describe("Modal", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("expone el titulo como nombre accesible del dialogo", () => {
+  it("expone el título como nombre accesible del dialogo", () => {
     render(
       <Modal open title="Nueva tarea" onClose={vi.fn()}>
         <p>contenido</p>
@@ -46,7 +46,7 @@ describe("Modal", () => {
     const onClose = vi.fn();
     render(
       <Modal open title="Editar" onClose={onClose}>
-        <button type="button">accion</button>
+        <button type="button">acción</button>
       </Modal>,
     );
 

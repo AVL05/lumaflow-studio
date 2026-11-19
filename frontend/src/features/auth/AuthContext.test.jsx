@@ -57,7 +57,7 @@ describe("AuthProvider boot", () => {
     expect(localStorage.getItem("lumaflow_token")).toBe("valido");
   });
 
-  it("con token y 401 limpia sesion y queda sin autenticar", async () => {
+  it("con token y 401 limpia sesión y queda sin autenticar", async () => {
     localStorage.setItem("lumaflow_token", "muerto");
     authApi.me.mockRejectedValue(apiError(401));
     renderProvider();
@@ -67,7 +67,7 @@ describe("AuthProvider boot", () => {
     expect(captured.user).toBeNull();
   });
 
-  it.each([500, 503, 429])("con token y %i conserva sesion en degradado", async (status) => {
+  it.each([500, 503, 429])("con token y %i conserva sesión en degradado", async (status) => {
     localStorage.setItem("lumaflow_token", "valido");
     authApi.me.mockRejectedValue(apiError(status));
     renderProvider();
@@ -77,7 +77,7 @@ describe("AuthProvider boot", () => {
     expect(captured.bootError).toBeTruthy();
   });
 
-  it("sin respuesta conserva sesion en degradado", async () => {
+  it("sin respuesta conserva sesión en degradado", async () => {
     localStorage.setItem("lumaflow_token", "valido");
     authApi.me.mockRejectedValue(new Error("Network Error"));
     renderProvider();
@@ -152,7 +152,7 @@ describe("AuthProvider boot", () => {
       try {
         await captured.refreshUser();
       } catch {
-        // 401 esperado: la sesion se invalida.
+        // 401 esperado: la sesión se invalida.
       }
     });
     expect(localStorage.getItem("lumaflow_token")).toBeNull();

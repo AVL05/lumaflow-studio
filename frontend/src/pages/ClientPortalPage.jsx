@@ -11,6 +11,7 @@ import { ErrorState } from "../components/states/ErrorState";
 import { BrandLogo } from "../components/branding/BrandLogo";
 
 import { sessionTypes } from "../utils/catalogs";
+import { formatMoney } from "../utils/money";
 
 const DeliveryReviewPanel = lazy(() =>
   import("../features/deliveries/DeliveryReviewPanel").then((module) => ({
@@ -76,7 +77,7 @@ export function ClientPortalPage() {
     try {
       setDelivery(await publicApi.approveDelivery(token, delivery.revision_number));
     } catch (err) {
-      setError(getApiError(err, "No se pudo registrar la aprobacion."));
+      setError(getApiError(err, "No se pudo registrar la aprobación."));
     } finally {
       setSaving(false);
     }
@@ -229,13 +230,13 @@ export function ClientPortalPage() {
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Presupuesto</p>
               <p className="mt-2 text-lg font-semibold tabular-nums text-stone-50">
-                {delivery.budget} EUR
+                {formatMoney(delivery.budget)}
               </p>
             </div>
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Pagado</p>
               <p className="mt-2 text-lg font-semibold tabular-nums text-stone-50">
-                {delivery.amount_paid} EUR
+                {formatMoney(delivery.amount_paid)}
               </p>
             </div>
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
@@ -250,7 +251,7 @@ export function ClientPortalPage() {
         {delivery.client_message ? (
           <div className="mt-6 rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-amber-200">
-              Ultimo mensaje enviado al estudio
+              Último mensaje enviado al estudio
             </p>
             <p className="mt-2 text-sm leading-6 text-stone-300">{delivery.client_message}</p>
           </div>

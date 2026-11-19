@@ -15,7 +15,7 @@ export function artisan(args) {
 
   if (result.status !== 0) {
     throw new Error(
-      [`php artisan ${args.join(" ")} fallo con codigo ${result.status}`, result.stdout, result.stderr]
+      [`php artisan ${args.join(" ")} fallo con código ${result.status}`, result.stdout, result.stderr]
         .filter(Boolean)
         .join("\n"),
     );
@@ -27,8 +27,8 @@ export function artisan(args) {
 /**
  * Prepara la base de datos de test.
  *
- * La base es un archivo SQLite local que se recrea en cada ejecucion, asi que la
- * suite nunca toca datos de desarrollo ni de produccion.
+ * La base es un archivo SQLite local que se recrea en cada ejecución, así que la
+ * suite nunca toca datos de desarrollo ni de producción.
  */
 export function prepareTestEnvironment() {
   mkdirSync(workDir, { recursive: true });
@@ -37,8 +37,8 @@ export function prepareTestEnvironment() {
     writeFileSync(databaseFile, "");
   }
 
-  // El log se reinicia para que la busqueda de correos solo encuentre mensajes
-  // generados por esta ejecucion.
+  // El log se reinicia para que la búsqueda de correos solo encuentre mensajes
+  // generados por esta ejecución.
   rmSync(backendLogFile, { force: true });
 
   // Una config cacheada en desarrollo pisaria el entorno de test.

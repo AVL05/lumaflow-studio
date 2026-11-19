@@ -13,14 +13,14 @@ test.describe("registro y acceso", () => {
     await page.getByLabel("Confirmar contraseña").fill("lumaflow-e2e");
     await page.getByRole("button", { name: "Crear cuenta" }).click();
 
-    // El alta deja al estudio a la espera del enlace de verificacion.
+    // El alta deja al estudio a la espera del enlace de verificación.
     await expect(page).toHaveURL(/\/verify-email$/);
     await expect(page.getByRole("heading", { name: "Revisa tu bandeja de entrada" })).toBeVisible();
 
-    // El backend usa el mailer `log`, asi que el enlace firmado queda en el log.
+    // El backend usa el mailer `log`, así que el enlace firmado queda en el log.
     await expect
       .poll(() => readVerificationLink(email), {
-        message: "el backend deberia enviar el enlace de verificacion",
+        message: "el backend debería enviar el enlace de verificación",
         timeout: 30_000,
       })
       .toMatch(/^https?:\/\/.+\/api\/email\/verify\/\d+\//);
@@ -45,11 +45,11 @@ test.describe("registro y acceso", () => {
 
     await page.goto("/app/dashboard");
     await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-    // El nombre del estudio aparece en la navegacion de la SPA ya configurada.
+    // El nombre del estudio aparece en la navegación de la SPA ya configurada.
     await expect(page.getByRole("banner").getByText("Estudio Nuevo E2E")).toBeVisible();
   });
 
-  test("un estudio ya configurado inicia sesion y llega a su dashboard", async ({ page }) => {
+  test("un estudio ya configurado inicia sesión y llega a su dashboard", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill(accounts.access.email);
     await page.getByLabel("Contraseña", { exact: true }).fill("password incorrecta");

@@ -3,7 +3,7 @@ import { TimelineItem } from "./TimelineItem";
 
 export function ActivityFeed({ activities = [] }) {
   if (activities.length === 0) {
-    return <EmptyState title="Sin actividad" description="Todavia no hay eventos registrados." />;
+    return <EmptyState title="Sin actividad" description="Todavía no hay eventos registrados." />;
   }
 
   return (

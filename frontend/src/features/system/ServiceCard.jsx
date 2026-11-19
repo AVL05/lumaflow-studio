@@ -2,7 +2,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
 
 const tones = { up: "green", degraded: "warm", down: "red" };
-const labels = { up: "Operativo", degraded: "Degradado", down: "Caido" };
+const labels = { up: "Operativo", degraded: "Degradado", down: "Caído" };
 
 /** Muestra una sonda de HealthService: estado, latencia y metadatos propios. */
 export function ServiceCard({ name, description, check }) {

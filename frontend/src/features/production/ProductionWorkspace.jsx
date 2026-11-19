@@ -12,6 +12,7 @@ import { Pagination } from "../../components/ui/Pagination";
 import { ErrorState } from "../../components/states/ErrorState";
 import { DayForm, ShotForm } from "./ProductionForms";
 import { dayForm, shotForm, shotPayload, shotStatuses } from "./productionFormUtils";
+import { formatDate } from "../../utils/dates";
 
 export function ProductionWorkspace({ job, onRefresh, onDirtyChange }) {
   const fetchShots = useCallback((params) => productionApi.shots(job.id, params), [job.id]);
@@ -187,7 +188,10 @@ export function ProductionWorkspace({ job, onRefresh, onDirtyChange }) {
             }}
             options={[
               { value: "", label: "Todas las jornadas" },
-              ...knownDays.map((d) => ({ value: d.id, label: `${d.date} · ${d.name}` })),
+              ...knownDays.map((d) => ({
+                value: d.id,
+                label: `${formatDate(d.date)} · ${d.name}`,
+              })),
             ]}
           />
         </Field>
@@ -227,7 +231,7 @@ export function ProductionWorkspace({ job, onRefresh, onDirtyChange }) {
                 <div>
                   <h4 className="font-semibold">{day.name}</h4>
                   <p className="mt-1 text-sm text-stone-400">
-                    {day.date} · {day.time?.slice(0, 5) || "Sin hora"} —{" "}
+                    {formatDate(day.date)} · {day.time?.slice(0, 5) || "Sin hora"} —{" "}
                     {day.end_time?.slice(0, 5) || "Por definir"}
                   </p>
                 </div>

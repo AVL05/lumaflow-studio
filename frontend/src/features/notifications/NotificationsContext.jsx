@@ -22,7 +22,7 @@ export function NotificationsProvider({ children }) {
     try {
       setUnread(await notificationsApi.unreadCount());
     } catch {
-      // Silencioso: el contador no debe bloquear la navegacion.
+      // Silencioso: el contador no debe bloquear la navegación.
     }
   }, [isAuthenticated]);
 

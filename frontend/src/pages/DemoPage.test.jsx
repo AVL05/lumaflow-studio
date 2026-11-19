@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { DemoPage } from "./DemoPage";
 
 describe("DemoPage", () => {
-  it("permite explorar datos ficticios sin autenticacion", async () => {
+  it("permite explorar datos ficticios sin autenticación", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>

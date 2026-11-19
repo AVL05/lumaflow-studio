@@ -8,9 +8,9 @@ const port = Number(process.env.E2E_BACKEND_PORT ?? 8001);
 const publicDir = path.join(backendDir, "public");
 
 // `php -S` con el router de Laravel sirve /api/* igual que `artisan serve`.
-// Se lanza aqui, y no con `artisan serve`, porque ese comando solo reenvia `$_ENV`
+// Se lanza aquí, y no con `artisan serve`, porque ese comando solo reenvía `$_ENV`
 // a su proceso hijo y la variable suele venir vacia.
-// El router resuelve el directorio publico con `getcwd()`, asi que el proceso
+// El router resuelve el directorio público con `getcwd()`, así que el proceso
 // se inicia en backend/public.
 const server = spawn(
   phpBinary,

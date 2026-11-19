@@ -15,6 +15,8 @@ import {
   productionPhases,
 } from "../features/jobs/jobFormUtils";
 import { useToast } from "../features/notifications/ToastContext";
+import { formatDate, formatDateTime } from "../utils/dates";
+import { formatMoney } from "../utils/money";
 
 const statusLabels = {
   lead: "Idea / contacto",
@@ -80,6 +82,13 @@ export function JobDetailPage() {
       setError(getApiError(err));
     }
   }, [id]);
+  useEffect(() => {
+    // Solo aporta la etiqueta legible de la especialidad; sin él se muestra la clave.
+    jobsApi
+      .workflows()
+      .then(setCatalog)
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     setJob(null);
     setSection("overview");
@@ -167,13 +176,14 @@ export function JobDetailPage() {
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[.2em] text-amber-200/80">
               {projectTypes.find((type) => type.value === job.project_type)?.label ?? "Fotográfico"}{" "}
-              · {job.specialty}
+              · {catalog.workflows?.[job.specialty]?.label ?? job.specialty}
             </p>
             <h1 className="mt-3 break-words text-3xl font-semibold tracking-tight text-stone-50 sm:text-4xl">
               {job.title}
             </h1>
             <p className="mt-3 text-sm text-stone-400">
-              {job.client?.name || "Proyecto sin cliente"} · {job.event_date || "Fecha por definir"}
+              {job.client?.name || "Proyecto sin cliente"} ·{" "}
+              {formatDate(job.event_date, "Fecha por definir")}
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">
@@ -242,9 +252,12 @@ export function JobDetailPage() {
               {job.description || "Añade una descripción para dar contexto a tu proyecto."}
             </p>
             <Fact label="Cliente" value={job.client?.name || "No asociado"} />
-            <Fact label="Inicio" value={job.start_date || "Por definir"} />
-            <Fact label="Fin" value={job.end_date || "Por definir"} />
-            <Fact label="Entrega prevista" value={job.delivery_due_date || "Por definir"} />
+            <Fact label="Inicio" value={formatDate(job.start_date, "Por definir")} />
+            <Fact label="Fin" value={formatDate(job.end_date, "Por definir")} />
+            <Fact
+              label="Entrega prevista"
+              value={formatDate(job.delivery_due_date, "Por definir")}
+            />
           </Panel>
           <Panel title="Participantes">
             <Collection
@@ -277,9 +290,7 @@ export function JobDetailPage() {
             render={(activity) => (
               <div key={activity.id} className="border-l border-amber-100/30 pl-4 text-sm">
                 <p className="text-stone-300">{activity.description || activity.type}</p>
-                <p className="mt-1 text-xs text-stone-400">
-                  {activity.created_at ? new Date(activity.created_at).toLocaleString("es-ES") : ""}
-                </p>
+                <p className="mt-1 text-xs text-stone-400">{formatDateTime(activity.created_at)}</p>
               </div>
             )}
           />
@@ -351,7 +362,7 @@ export function JobDetailPage() {
                     >
                       {task.title}
                     </p>
-                    <p className="mt-1 text-xs text-stone-400">{task.due_date || "Sin fecha"}</p>
+                    <p className="mt-1 text-xs text-stone-400">{formatDate(task.due_date)}</p>
                   </div>
                   <span className="text-stone-400">{task.status}</span>
                 </div>
@@ -366,7 +377,7 @@ export function JobDetailPage() {
                 <div key={session.id} className="text-sm">
                   <p className="text-stone-200">{session.name}</p>
                   <p className="mt-1 text-stone-400">
-                    {session.date} ·{" "}
+                    {formatDate(session.date)} ·{" "}
                     {session.location?.name || session.location_name || "Localización por definir"}
                   </p>
                 </div>
@@ -590,7 +601,5 @@ function ExternalLink({ url, children }) {
   );
 }
 function money(value) {
-  return value === null || value === undefined
-    ? "Sin definir"
-    : new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(value));
+  return formatMoney(value, "Sin definir");
 }

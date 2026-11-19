@@ -28,7 +28,7 @@ export function LocationCard({ location, onEdit, onDelete }) {
           {labelFor(accessDifficulties, location.access_difficulty)}
         </p>
         <p className="mt-2 text-sm text-stone-400">
-          {location.rating ? `Rating ${location.rating}/5` : "Sin valorar"} ·{" "}
+          {location.rating ? `Valoración ${location.rating}/5` : "Sin valorar"} ·{" "}
           {location.sessions_count ?? 0} sesiones
         </p>
         <div className="mt-4 flex flex-wrap gap-1">

@@ -1,4 +1,4 @@
-export const weekdayLabels = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+export const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 const monthNames = [
   "Enero",
@@ -47,7 +47,7 @@ export function addMonths(iso, months) {
   return toIsoDate(date);
 }
 
-/** Indice 0-6 con lunes como primer dia de la semana. */
+/** Índice 0-6 con lunes como primer día de la semana. */
 function mondayIndex(date) {
   return (date.getDay() + 6) % 7;
 }
@@ -79,7 +79,7 @@ export function isSameMonth(iso, referenceIso) {
   return iso.slice(0, 7) === referenceIso.slice(0, 7);
 }
 
-/** Rejilla de 6 semanas (42 dias) que contiene el mes de `iso`. */
+/** Rejilla de 6 semanas (42 días) que contiene el mes de `iso`. */
 export function monthGrid(iso) {
   const first = parseIsoDate(iso);
   first.setDate(1);
@@ -94,7 +94,7 @@ export function weekGrid(iso) {
   return Array.from({ length: 7 }, (_, index) => addDays(start, index));
 }
 
-/** Rango consultado al backend segun la vista activa. */
+/** Rango consultado al backend según la vista activa. */
 export function rangeForView(view, cursor) {
   if (view === "day") return { from: cursor, to: cursor };
 

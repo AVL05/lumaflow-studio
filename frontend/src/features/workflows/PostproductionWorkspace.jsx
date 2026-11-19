@@ -22,6 +22,7 @@ import {
   templateForm,
   templatePayload,
 } from "./workflowFormUtils";
+import { formatDate } from "../../utils/dates";
 
 const modalTitles = {
   stage: "Configurar etapa",
@@ -232,7 +233,7 @@ export function PostproductionWorkspace({ job, onRefresh, onDirtyChange, onSecti
                 {task.title}
               </button>
               <p className="mt-1 text-xs text-stone-400">
-                {assignee(task.assigned_user_id)} · {task.due_date || "Sin fecha"}
+                {assignee(task.assigned_user_id)} · {formatDate(task.due_date)}
                 {task.status === "cancelled" ? " · Cancelada" : ""}
               </p>
             </div>
@@ -395,7 +396,7 @@ export function PostproductionWorkspace({ job, onRefresh, onDirtyChange, onSecti
                 <div>
                   <h3 className="text-lg font-semibold">{stage.label}</h3>
                   <p className="mt-1 text-xs text-stone-400">
-                    {assignee(stage.assigned_user_id)} · {stage.due_date || "Sin fecha"} ·{" "}
+                    {assignee(stage.assigned_user_id)} · {formatDate(stage.due_date)} ·{" "}
                     {stage.pending_tasks} tarea{stage.pending_tasks === 1 ? "" : "s"} pendiente
                     {stage.pending_tasks === 1 ? "" : "s"}
                   </p>

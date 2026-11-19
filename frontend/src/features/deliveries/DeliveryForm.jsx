@@ -16,7 +16,7 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
           <ErrorState message={error} />
         </div>
       ) : null}
-      <Field label="Titulo">
+      <Field label="Título">
         <Input required value={form.title} onChange={(e) => setValue("title", e.target.value)} />
       </Field>
       <Field label="Estado">
@@ -36,12 +36,12 @@ export function DeliveryForm({ form, setForm, clients, sessions, onSubmit, error
           ]}
         />
       </Field>
-      <Field label="Sesion">
+      <Field label="Sesión">
         <Select
           value={form.session_id ?? ""}
           onChange={(e) => setValue("session_id", e.target.value)}
           options={[
-            { value: "", label: "Sin sesion" },
+            { value: "", label: "Sin sesión" },
             ...sessions.map((session) => ({ value: String(session.id), label: session.name })),
           ]}
         />

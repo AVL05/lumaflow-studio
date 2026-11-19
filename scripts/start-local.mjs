@@ -1,4 +1,4 @@
-import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -7,9 +7,23 @@ import path from "node:path";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const backend = path.join(root, "backend");
 const frontend = path.join(root, "frontend");
-const database = path.join(backend, "database", "database.sqlite");
+// --showcase runs a throwaway demo studio in its own database, rebuilt on every
+// start so its dates stay relative to today. The regular local data is untouched.
+const showcase = process.argv.includes("--showcase");
+const database = path.join(backend, "database", showcase ? "showcase.sqlite" : "database.sqlite");
 const pnpmCli = process.env.npm_execpath;
+// npm_execpath points to a JS entry for npm-installed pnpm, but to a native
+// binary (pnpm.exe) for the standalone @pnpm/exe build, which Node cannot load.
+const pnpmIsScript = /\.[cm]?js$/i.test(pnpmCli ?? "");
+
+function pnpm(args) {
+  return pnpmIsScript ? [process.execPath, [pnpmCli, ...args]] : [pnpmCli, args];
+}
+
 const windows = process.platform === "win32";
+// Override when another local project already holds the defaults.
+const apiPort = process.env.LUMAFLOW_API_PORT || "8000";
+const webPort = process.env.LUMAFLOW_WEB_PORT || "5173";
 
 function run(label, executable, args, cwd = root, env = process.env, shell = false) {
   process.stdout.write(`\n[local] ${label}\n`);
@@ -60,6 +74,9 @@ if (Number(phpVersion.stdout) < 80300) {
 }
 
 mkdirSync(path.dirname(database), { recursive: true });
+if (showcase) {
+  rmSync(database, { force: true });
+}
 if (!existsSync(database)) {
   closeSync(openSync(database, "w"));
 }
@@ -68,9 +85,9 @@ const localEnvironment = {
   ...process.env,
   APP_ENV: "local",
   APP_DEBUG: "true",
-  APP_URL: "http://localhost:8000",
-  FRONTEND_URL: "http://localhost:5173",
-  FRONTEND_URLS: "http://localhost:5173,http://127.0.0.1:5173",
+  APP_URL: `http://localhost:${apiPort}`,
+  FRONTEND_URL: `http://localhost:${webPort}`,
+  FRONTEND_URLS: `http://localhost:${webPort},http://127.0.0.1:${webPort}`,
   DB_CONNECTION: "sqlite",
   DB_DATABASE: database,
   SESSION_DRIVER: "file",
@@ -78,11 +95,11 @@ const localEnvironment = {
   QUEUE_CONNECTION: "sync",
   FILESYSTEM_DISK: "public",
   MAIL_MAILER: "log",
-  VITE_API_URL: "http://localhost:8000/api",
+  VITE_API_URL: `http://localhost:${apiPort}/api`,
 };
 
 try {
-  run("Instalando dependencias JavaScript", process.execPath, [pnpmCli, "install"]);
+  run("Instalando dependencias JavaScript", ...pnpm(["install"]));
 
   const composerAutoload = path.join(backend, "vendor", "autoload.php");
   const composerFiles = [path.join(backend, "composer.json"), path.join(backend, "composer.lock")];
@@ -109,24 +126,35 @@ try {
     run("Creando enlace de almacenamiento", "php", ["artisan", "storage:link"], backend, localEnvironment);
   }
   run("Actualizando base de datos SQLite", "php", ["artisan", "migrate", "--force"], backend, localEnvironment);
+  if (showcase) {
+    run("Creando estudio de demostración", "php", ["artisan", "db:seed", "--class=ShowcaseSeeder", "--force"], backend, localEnvironment);
+    // Analytics are cached per workspace id, which the fresh database reuses.
+    run("Limpiando caché local", "php", ["artisan", "cache:clear"], backend, localEnvironment);
+  }
 } catch (error) {
   process.stderr.write(`\n[local] ${error.message}\n`);
   process.exit(1);
 }
 
 process.stdout.write("\n[local] LumaFlow listo\n");
-process.stdout.write("[local] Web: http://localhost:5173\n");
-process.stdout.write("[local] API: http://localhost:8000/api/health\n");
+process.stdout.write(`[local] Web: http://localhost:${webPort}\n`);
+process.stdout.write(`[local] API: http://localhost:${apiPort}/api/health\n`);
 process.stdout.write("[local] Emails de prueba: backend/storage/logs/laravel.log\n");
+if (showcase) {
+  process.stdout.write("[local] Estudio demo: demo@lumaflow.test (contraseña en README, «Modo exhibición»)\n");
+}
 process.stdout.write("[local] Pulsa Ctrl+C para detener ambos procesos.\n\n");
 
 const processes = [
-  spawn("php", ["artisan", "serve", "--host=127.0.0.1", "--port=8000"], {
+  // Without --no-reload, `artisan serve` blanks every variable that also exists
+  // in backend/.env so the child re-reads it, silently replacing the SQLite and
+  // CORS settings above with whatever .env holds (e.g. a MySQL connection).
+  spawn("php", ["artisan", "serve", "--host=127.0.0.1", `--port=${apiPort}`, "--no-reload"], {
     cwd: backend,
     env: localEnvironment,
     stdio: "inherit",
   }),
-  spawn(process.execPath, [pnpmCli, "--dir", frontend, "run", "dev", "--host", "localhost", "--port", "5173", "--strictPort"], {
+  spawn(...pnpm(["--dir", frontend, "run", "dev", "--host", "localhost", "--port", webPort, "--strictPort"]), {
     cwd: root,
     env: localEnvironment,
     stdio: "inherit",

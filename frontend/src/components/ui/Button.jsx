@@ -12,7 +12,7 @@ const base =
   "rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090908]";
 
 /**
- * No se fija `type` por defecto a proposito: varios formularios usan el boton
+ * No se fija `type` por defecto a propósito: varios formularios usan el boton
  * sin `type` como submit implicito.
  */
 export function Button({ variant = "primary", className = "", ...props }) {

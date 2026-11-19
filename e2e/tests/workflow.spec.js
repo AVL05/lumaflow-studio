@@ -1,7 +1,7 @@
 import { expect, test } from "../fixtures/test.js";
 
-test.describe("alta de cliente, trabajo y sesion", () => {
-  test("el recorrido comercial crea cliente, trabajo y sesion", async ({
+test.describe("alta de cliente, trabajo y sesión", () => {
+  test("el recorrido comercial crea cliente, trabajo y sesión", async ({
     ownerPage,
   }) => {
     const suffix = Date.now();
@@ -31,7 +31,7 @@ test.describe("alta de cliente, trabajo y sesion", () => {
 
     const jobDialog = ownerPage.getByRole("dialog");
     await jobDialog.getByLabel("Nombre del proyecto").fill(jobTitle);
-    // Esperar a que el fetch de clientes de /app/jobs incluya el recien creado
+    // Esperar a que el fetch de clientes de /app/jobs incluya el recién creado
     // antes de seleccionar: evita mandar client_id vacio si el dialogo se abrio
     // con la lista aun cargando.
     const jobClientSelect = jobDialog.getByRole("radio", {
@@ -42,7 +42,7 @@ test.describe("alta de cliente, trabajo y sesion", () => {
     await jobClientSelect.check();
     await expect(jobClientSelect).toBeChecked();
     await jobDialog.getByLabel("Fecha").fill(eventDate);
-    // El `label` envuelve el `select`, asi que su nombre accesible incluye las
+    // El `label` envuelve el `select`, así que su nombre accesible incluye las
     // opciones: se ancla el inicio para no confundirse con "Workflow".
     await jobDialog.getByLabel(/^Especialidad/).selectOption("wedding");
     await jobDialog.getByLabel("Presupuesto").fill("1500");
@@ -55,7 +55,7 @@ test.describe("alta de cliente, trabajo y sesion", () => {
     await expect(jobCard.getByText(clientName, { exact: true })).toBeVisible();
 
     await ownerPage.goto("/app/sessions");
-    await ownerPage.getByRole("button", { name: "Nueva sesion" }).click();
+    await ownerPage.getByRole("button", { name: "Nueva sesión" }).click();
 
     const sessionDialog = ownerPage.getByRole("dialog");
     await sessionDialog.getByLabel("Nombre", { exact: true }).fill(sessionName);
@@ -63,9 +63,9 @@ test.describe("alta de cliente, trabajo y sesion", () => {
     await sessionDialog.getByLabel("Fecha", { exact: true }).fill(eventDate);
     await sessionDialog.getByLabel("Hora").fill("17:30");
     await sessionDialog
-      .getByLabel("Localizacion", { exact: true })
+      .getByLabel("Localización", { exact: true })
       .fill("Jardin Botanico E2E");
-    await sessionDialog.getByRole("button", { name: "Guardar sesion" }).click();
+    await sessionDialog.getByRole("button", { name: "Guardar sesión" }).click();
 
     await expect(sessionDialog).toBeHidden();
 

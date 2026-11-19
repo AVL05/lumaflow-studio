@@ -2,7 +2,7 @@ import { Link, useRouteError } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 
 /**
- * Sirve como pagina 404 y como `errorElement` del router: sustituye la pantalla
+ * Sirve como página 404 y como `errorElement` del router: sustituye la pantalla
  * de desarrollo de React Router, que filtraba stack traces al usuario.
  */
 export function NotFoundPage({ asErrorBoundary = false }) {
@@ -16,11 +16,11 @@ export function NotFoundPage({ asErrorBoundary = false }) {
           {isCrash ? "Error inesperado" : "Error 404"}
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">
-          {isCrash ? "Algo se ha roto" : "Pagina no encontrada"}
+          {isCrash ? "Algo se ha roto" : "Página no encontrada"}
         </h1>
         <p className="mt-4 text-sm leading-6 text-stone-400">
           {isCrash
-            ? "La vista no ha podido renderizarse. Vuelve al dashboard e intentalo de nuevo."
+            ? "La vista no ha podido renderizarse. Vuelve al dashboard e inténtalo de nuevo."
             : "La ruta que buscas no existe o ha cambiado de sitio."}
         </p>
         {isCrash && import.meta.env.DEV ? (

@@ -4,9 +4,9 @@ import { backendLogFile } from "./env.js";
 const verificationUrlPattern = /https?:\/\/\S*\/api\/email\/verify\/\d+\/[a-f0-9]+\?[^\s"']+/;
 
 /**
- * Devuelve el enlace de verificacion que el backend acaba de enviar por email.
+ * Devuelve el enlace de verificación que el backend acaba de enviar por email.
  *
- * El entorno E2E usa el mailer `log`, asi que el enlace firmado queda escrito en
+ * El entorno E2E usa el mailer `log`, así que el enlace firmado queda escrito en
  * `backend/storage/logs/laravel.log`. Se busca solo dentro del mensaje cuyo
  * destinatario es el correo indicado para no depender del orden de la suite.
  */

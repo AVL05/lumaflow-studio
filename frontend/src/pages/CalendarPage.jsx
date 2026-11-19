@@ -30,11 +30,12 @@ import { useToast } from "../features/notifications/ToastContext";
 import { TaskForm } from "../features/tasks/TaskForm";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { calendarSources } from "../utils/catalogs";
+import { formatDate } from "../utils/dates";
 
 const views = [
   { value: "month", label: "Mes" },
   { value: "week", label: "Semana" },
-  { value: "day", label: "Dia" },
+  { value: "day", label: "Día" },
   { value: "agenda", label: "Agenda" },
   { value: "list", label: "Lista" },
 ];
@@ -100,14 +101,14 @@ export function CalendarPage() {
     load();
   }, [load]);
 
-  // Catalogos para los formularios rapidos; se cargan una sola vez.
+  // Catálogos para los formularios rápidos; se cargan una sola vez.
   useEffect(() => {
     Promise.all([sessionsApi.list(), clientsApi.list()])
       .then(([sessionList, clientList]) => {
         setSessions(sessionList);
         setClients(clientList);
       })
-      .catch(() => toast.error("No se pudieron cargar los catalogos del calendario."));
+      .catch(() => toast.error("No se pudieron cargar los catálogos del calendario."));
   }, [toast]);
 
   const counts = useMemo(
@@ -192,9 +193,9 @@ export function CalendarPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Workflow"
+        eyebrow="Flujo de trabajo"
         title="Calendario"
-        description="Sesiones, entregas y tareas en una sola linea temporal. Arrastra para reprogramar."
+        description="Sesiones, entregas y tareas en una sola línea temporal. Arrastra para reprogramar."
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => setCursor(todayIso())}>
@@ -268,7 +269,7 @@ export function CalendarPage() {
           <Panel className="p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-stone-400">Rango consultado</p>
             <p className="mt-2 text-sm tabular-nums text-stone-300">
-              {range.from} → {range.to}
+              {formatDate(range.from)} – {formatDate(range.to)}
             </p>
             <p className="mt-3 text-xs text-stone-400">{events.length} eventos cargados</p>
           </Panel>

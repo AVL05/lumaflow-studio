@@ -5,6 +5,8 @@ import { Card } from "../../components/ui/Card";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { deliveryStatuses, paymentStatuses } from "../../utils/catalogs";
 import { DemoBadge } from "../../components/ui/DemoBadge";
+import { formatDate } from "../../utils/dates";
+import { formatMoney } from "../../utils/money";
 
 export function DeliveryCard({ delivery, onEdit, onDelete }) {
   const [copied, setCopied] = useState(false);
@@ -30,15 +32,15 @@ export function DeliveryCard({ delivery, onEdit, onDelete }) {
             <DemoBadge show={delivery.is_demo} />
           </h2>
           <p className="mt-1 text-sm text-stone-400">
-            {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesion"}
+            {delivery.client?.name || "Sin cliente"} · {delivery.session?.name || "Sin sesión"}
           </p>
         </div>
         <StatusBadge options={deliveryStatuses} value={delivery.status} />
       </div>
       <div className="mt-5 space-y-2 text-sm text-stone-400">
-        <p>Fecha: {delivery.delivery_date || "Sin fecha"}</p>
+        <p>Fecha: {formatDate(delivery.delivery_date)}</p>
         <div className="flex items-center gap-2">
-          <span>Presupuesto: {delivery.budget ? `${delivery.budget} EUR` : "Sin presupuesto"}</span>
+          <span>Presupuesto: {formatMoney(delivery.budget, "Sin presupuesto")}</span>
           {delivery.budget ? (
             <StatusBadge options={paymentStatuses} value={delivery.payment_status} />
           ) : null}

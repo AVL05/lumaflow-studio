@@ -128,18 +128,18 @@ test("plantillas y postproducción manual preservan históricos, permisos y dupl
     .fill("Selección sintética con criterios del briefing.");
   await dialog.getByRole("button", { name: "Guardar etapa" }).click();
   await expect(dialog).toBeHidden();
-  await expect(selection).toContainText("2030-05-10");
+  await expect(selection).toContainText("10 may 2030");
   await selection
     .getByRole("button", { name: "Añadir tarea", exact: true })
     .click();
   dialog = ownerPage.getByRole("dialog", { name: "Tarea del proyecto" });
   await dialog
-    .getByLabel("Titulo")
+    .getByLabel("Título")
     .fill("Revisar selección sintética adicional");
   await dialog
     .getByLabel("Responsable de la tarea")
     .selectOption(String(member.id));
-  await dialog.getByLabel("Fecha limite").fill("2030-05-09");
+  await dialog.getByLabel("Fecha límite").fill("2030-05-09");
   await dialog.getByRole("button", { name: "Guardar tarea" }).click();
   await expect(dialog).toBeHidden();
   await expect(

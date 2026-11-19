@@ -22,7 +22,7 @@ export function LocationForm({ form, setForm, onSubmit, error, saving }) {
           location={{
             latitude: form.latitude,
             longitude: form.longitude,
-            name: form.name || "Nueva localizacion",
+            name: form.name || "Nueva localización",
           }}
           selectable
           onSelect={({ latitude, longitude }) =>
@@ -50,7 +50,7 @@ export function LocationForm({ form, setForm, onSubmit, error, saving }) {
       <Field label="Ciudad">
         <Input value={form.city ?? ""} onChange={(event) => setValue("city", event.target.value)} />
       </Field>
-      <Field label="Pais">
+      <Field label="País">
         <Input
           value={form.country ?? ""}
           onChange={(event) => setValue("country", event.target.value)}
@@ -87,7 +87,7 @@ export function LocationForm({ form, setForm, onSubmit, error, saving }) {
           options={accessDifficulties}
         />
       </Field>
-      <Field label="Rating">
+      <Field label="Valoración">
         <Input
           type="number"
           min="1"
@@ -140,7 +140,7 @@ export function LocationForm({ form, setForm, onSubmit, error, saving }) {
               season_pick: "",
             }));
           }}
-          options={[{ value: "", label: "Anadir estacion" }, ...seasons]}
+          options={[{ value: "", label: "Añadir estacion" }, ...seasons]}
         />
       </Field>
       <div className="md:col-span-2 flex flex-wrap gap-2">
@@ -220,7 +220,7 @@ export function LocationForm({ form, setForm, onSubmit, error, saving }) {
         </Field>
       </div>
       <div className="md:col-span-2 flex justify-end">
-        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar localizacion"}</Button>
+        <Button disabled={saving}>{saving ? "Guardando..." : "Guardar localización"}</Button>
       </div>
     </form>
   );

@@ -33,17 +33,17 @@ function renderCard(overrides = {}, handlers = {}) {
 }
 
 describe("TaskCard", () => {
-  it("traduce prioridad y estado a las etiquetas del catalogo", () => {
+  it("traduce prioridad y estado a las etiquetas del catálogo", () => {
     renderCard();
 
     expect(screen.getByText("Urgente")).toBeInTheDocument();
     expect(screen.getByText("Por hacer")).toBeInTheDocument();
   });
 
-  it("muestra fecha, hora y sesion asociada", () => {
+  it("muestra fecha, hora y sesión asociada", () => {
     renderCard();
 
-    expect(screen.getByText(/2026-07-20/)).toBeInTheDocument();
+    expect(screen.getByText(/20 jul 2026/)).toBeInTheDocument();
     expect(screen.getByText(/10:00/)).toBeInTheDocument();
     expect(screen.getByText(/Editorial urbano/)).toBeInTheDocument();
   });
@@ -60,7 +60,7 @@ describe("TaskCard", () => {
     expect(screen.getByRole("button", { name: "Reabrir" })).toBeInTheDocument();
   });
 
-  it("propaga la seleccion con el id de la tarea", async () => {
+  it("propaga la selección con el id de la tarea", async () => {
     const { onSelect } = renderCard();
 
     await userEvent.click(screen.getByRole("checkbox", { name: /Seleccionar Confirmar permisos/ }));

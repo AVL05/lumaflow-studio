@@ -74,7 +74,7 @@ describe("ContractsPage", () => {
     expect(screen.getByRole("button", { name: "Crear mi primer contrato" })).toBeVisible();
   });
 
-  it("deshabilita edicion y borrado en contratos enviados", async () => {
+  it("deshabilita edición y borrado en contratos enviados", async () => {
     contractsApi.list.mockResolvedValue(
       page([draft(), draft({ id: 2, contract_number: "CON-2026-0002", status: "sent" })]),
     );

@@ -45,6 +45,25 @@ class CreativeWorkspaceTest extends TestCase
         $this->getJson('/api/jobs?paginate=1&project_type=personal')->assertOk()->assertJsonCount(0, 'data');
     }
 
+    public function test_list_shows_active_projects_before_finished_ones(): void
+    {
+        Sanctum::actingAs(User::factory()->create());
+        $ids = [];
+        foreach ([
+            'old_closed' => ['closed', '2025-01-10'],
+            'recent_delivered' => ['delivered', '2026-10-01'],
+            'undated_lead' => ['lead', null],
+            'later_shoot' => ['shoot', '2030-06-01'],
+            'soon_quoted' => ['quoted', '2030-01-15'],
+        ] as $key => [$status, $date]) {
+            $ids[$key] = $this->postJson('/api/jobs', $this->payload(['title' => $key, 'status' => $status, 'event_date' => $date]))->assertCreated()->json('data.id');
+        }
+
+        $order = collect($this->getJson('/api/jobs')->assertOk()->json('data'))->pluck('id')->all();
+
+        $this->assertSame([$ids['soon_quoted'], $ids['later_shoot'], $ids['undated_lead'], $ids['recent_delivered'], $ids['old_closed']], $order);
+    }
+
     public function test_all_roles_reject_foreign_locations_and_outsiders_get_404(): void
     {
         $owner = User::factory()->create();

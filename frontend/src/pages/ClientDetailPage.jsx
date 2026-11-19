@@ -25,7 +25,7 @@ export function ClientDetailPage() {
       <PageHeader
         eyebrow="Cliente"
         title={client?.name || "Detalle de cliente"}
-        description="Ficha operativa de contacto y relacion con entregas."
+        description="Ficha operativa de contacto y relación con entregas."
         action={
           <Link to="/app/clients">
             <Button variant="secondary">Volver</Button>

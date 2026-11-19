@@ -2,6 +2,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { accessDifficulties, accessModes, labelFor, seasons } from "../../utils/catalogs";
+import { formatMoney } from "../../utils/money";
 
 export function LocationSidebar({ location, onCopy }) {
   const links = [
@@ -12,7 +13,7 @@ export function LocationSidebar({ location, onCopy }) {
 
   return (
     <Card className="p-5">
-      <h2 className="font-semibold">Planificacion</h2>
+      <h2 className="font-semibold">Planificación</h2>
       <div className="mt-4 grid gap-3 text-sm text-stone-400">
         <p>
           <span className="text-stone-100">Mejor hora:</span> {location.best_time || "Sin dato"}
@@ -27,7 +28,7 @@ export function LocationSidebar({ location, onCopy }) {
         </p>
         <p>
           <span className="text-stone-100">Coste:</span>{" "}
-          {location.cost ? `${location.cost} EUR` : "Sin coste"}
+          {location.cost ? formatMoney(location.cost) : "Sin coste"}
         </p>
         <p>
           <span className="text-stone-100">Clima recomendado:</span>{" "}

@@ -31,7 +31,7 @@ describe("getNextAction", () => {
     });
   });
 
-  it("avanza en orden cliente, trabajo y sesion", () => {
+  it("avanza en orden cliente, trabajo y sesión", () => {
     expect(getNextAction(activationFor(["studio", "client"]))?.key).toBe("job");
     expect(getNextAction(activationFor(["studio", "client", "job"]))?.key).toBe("session");
   });

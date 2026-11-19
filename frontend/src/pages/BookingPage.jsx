@@ -70,19 +70,19 @@ export function BookingPage() {
         <Card className="p-8 text-center">
           <h1 className="text-2xl font-semibold text-stone-50">Solicitud enviada</h1>
           <p className="mt-3 text-sm leading-6 text-stone-400">
-            {studio?.name ?? "El estudio"} ha recibido tu peticion y te respondera pronto.
+            {studio?.name ?? "El estudio"} ha recibido tu petición y te respondera pronto.
           </p>
         </Card>
       ) : (
         <Card className="p-6 sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
-            Reserva tu sesion
+            Reserva tu sesión
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-50">
             {studio ? studio.name : "Cargando..."}
           </h1>
           <p className="mt-3 text-sm leading-6 text-stone-400">
-            Cuentanos que necesitas y te contactaremos para confirmar fecha y detalles.
+            Cuéntanos qué necesitas y te contactaremos para confirmar fecha y detalles.
           </p>
 
           <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={submit}>
@@ -108,14 +108,14 @@ export function BookingPage() {
                 onChange={(e) => setValue("email", e.target.value)}
               />
             </Field>
-            <Field label="Telefono">
+            <Field label="Teléfono">
               <input
                 className={inputClass}
                 value={form.phone}
                 onChange={(e) => setValue("phone", e.target.value)}
               />
             </Field>
-            <Field label="Tipo de sesion">
+            <Field label="Tipo de sesión">
               <input
                 className={inputClass}
                 placeholder="Boda, retrato, producto..."
@@ -134,12 +134,12 @@ export function BookingPage() {
               </Field>
             </div>
             <div className="md:col-span-2">
-              <Field label="Cuentanos mas">
+              <Field label="Cuéntanos más">
                 <Textarea
                   rows="4"
                   value={form.message}
                   onChange={(e) => setValue("message", e.target.value)}
-                  placeholder="Numero de invitados, localizacion, estilo que buscas..."
+                  placeholder="Número de invitados, localización, estilo que buscas..."
                 />
               </Field>
             </div>

@@ -102,7 +102,7 @@ export function TasksPage() {
 
   useCreateIntent(openCreate);
 
-  // Estables para que TaskCard (memoizada) no se re-renderice en cada seleccion.
+  // Estables para que TaskCard (memoizada) no se re-renderice en cada selección.
   const openEdit = useCallback((task) => {
     setEditing(task);
     setForm({
@@ -180,9 +180,9 @@ export function TasksPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Workflow"
+        eyebrow="Flujo de trabajo"
         title="Tareas"
-        description="Organiza el trabajo por prioridad, estado y fecha limite, conectado a sesiones y clientes."
+        description="Organiza el trabajo por prioridad, estado y fecha límite, conectado a sesiones y clientes."
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => exportsApi.csv("tasks")}>
@@ -199,7 +199,7 @@ export function TasksPage() {
         <SearchBar
           value={resource.filters.search ?? ""}
           onChange={(value) => resource.updateFilter("search", value)}
-          placeholder="Buscar por titulo o descripcion"
+          placeholder="Buscar por título o descripción"
         />
         <Select
           value={resource.filters.status ?? ""}
@@ -218,7 +218,7 @@ export function TasksPage() {
             { value: "due_date", label: "Fecha" },
             { value: "priority", label: "Prioridad" },
             { value: "status", label: "Estado" },
-            { value: "title", label: "Titulo" },
+            { value: "title", label: "Título" },
           ]}
         />
         <Select
@@ -242,7 +242,7 @@ export function TasksPage() {
       ) : resource.items.length === 0 ? (
         <EmptyState
           title="Sin tareas"
-          description="Crea la primera tarea para organizar la preparacion, edicion y entrega."
+          description="Crea la primera tarea para organizar la preparación, edición y entrega."
           action={<Button onClick={openCreate}>Crear tarea</Button>}
         />
       ) : (
@@ -281,7 +281,7 @@ export function TasksPage() {
           Cambiar estado
         </Button>
         <Button variant="secondary" onClick={() => exportsApi.csv("tasks", selection.selected)}>
-          Exportar seleccion
+          Exportar selección
         </Button>
         <Button variant="danger" onClick={() => runBulk("delete")}>
           Eliminar
@@ -307,7 +307,7 @@ export function TasksPage() {
       <ConfirmDialog
         open={Boolean(deleting)}
         title="Eliminar tarea"
-        description="Esta accion elimina la tarea de forma permanente."
+        description="Esta acción elimina la tarea de forma permanente."
         onClose={() => setDeleting(null)}
         onConfirm={confirmDelete}
       />

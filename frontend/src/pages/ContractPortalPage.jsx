@@ -6,6 +6,7 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ErrorState } from "../components/states/ErrorState";
 import { BrandLogo } from "../components/branding/BrandLogo";
+import { formatDate } from "../utils/dates";
 
 const decidedCopy = {
   accepted: "Has aceptado este contrato. Gracias.",
@@ -104,7 +105,7 @@ export function ContractPortalPage() {
         </p>
         {contract.expires_at ? (
           <p className="mt-2 text-xs text-stone-500">
-            Enlace disponible hasta el {contract.expires_at.slice(0, 10)}
+            Enlace disponible hasta el {formatDate(contract.expires_at)}
           </p>
         ) : null}
         {canRespond ? (

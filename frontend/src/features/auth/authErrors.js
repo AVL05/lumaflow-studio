@@ -1,9 +1,9 @@
 /**
- * Clasificador central de errores de autenticacion (Issue #26).
+ * Clasificador central de errores de autenticación (Issue #26).
  *
- * Solo un 401 demuestra sesion invalida. Todo lo demas (5xx, red,
+ * Solo un 401 demuestra sesión invalida. Todo lo demás (5xx, red,
  * throttling o respuestas inesperadas) conserva la credencial local:
- * un fallo transitorio no prueba que el token sea invalido.
+ * un fallo transitorio no prueba que el token sea inválido.
  */
 
 export const AUTH_ERROR_UNAUTHORIZED = "unauthorized";

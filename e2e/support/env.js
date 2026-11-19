@@ -10,13 +10,13 @@ export const repoRoot = path.resolve(e2eDir, "..");
 export const backendDir = path.join(repoRoot, "backend");
 export const frontendDir = path.join(repoRoot, "frontend");
 
-// Todo el estado generado por la suite vive aqui y esta ignorado por git.
+// Todo el estado generado por la suite vive aquí y esta ignorado por git.
 export const workDir = path.join(e2eDir, ".tmp");
 export const databaseFile = path.join(workDir, "lumaflow-e2e.sqlite");
 export const appKeyFile = path.join(workDir, "app-key");
 export const backendLogFile = path.join(backendDir, "storage", "logs", "laravel.log");
 
-/** Estado de sesion de una cuenta, generado una vez por ejecucion. */
+/** Estado de sesión de una cuenta, generado una vez por ejecución. */
 export function sessionStateFile(account) {
   return path.join(workDir, `session-${account}.json`);
 }
@@ -28,11 +28,11 @@ export const frontendUrl = `http://127.0.0.1:${frontendPort}`;
 export const apiUrl = `http://127.0.0.1:${backendPort}/api`;
 
 /**
- * Clave de aplicacion efimera para el entorno de test.
+ * Clave de aplicación efímera para el entorno de test.
  *
  * Laravel necesita APP_KEY para cifrar tokens y firmar URLs, pero no es un
  * secreto real: solo protege una base de datos SQLite local que se recrea en
- * cada ejecucion. Se genera una vez y se reutiliza para que la ejecucion sea
+ * cada ejecución. Se genera una vez y se reutiliza para que la ejecución sea
  * reproducible.
  */
 export function resolveAppKey() {
@@ -43,7 +43,7 @@ export function resolveAppKey() {
 
     if (stored) return stored;
   } catch {
-    // todavia no existe: se genera ahora.
+    // todavía no existe: se genera ahora.
   }
 
   const key = `base64:${randomBytes(32).toString("base64")}`;
@@ -56,7 +56,7 @@ export function resolveAppKey() {
  * Entorno del backend para E2E.
  *
  * Se inyecta de forma explicita en cada proceso PHP porque `php artisan serve`
- * solo reenvia `$_ENV` a su proceso hijo, y esa variable no esta poblada en
+ * solo reenvía `$_ENV` a su proceso hijo, y esa variable no esta poblada en
  * muchas instalaciones de PHP.
  */
 export function backendEnv(extra = {}) {
@@ -84,7 +84,7 @@ export function backendEnv(extra = {}) {
     BCRYPT_ROUNDS: "4",
     // La suite ejecuta once recorridos completos en ~1 min (cientos de
     // peticiones autenticadas por usuario); sin techo propio agotaria el
-    // budget anti-abuso de produccion (180/min). Produccion no define
+    // budget anti-abuso de producción (180/min). Producción no define
     // esta variable y conserva su valor.
     API_THROTTLE_PER_MINUTE: "1000",
     ...extra,

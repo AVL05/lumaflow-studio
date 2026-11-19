@@ -34,7 +34,7 @@ test.describe("estudio compartido", () => {
     expect(invite.status(), "el propietario puede invitar").toBe(201);
 
     const { token } = (await invite.json()).meta;
-    expect(token, "la invitacion expone el token una sola vez").toBeTruthy();
+    expect(token, "la invitación expone el token una sola vez").toBeTruthy();
 
     // La invitada acepta y entra en el estudio compartido.
     const accepted = await apiRequest(guestPage, "POST", "/workspace/invitations/accept", { token });

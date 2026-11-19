@@ -6,6 +6,7 @@ import { Textarea } from "../../components/ui/Textarea";
 import { ProjectResourcePicker } from "../jobs/ProjectResourcePicker";
 
 import { shotStatuses } from "./productionFormUtils";
+import { formatDate } from "../../utils/dates";
 
 export function ShotForm({ job, form, setForm, onSubmit, saving }) {
   const update = (key) => (e) => setForm((current) => ({ ...current, [key]: e.target.value }));
@@ -52,7 +53,7 @@ export function ShotForm({ job, form, setForm, onSubmit, saving }) {
                 { value: "", label: "Sin asignar" },
                 ...(job.sessions ?? []).map((day) => ({
                   value: day.id,
-                  label: `${day.date} · ${day.name}`,
+                  label: `${formatDate(day.date)} · ${day.name}`,
                 })),
               ]}
             />

@@ -17,7 +17,7 @@ export function ClientDetail({ client }) {
           <span className="text-stone-100">Email:</span> {client.email || "Sin email"}
         </p>
         <p>
-          <span className="text-stone-100">Telefono:</span> {client.phone || "Sin telefono"}
+          <span className="text-stone-100">Teléfono:</span> {client.phone || "Sin teléfono"}
         </p>
         <p>
           <span className="text-stone-100">Instagram:</span> {client.instagram || "Sin Instagram"}

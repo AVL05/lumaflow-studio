@@ -140,7 +140,7 @@ export function DeliveriesPage() {
         <SearchBar
           value={resource.filters.search ?? ""}
           onChange={(value) => resource.updateFilter("search", value)}
-          placeholder="Buscar por titulo, cliente, sesion o URL"
+          placeholder="Buscar por título, cliente, sesión o URL"
         />
         <Select
           value={resource.filters.status ?? ""}
@@ -153,7 +153,7 @@ export function DeliveriesPage() {
           options={[
             { value: "created_at", label: "Fecha" },
             { value: "delivery_date", label: "Entrega" },
-            { value: "title", label: "Titulo" },
+            { value: "title", label: "Título" },
             { value: "status", label: "Estado" },
           ]}
         />

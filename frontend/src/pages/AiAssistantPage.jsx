@@ -226,7 +226,7 @@ export function AiAssistantPage() {
           onProgress: updateWebGpuProgress,
           schema: gearSchema,
           payload,
-          task: "Recomienda equipo fotografico practico para esta sesion.",
+          task: "Recomienda equipo fotográfico práctico para esta sesión.",
         });
         setGearRecommendation(result);
       },
@@ -243,7 +243,7 @@ export function AiAssistantPage() {
           onProgress: updateWebGpuProgress,
           schema: planSchema,
           payload: { ...payload, session },
-          task: "Crea un plan de produccion fotografica accionable para esta sesion.",
+          task: "Crea un plan de producción fotográfica accionable para esta sesión.",
         });
         setSessionPlan(result);
       },
@@ -378,7 +378,7 @@ export function AiAssistantPage() {
   }
 
   async function deleteConversation(conversation) {
-    if (!window.confirm("Eliminar esta conversacion?")) return;
+    if (!window.confirm("Eliminar esta conversación?")) return;
     if (isLocalConversation(conversation)) {
       if (!historyRepo) return;
       try {

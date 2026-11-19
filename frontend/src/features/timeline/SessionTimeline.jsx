@@ -26,7 +26,7 @@ export function SessionTimeline({ sessionId }) {
     return (
       <EmptyState
         title="Sin actividad"
-        description="Las acciones sobre esta sesion apareceran aqui automaticamente."
+        description="Las acciones sobre esta sesión aparecerán aquí automáticamente."
       />
     );
   }

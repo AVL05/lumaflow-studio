@@ -34,7 +34,7 @@ function renderRoute() {
 }
 
 describe("ProtectedRoute", () => {
-  it("redirige a login sin sesion", () => {
+  it("redirige a login sin sesión", () => {
     Object.assign(authState, { booting: false, isAuthenticated: false });
     renderRoute();
 
@@ -49,7 +49,7 @@ describe("ProtectedRoute", () => {
     expect(screen.queryByText("pantalla de login")).not.toBeInTheDocument();
   });
 
-  it("renderiza el contenido con sesion activa", () => {
+  it("renderiza el contenido con sesión activa", () => {
     Object.assign(authState, {
       booting: false,
       isAuthenticated: true,

@@ -12,7 +12,7 @@ export function ProtectedRoute({ children }) {
     return <LoadingState label="Preparando workspace seguro..." />;
   }
 
-  // Fallo transitorio con sesion local potencialmente valida: estado
+  // Fallo transitorio con sesión local potencialmente valida: estado
   // degradado con reintento, nunca redireccion a login.
   if (authStatus === AUTH_STATUS_UNAVAILABLE) {
     return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;

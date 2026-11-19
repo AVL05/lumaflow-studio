@@ -9,7 +9,13 @@ import { Skeleton } from "../components/ui/Skeleton";
 import { StatCard } from "../components/ui/StatCard";
 import { ErrorState } from "../components/states/ErrorState";
 import { EmptyState } from "../components/states/EmptyState";
-import { labelFor, sessionStatuses, sessionTypes, toneForStatus } from "../utils/catalogs";
+import {
+  labelFor,
+  locationTypes,
+  sessionStatuses,
+  sessionTypes,
+  toneForStatus,
+} from "../utils/catalogs";
 import { LocationMapPreview } from "../features/locations/LocationMapPreview";
 import {
   ActivityWidget,
@@ -21,6 +27,7 @@ import {
 } from "../features/dashboard/WorkflowWidgets";
 import { ActivationPanel } from "../features/dashboard/ActivationPanel";
 import { getNextAction } from "../features/dashboard/activation";
+import { formatDate } from "../utils/dates";
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
@@ -35,16 +42,16 @@ export function DashboardPage() {
 
   useEffect(() => {
     loadDashboard();
-    // La carga inicial solo debe ejecutarse al montar la pagina.
+    // La carga inicial solo debe ejecutarse al montar la página.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
       <PageHeader
-        eyebrow="Overview"
+        eyebrow="Vista general"
         title="Dashboard"
-        description="Metricas reales del workspace creativo: sesiones, equipo, clientes y actividad reciente."
+        description="Métricas reales del workspace creativo: sesiones, equipo, clientes y actividad reciente."
       />
       {error ? <ErrorState message={error} onRetry={loadDashboard} /> : null}
       {!dashboard ? (
@@ -64,7 +71,7 @@ export function DashboardPage() {
                     : "Tu estudio está listo para organizar producción, entrega y archivo."}
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400">
-                  El dashboard resume lo que requiere atencion: agenda inmediata, tareas abiertas,
+                  El dashboard resume lo que requiere atención: agenda inmediata, tareas abiertas,
                   entregas pendientes y actividad reciente del workspace.
                 </p>
                 {(() => {
@@ -82,7 +89,7 @@ export function DashboardPage() {
               <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                 {[
                   ["Agenda", dashboard.todayAgenda?.length ?? 0, "eventos hoy"],
-                  ["Produccion", dashboard.upcomingSessions.length, "sesiones proximas"],
+                  ["Producción", dashboard.upcomingSessions.length, "sesiones próximas"],
                   ["Entrega", dashboard.pendingDeliveries, "pendientes"],
                 ].map(([label, value, detail]) => (
                   <div key={label} className="rounded-xl border border-white/10 bg-black/20 p-4">
@@ -99,7 +106,7 @@ export function DashboardPage() {
             </div>
           </Card>
 
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid items-start gap-6 xl:grid-cols-2">
             <AgendaWidget events={dashboard.todayAgenda ?? []} />
             <PendingTasksWidget
               tasks={dashboard.pendingTasks ?? []}
@@ -107,18 +114,13 @@ export function DashboardPage() {
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
             <StatCard label="Sesiones" value={dashboard.totalSessions} detail="Total planificado" />
-            <StatCard label="Equipo" value={dashboard.totalGear} detail="Items registrados" />
+            <StatCard label="Equipo" value={dashboard.totalGear} detail="Piezas en inventario" />
             <StatCard
               label="Localizaciones"
               value={dashboard.totalLocations}
-              detail="Spots guardados"
-            />
-            <StatCard
-              label="Proximas"
-              value={dashboard.upcomingSessions.length}
-              detail="Agenda visible"
+              detail="Lugares guardados"
             />
             <StatCard
               label="Clientes"
@@ -128,7 +130,7 @@ export function DashboardPage() {
             <StatCard
               label="Entregas pendientes"
               value={dashboard.pendingDeliveries}
-              detail="Esperando envio"
+              detail="Esperando envío"
             />
             <StatCard
               label="Proyectos entregados"
@@ -168,7 +170,7 @@ export function DashboardPage() {
 
           <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             <Card className="p-5">
-              <h2 className="font-semibold">Ultimas localizaciones</h2>
+              <h2 className="font-semibold">Últimas localizaciones</h2>
               <div className="mt-4 space-y-3">
                 {dashboard.latestLocations.length === 0 ? (
                   <p className="text-sm text-stone-400">Sin localizaciones.</p>
@@ -179,7 +181,7 @@ export function DashboardPage() {
                       <p className="mt-1 text-xs text-stone-400">
                         {[location.city, location.country].filter(Boolean).join(", ") ||
                           "Sin ciudad"}{" "}
-                        · {location.type}
+                        · {labelFor(locationTypes, location.type)}
                       </p>
                     </div>
                   ))
@@ -196,7 +198,8 @@ export function DashboardPage() {
                     <div key={session.id} className="rounded-md bg-white/[0.04] p-3">
                       <p className="text-sm">{session.name}</p>
                       <p className="mt-1 text-xs text-stone-400">
-                        {session.date} · {session.location?.name || session.location_name}
+                        {formatDate(session.date)} ·{" "}
+                        {session.location?.name || session.location_name}
                       </p>
                       {session.location ? (
                         <div className="mt-3">
@@ -235,7 +238,7 @@ export function DashboardPage() {
               </div>
             </Card>
             <Card className="p-5">
-              <h2 className="font-semibold">Ciudades mas utilizadas</h2>
+              <h2 className="font-semibold">Ciudades más utilizadas</h2>
               <div className="mt-4 space-y-3">
                 {dashboard.topLocationCities.length === 0 ? (
                   <p className="text-sm text-stone-400">Sin ciudades registradas.</p>
@@ -259,7 +262,7 @@ export function DashboardPage() {
               <h2 className="font-semibold">Clientes recientes</h2>
               <div className="mt-4 space-y-3">
                 {dashboard.recentClients.length === 0 ? (
-                  <p className="text-sm text-stone-400">Sin clientes todavia.</p>
+                  <p className="text-sm text-stone-400">Sin clientes todavía.</p>
                 ) : (
                   dashboard.recentClients.map((client) => (
                     <div
@@ -281,7 +284,7 @@ export function DashboardPage() {
               </div>
             </Card>
             <Card className="p-5">
-              <h2 className="font-semibold">Proximas entregas</h2>
+              <h2 className="font-semibold">Próximas entregas</h2>
               <div className="mt-4 space-y-3">
                 {dashboard.upcomingDeliveries.length === 0 ? (
                   <p className="text-sm text-stone-400">Sin entregas futuras.</p>
@@ -291,7 +294,7 @@ export function DashboardPage() {
                       <p className="text-sm">{delivery.title}</p>
                       <p className="mt-1 text-xs text-stone-400">
                         {delivery.client?.name || "Sin cliente"} ·{" "}
-                        {delivery.delivery_date || "Sin fecha"}
+                        {formatDate(delivery.delivery_date)}
                       </p>
                     </div>
                   ))
@@ -302,12 +305,12 @@ export function DashboardPage() {
 
           <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
             <Card className="p-5">
-              <h2 className="font-semibold">Proximas sesiones</h2>
+              <h2 className="font-semibold">Próximas sesiones</h2>
               <div className="mt-4 space-y-3">
                 {dashboard.upcomingSessions.length === 0 ? (
                   <EmptyState
-                    title="Sin sesiones proximas"
-                    description="Cuando crees sesiones futuras apareceran aqui."
+                    title="Sin sesiones próximas"
+                    description="Cuando crees sesiones futuras aparecerán aquí."
                   />
                 ) : (
                   dashboard.upcomingSessions.map((session) => (
@@ -319,8 +322,8 @@ export function DashboardPage() {
                         <div>
                           <p className="font-medium">{session.name}</p>
                           <p className="mt-1 text-sm text-stone-400">
-                            {session.date} {session.time || ""} ·{" "}
-                            {session.location_name || "Sin localizacion"}
+                            {formatDate(session.date)} {session.time?.slice(0, 5) || ""} ·{" "}
+                            {session.location_name || "Sin localización"}
                           </p>
                         </div>
                         <Badge variant={toneForStatus(session.status)}>
@@ -374,7 +377,7 @@ export function DashboardPage() {
               </p>
             </Card>
             <Card className="p-5">
-              <h2 className="font-semibold">Ultimo analisis</h2>
+              <h2 className="font-semibold">Último análisis</h2>
               {dashboard.latestAiAnalysis?.id ? (
                 <div className="mt-4 text-sm text-stone-400">
                   <p>{dashboard.latestAiAnalysis.summary}</p>
@@ -383,7 +386,7 @@ export function DashboardPage() {
                   </p>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-stone-400">Sin analisis IA todavia.</p>
+                <p className="mt-4 text-sm text-stone-400">Sin análisis IA todavía.</p>
               )}
             </Card>
             <Card className="p-5">
@@ -403,9 +406,9 @@ export function DashboardPage() {
           </div>
 
           <Card className="p-5">
-            <h2 className="font-semibold">Ultimos planes IA</h2>
+            <h2 className="font-semibold">Últimos planes IA</h2>
             {dashboard.latestAiSessionPlans?.length === 0 ? (
-              <p className="mt-4 text-sm text-stone-400">Sin planes de sesion generados.</p>
+              <p className="mt-4 text-sm text-stone-400">Sin planes de sesión generados.</p>
             ) : (
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {dashboard.latestAiSessionPlans?.map((plan) => (

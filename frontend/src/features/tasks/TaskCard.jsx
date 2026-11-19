@@ -4,8 +4,9 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Checkbox } from "../../components/ui/Checkbox";
 import { labelFor, taskPriorities, taskStatuses, toneFor } from "../../utils/catalogs";
+import { formatDate } from "../../utils/dates";
 
-/** Memoizada: cada clic de la seleccion multiple re-renderiza el listado entero. */
+/** Memoizada: cada clic de la selección múltiple re-renderiza el listado entero. */
 export const TaskCard = memo(function TaskCard({
   task,
   selected,
@@ -37,7 +38,7 @@ export const TaskCard = memo(function TaskCard({
           </div>
 
           <p className="mt-2 line-clamp-2 text-sm text-stone-400">
-            {task.description || "Sin descripcion."}
+            {task.description || "Sin descripción."}
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-stone-400">
@@ -46,7 +47,7 @@ export const TaskCard = memo(function TaskCard({
             </Badge>
             {task.due_date ? (
               <span className={task.is_overdue ? "text-red-300" : ""}>
-                {task.due_date}
+                {formatDate(task.due_date)}
                 {task.due_time ? ` · ${task.due_time}` : ""}
                 {task.is_overdue ? " · vencida" : ""}
               </span>

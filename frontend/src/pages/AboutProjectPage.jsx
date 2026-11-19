@@ -13,21 +13,21 @@ const stack = [
 ];
 
 const modules = [
-  ["Sesiones", "CRUD con cliente, tipo, estado, localizacion, checklists y timeline."],
+  ["Sesiones", "CRUD con cliente, tipo, estado, localización, checklists y timeline."],
   ["Localizaciones", "Mapa Leaflet, coordenadas, acceso, permisos, clima y equipo sugerido."],
   ["Clientes y entregas", "CRM ligero conectado a sesiones, presupuestos y entregas externas."],
   ["Negocio", "Presupuestos, facturas PDF, vencimientos y estados de cobro."],
   ["Entregas", "Enlaces externos, portal privado y seguimiento de la aprobación del cliente."],
-  ["Presets", "Configuraciones de camara vinculadas al inventario real."],
+  ["Presets", "Configuraciones de cámara vinculadas al inventario real."],
   ["Workflow", "Calendario con drag & drop, tareas y notificaciones."],
-  ["Analitica", "KPIs y graficas calculadas sobre datos reales del usuario."],
-  ["Asistente IA", "Chat con contexto, planes de sesion y recomendacion de equipo."],
+  ["Analítica", "KPIs y gráficas calculadas sobre datos reales del usuario."],
+  ["Asistente IA", "Chat con contexto, planes de sesión y recomendación de equipo."],
 ];
 
 const decisions = [
   [
-    "Tokens Bearer en vez de cookies de sesion",
-    "La SPA y la API viven en origenes distintos. Sanctum emite tokens personales, CORS no necesita credenciales y el frontend no arrastra estado de sesion.",
+    "Tokens Bearer en vez de cookies de sesión",
+    "La SPA y la API viven en orígenes distintos. Sanctum emite tokens personales, CORS no necesita credenciales y el frontend no arrastra estado de sesión.",
   ],
   [
     "404 en vez de 403 para recursos ajenos",
@@ -39,11 +39,11 @@ const decisions = [
   ],
   [
     "Agregacion en base de datos",
-    "La analitica no carga colecciones en memoria: agrupa y cuenta en SQL, y el calendario normaliza tres fuentes en un unico shape de evento.",
+    "La analítica no carga colecciones en memoria: agrupa y cuenta en SQL, y el calendario normaliza tres fuentes en un único shape de evento.",
   ],
   [
     "IA local en navegador",
-    "La experiencia principal usa WebGPU en el cliente. Si el navegador no lo soporta, la aplicacion informa el limite sin tumbar el resto del producto.",
+    "La experiencia principal usa WebGPU en el cliente. Si el navegador no lo soporta, la aplicación informa el límite sin tumbar el resto del producto.",
   ],
 ];
 
@@ -57,8 +57,8 @@ const links = [
 const screenshots = [
   ["Dashboard", "/product/dashboard.png"],
   ["Calendario", "/product/calendar.png"],
-  ["Analitica", "/product/analytics.png"],
-  ["Galeria", "/product/gallery.png"],
+  ["Analítica", "/product/analytics.png"],
+  ["Galería", "/product/gallery.png"],
   ["Localizaciones", "/product/locations.png"],
   ["Asistente IA", "/product/ai-assistant.png"],
 ];
@@ -84,22 +84,22 @@ export function AboutProjectPage() {
             Sobre el proyecto
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-stone-50">
-            Todo tu estudio fotografico en un unico lugar
+            Todo tu estudio fotográfico en un único lugar
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-400">
             LumaFlow Studio conecta clientes, trabajos, reservas, presupuestos, facturas, sesiones y
-            entregas en una sola aplicacion. El objetivo es reducir herramientas desconectadas y
-            ofrecer una lectura clara de lo que necesita atencion en el estudio.
+            entregas en una sola aplicación. El objetivo es reducir herramientas desconectadas y
+            ofrecer una lectura clara de lo que necesita atención en el estudio.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
             El producto esta en beta publica gratuita y no solicita tarjeta. Esta etapa sirve para
             mejorar el flujo con profesionales reales, manteniendo todas las funciones gratuitas. El
-            codigo es open source y tambien documenta el proceso tecnico del producto.
+            código es open source y también documenta el proceso técnico del producto.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-stone-100">Tecnologias</h2>
+          <h2 className="text-lg font-semibold text-stone-100">Tecnologías</h2>
           <div className="mt-5 grid gap-3">
             {stack.map(([area, detail]) => (
               <Panel
@@ -119,7 +119,7 @@ export function AboutProjectPage() {
           <h2 className="text-lg font-semibold text-stone-100">Arquitectura</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-400">
             Dos aplicaciones independientes. El backend es una API REST pura: cada recurso recorre
-            ruta, controlador, form request, modelo con scopes y resource, y la logica de dominio
+            ruta, controlador, form request, modelo con scopes y resource, y la lógica de dominio
             vive en servicios. El frontend es una SPA con router, providers de auth y
             notificaciones, hooks compartidos y modulos por dominio. Todo el aislamiento entre
             estudios se apoya en scopes de workspace, comprobación de miembros y en policies que
@@ -127,10 +127,10 @@ export function AboutProjectPage() {
           </p>
           <div className="mt-5 overflow-x-auto">
             <pre className="w-max min-w-full rounded-lg border border-white/10 bg-black/40 p-5 text-xs leading-6 text-stone-400">
-              {`routes/api.php  ->  Api\\XController  ->  XRequest (validacion)
+              {`routes/api.php  ->  Api\\XController  ->  XRequest (validación)
                           |
                           v
-                   App\\Services\\*  (logica de dominio)
+                   App\\Services\\*  (lógica de dominio)
                           |
                           v
                  Modelo + scopes  ->  XResource (serializacion)
@@ -153,15 +153,15 @@ frontend/src/api/*.js  ->  hooks  ->  features/<dominio>  ->  pages/`}
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-stone-100">Integracion de IA</h2>
+          <h2 className="text-lg font-semibold text-stone-100">Integración de IA</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-400">
-            El asistente principal corre con WebGPU en el navegador mediante WebLLM. Ningun prompt
+            El asistente principal corre con WebGPU en el navegador mediante WebLLM. Ningún prompt
             necesita salir a un proveedor externo. El backend conserva servicios compatibles con
-            Ollama para ejecucion local avanzada, pero la experiencia de la SPA no depende de tener
+            Ollama para ejecución local avanzada, pero la experiencia de la SPA no depende de tener
             Ollama instalado.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            {["Chat con contexto", "Planes de sesion", "Recomendador de equipo"].map((item) => (
+            {["Chat con contexto", "Planes de sesión", "Recomendador de equipo"].map((item) => (
               <Badge key={item} variant="warm">
                 {item}
               </Badge>

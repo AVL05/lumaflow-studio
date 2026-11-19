@@ -170,7 +170,19 @@ pnpm run start
 | Demo interactiva     | `http://localhost:5173/demo` |
 | API Laravel          | `http://localhost:8000/api`  |
 
-React, JavaScript y CSS utilizan HMR. Los cambios PHP se aplican en la siguiente petición. No necesitas Docker ni MySQL para empezar.
+React, JavaScript y CSS utilizan HMR. Los cambios PHP se aplican en la siguiente petición. No necesitas Docker ni MySQL para empezar. Si otro proyecto ocupa esos puertos, usa `LUMAFLOW_WEB_PORT` y `LUMAFLOW_API_PORT` (por ejemplo, `5180` y `8010`). El script fija SQLite, CORS y correo por log aunque `backend/.env` apunte a otra base de datos.
+
+### Modo exhibición
+
+```bash
+pnpm run start:showcase
+```
+
+Arranca LumaFlow con **Estudio Lumen**, un estudio ficticio con un año de actividad: 11 clientes, 16 proyectos en todas las fases, sesiones, presupuestos, facturas (incluida una vencida), contrato aceptado, entregas con revisiones, tomas, postproducción, reservas y avisos. Entra con `demo@lumaflow.test` y la contraseña `lumaflow-demo` (cámbiala con `SHOWCASE_PASSWORD`). Es una credencial local de demostración, no una cuenta real.
+
+Usa una base propia (`backend/database/showcase.sqlite`) que se regenera en cada arranque para que las fechas sean siempre relativas a hoy; tus datos de `pnpm run start` no se tocan. El seeder se niega a ejecutarse en producción.
+
+Con el modo exhibición en marcha, `pnpm run capture:showcase` regenera las capturas de producto de la landing (`frontend/public/product`) y de `docs/screenshots` con Chromium de Playwright.
 
 El alta local sigue `crear cuenta -> verificar email -> configurar estudio -> elegir primer paso -> dashboard`. Tras el onboarding puedes crear el primer trabajo, cargar un workspace ficticio o importar clientes mediante CSV. Como `pnpm run start` usa correo por log, copia el enlace de verificacion desde `backend/storage/logs/laravel.log`.
 

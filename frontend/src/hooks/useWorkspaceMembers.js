@@ -10,7 +10,7 @@ export const WORKSPACE_ROLES = {
 
 /**
  * Miembros e invitaciones del workspace actual. La autorizacion real vive en
- * el backend; aqui solo se ocultan acciones segun el rol para guiar la UI.
+ * el backend; aquí solo se ocultan acciones según el rol para guiar la UI.
  */
 export function useWorkspaceMembers(currentRole) {
   const [members, setMembers] = useState([]);

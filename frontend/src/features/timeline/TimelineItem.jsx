@@ -1,4 +1,4 @@
-import { activityTypes, labelFor } from "../../utils/catalogs";
+import { activitySubjects, activityTypes, labelFor } from "../../utils/catalogs";
 
 const toneByType = {
   created: "bg-sky-300",
@@ -38,7 +38,8 @@ export function TimelineItem({ activity, last }) {
           <span className="text-xs text-stone-400">{formatDate(activity.created_at)}</span>
         </div>
         <p className="mt-0.5 text-xs text-stone-400">
-          {labelFor(activityTypes, activity.type)} · {activity.subject_type}
+          {labelFor(activityTypes, activity.type)} ·{" "}
+          {labelFor(activitySubjects, activity.subject_type)}
         </p>
       </div>
     </li>

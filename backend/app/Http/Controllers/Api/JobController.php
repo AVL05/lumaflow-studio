@@ -39,7 +39,7 @@ class JobController extends Controller
             ->when($request->status, fn ($q, $status) => $q->where('status', $status))
             ->when($request->specialty, fn ($q, $specialty) => $q->where('specialty', $specialty))
             ->when($request->project_type, fn ($q, $type) => $q->where('project_type', $type))
-            ->orderByRaw('event_date IS NULL')->orderBy('event_date')->orderByDesc('created_at')->orderByDesc('id');
+            ->boardOrder();
 
         return JobResource::collection($request->boolean('paginate') ? $jobs->paginate((int) $request->input('per_page', 12)) : $jobs->get());
     }

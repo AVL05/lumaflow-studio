@@ -25,7 +25,7 @@ import {
   taskStatuses,
 } from "../../utils/catalogs";
 
-/** Traduce las etiquetas crudas del backend usando los catalogos existentes. */
+/** Traduce las etiquetas crudas del backend usando los catálogos existentes. */
 function translate(rows, options) {
   return rows.map((row) => ({ ...row, label: labelFor(options, row.label) }));
 }
@@ -61,7 +61,7 @@ export const SessionTypesChart = memo(function SessionTypesChart({ data }) {
   const rows = useMemo(() => translate(data, sessionTypes), [data]);
 
   return (
-    <ChartPanel title="Tipos de sesion" description="Distribucion por especialidad" data={rows}>
+    <ChartPanel title="Tipos de sesión" description="Distribución por especialidad" data={rows}>
       <PieChart>
         <Pie
           data={rows}
@@ -108,7 +108,7 @@ export const AiUsageChart = memo(function AiUsageChart({ data }) {
   return (
     <ChartPanel
       title="Uso de IA"
-      description="Analisis, conversaciones y planes por mes"
+      description="Análisis, conversaciones y planes por mes"
       data={hasData ? data : []}
     >
       <LineChart data={data}>
@@ -120,7 +120,7 @@ export const AiUsageChart = memo(function AiUsageChart({ data }) {
         <Line
           type="monotone"
           dataKey="analyses"
-          name="Analisis"
+          name="Análisis"
           stroke={colorAt(0)}
           strokeWidth={2}
           dot={false}

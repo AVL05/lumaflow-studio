@@ -33,7 +33,7 @@ export function ClientForm({ form, setForm, onSubmit, error, saving }) {
           onChange={(e) => setValue("email", e.target.value)}
         />
       </Field>
-      <Field label="Telefono">
+      <Field label="Teléfono">
         <Input value={form.phone ?? ""} onChange={(e) => setValue("phone", e.target.value)} />
       </Field>
       <Field label="Empresa">

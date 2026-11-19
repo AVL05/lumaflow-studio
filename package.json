@@ -6,6 +6,8 @@
   "description": "Plataforma full-stack de gestion del flujo de trabajo para fotografos.",
   "scripts": {
     "start": "node scripts/start-local.mjs",
+    "start:showcase": "node scripts/start-local.mjs --showcase",
+    "capture:showcase": "node scripts/capture-showcase.mjs",
     "start:backend": "cd backend && php artisan serve --host=127.0.0.1 --port=8000",
     "start:frontend": "pnpm --dir frontend run dev --host localhost --port 5173",
     "dev": "pnpm run start",

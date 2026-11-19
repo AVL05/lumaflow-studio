@@ -51,7 +51,7 @@ test.describe("portal de entrega", () => {
     await expect(visitorPage.getByText("Este enlace de entrega no existe o ha caducado.")).toBeVisible();
   });
 
-  test("el cliente aprueba la entrega desde el enlace publico", async ({ ownerPage, visitorPage }) => {
+  test("el cliente aprueba la entrega desde el enlace público", async ({ ownerPage, visitorPage }) => {
     const suffix = Date.now();
     const clientName = `Cliente Entrega E2E ${suffix}`;
     const deliveryTitle = `Galería Boda E2E ${suffix}`;
@@ -68,8 +68,8 @@ test.describe("portal de entrega", () => {
     await ownerPage.getByRole("button", { name: "Nueva entrega" }).click();
 
     const deliveryDialog = ownerPage.getByRole("dialog");
-    await deliveryDialog.getByLabel("Titulo").fill(deliveryTitle);
-    // El `label` envuelve el `select`, asi que su nombre accesible incluye las
+    await deliveryDialog.getByLabel("Título").fill(deliveryTitle);
+    // El `label` envuelve el `select`, así que su nombre accesible incluye las
     // opciones: se ancla el inicio para no confundirse con "Estado de pago".
     await deliveryDialog.getByLabel(/^Estado(?!\s)/).selectOption("delivered");
     const deliveryClientSelect = deliveryDialog.getByLabel("Cliente");
@@ -89,15 +89,15 @@ test.describe("portal de entrega", () => {
     await expect(deliveryDialog).toBeHidden();
     await expect(ownerPage.getByText(deliveryTitle)).toBeVisible();
 
-    // El enlace publico no se expone en la UI: se lee el token como el estudio.
+    // El enlace público no se expone en la UI: se lee el token como el estudio.
     const deliveryId = await findResourceId(ownerPage, "/deliveries", "title", deliveryTitle);
     const detail = await apiRequest(ownerPage, "GET", `/deliveries/${deliveryId}`);
     expect(detail.status()).toBe(200);
 
     const { public_token: publicToken } = (await detail.json()).data;
-    expect(publicToken, "la entrega debe exponer un token publico").toBeTruthy();
+    expect(publicToken, "la entrega debe exponer un token público").toBeTruthy();
 
-    // El visitante abre el portal sin sesion y aprueba la entrega.
+    // El visitante abre el portal sin sesión y aprueba la entrega.
     await visitorPage.goto(`/deliver/${publicToken}`);
 
     await expect(visitorPage.getByRole("heading", { name: clientName })).toBeVisible();
@@ -115,8 +115,8 @@ test.describe("portal de entrega", () => {
     await visitorPage.getByRole("button", { name: "Aprobar entrega" }).click();
     await expect(visitorPage.getByText("Ya has aprobado esta entrega. Gracias.")).toBeVisible();
 
-    // La aprobacion queda registrada en el panel del estudio: primero se
-    // comprueba por API (sin navegacion en curso) y despues se recarga la UI.
+    // La aprobación queda registrada en el panel del estudio: primero se
+    // comprueba por API (sin navegación en curso) y después se recarga la UI.
     const refreshed = await apiRequest(ownerPage, "GET", `/deliveries/${deliveryId}`);
     expect((await refreshed.json()).data.status).toBe("approved");
 

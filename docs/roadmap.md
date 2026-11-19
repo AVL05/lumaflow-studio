@@ -6,6 +6,10 @@ Estado tras el hardening V1 (#3–#12 mergeados). Lo implementado ya no aparece 
 
 `chore/consolidate-lumaflow` integra `feat/backup-b2-storage` (B2 privado, Sprints 1–6) y `feat/seo-geo-public-pages` (SEO/GEO P0/P1, regresión de actualización PWA) sobre `main` `03676ea`. Corrige la espera infinita del entrypoint ante una base inalcanzable, los falsos fallos del smoke en Previews y los timeouts de arranque de dos suites Vitest en CI. Los backups siguen desactivados. No hay push, merge ni despliegue: resultados, bloqueos y decisión en el [informe de consolidación](plans/2026-11-06-consolidation-release-assessment.md).
 
+## Pulido para exhibición — noviembre de 2026, local y sin publicar
+
+Rama `feat/showcase-polish` sobre la consolidación. Modo exhibición (`pnpm run start:showcase`) con un estudio ficticio en base SQLite propia y `pnpm run capture:showcase` para regenerar las capturas de la landing, que mostraban estados de carga. Corrige mapas rotos también en producción (CARTO exige clave; ahora teselas OSM con filtro oscuro), el arranque local con pnpm standalone y con `backend/.env` apuntando a MySQL, textos sin tildes o en inglés, valores técnicos sin traducir, fechas ISO e importes `EUR` sin formato. Los proyectos activos aparecen antes que los cerrados. No resuelve la caída de la API productiva.
+
 ## SEO/GEO P0/P1 — implementado localmente, con verificaciones externas pendientes
 
 Metadatos por ruta, allowlist comercial, robots/sitemap generados, exclusión de superficies operativas, headers API, copy coherente y HTML público prerenderizado/hidratado sin cambiar React/Vite + Laravel. El CRM conserva su SPA; no se añaden pagos, alojamiento de originales, blog ni dependencias. Se mantienen estilos y animaciones.

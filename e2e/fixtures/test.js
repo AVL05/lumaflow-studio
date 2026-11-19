@@ -4,19 +4,19 @@ import { apiUrl, sessionStateFile } from "../support/env.js";
 /**
  * Suite E2E de LumaFlow.
  *
- * Cada fixture abre un contexto con la sesion ya iniciada de una cuenta, de modo
+ * Cada fixture abre un contexto con la sesión ya iniciada de una cuenta, de modo
  * que un mismo recorrido puede representar a dos estudios distintos (por ejemplo,
  * para comprobar aislamiento) sin depender del estado compartido.
- * Las sesiones se crean en el `globalSetup` para no agotar el limite de intentos
+ * Las sesiones se crean en el `globalSetup` para no agotar el límite de intentos
  * de login del backend.
  */
 
-/** Abre una pagina en la SPA con la sesion guardada y comprueba que sigue viva. */
+/** Abre una página en la SPA con la sesión guardada y comprueba que sigue viva. */
 async function openStudioPage(browser, account) {
   const context = await browser.newContext({ storageState: sessionStateFile(account) });
   const page = await context.newPage();
 
-  // Abrir el panel valida la sesion reutilizada y deja la pagina en el origen
+  // Abrir el panel valida la sesión reutilizada y deja la página en el origen
   // de la SPA, donde el token vive en localStorage.
   await page.goto("/app/dashboard");
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
@@ -57,7 +57,7 @@ export const test = base.extend({
     await use(page);
     await context.close();
   },
-  /** Ventana publica sin sesion, para los portales de entrega. */
+  /** Ventana publica sin sesión, para los portales de entrega. */
   visitorPage: [
     async ({ browser }, use, testInfo) => {
       const context = await browser.newContext();

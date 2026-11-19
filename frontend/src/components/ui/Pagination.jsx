@@ -6,7 +6,7 @@ export function Pagination({ meta, onPage }) {
   return (
     <div className="mt-6 flex items-center justify-between gap-3 text-sm text-stone-400">
       <span>
-        Pagina {meta.current_page} de {meta.last_page}
+        Página {meta.current_page} de {meta.last_page}
       </span>
       <div className="flex gap-2">
         <Button

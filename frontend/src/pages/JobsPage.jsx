@@ -21,6 +21,7 @@ import {
 import { useCreateIntent } from "../hooks/useCreateIntent";
 import { usePaginatedResource } from "../hooks/usePaginatedResource";
 import { useToast } from "../features/notifications/ToastContext";
+import { formatDate } from "../utils/dates";
 
 export function JobsPage() {
   const toast = useToast();
@@ -77,7 +78,7 @@ export function JobsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Creative workspace"
+        eyebrow="Espacio creativo"
         title="Proyectos"
         description="De la primera idea a la entrega. Fotografía, audiovisual y proyectos personales, en un mismo espacio."
         action={<Button onClick={openCreate}>Nuevo proyecto</Button>}
@@ -137,10 +138,11 @@ export function JobsPage() {
               </p>
               <p className="mt-5 text-xs text-stone-400">
                 {catalog.pipeline[job.status] ?? job.status} ·{" "}
-                {job.event_date || "Fecha por definir"}
+                {formatDate(job.event_date, "Fecha por definir")}
               </p>
               <p className="mt-2 text-xs text-amber-100/70">
-                {job.counts?.open_tasks ?? 0} tareas pendientes
+                {job.counts?.open_tasks ?? 0}{" "}
+                {job.counts?.open_tasks === 1 ? "tarea pendiente" : "tareas pendientes"}
               </p>
             </Link>
           ))}

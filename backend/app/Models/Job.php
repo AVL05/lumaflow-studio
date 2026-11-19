@@ -25,6 +25,8 @@ class Job extends Model
 
     public const PROJECT_TYPES = ['photography', 'audiovisual', 'personal'];
 
+    public const FINISHED_STATUSES = ['delivered', 'closed', 'cancelled'];
+
     protected function casts(): array
     {
         return ['event_date' => 'date', 'budget' => 'decimal:2', 'deposit_amount' => 'decimal:2', 'contract_signed_at' => 'datetime', 'participants' => 'array', 'external_links' => 'array', 'briefing' => 'array', 'briefing_revision' => 'integer', 'start_date' => 'date', 'end_date' => 'date', 'delivery_due_date' => 'date'];
@@ -38,6 +40,21 @@ class Job extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($q) => $q->where(fn ($i) => $i->where('title', 'like', "%{$search}%")->orWhereHas('client', fn ($c) => $c->where('name', 'like', "%{$search}%"))));
+    }
+
+    /**
+     * Work in progress first with the soonest date on top, then finished work
+     * most recent first, so a long history never buries active projects.
+     * Undated projects close each group.
+     */
+    public function scopeBoardOrder($query)
+    {
+        $finished = "status IN ('".implode("', '", self::FINISHED_STATUSES)."')";
+
+        return $query->orderByRaw("CASE WHEN {$finished} THEN 1 ELSE 0 END")
+            ->orderByRaw('event_date IS NULL')
+            ->orderByRaw("CASE WHEN {$finished} THEN NULL ELSE event_date END")
+            ->orderByDesc('event_date')->orderByDesc('created_at')->orderByDesc('id');
     }
 
     public function user(): BelongsTo

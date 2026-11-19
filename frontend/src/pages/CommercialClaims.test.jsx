@@ -17,7 +17,7 @@ describe("commercial claims reflect the external-delivery product", () => {
       </MemoryRouter>,
     );
     expect(container.textContent).not.toMatch(
-      /S3|seleccionar favoritas|seleccion de favoritas|Galerías privadas y favoritos|Carga multiple|Fotografías que decides subir/,
+      /S3|seleccionar favoritas|selecci[oó]n de favoritas|Galerías privadas y favoritos|Carga m[uú]ltiple|Fotografías que decides subir/,
     );
     expect(container.textContent).toMatch(/extern[oa]s?/i);
   });

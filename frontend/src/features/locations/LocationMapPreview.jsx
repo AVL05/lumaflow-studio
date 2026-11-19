@@ -14,7 +14,7 @@ export function LocationMapPreview({ latitude, longitude, name }) {
       <div className="relative grid min-h-48 place-items-center p-6 text-center">
         <div>
           <div className="mx-auto mb-3 h-4 w-4 rounded-full bg-amber-200 shadow-[0_0_24px_rgba(253,230,138,0.55)]" />
-          <p className="font-medium text-stone-100">{name || "Localizacion"}</p>
+          <p className="font-medium text-stone-100">{name || "Localización"}</p>
           <p className="mt-2 text-sm text-stone-400">
             {valid ? `${latitude}, ${longitude}` : "Coordenadas pendientes"}
           </p>

@@ -18,7 +18,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
       ) : null}
 
       <div className="md:col-span-2">
-        <Field label="Titulo">
+        <Field label="Título">
           <Input required value={form.title} onChange={(e) => setValue("title", e.target.value)} />
         </Field>
       </div>
@@ -38,7 +38,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
         />
       </Field>
 
-      <Field label="Fecha limite">
+      <Field label="Fecha límite">
         <Input
           type="date"
           value={form.due_date ?? ""}
@@ -69,12 +69,12 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
         </Field>
       )}
 
-      <Field label="Sesion">
+      <Field label="Sesión">
         <Select
           value={form.session_id ?? ""}
           onChange={(e) => setValue("session_id", e.target.value)}
           options={[
-            { value: "", label: "Sin sesion" },
+            { value: "", label: "Sin sesión" },
             ...sessions.map((session) => ({ value: String(session.id), label: session.name })),
           ]}
         />
@@ -91,7 +91,7 @@ export function TaskForm({ form, setForm, onSubmit, error, saving, sessions, cli
       </Field>
 
       <div className="md:col-span-2">
-        <Field label="Descripcion">
+        <Field label="Descripción">
           <Textarea
             rows="3"
             value={form.description ?? ""}

@@ -3,14 +3,14 @@ import { apiRequest } from "../support/app.js";
 
 async function activationSteps(page) {
   const response = await apiRequest(page, "GET", "/dashboard");
-  expect(response.status(), "el panel deberia responder 200").toBe(200);
+  expect(response.status(), "el panel debería responder 200").toBe(200);
 
   const steps = (await response.json()).data.activation.steps;
   return Object.fromEntries(steps.map((step) => [step.key, step]));
 }
 
 test.describe("primer valor", () => {
-  test("un estudio nuevo configura, crea cliente, trabajo y sesion guiado por el CTA", async ({
+  test("un estudio nuevo configura, crea cliente, trabajo y sesión guiado por el CTA", async ({
     newcomerPage,
   }) => {
     const suffix = Date.now();
@@ -18,7 +18,7 @@ test.describe("primer valor", () => {
     const jobTitle = `Boda Nueva E2E ${suffix}`;
     const sessionName = `Preboda Nueva E2E ${suffix}`;
 
-    // El embudo continua donde lo dejo la sesion preparada: paso 1 de 5.
+    // El embudo continua donde lo dejo la sesión preparada: paso 1 de 5.
     await expect(newcomerPage.getByText("1 de 5")).toBeVisible();
     await newcomerPage
       .getByLabel("Nombre del estudio")
@@ -39,7 +39,7 @@ test.describe("primer valor", () => {
       .getByRole("button", { name: "Abrir mi estudio" })
       .click();
 
-    // Ultimo paso del embudo con ruta directa al primer trabajo.
+    // Último paso del embudo con ruta directa al primer trabajo.
     await newcomerPage.waitForURL("**/getting-started");
     await expect(newcomerPage.getByText("5 de 5")).toBeVisible();
     await newcomerPage
@@ -50,7 +50,7 @@ test.describe("primer valor", () => {
       newcomerPage.getByText("No hay proyectos en esta vista"),
     ).toBeVisible();
 
-    // El panel orienta con la siguiente accion util.
+    // El panel orienta con la siguiente acción útil.
     await newcomerPage.goto("/app/dashboard");
     const firstCta = newcomerPage
       .getByRole("link", { name: /primer cliente/i })
@@ -99,16 +99,16 @@ test.describe("primer valor", () => {
     await expect(jobDialog).toBeHidden();
 
     await newcomerPage.goto("/app/sessions");
-    await newcomerPage.getByRole("button", { name: "Nueva sesion" }).click();
+    await newcomerPage.getByRole("button", { name: "Nueva sesión" }).click();
     const sessionDialog = newcomerPage.getByRole("dialog");
     await sessionDialog.getByLabel("Nombre", { exact: true }).fill(sessionName);
     await sessionDialog.getByLabel("Cliente", { exact: true }).fill(clientName);
     await sessionDialog.getByLabel("Fecha", { exact: true }).fill("2030-05-17");
     await sessionDialog.getByLabel("Hora").fill("17:30");
     await sessionDialog
-      .getByLabel("Localizacion", { exact: true })
+      .getByLabel("Localización", { exact: true })
       .fill("Jardin E2E");
-    await sessionDialog.getByRole("button", { name: "Guardar sesion" }).click();
+    await sessionDialog.getByRole("button", { name: "Guardar sesión" }).click();
     await expect(sessionDialog).toBeHidden();
     await expect(
       newcomerPage.getByRole("heading", { name: sessionName }),
@@ -116,7 +116,7 @@ test.describe("primer valor", () => {
 
     steps = await activationSteps(newcomerPage);
     expect(steps.job.completed, "el trabajo real completa su paso").toBe(true);
-    expect(steps.session.completed, "la sesion real completa su paso").toBe(
+    expect(steps.session.completed, "la sesión real completa su paso").toBe(
       true,
     );
 

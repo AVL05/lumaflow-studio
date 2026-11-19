@@ -3,7 +3,7 @@ import { EmptyState } from "../../components/states/EmptyState";
 import { CalendarEvent } from "./CalendarEvent";
 import { dayLabel, groupByDate, todayIso } from "./calendarUtils";
 
-/** Vista agenda: eventos agrupados por dia, en orden cronologico. */
+/** Vista agenda: eventos agrupados por día, en orden cronologico. */
 export const CalendarAgenda = memo(function CalendarAgenda({ events, onSelect }) {
   const byDate = groupByDate(events);
   const dates = Object.keys(byDate).sort();
