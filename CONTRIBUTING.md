@@ -120,7 +120,7 @@ Documentation changes belong in the same PR as the behavior they describe. Never
 
 ## Dependency updates
 
-Dependabot (`.github/dependabot.yml`) abre cada lunes PRs para pnpm, Composer, GitHub Actions y las imágenes Docker. Las actualizaciones menores y de parche se agrupan en un único PR por ecosistema; las mayores llegan en PRs separados y requieren revisión manual y su propio issue si cambian comportamiento. Ningún PR de Dependabot se fusiona con CI en rojo. Los avisos de seguridad siguen el mismo flujo y se priorizan sobre el resto.
+Dependabot (`.github/dependabot.yml`) abre cada lunes PRs para pnpm, Composer, GitHub Actions y las imágenes Docker. Las actualizaciones menores y de parche se agrupan en un único PR por ecosistema; las actualizaciones mayores de npm, Composer y Docker se ignoran (no llegan PRs) y se hacen a propósito en un issue propio; las mayores de GitHub Actions sí llegan, en PRs separados y con revisión manual. Máximo 3 PRs abiertos por ecosistema. Ningún PR de Dependabot se fusiona con CI en rojo. Los avisos de seguridad siguen el mismo flujo y se priorizan sobre el resto.
 
 ## Security
 
