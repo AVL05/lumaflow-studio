@@ -16,6 +16,8 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+            // Segundo factor (TOTP o codigo de recuperacion) para cuentas con 2FA activado.
+            'code' => ['nullable', 'string', 'max:32'],
         ];
     }
 }

@@ -50,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Limite propio por IP y estudio: el techo general de 30/min es compartido por todos
         // los portales publicos y no basta para evitar spam en la bandeja de un estudio.
+        RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(10)
+            ->by('two-factor|'.$request->user()?->id));
+
         RateLimiter::for('public-booking', fn (Request $request) => Limit::perMinute(5)
             ->by($request->ip().'|'.$request->route('slug')));
 
