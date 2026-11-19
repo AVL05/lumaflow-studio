@@ -244,6 +244,8 @@ VITE_SENTRY_RELEASE=
 
 ## Checklist antes de produccion
 
+Para fusionar en `main` (que despliega y migra) sigue [release-checklist.md](release-checklist.md) y abre la PR con la plantilla `release.md`.
+
 - [ ] `APP_DEBUG=false` y `APP_ENV=production`.
 - [ ] `APP_KEY` generada y persistida.
 - [ ] `FRONTEND_URLS` con el dominio real (CORS deniega el resto).
