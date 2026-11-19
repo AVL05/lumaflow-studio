@@ -94,8 +94,8 @@ class DeliveryController extends Controller
     }
 
     /**
-     * El correo al cliente no debe romper la actualizacion si el SMTP falla
-     * o el cliente no tiene email registrado.
+     * El correo al cliente se envia tras la respuesta y no debe romper la
+     * actualizacion si el SMTP falla o el cliente no tiene email registrado.
      */
     private function notifyClient(Delivery $delivery): void
     {
@@ -105,11 +105,17 @@ class DeliveryController extends Controller
 
         $portalUrl = rtrim(config('app.frontend_url'), '/')."/deliver/{$delivery->public_token}";
 
-        try {
-            Mail::to($delivery->client->email)->send(new DeliveryReadyMail($delivery, $portalUrl));
-        } catch (Throwable $exception) {
-            AuditLog::mailFailed(DeliveryReadyMail::class, $exception->getMessage(), $delivery->user_id);
-        }
+        $email = $delivery->client->email;
+
+        // Tras enviar la respuesta: la latencia SMTP no alarga la peticion y no hace falta
+        // un worker de cola (QUEUE_CONNECTION=database no tiene uno en produccion).
+        dispatch(function () use ($delivery, $email, $portalUrl): void {
+            try {
+                Mail::to($email)->send(new DeliveryReadyMail($delivery, $portalUrl));
+            } catch (Throwable $exception) {
+                AuditLog::mailFailed(DeliveryReadyMail::class, $exception->getMessage(), $delivery->user_id);
+            }
+        })->afterResponse();
     }
 
     private function ensureOwnership(Delivery $delivery): void
