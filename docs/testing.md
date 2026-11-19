@@ -112,6 +112,10 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 | Flujo de usuario de principio a fin               | Recorrido E2E                                            |
 | Correccion de error reproducible                  | Test de regresion en el nivel mas bajo posible y, si rompia un flujo, E2E |
 
+## Migraciones y Feature tests en MySQL (#54)
+
+El job `Backend on MySQL 8` de CI levanta un servicio `mysql:8.0`, ejecuta `php artisan migrate --force` desde cero y después la suite `Feature` contra MySQL (las variables `DB_*` del job prevalecen sobre las de `phpunit.xml`). Si una migración no funciona en MySQL, CI falla. Los tests de concurrencia con workers SQLite/WAL no acreditan bloqueos MySQL. El ensayo sobre un clon de TiDB sigue pendiente y requiere acceso del operador.
+
 ## Presupuesto de rendimiento (#68)
 
 - Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
