@@ -30,4 +30,10 @@ class SecurityHeadersTest extends TestCase
         $this->getJson('https://localhost/api/health')
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
+
+    public function test_hsts_is_sent_behind_a_tls_terminating_proxy(): void
+    {
+        $this->getJson('/api/health', ['X-Forwarded-Proto' => 'https'])
+            ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
 }
