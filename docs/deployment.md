@@ -210,6 +210,7 @@ VITE_SENTRY_RELEASE=
 - [ ] `CACHE_STORE` real (database o redis): el rate limiting depende de el.
 - [ ] Rotacion de `storage/logs/lumaflow.log` (canal diario, 14 dias por defecto).
 - [ ] SMTP configurado y entrega real de verificacion probada fuera de spam.
+- Correo de entrega (`DeliveryReadyMail`): se envia tras la respuesta HTTP (`dispatch(...)->afterResponse()`), sin esperar al SMTP y sin worker de cola. Un fallo SMTP no afecta a la respuesta y queda registrado como `mail.failed`. No hay reintentos: si hiciera falta fiabilidad de entrega, habria que desplegar un worker (`queue:work`) y pasar el Mailable a cola.
 
 ## Monitorizacion
 
