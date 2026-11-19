@@ -352,3 +352,11 @@ Superficie sin autenticar: `/public/studios/{slug}` (+ `/bookings`), `/public/de
 - **Honeypot:** la reserva acepta un campo opcional `website`, oculto en la SPA. Si llega relleno, la API responde `201` igual que un éxito pero no guarda la solicitud ni notifica al estudio.
 - **Tokens inválidos:** desconocidos, revocados o caducados devuelven un `404` uniforme en entregas, contratos y calendario, sin distinguir el motivo.
 - No hay captcha de terceros. Cubre `PublicEndpointAbuseTest`.
+
+## Exportación completa de datos (#67)
+
+| Método | Ruta | Auth | Notas |
+| --- | --- | --- | --- |
+| GET | `/account/export` | sí | Descarga JSON (`Content-Disposition: attachment`) con todos los datos accesibles al usuario: `account`, `totals` y `data` (`clients`, `jobs`, `sessions`, `tasks`, `quotes`, `invoices`, `contracts`, `deliveries`, `locations`, `gear`, `presets`, `booking_requests`, `checklists`, `activities`). Límite propio de 6/min por usuario (`throttle:account-export`). |
+
+Lee siempre mediante el scope `accessibleBy`: nunca incluye datos de otros estudios. Excluye `gallery_password`, `public_token`, `calendar_token`, contraseñas y tokens. El borrado de cuenta **no está implementado**: requiere decidir el periodo de gracia, el tratamiento de workspaces compartidos y una revisión legal (AGENTS.md §15).
