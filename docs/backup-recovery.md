@@ -202,6 +202,6 @@ Restaurar un backup:
 3. Comprueba la huella: `sha256sum <fichero>.sql.gz` debe coincidir con el `.sha256.txt` incluido.
 4. Copia el `.sql.gz` a `backend/storage/backups/` y ejecuta `php artisan data:restore <fichero>.sql.gz` (verifica) y, sobre una base vacía o de pruebas, `--apply`. En producción exige además `--force-production`.
 
-La restauración se ensaya en cada ejecución de CI: el job `Backend on PostgreSQL 16` hace un backup, lo restaura en una base nueva y compara el número de tablas y la tabla `migrations`.
+La restauración se ensaya en cada ejecución de CI: el job `Backend on PostgreSQL 17` hace un backup, lo restaura en una base nueva y compara el número de tablas y la tabla `migrations`.
 
 Supabase en el plan gratuito no incluye copias automáticas: este workflow es la única copia, así que comprueba de vez en cuando que los artefactos existen.

@@ -95,4 +95,4 @@ php artisan route:list --path=api
 DB_CONNECTION=mysql DB_DATABASE=lumaflow_studio_testing php artisan test
 ```
 
-El CI ejecuta la suite Feature en SQLite, MySQL 8 y PostgreSQL 16; las consultas deben seguir siendo portables entre los tres.
+El CI ejecuta la suite Feature en SQLite, MySQL 8 y PostgreSQL 17; las consultas deben seguir siendo portables entre los tres.

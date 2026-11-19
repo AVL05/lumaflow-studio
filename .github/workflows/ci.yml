@@ -203,11 +203,11 @@ jobs:
         run: php artisan test --testsuite=Feature
 
   backend-postgres:
-    name: Backend on PostgreSQL 16
+    name: Backend on PostgreSQL 17
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: lumaflow_ci
