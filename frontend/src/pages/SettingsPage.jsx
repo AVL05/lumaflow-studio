@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
 import { useAuth } from "../features/auth/AuthContext";
+import { TwoFactorPanel } from "../features/settings/TwoFactorPanel";
+
 import { DataExportPanel } from "../features/settings/DataExportPanel";
 import { WorkspaceMembers } from "../features/settings/WorkspaceMembers";
 
@@ -55,6 +57,8 @@ export function SettingsPage() {
           Apoyar LumaFlow
         </Link>
       </Panel>
+      <TwoFactorPanel />
+
       <DataExportPanel />
       <WorkspaceMembers
         key={user?.current_workspace_id ?? "sin-estudio"}
