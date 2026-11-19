@@ -14,7 +14,10 @@ use App\Models\User;
 use App\Observers\AnalyticsInvalidationObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
+
+        // Limite propio por IP y estudio: el techo general de 30/min es compartido por todos
+        // los portales publicos y no basta para evitar spam en la bandeja de un estudio.
+        RateLimiter::for('public-booking', fn (Request $request) => Limit::perMinute(5)
+            ->by($request->ip().'|'.$request->route('slug')));
 
         // Entidades que alimentan los KPIs de analytics: cualquier
         // create/update/delete invalida la cache de su workspace.
