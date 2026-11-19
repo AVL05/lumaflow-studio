@@ -3,36 +3,8 @@ import { AppLayout } from "../components/layout/AppLayout";
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
 import { lazyRoute } from "./lazyRoute";
 import { LoginPage } from "../pages/LoginPage";
-import { RegisterPage } from "../pages/RegisterPage";
-import { EmailVerificationPage } from "../pages/EmailVerificationPage";
-import { OnboardingPage } from "../pages/OnboardingPage";
-import { GettingStartedPage } from "../pages/GettingStartedPage";
-import { ForgotPasswordPage } from "../pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "../pages/ResetPasswordPage";
-import { DashboardPage } from "../pages/DashboardPage";
-import { SessionsPage } from "../pages/SessionsPage";
-import { GearPage } from "../pages/GearPage";
-import { ClientsPage } from "../pages/ClientsPage";
-import { ClientDetailPage } from "../pages/ClientDetailPage";
-import { DeliveriesPage } from "../pages/DeliveriesPage";
-import { DeliveryDetailPage } from "../pages/DeliveryDetailPage";
-import { LocationsPage } from "../pages/LocationsPage";
-import { LocationDetailPage } from "../pages/LocationDetailPage";
-import { TasksPage } from "../pages/TasksPage";
-import { QuotesPage } from "../pages/QuotesPage";
-import { ContractsPage } from "../pages/ContractsPage";
-import { InvoicesPage } from "../pages/InvoicesPage";
-import { PresetsPage } from "../pages/PresetsPage";
-import { BookingRequestsPage } from "../pages/BookingRequestsPage";
-import { BookingPage } from "../pages/BookingPage";
-import { ClientPortalPage } from "../pages/ClientPortalPage";
-import { ContractPortalPage } from "../pages/ContractPortalPage";
-import { SystemPage } from "../pages/SystemPage";
-import { SettingsPage } from "../pages/SettingsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { LandingPage } from "../pages/LandingPage";
-import { JobsPage } from "../pages/JobsPage";
-import { JobDetailPage } from "../pages/JobDetailPage";
 
 const errorElement = <NotFoundPage asErrorBoundary />;
 
@@ -60,20 +32,56 @@ export const router = createBrowserRouter([
   },
   { path: "/security", element: <Navigate to="/privacy" replace />, errorElement },
   { path: "/login", element: <LoginPage />, errorElement },
-  { path: "/register", element: <RegisterPage />, errorElement },
-  { path: "/verify-email", element: <EmailVerificationPage />, errorElement },
-  { path: "/onboarding", element: <OnboardingPage />, errorElement },
-  { path: "/getting-started", element: <GettingStartedPage />, errorElement },
-  { path: "/forgot-password", element: <ForgotPasswordPage />, errorElement },
-  { path: "/reset-password", element: <ResetPasswordPage />, errorElement },
+  {
+    path: "/register",
+    element: lazyRoute(() => import("../pages/RegisterPage"), "RegisterPage"),
+    errorElement,
+  },
+  {
+    path: "/verify-email",
+    element: lazyRoute(() => import("../pages/EmailVerificationPage"), "EmailVerificationPage"),
+    errorElement,
+  },
+  {
+    path: "/onboarding",
+    element: lazyRoute(() => import("../pages/OnboardingPage"), "OnboardingPage"),
+    errorElement,
+  },
+  {
+    path: "/getting-started",
+    element: lazyRoute(() => import("../pages/GettingStartedPage"), "GettingStartedPage"),
+    errorElement,
+  },
+  {
+    path: "/forgot-password",
+    element: lazyRoute(() => import("../pages/ForgotPasswordPage"), "ForgotPasswordPage"),
+    errorElement,
+  },
+  {
+    path: "/reset-password",
+    element: lazyRoute(() => import("../pages/ResetPasswordPage"), "ResetPasswordPage"),
+    errorElement,
+  },
   {
     path: "/about-project",
     element: lazyRoute(() => import("../pages/AboutProjectPage"), "AboutProjectPage"),
     errorElement,
   },
-  { path: "/book/:slug", element: <BookingPage />, errorElement },
-  { path: "/deliver/:token", element: <ClientPortalPage />, errorElement },
-  { path: "/contract/:token", element: <ContractPortalPage />, errorElement },
+  {
+    path: "/book/:slug",
+    element: lazyRoute(() => import("../pages/BookingPage"), "BookingPage"),
+    errorElement,
+  },
+  {
+    path: "/deliver/:token",
+    element: lazyRoute(() => import("../pages/ClientPortalPage"), "ClientPortalPage"),
+    errorElement,
+  },
+  {
+    path: "/contract/:token",
+    element: lazyRoute(() => import("../pages/ContractPortalPage"), "ContractPortalPage"),
+    errorElement,
+  },
   {
     path: "/app",
     element: (
@@ -84,38 +92,77 @@ export const router = createBrowserRouter([
     errorElement,
     children: [
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
-      { path: "dashboard", element: <DashboardPage /> },
-      { path: "jobs", element: <JobsPage /> },
-      { path: "jobs/:id", element: <JobDetailPage /> },
+      {
+        path: "dashboard",
+        element: lazyRoute(() => import("../pages/DashboardPage"), "DashboardPage"),
+      },
+      { path: "jobs", element: lazyRoute(() => import("../pages/JobsPage"), "JobsPage") },
+      {
+        path: "jobs/:id",
+        element: lazyRoute(() => import("../pages/JobDetailPage"), "JobDetailPage"),
+      },
       {
         path: "calendar",
         element: lazyRoute(() => import("../pages/CalendarPage"), "CalendarPage"),
       },
-      { path: "tasks", element: <TasksPage /> },
+      { path: "tasks", element: lazyRoute(() => import("../pages/TasksPage"), "TasksPage") },
       {
         path: "analytics",
         element: lazyRoute(() => import("../pages/AnalyticsPage"), "AnalyticsPage"),
       },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "gear", element: <GearPage /> },
-      { path: "presets", element: <PresetsPage /> },
-      { path: "clients", element: <ClientsPage /> },
-      { path: "clients/:id", element: <ClientDetailPage /> },
-      { path: "deliveries", element: <DeliveriesPage /> },
-      { path: "deliveries/:id", element: <DeliveryDetailPage /> },
-      { path: "quotes", element: <QuotesPage /> },
-      { path: "contracts", element: <ContractsPage /> },
-      { path: "invoices", element: <InvoicesPage /> },
-      { path: "booking-requests", element: <BookingRequestsPage /> },
-      { path: "locations", element: <LocationsPage /> },
-      { path: "locations/:id", element: <LocationDetailPage /> },
+      {
+        path: "sessions",
+        element: lazyRoute(() => import("../pages/SessionsPage"), "SessionsPage"),
+      },
+      { path: "gear", element: lazyRoute(() => import("../pages/GearPage"), "GearPage") },
+      { path: "presets", element: lazyRoute(() => import("../pages/PresetsPage"), "PresetsPage") },
+      { path: "clients", element: lazyRoute(() => import("../pages/ClientsPage"), "ClientsPage") },
+      {
+        path: "clients/:id",
+        element: lazyRoute(() => import("../pages/ClientDetailPage"), "ClientDetailPage"),
+      },
+      {
+        path: "deliveries",
+        element: lazyRoute(() => import("../pages/DeliveriesPage"), "DeliveriesPage"),
+      },
+      {
+        path: "deliveries/:id",
+        element: lazyRoute(() => import("../pages/DeliveryDetailPage"), "DeliveryDetailPage"),
+      },
+      { path: "quotes", element: lazyRoute(() => import("../pages/QuotesPage"), "QuotesPage") },
+      {
+        path: "contracts",
+        element: lazyRoute(() => import("../pages/ContractsPage"), "ContractsPage"),
+      },
+      {
+        path: "invoices",
+        element: lazyRoute(() => import("../pages/InvoicesPage"), "InvoicesPage"),
+      },
+      {
+        path: "booking-requests",
+        element: lazyRoute(() => import("../pages/BookingRequestsPage"), "BookingRequestsPage"),
+      },
+      {
+        path: "locations",
+        element: lazyRoute(() => import("../pages/LocationsPage"), "LocationsPage"),
+      },
+      {
+        path: "locations/:id",
+        element: lazyRoute(() => import("../pages/LocationDetailPage"), "LocationDetailPage"),
+      },
       {
         path: "ai-assistant",
         element: lazyRoute(() => import("../pages/AiAssistantPage"), "AiAssistantPage"),
       },
       { path: "system", element: <Navigate to="/app/settings/advanced" replace /> },
-      { path: "settings", element: <SettingsPage /> },
-      { path: "settings/advanced", element: <SystemPage /> },
+      {
+        path: "settings",
+        element: lazyRoute(() => import("../pages/SettingsPage"), "SettingsPage"),
+      },
+      {
+        path: "settings/advanced",
+        element: lazyRoute(() => import("../pages/SystemPage"), "SystemPage"),
+      },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

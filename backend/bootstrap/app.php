@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureOnboardingIsComplete;
 use App\Http\Middleware\RequestCorrelationId;
+use App\Http\Middleware\SecurityHeaders;
 use App\Support\AuditLog;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'onboarded' => EnsureOnboardingIsComplete::class,
         ]);
         $middleware->appendToGroup('api', RequestCorrelationId::class);
+        $middleware->append(SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

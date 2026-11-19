@@ -60,7 +60,8 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 // Todo se resuelve por token/slug opaco, nunca por id incremental.
 Route::middleware('throttle:30,1')->group(function (): void {
     Route::get('/public/studios/{slug}', [PublicBookingController::class, 'show']);
-    Route::post('/public/studios/{slug}/bookings', [PublicBookingController::class, 'store']);
+    Route::post('/public/studios/{slug}/bookings', [PublicBookingController::class, 'store'])
+        ->middleware('throttle:public-booking');
     Route::get('/public/deliveries/{token}', [PublicDeliveryController::class, 'show']);
     Route::post('/public/deliveries/{token}/approve', [PublicDeliveryController::class, 'approve']);
     Route::post('/public/deliveries/{token}/request-changes', [PublicDeliveryController::class, 'requestChanges']);

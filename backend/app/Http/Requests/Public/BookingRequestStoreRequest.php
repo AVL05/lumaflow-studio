@@ -20,6 +20,8 @@ class BookingRequestStoreRequest extends FormRequest
             'session_type' => ['nullable', 'string', 'max:120'],
             'preferred_date' => ['nullable', 'date'],
             'message' => ['nullable', 'string', 'max:2000'],
+            // Honeypot: invisible para personas; solo los bots lo rellenan.
+            'website' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

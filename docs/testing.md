@@ -117,3 +117,9 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 `e2e/tests/accessibility.spec.js` ejecuta axe (`@axe-core/playwright`, dependencia de desarrollo del paquete `e2e`: la alternativa sería mantener reglas WCAG propias) sobre landing, login, dashboard, portal de entrega y portal de contrato, con las etiquetas WCAG 2.x A/AA. Falla ante violaciones `serious` o `critical`; las menores no bloquean. Antes de analizar espera a que terminen las animaciones de entrada, que falsean el contraste.
 
 Su primera ejecución encontró y se corrigieron: texto `stone-500/600` con contraste insuficiente en landing, footer y portal de entrega, y una barra de progreso sin nombre accesible (`ProgressBar`). Otras pantallas con `text-stone-500` (por ejemplo ajustes, contratos o IA) no están cubiertas por el test y no se han auditado. No sustituye una auditoría manual.
+
+## Presupuesto de rendimiento (#68)
+
+- Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
+- `pnpm --dir frontend run check:bundle` (job `Frontend quality`) falla si el chunk de entrada supera 520 kB o cualquier otro 450 kB (excluye `lib-*`). Por eso `chunkSizeWarningLimit` está subido: solo `lib-*` lo supera y está justificado.
+- El job `Lighthouse budget` ejecuta Lighthouse CI sobre `/` y `/login` con `frontend/lighthouserc.json` (rendimiento ≥ 0,7, accesibilidad ≥ 0,85, TBT ≤ 400 ms, LCP ≤ 4 s, CLS ≤ 0,1). **Estos umbrales no están medidos**: no se ha podido ejecutar Lighthouse en local; hay que ajustarlos con la primera ejecución real en Actions.

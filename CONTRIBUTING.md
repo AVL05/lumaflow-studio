@@ -118,6 +118,10 @@ The repository has three test levels: PHPUnit for the API and domain services, V
 
 Documentation changes belong in the same PR as the behavior they describe. Never document roadmap functionality as already implemented.
 
+## Dependency updates
+
+Dependabot (`.github/dependabot.yml`) abre cada lunes PRs para pnpm, Composer, GitHub Actions y las imágenes Docker. Las actualizaciones menores y de parche se agrupan en un único PR por ecosistema; las mayores llegan en PRs separados y requieren revisión manual y su propio issue si cambian comportamiento. Ningún PR de Dependabot se fusiona con CI en rojo. Los avisos de seguridad siguen el mismo flujo y se priorizan sobre el resto.
+
 ## Security
 
 Never commit secrets, `.env` files, tokens, real customer data or production exports. If you discover a security vulnerability, do not publish exploit details in a public issue; report it privately to the repository owner.
