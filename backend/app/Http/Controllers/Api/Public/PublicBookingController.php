@@ -24,9 +24,16 @@ class PublicBookingController extends Controller
     {
         $user = User::query()->where('studio_slug', $slug)->whereNotNull('bookings_enabled_at')->firstOrFail();
 
+        $response = response()->json(['message' => 'Solicitud enviada. El estudio te respondera pronto.'], 201);
+
+        // Honeypot rellenado: se responde igual que un exito para no dar pistas al bot.
+        if ($request->filled('website')) {
+            return $response;
+        }
+
         $workspaceId = $user->workspaces()->value('id');
         abort_unless($workspaceId, 404);
-        $booking = $user->bookingRequests()->create($request->validated() + ['status' => 'new', 'workspace_id' => $workspaceId]);
+        $booking = $user->bookingRequests()->create($request->safe()->except('website') + ['status' => 'new', 'workspace_id' => $workspaceId]);
 
         $this->notifications->info(
             $user,
@@ -35,6 +42,6 @@ class PublicBookingController extends Controller
             '/app/booking-requests',
         );
 
-        return response()->json(['message' => 'Solicitud enviada. El estudio te respondera pronto.'], 201);
+        return $response;
     }
 }

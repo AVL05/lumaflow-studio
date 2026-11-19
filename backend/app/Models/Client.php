@@ -24,10 +24,10 @@ class Client extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('company', 'like', "%{$search}%")
-                ->orWhere('instagram', 'like', "%{$search}%");
+            $inner->whereLike('name', "%{$search}%")
+                ->orWhereLike('email', "%{$search}%")
+                ->orWhereLike('company', "%{$search}%")
+                ->orWhereLike('instagram', "%{$search}%");
         }));
     }
 

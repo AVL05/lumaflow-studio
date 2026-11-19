@@ -36,16 +36,16 @@ class Location extends Model
     public function scopeSearch($query, ?string $search)
     {
         return $query->when($search, fn ($builder) => $builder->where(function ($inner) use ($search): void {
-            $inner->where('name', 'like', "%{$search}%")
-                ->orWhere('city', 'like', "%{$search}%")
-                ->orWhere('country', 'like', "%{$search}%")
-                ->orWhere('notes', 'like', "%{$search}%");
+            $inner->whereLike('name', "%{$search}%")
+                ->orWhereLike('city', "%{$search}%")
+                ->orWhereLike('country', "%{$search}%")
+                ->orWhereLike('notes', "%{$search}%");
         }));
     }
 
     public function scopeCity($query, ?string $city)
     {
-        return $query->when($city, fn ($builder) => $builder->where('city', 'like', "%{$city}%"));
+        return $query->when($city, fn ($builder) => $builder->whereLike('city', "%{$city}%"));
     }
 
     public function scopeType($query, ?string $type)

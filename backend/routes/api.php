@@ -64,7 +64,8 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 // Todo se resuelve por token/slug opaco, nunca por id incremental.
 Route::middleware('throttle:30,1')->group(function (): void {
     Route::get('/public/studios/{slug}', [PublicBookingController::class, 'show']);
-    Route::post('/public/studios/{slug}/bookings', [PublicBookingController::class, 'store']);
+    Route::post('/public/studios/{slug}/bookings', [PublicBookingController::class, 'store'])
+        ->middleware('throttle:public-booking');
     Route::get('/public/deliveries/{token}', [PublicDeliveryController::class, 'show']);
     Route::get('/public/deliveries/{token}/history', [DeliveryReviewController::class, 'publicHistory']);
     Route::post('/public/deliveries/{token}/{action}', [DeliveryReviewController::class, 'publicRespond'])->whereIn('action', ['receive', 'review', 'approve', 'request-changes', 'comment']);

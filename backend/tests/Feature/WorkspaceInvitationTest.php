@@ -175,7 +175,7 @@ class WorkspaceInvitationTest extends TestCase
         $delivery = Delivery::create([
             'user_id' => $owner->id, 'workspace_id' => $workspaceId, 'client_id' => $client->id,
             'job_id' => $job->id, 'title' => 'Galeria', 'status' => 'pending',
-            'payment_status' => 'unpaid', 'gallery_url' => 'https://example.com/g',
+            'payment_status' => 'pending', 'gallery_url' => 'https://example.com/g',
         ]);
 
         $member = User::factory()->create();

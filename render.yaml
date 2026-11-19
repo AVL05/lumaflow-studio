@@ -9,8 +9,9 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    dockerCommand: php artisan serve --host=0.0.0.0 --port=10000
-    healthCheckPath: /api/health
+    # Via entrypoint: normaliza APP_KEY, espera a la BD, ejecuta migrate y cachea la config.
+    dockerCommand: entrypoint php artisan serve --host=0.0.0.0 --port=10000
+    healthCheckPath: /up
     envVars:
       - key: PORT
         value: 10000
@@ -31,19 +32,22 @@ services:
       - key: FRONTEND_URL
         value: https://lumaflow.aleviclop.dev
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: 4000
+        value: 5432
       - key: DB_DATABASE
-        sync: false
+        value: postgres
+      # Esquema propio: `public` queda expuesto por la API REST de Supabase.
+      - key: DB_SCHEMA
+        value: lumaflow
+      - key: DB_SSLMODE
+        value: require
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
         sync: false
-      - key: MYSQL_ATTR_SSL_CA
-        value: /etc/ssl/certs/ca-certificates.crt
       - key: FILESYSTEM_DISK
         value: s3
       - key: AWS_ACCESS_KEY_ID

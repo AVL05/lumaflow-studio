@@ -15,7 +15,7 @@ class PresetController extends Controller
     {
         $presets = Preset::query()->accessibleBy(request()->user())->with('gearItem')
             ->when(request('category'), fn ($query, $category) => $query->where('category', $category))
-            ->when(request('search'), fn ($query, $search) => $query->where('name', 'like', "%{$search}%"))
+            ->when(request('search'), fn ($query, $search) => $query->whereLike('name', "%{$search}%"))
             ->orderBy('category')->orderBy('name')->paginate(min((int) request('per_page', 24), 100));
 
         return PresetResource::collection($presets);

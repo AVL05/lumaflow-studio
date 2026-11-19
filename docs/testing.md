@@ -198,3 +198,26 @@ La suite E2E normal fuerza VITE_KOFI_URL y VITE_GITHUB_SPONSORS_URL vacías, com
 La suite `test:pwa` incluye transición desde la fuente pre-SEO congelada en `03676ea`: construye esa versión en TEMP con los módulos instalados y cambia al build actual en el mismo origen. Requiere ese objeto Git; CI hace checkout con historial. `PWA_LEGACY_DIR` permite contrastar una captura pública anterior en local, sin conectarse al backend ni usar sesiones reales.
 
 El smoke remoto separado usa `SEO_PREVIEW_URL` (deployment HTTPS exacto de Vercel) con `pnpm --dir e2e exec playwright test --config=playwright.preview.config.js`. Para un Preview protegido, proporcionar el OIDC efímero mediante la CLI autenticada; nunca incluir el token en argumentos o archivos. Los headers se limitan al origen, terceros se bloquean y no se guardan trazas/capturas. El noindex del Preview es esperado; no sustituye al workflow de producción. Ver §15 de `SEO_GEO_AUDIT.md`.
+| Cambio                                            | Nivel minimo esperado                                   |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| Regla de validacion o serializacion de la API     | PHPUnit feature test + actualizar `docs/api.md` si cambia el contrato |
+| Aislamiento o autorizacion                        | PHPUnit con caso de `404` + recorrido E2E si afecta a la interfaz |
+| Hook, utilidad o componente del frontend           | Vitest + Testing Library                                 |
+| Flujo de usuario de principio a fin               | Recorrido E2E                                            |
+| Correccion de error reproducible                  | Test de regresion en el nivel mas bajo posible y, si rompia un flujo, E2E |
+
+## Accesibilidad automatizada (#69)
+
+`e2e/tests/zz-accessibility.spec.js` ejecuta axe (`@axe-core/playwright`, dependencia de desarrollo del paquete `e2e`: la alternativa sería mantener reglas WCAG propias) sobre landing, login, dashboard, portal de entrega y portal de contrato, con las etiquetas WCAG 2.x A/AA. Falla ante violaciones `serious` o `critical`; las menores no bloquean. Antes de analizar espera a que terminen las animaciones de entrada, que falsean el contraste.
+
+Su primera ejecución encontró y se corrigieron: texto `stone-500/600` con contraste insuficiente en landing, footer y portal de entrega, y una barra de progreso sin nombre accesible (`ProgressBar`). Otras pantallas con `text-stone-500` (por ejemplo ajustes, contratos o IA) no están cubiertas por el test y no se han auditado. No sustituye una auditoría manual.
+
+## Migraciones y Feature tests en MySQL (#54)
+
+El job `Backend on MySQL 8` de CI levanta un servicio `mysql:8.0`, ejecuta `php artisan migrate --force` desde cero y después la suite `Feature` contra MySQL (las variables `DB_*` del job prevalecen sobre las de `phpunit.xml`). Si una migración no funciona en MySQL, CI falla. Los tests de concurrencia con workers SQLite/WAL no acreditan bloqueos MySQL. El ensayo sobre un clon de TiDB sigue pendiente y requiere acceso del operador.
+
+## Presupuesto de rendimiento (#68)
+
+- Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
+- `pnpm --dir frontend run check:bundle` (job `Frontend quality`) falla si el chunk de entrada supera 520 kB o cualquier otro 450 kB (excluye `lib-*`). Por eso `chunkSizeWarningLimit` está subido: solo `lib-*` lo supera y está justificado.
+- El job `Lighthouse budget` ejecuta Lighthouse CI sobre `/` y `/login` con `frontend/lighthouserc.json` (rendimiento ≥ 0,7, accesibilidad ≥ 0,85, TBT ≤ 400 ms, LCP ≤ 4 s, CLS ≤ 0,1). **Estos umbrales no están medidos**: no se ha podido ejecutar Lighthouse en local; hay que ajustarlos con la primera ejecución real en Actions.

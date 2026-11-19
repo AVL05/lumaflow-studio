@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureOnboardingIsComplete;
 use App\Http\Middleware\ExcludeSearchIndexing;
 use App\Http\Middleware\RequestCorrelationId;
+use App\Http\Middleware\SecurityHeaders;
 use App\Support\AuditLog;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -25,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'onboarded' => EnsureOnboardingIsComplete::class,
         ]);
         $middleware->appendToGroup('api', RequestCorrelationId::class);
+        $middleware->append(SecurityHeaders::class);
+        // Render termina TLS en su proxy: sin esto la app ve HTTP (sin HSTS, URLs generadas en http).
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
