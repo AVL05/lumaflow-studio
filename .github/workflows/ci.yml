@@ -336,7 +336,9 @@ jobs:
 
       - name: Smoke the backend image (FrankenPHP serves /up and concurrent requests)
         run: |
-          docker run -d --name lumaflow-api -p 8080:8080 \
+          # Sin capabilities ni privilegios nuevos, como en Render: con las de Docker por defecto el
+          # binario arrancaba aqui y fallaba en produccion (`exec: Operation not permitted`).
+          docker run -d --name lumaflow-api -p 8080:8080 --cap-drop=ALL --security-opt no-new-privileges \
             -e PORT=8080 -e APP_ENV=production -e APP_DEBUG=false \
             -e APP_KEY="$(openssl rand -base64 32)" \
             -e DB_CONNECTION=sqlite -e DB_DATABASE=/tmp/ci.sqlite \
