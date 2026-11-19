@@ -118,6 +118,10 @@ El job `E2E journeys` de `.github/workflows/ci.yml` instala PHP 8.4 con `pdo_sql
 
 Su primera ejecución encontró y se corrigieron: texto `stone-500/600` con contraste insuficiente en landing, footer y portal de entrega, y una barra de progreso sin nombre accesible (`ProgressBar`). Otras pantallas con `text-stone-500` (por ejemplo ajustes, contratos o IA) no están cubiertas por el test y no se han auditado. No sustituye una auditoría manual.
 
+## Migraciones y Feature tests en MySQL (#54)
+
+El job `Backend on MySQL 8` de CI levanta un servicio `mysql:8.0`, ejecuta `php artisan migrate --force` desde cero y después la suite `Feature` contra MySQL (las variables `DB_*` del job prevalecen sobre las de `phpunit.xml`). Si una migración no funciona en MySQL, CI falla. Los tests de concurrencia con workers SQLite/WAL no acreditan bloqueos MySQL. El ensayo sobre un clon de TiDB sigue pendiente y requiere acceso del operador.
+
 ## Presupuesto de rendimiento (#68)
 
 - Todas las páginas de la app salvo `LandingPage`, `LoginPage` y `NotFoundPage` se cargan con `lazyRoute` (`frontend/src/app/router.jsx`): el chunk de entrada pasó de 690 kB a 493 kB. Recharts sigue aislado en la ruta de analíticas (428 kB) y WebLLM (`lib-*`, ~6 MB) se carga bajo demanda y queda fuera del precache.
