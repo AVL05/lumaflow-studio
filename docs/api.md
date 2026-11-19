@@ -10,7 +10,7 @@ Sanctum con **tokens Bearer**, no cookies de sesion. El token se obtiene en `reg
 Authorization: Bearer <token>
 ```
 
-Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, revocado o invalido. La SPA solo destruye la sesion local ante 401; ante 5xx, red o throttling conserva el token y muestra estado degradado con reintento.
+Los tokens caducan a los `SANCTUM_TOKEN_EXPIRATION` minutos de su creacion (43200 = 30 dias por defecto en `.env.example`; vacio desactiva la caducidad) y `sanctum:prune-expired` los purga a diario cuando hay runner de `schedule:run`. Un `login` invalida los tokens anteriores del usuario (sesion unica). Un 401 indica token ausente, caducado, revocado o invalido. La SPA solo destruye la sesion local ante 401; ante 5xx, red o throttling conserva el token y muestra estado degradado con reintento.
 
 | Metodo | Ruta | Auth | Notas |
 |---|---|---|---|
