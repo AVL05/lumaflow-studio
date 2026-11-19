@@ -97,7 +97,7 @@ export function LandingPage() {
                 className="rounded-xl border border-white/8"
               />
               <div className="flex flex-col gap-3 px-2 pb-1 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs leading-5 text-stone-500">
+                <p className="text-xs leading-5 text-stone-400">
                   Datos ficticios. Sin registro y sin modificar información real.
                 </p>
                 <Link
@@ -121,7 +121,7 @@ export function LandingPage() {
             ].map(([title, text]) => (
               <div key={title} className="bg-[#0d0c0b] px-6 py-7 lg:px-8">
                 <p className="text-sm font-semibold text-stone-100">{title}</p>
-                <p className="mt-2 text-sm leading-6 text-stone-500">{text}</p>
+                <p className="mt-2 text-sm leading-6 text-stone-400">{text}</p>
               </div>
             ))}
           </div>
@@ -243,13 +243,13 @@ export function LandingPage() {
             <dl className="mt-10 grid gap-7 sm:grid-cols-2">
               <div>
                 <dt className="text-sm font-semibold text-stone-100">Sin claves externas</dt>
-                <dd className="mt-2 text-sm leading-6 text-stone-500">
+                <dd className="mt-2 text-sm leading-6 text-stone-400">
                   Instalas y eliges el modelo compatible desde la aplicación.
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-semibold text-stone-100">Contexto limitado</dt>
-                <dd className="mt-2 text-sm leading-6 text-stone-500">
+                <dd className="mt-2 text-sm leading-6 text-stone-400">
                   La IA solo consulta información perteneciente a tu estudio.
                 </dd>
               </div>
@@ -324,7 +324,7 @@ export function LandingPage() {
                 <p className="text-sm text-stone-400">Beta gratuita</p>
                 <p className="mt-3 text-6xl font-semibold tracking-[-0.06em] text-stone-50">
                   0 €
-                  <span className="ml-2 text-base font-normal tracking-normal text-stone-500">
+                  <span className="ml-2 text-base font-normal tracking-normal text-stone-400">
                     durante la beta
                   </span>
                 </p>

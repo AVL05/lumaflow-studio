@@ -13,6 +13,7 @@ export function ProgressBar({ value = 0, label }) {
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
+        aria-label={label ?? "Progreso"}
       >
         <div
           className="h-full rounded-full bg-amber-200/80 transition-[width] duration-300"

@@ -4,7 +4,7 @@ import { BrandLogo } from "../branding/BrandLogo";
 export function MarketingFooter() {
   return (
     <footer className="border-t border-white/8 bg-[#090908] px-4 py-8 sm:px-6 lg:px-10">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-5 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-5 text-sm text-stone-400 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <BrandLogo className="h-8 w-8 rounded-lg" />
           <span>LumaFlow Studio</span>
