@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class BackupScheduleTest extends TestCase
 {
-    public function test_runner_is_restricted_and_never_publishes_dumps(): void
+    public function test_runner_is_restricted_and_never_publishes_plaintext_dumps(): void
     {
         $workflow = file_get_contents(base_path('../.github/workflows/production-backup.yml'));
         $this->assertStringContainsString('cron: "0 3 * * *"', $workflow);
@@ -18,32 +18,41 @@ class BackupScheduleTest extends TestCase
         $this->assertStringContainsString("github.ref == 'refs/heads/main'", $workflow);
         $this->assertStringContainsString('group: production-backup', $workflow);
         $this->assertStringContainsString('cancel-in-progress: false', $workflow);
-        $this->assertStringContainsString('php artisan data:backup --remote --prune --no-interaction', $workflow);
-        $this->assertStringContainsString('php artisan data:backup-status --remote --no-interaction', $workflow);
-        $this->assertStringContainsString('RemoteBackupService::class)->assertConfigured()', $workflow);
+        $this->assertStringContainsString('php artisan data:backup --no-interaction', $workflow);
+        $this->assertStringContainsString('openssl enc -aes-256-cbc -pbkdf2', $workflow);
+        // El repositorio es publico: solo el fichero cifrado y la huella pueden salir como artefacto.
+        $this->assertSame(1, preg_match('/upload-artifact@v\d+\n(?:.*\n)*?\s+path: \|\n((?:\s+\S.*\n)+)/', $workflow, $upload));
+        $this->assertStringContainsString('*.enc', $upload[1]);
+        $this->assertStringNotContainsString('.sql.gz\n', $upload[1]);
+        $this->assertStringNotContainsString('*.sql.gz', $upload[1]);
         $this->assertStringContainsString('if: always()', $workflow);
-        $this->assertStringNotContainsString('upload-artifact', $workflow);
-        $this->assertSame(1, preg_match('/echo \'([^\'\r\n]*)\' >> "\$GITHUB_STEP_SUMMARY"/', $workflow, $summary));
-        $this->assertStringNotContainsString('${', $summary[1]);
+        $this->assertStringContainsString('rm -f "$file.check" "$file"', $workflow);
     }
 
-    public function test_runner_requires_explicit_activation_before_accessing_secrets(): void
+    public function test_runner_only_reads_secrets_inside_steps_and_fails_fast_without_them(): void
     {
         $workflow = file_get_contents(base_path('../.github/workflows/production-backup.yml'));
         $this->assertSame(1, preg_match('/^    if: (.+)$/m', $workflow, $match));
         $this->assertSame(
-            "github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main' && vars.PRODUCTION_BACKUP_ENABLED == 'true'",
+            "github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'",
             trim($match[1])
         );
-        // Un unico gate de job cubre ambos triggers, sin bypass de dispatch.
-        $this->assertStringContainsString('environment: production-backup', $workflow);
-        $this->assertStringNotContainsString('pull_request', $workflow);
         $beforeSteps = substr($workflow, 0, strpos($workflow, '    steps:'));
         $this->assertStringNotContainsString('secrets.', $beforeSteps);
-        $this->assertStringNotContainsString('Report missing durable destination', $workflow);
-        $this->assertStringContainsString('secrets.BACKUP_S3_SECRET_ACCESS_KEY', $workflow);
-        $this->assertStringContainsString('vars.BACKUP_S3_ENDPOINT', $workflow);
-        $this->assertStringContainsString('exit(1)', $workflow);
+        foreach (['PROD_DB_HOST', 'PROD_DB_PORT', 'PROD_DB_DATABASE', 'PROD_DB_USERNAME', 'PROD_DB_PASSWORD', 'BACKUP_ENCRYPTION_PASSPHRASE'] as $secret) {
+            $this->assertStringContainsString("secrets.{$secret}", $workflow);
+        }
+        $this->assertStringContainsString('exit 1', $workflow);
+        $this->assertStringNotContainsString('echo "$BACKUP_ENCRYPTION_PASSPHRASE"', $workflow);
+    }
+
+    public function test_maintenance_workflow_runs_the_token_purge_daily(): void
+    {
+        $workflow = file_get_contents(base_path('../.github/workflows/scheduled-maintenance.yml'));
+        $this->assertStringContainsString('cron: "30 2 * * *"', $workflow);
+        $this->assertStringNotContainsString('pull_request:', $workflow);
+        $this->assertStringContainsString("github.ref == 'refs/heads/main'", $workflow);
+        $this->assertStringContainsString('php artisan sanctum:prune-expired --hours=24', $workflow);
     }
 
     public function test_configuration_failure_returns_failure_without_secrets(): void
@@ -79,18 +88,13 @@ class BackupScheduleTest extends TestCase
         $this->assertSame([], DataBackupService::mysqlTlsArgs(['options' => []]));
     }
 
-    public function test_schedule_declares_daily_pruned_backup(): void
+    public function test_scheduler_only_declares_the_token_purge(): void
     {
-        $events = collect(app(Schedule::class)->events());
+        $commands = collect(app(Schedule::class)->events())->map(fn ($event) => (string) $event->command);
 
-        $backup = $events->first(fn ($event) => str_contains((string) $event->command, 'data:backup'));
-
-        $this->assertNotNull($backup);
-        $this->assertStringContainsString('--prune', (string) $backup->command);
-        $this->assertSame('0 3 * * *', $backup->expression);
-        $this->assertSame('UTC', $backup->timezone);
-        $this->assertTrue($backup->withoutOverlapping);
-        $this->assertSame(30, $backup->expiresAt);
+        // El backup lo lanza GitHub Actions (production-backup.yml), no el scheduler de Laravel.
+        $this->assertTrue($commands->contains(fn (string $command) => str_contains($command, 'sanctum:prune-expired')));
+        $this->assertFalse($commands->contains(fn (string $command) => str_contains($command, 'data:backup')));
     }
 
     public function test_backup_path_defaults_to_local_storage_and_can_use_private_storage(): void
