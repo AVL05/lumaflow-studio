@@ -7,7 +7,9 @@ services:
     # Produccion despliega la rama `production`, que solo se actualiza con el workflow
     # `Promote to production` tras comprobar CI y el staging (docs/deployment.md, #55).
     branch: production
-    autoDeployTrigger: checksPass
+    # `commit`: la rama `production` ya solo avanza tras CI verde y staging sano; `checksPass`
+    # no se activa con pushes hechos por Actions y dejaba el deploy sin lanzar.
+    autoDeployTrigger: commit
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
