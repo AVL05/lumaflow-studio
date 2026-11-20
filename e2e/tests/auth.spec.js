@@ -1,9 +1,8 @@
 import { expect, test } from "../fixtures/test.js";
 import { accounts } from "../support/accounts.js";
-import { readVerificationLink } from "../support/mail.js";
 
 test.describe("registro y acceso", () => {
-  test("un estudio se registra, verifica su email y abre su dashboard", async ({ page }) => {
+  test("un estudio se registra, configura su estudio y abre su dashboard", async ({ page }) => {
     const email = `e2e.registro.${Date.now()}@lumaflow.test`;
 
     await page.goto("/register");
@@ -13,21 +12,6 @@ test.describe("registro y acceso", () => {
     await page.getByLabel("Confirmar contraseña").fill("lumaflow-e2e");
     await page.getByRole("button", { name: "Crear cuenta" }).click();
 
-    // El alta deja al estudio a la espera del enlace de verificación.
-    await expect(page).toHaveURL(/\/verify-email$/);
-    await expect(page.getByRole("heading", { name: "Revisa tu bandeja de entrada" })).toBeVisible();
-
-    // El backend usa el mailer `log`, así que el enlace firmado queda en el log.
-    await expect
-      .poll(() => readVerificationLink(email), {
-        message: "el backend debería enviar el enlace de verificación",
-        timeout: 30_000,
-      })
-      .toMatch(/^https?:\/\/.+\/api\/email\/verify\/\d+\//);
-
-    await page.goto(await readVerificationLink(email));
-
-    // Verificar el email devuelve a la SPA, que continua con el onboarding.
     await page.waitForURL("**/onboarding");
     await page.getByLabel("Nombre del estudio").fill("Estudio Nuevo E2E");
     await page.getByRole("button", { name: "Continuar" }).click();

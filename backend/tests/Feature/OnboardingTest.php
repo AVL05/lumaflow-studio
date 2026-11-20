@@ -37,15 +37,6 @@ class OnboardingTest extends TestCase
         ]);
     }
 
-    public function test_unverified_user_cannot_complete_onboarding(): void
-    {
-        $user = User::factory()->unverified()->withoutOnboarding()->create();
-
-        $this->actingAs($user)
-            ->postJson('/api/onboarding', $this->validPayload())
-            ->assertForbidden();
-    }
-
     public function test_dashboard_requires_completed_onboarding(): void
     {
         $user = User::factory()->withoutOnboarding()->create();

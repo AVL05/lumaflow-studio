@@ -9,7 +9,6 @@ vi.mock("../../api/auth", () => ({
     login: vi.fn(),
     register: vi.fn(),
     logout: vi.fn(),
-    resendVerification: vi.fn(),
     completeOnboarding: vi.fn(),
     completeGettingStarted: vi.fn(),
   },
@@ -49,11 +48,11 @@ describe("AuthProvider boot", () => {
 
   it("con token y 200 carga usuario y conserva token", async () => {
     localStorage.setItem("lumaflow_token", "valido");
-    authApi.me.mockResolvedValue({ id: 3, email_verified: true });
+    authApi.me.mockResolvedValue({ id: 3, onboarding_completed: true });
     renderProvider();
 
     await waitFor(() => expect(screen.getByText("estado:authenticated")).toBeVisible());
-    expect(captured.user).toEqual({ id: 3, email_verified: true });
+    expect(captured.user).toEqual({ id: 3, onboarding_completed: true });
     expect(localStorage.getItem("lumaflow_token")).toBe("valido");
   });
 
@@ -100,13 +99,13 @@ describe("AuthProvider boot", () => {
 
     await waitFor(() => expect(screen.getByText("estado:unavailable")).toBeVisible());
 
-    authApi.me.mockResolvedValueOnce({ id: 9, email_verified: true });
+    authApi.me.mockResolvedValueOnce({ id: 9, onboarding_completed: true });
     let recovered = null;
     await act(async () => {
       recovered = await captured.retryBoot();
     });
 
-    expect(recovered).toEqual({ id: 9, email_verified: true });
+    expect(recovered).toEqual({ id: 9, onboarding_completed: true });
     expect(localStorage.getItem("lumaflow_token")).toBe("valido");
     expect(screen.getByText("estado:authenticated")).toBeVisible();
   });
@@ -129,7 +128,7 @@ describe("AuthProvider boot", () => {
 
   it("refreshUser conserva ante 500 e invalida ante 401", async () => {
     localStorage.setItem("lumaflow_token", "valido");
-    authApi.me.mockResolvedValue({ id: 5, email_verified: true });
+    authApi.me.mockResolvedValue({ id: 5, onboarding_completed: true });
     renderProvider();
 
     await waitFor(() => expect(screen.getByText("estado:authenticated")).toBeVisible());

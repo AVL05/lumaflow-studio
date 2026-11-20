@@ -51,7 +51,7 @@ ToastProvider          avisos efimeros
 
 `ToastContext` y `NotificationsContext` son cosas distintas: el primero son toasts en memoria, el segundo el centro de notificaciones persistidas en BD.
 
-`AuthContext` conserva tambien `email_verified`, `onboarding_completed` y `getting_started_completed`. `getAuthDestination()` es la unica regla de redireccion: `/verify-email`, `/onboarding`, `/getting-started` o `/app/dashboard`. `ProtectedRoute` aplica la misma secuencia antes de montar el producto.
+`AuthContext` conserva tambien `onboarding_completed` y `getting_started_completed`. `getAuthDestination()` es la unica regla de redireccion: `/onboarding`, `/getting-started` o `/app/dashboard`. `ProtectedRoute` aplica la misma secuencia antes de montar el producto.
 
 ## Rutas
 

@@ -12,13 +12,11 @@ use App\Models\User;
 use App\Services\TwoFactorService;
 use App\Services\WorkspaceService;
 use App\Support\AuditLog;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Throwable;
 
 class AuthController extends Controller
 {
@@ -26,19 +24,10 @@ class AuthController extends Controller
     {
         $user = User::create($request->validated());
         AuditLog::registered($user->id);
-        $verificationEmailSent = true;
-
-        try {
-            event(new Registered($user));
-        } catch (Throwable $exception) {
-            $verificationEmailSent = false;
-            AuditLog::mailFailed('verify-email', $exception::class, $user->id);
-        }
 
         return response()->json([
             'user' => new UserResource($user),
             'token' => $user->createToken('frontend')->plainTextToken,
-            'verification_email_sent' => $verificationEmailSent,
         ], 201);
     }
 

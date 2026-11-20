@@ -98,7 +98,6 @@ export function OnboardingPage() {
     return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!user.email_verified) return <Navigate to="/verify-email" replace />;
   if (user.onboarding_completed) return <Navigate to={getAuthDestination(user)} replace />;
 
   function toggleSpecialty(value) {

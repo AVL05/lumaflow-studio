@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\Auth\GettingStartedController;
 use App\Http\Controllers\Api\Auth\OnboardingController;
 use App\Http\Controllers\Api\Auth\TwoFactorController;
@@ -59,10 +58,6 @@ Route::middleware('throttle:10,1')->group(function (): void {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
-
 // Superficie publica sin autenticar: portal de cliente, reserva y feed de calendario.
 // Todo se resuelve por token/slug opaco, nunca por id incremental.
 Route::middleware('throttle:30,1')->group(function (): void {
@@ -86,12 +81,9 @@ Route::middleware(['auth:sanctum', 'throttle:'.config('api.throttle_per_minute',
         Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm']);
         Route::post('/two-factor/disable', [TwoFactorController::class, 'disable']);
     });
-    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-    Route::post('/onboarding', OnboardingController::class)->middleware('verified');
+    Route::post('/onboarding', OnboardingController::class);
 
-    Route::middleware(['verified', 'onboarded'])->group(function (): void {
+    Route::middleware('onboarded')->group(function (): void {
         Route::post('/getting-started', GettingStartedController::class);
         Route::get('/dashboard', DashboardController::class);
         Route::post('/activation/bookings', [ActivationController::class, 'enableBookings']);

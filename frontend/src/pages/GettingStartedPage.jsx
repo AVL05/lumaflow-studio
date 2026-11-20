@@ -65,8 +65,7 @@ export function GettingStartedPage() {
     return <ServiceUnavailable message={bootError} onRetry={retryBoot} onLogout={logout} />;
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!user.email_verified || !user.onboarding_completed)
-    return <Navigate to={getAuthDestination(user)} replace />;
+  if (!user.onboarding_completed) return <Navigate to={getAuthDestination(user)} replace />;
   if (user.getting_started_completed && !selected)
     return <Navigate to={getAuthDestination(user)} replace />;
 

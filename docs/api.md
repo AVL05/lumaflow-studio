@@ -20,16 +20,14 @@ Los tokens caducan a los `SANCTUM_TOKEN_EXPIRATION` minutos de su creacion (4320
 
 | Metodo | Ruta                               | Auth                 | Notas                                                                    |
 | ------ | ---------------------------------- | -------------------- | ------------------------------------------------------------------------ |
-| POST   | `/register`                        | no                   | Crea una cuenta sin verificar, envia el email y devuelve `{user, token}` |
+| POST   | `/register`                        | no                   | Crea la cuenta y devuelve `{user, token}` (no hay verificacion de email) |
 | POST   | `/login`                           | no                   | `throttle:10,1`. Mismo error exista o no el email                        |
 | POST   | `/logout`                          | si                   | Revoca el token en uso                                                   |
 | GET    | `/user`                            | si                   | Estado de verificacion, onboarding y preferencias del usuario            |
-| GET    | `/email/verify/{id}/{hash}`        | firma temporal       | Verifica el email y redirige a la SPA                                    |
-| POST   | `/email/verification-notification` | si                   | Reenvia el enlace, `throttle:6,1`                                        |
-| POST   | `/onboarding`                      | si, email verificado | Guarda estudio, especialidades, pais, moneda y primera prioridad         |
+| POST   | `/onboarding`                      | si                   | Guarda estudio, especialidades, pais, moneda y primera prioridad         |
 | POST   | `/getting-started`                 | si                   | Elige `create_first_job`, `sample_workspace`, `import_clients` o `later` |
 
-Los recursos de producto requieren email verificado y onboarding completado. Una cuenta pendiente puede usar `/user`, `/logout`, el reenvio de verificacion y `/onboarding` cuando corresponda. El enlace de email caduca a los 60 minutos y su firma impide alterar el usuario o el hash.
+Los recursos de producto requieren onboarding completado. Una cuenta pendiente puede usar `/user`, `/logout` y `/onboarding`. LumaFlow no verifica el email al registrarse.
 
 `sample_workspace` crea de forma idempotente clientes, trabajos, sesiones, tareas, localizacion y entrega ficticios marcados con `is_demo`. No genera estados entregados, no activa reservas y no cuenta como progreso de activación: el checklist solo cuenta recursos reales (`is_demo = false`) y la UI los distingue con la insignia «Ejemplo». No falsea el hito operativo.
 
@@ -324,7 +322,6 @@ El recibo único por proyecto/clave hace que solicitudes repetidas o simultánea
 | Codigo | Significado                                                                                                      |
 | ------ | ---------------------------------------------------------------------------------------------------------------- |
 | 401    | Sin token, o token revocado                                                                                      |
-| 403    | Email sin verificar o firma invalida                                                                             |
 | 404    | No existe **o no es tuyo**                                                                                       |
 | 409    | Onboarding pendiente (`code: onboarding_required`), revisión obsoleta o previsualización de plantilla modificada |
 | 422    | Validacion fallida, o accion masiva no soportada                                                                 |
@@ -333,7 +330,6 @@ El recibo único por proyecto/clave hace que solicitudes repetidas o simultánea
 | Codigo | Significado |
 |---|---|
 | 401 | Sin token, o token revocado |
-| 403 | Email sin verificar o firma invalida |
 | 404 | No existe **o no es tuyo** |
 | 409 | Onboarding pendiente (`code: onboarding_required`) |
 | 422 | Validacion fallida, o accion masiva no soportada |
