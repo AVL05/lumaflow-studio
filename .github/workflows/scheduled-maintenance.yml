@@ -66,3 +66,5 @@ jobs:
           export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
 
           php artisan sanctum:prune-expired --hours=24
+          # Cuentas cuyo periodo de gracia de borrado (#67) ha vencido.
+          php artisan account:purge-deleted

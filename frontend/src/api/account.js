@@ -15,3 +15,10 @@ export async function downloadAccountExport() {
   link.remove();
   URL.revokeObjectURL(url);
 }
+
+/** Programa el borrado de la cuenta tras el periodo de gracia (exige la contraseña). */
+export const requestAccountDeletion = (password) =>
+  apiClient.post("/account/deletion", { password }).then((res) => res.data);
+
+export const cancelAccountDeletion = () =>
+  apiClient.delete("/account/deletion").then((res) => res.data);

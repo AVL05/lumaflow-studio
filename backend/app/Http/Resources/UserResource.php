@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'sample_workspace_activated' => $this->sample_workspace_activated_at !== null,
             'bookings_enabled' => $this->bookings_enabled_at !== null,
             'two_factor_enabled' => $this->two_factor_confirmed_at !== null,
+            'deletion_scheduled_for' => $this->deletion_scheduled_for?->toISOString(),
             'current_workspace_id' => $this->current_workspace_id,
             'workspace_role' => $this->current_workspace_id
                 ? app(WorkspaceAuthorizer::class)->role($this->resource, (int) $this->current_workspace_id)
