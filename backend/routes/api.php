@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountDeletionController;
 use App\Http\Controllers\Api\AccountExportController;
 use App\Http\Controllers\Api\ActivationController;
 use App\Http\Controllers\Api\ActivityController;
@@ -214,5 +215,9 @@ Route::middleware(['auth:sanctum', 'throttle:'.config('api.throttle_per_minute',
         Route::post('/bulk-actions', BulkActionController::class);
         Route::match(['get', 'post'], '/exports/{resource}', ExportController::class);
         Route::get('/account/export', AccountExportController::class)->middleware('throttle:account-export');
+        Route::middleware('throttle:account-deletion')->group(function (): void {
+            Route::post('/account/deletion', [AccountDeletionController::class, 'store']);
+            Route::delete('/account/deletion', [AccountDeletionController::class, 'destroy']);
+        });
     });
 });

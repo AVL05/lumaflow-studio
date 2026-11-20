@@ -394,3 +394,5 @@ Detalles:
 - Emergencias: el workflow acepta `skip_staging_check`. Para volver atrás, usar el rollback de Render al deploy anterior o revertir en `main` y promover.
 - **Vercel:** para que el frontend siga el mismo flujo, en Vercel → Settings → Git cambiar la *Production Branch* a `production` (hasta entonces Vercel sigue desplegando `main`). Es un ajuste del panel de Vercel que no se puede hacer desde el repositorio.
 - Si cambia el dominio del staging hay que actualizar `STAGING_URL` en `promote-production.yml`.
+
+Render no ejecuta el scheduler de Laravel. `.github/workflows/scheduled-maintenance.yml` (diario, 02:30 UTC) conecta con la base de datos de producción con los secretos `PROD_DB_*` (los mismos que el backup, ver `docs/backup-recovery.md`) y lanza `php artisan sanctum:prune-expired --hours=24`. Las tareas se invocan por su nombre y no con `schedule:run`, porque los cron de GitHub se retrasan unos minutos y las frecuencias exactas del scheduler se perderían. El workflow ejecuta también `php artisan account:purge-deleted` (borrado de cuentas con periodo de gracia vencido, #67). Las futuras tareas se añaden como pasos de ese workflow.

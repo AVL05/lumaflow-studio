@@ -58,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('account-export', fn (Request $request) => Limit::perMinute(6)
             ->by('account-export|'.$request->user()?->id));
 
+        RateLimiter::for('account-deletion', fn (Request $request) => Limit::perMinute(5)
+            ->by('account-deletion|'.$request->user()?->id));
+
         RateLimiter::for('public-booking', fn (Request $request) => Limit::perMinute(5)
             ->by($request->ip().'|'.$request->route('slug')));
 

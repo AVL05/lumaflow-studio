@@ -375,3 +375,17 @@ TOTP (RFC 6238: SHA-1, 6 dígitos, 30 s, tolerancia ±1 intervalo) más 8 códig
 | GET | `/account/export` | sí | Descarga JSON (`Content-Disposition: attachment`) con todos los datos accesibles al usuario: `account`, `totals` y `data` (`clients`, `jobs`, `sessions`, `tasks`, `quotes`, `invoices`, `contracts`, `deliveries`, `locations`, `gear`, `presets`, `booking_requests`, `checklists`, `activities`). Límite propio de 6/min por usuario (`throttle:account-export`). |
 
 Lee siempre mediante el scope `accessibleBy`: nunca incluye datos de otros estudios. Excluye `gallery_password`, `public_token`, `calendar_token`, contraseñas y tokens. El borrado de cuenta **no está implementado**: requiere decidir el periodo de gracia, el tratamiento de workspaces compartidos y una revisión legal (AGENTS.md §15).
+
+## Borrado de cuenta con periodo de gracia (#67)
+
+| Método | Ruta | Auth | Notas |
+| --- | --- | --- | --- |
+| POST | `/account/deletion` | sí | `{password}`. Programa el borrado a `ACCOUNT_DELETION_GRACE_DAYS` (30 por defecto) y responde **202** con `deletion_scheduled_for`. **409** con `{message, workspaces}` si el usuario es propietario de un estudio con otros miembros (hay que retirarlos antes) |
+| DELETE | `/account/deletion` | sí | Cancela un borrado programado |
+
+- Solicitar el borrado no cierra la sesión ni desactiva la cuenta: sigue funcionando hasta que vence el plazo. `GET /user` expone `deletion_scheduled_for` y la SPA muestra la fecha con un botón para cancelar.
+- La purga la ejecuta `php artisan account:purge-deleted` (`--dry-run` para listar). Corre a diario en `scheduled-maintenance.yml`. Borra la cuenta, sus estudios propios (sin otros miembros) y todo lo que cuelga de ellos por `ON DELETE CASCADE`; revoca tokens y tokens de restablecimiento.
+- **Datos compartidos:** los registros que la persona creó en el estudio de otra se **reasignan al propietario de ese estudio** antes de borrar (las tablas de dominio guardan el autor en `user_id` con `CASCADE`, y de otro modo desaparecerían para el resto del equipo). Si un estudio propio vuelve a tener miembros después de solicitar el borrado, la purga se omite para esa cuenta y el comando termina con error.
+- Límite propio `throttle:account-deletion` (5/min por usuario); eventos de auditoría `account_deletion_requested|cancelled` y `account_purged` solo con el id.
+- La exportación completa (`/account/export`) permite descargar los datos antes del borrado.
+- **Revisión legal:** pendiente (AGENTS.md §15); este cambio no modifica textos legales.
