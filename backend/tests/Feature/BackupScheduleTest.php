@@ -10,9 +10,7 @@ class BackupScheduleTest extends TestCase
 {
     public function test_runner_is_restricted_and_never_publishes_plaintext_dumps(): void
     {
-        $workflow = str_replace('
-', '
-', (string) file_get_contents(base_path('../.github/workflows/production-backup.yml')));
+        $workflow = str_replace("\r\n", "\n", (string) file_get_contents(base_path('../.github/workflows/production-backup.yml')));
         $this->assertStringContainsString('cron: "0 3 * * *"', $workflow);
         $this->assertStringContainsString('workflow_dispatch:', $workflow);
         $this->assertStringNotContainsString('pull_request:', $workflow);
@@ -33,9 +31,7 @@ class BackupScheduleTest extends TestCase
 
     public function test_runner_only_reads_secrets_inside_steps_and_fails_fast_without_them(): void
     {
-        $workflow = str_replace('
-', '
-', (string) file_get_contents(base_path('../.github/workflows/production-backup.yml')));
+        $workflow = str_replace("\r\n", "\n", (string) file_get_contents(base_path('../.github/workflows/production-backup.yml')));
         $this->assertSame(1, preg_match('/^    if: (.+)$/m', $workflow, $match));
         $this->assertSame(
             "github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'",
@@ -52,9 +48,7 @@ class BackupScheduleTest extends TestCase
 
     public function test_maintenance_workflow_runs_the_token_purge_daily(): void
     {
-        $workflow = str_replace('
-', '
-', (string) file_get_contents(base_path('../.github/workflows/scheduled-maintenance.yml')));
+        $workflow = str_replace("\r\n", "\n", (string) file_get_contents(base_path('../.github/workflows/scheduled-maintenance.yml')));
         $this->assertStringContainsString('cron: "30 2 * * *"', $workflow);
         $this->assertStringNotContainsString('pull_request:', $workflow);
         $this->assertStringContainsString("github.ref == 'refs/heads/main'", $workflow);

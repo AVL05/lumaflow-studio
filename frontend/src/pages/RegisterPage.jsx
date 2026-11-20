@@ -34,11 +34,8 @@ export function RegisterPage() {
     setError("");
 
     try {
-      const result = await register(form);
-      navigate("/verify-email", {
-        replace: true,
-        state: { verificationEmailSent: result.verification_email_sent },
-      });
+      await register(form);
+      navigate("/onboarding", { replace: true });
     } catch (err) {
       setError(getApiError(err, "No se pudo crear la cuenta."));
     } finally {

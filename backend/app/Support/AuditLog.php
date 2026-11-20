@@ -30,11 +30,6 @@ class AuditLog
         self::write('info', 'auth.registered', ['user_id' => $userId]);
     }
 
-    public static function emailVerified(int $userId): void
-    {
-        self::write('info', 'auth.email_verified', ['user_id' => $userId]);
-    }
-
     public static function onboardingCompleted(int $userId): void
     {
         self::write('info', 'auth.onboarding_completed', ['user_id' => $userId]);

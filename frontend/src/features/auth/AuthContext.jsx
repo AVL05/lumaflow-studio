@@ -108,10 +108,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function resendVerification() {
-    return authApi.resendVerification();
-  }
-
   async function completeOnboarding(payload) {
     const completed = await authApi.completeOnboarding(payload);
     setUser(completed);
@@ -147,7 +143,6 @@ export function AuthProvider({ children }) {
       login,
       register,
       refreshUser,
-      resendVerification,
       completeOnboarding,
       completeGettingStarted,
       logout,

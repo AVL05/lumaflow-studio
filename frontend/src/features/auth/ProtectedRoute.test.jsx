@@ -18,7 +18,6 @@ function renderRoute() {
     <MemoryRouter initialEntries={["/app/dashboard"]}>
       <Routes>
         <Route path="/login" element={<p>pantalla de login</p>} />
-        <Route path="/verify-email" element={<p>verifica email</p>} />
         <Route path="/onboarding" element={<p>completa onboarding</p>} />
         <Route
           path="/app/dashboard"
@@ -55,7 +54,6 @@ describe("ProtectedRoute", () => {
       isAuthenticated: true,
       user: {
         id: 1,
-        email_verified: true,
         onboarding_completed: true,
         getting_started_completed: true,
       },
@@ -65,22 +63,11 @@ describe("ProtectedRoute", () => {
     expect(screen.getByText("contenido privado")).toBeInTheDocument();
   });
 
-  it("redirige a verificación con email pendiente", () => {
+  it("redirige al onboarding si no está completo", () => {
     Object.assign(authState, {
       booting: false,
       isAuthenticated: true,
-      user: { id: 1, email_verified: false, onboarding_completed: false },
-    });
-    renderRoute();
-
-    expect(screen.getByText("verifica email")).toBeInTheDocument();
-  });
-
-  it("redirige al onboarding después de verificar", () => {
-    Object.assign(authState, {
-      booting: false,
-      isAuthenticated: true,
-      user: { id: 1, email_verified: true, onboarding_completed: false },
+      user: { id: 1, onboarding_completed: false },
     });
     renderRoute();
 

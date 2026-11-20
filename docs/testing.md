@@ -68,7 +68,7 @@ Evidencia agregada y límites de ejecución en el informe del Sprint 2. La suite
 
 | Recorrido                                 | Archivo                        | Qué valida                                                                                                     |
 | ----------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Alta y acceso de un estudio               | `e2e/tests/auth.spec.js`       | Registro, verificacion de email por enlace firmado, onboarding, primer trabajo, login valido y login erroneo   |
+| Alta y acceso de un estudio               | `e2e/tests/auth.spec.js`       | Registro, onboarding, primer trabajo, login valido y login erroneo   |
 | Alta comercial: cliente, trabajo y sesion | `e2e/tests/workflow.spec.js`   | Los tres modulos conectados usando el pipeline real de la interfaz                                             |
 | Portal de entrega                         | `e2e/tests/deliveries.spec.js` | Creacion de entrega, apertura del portal publico sin sesion, aprobacion del cliente y reflejo en el panel      |
 | Aislamiento entre estudios                | `e2e/tests/isolation.spec.js`  | Un segundo estudio recibe `404` al leer, modificar y borrar recursos ajenos, y la interfaz no filtra su nombre |
@@ -107,7 +107,7 @@ El backend se lanza con `php -S` y el router de Laravel en lugar de `php artisan
 Antes de ejecutar los tests, el `globalSetup`:
 
 1. ejecuta `php artisan optimize:clear` y `migrate:fresh --seed --seeder=Database\Seeders\E2ESeeder`, de modo que la base solo contiene los datos de la suite;
-2. vacia `backend/storage/logs/laravel.log`, porque el enlace de verificacion de email se lee de ese log (`MAIL_MAILER=log`);
+2. vacia `backend/storage/logs/laravel.log`;
 3. inicia sesion una vez por cuenta reutilizable y guarda el `storageState` de la SPA.
 
 `Database\Seeders\E2ESeeder` crea cinco estudios ficticios en el dominio reservado `.test`, ya verificados; cuatro configurados y uno (`e2e.nuevo@lumaflow.test`) sin onboarding para el recorrido de primer valor. Las credenciales viven solo en `e2e/support/accounts.js` y llegan al seeder por variables de entorno, para no duplicarlas en dos lenguajes. Solo se registra por UI una vez por ejecucion (el throttle comparte contador por IP en peticiones no autenticadas): el resto de cuentas llegan sembradas.

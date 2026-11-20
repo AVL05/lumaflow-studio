@@ -13,11 +13,9 @@ use App\Models\Task;
 use App\Models\User;
 use App\Observers\AnalyticsInvalidationObserver;
 use App\Observers\UserObserver;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Transport\LogTransport;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -69,12 +67,5 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Session::class, Delivery::class, Client::class, Task::class, AiAnalysis::class, AiConversation::class, AiSessionPlan::class, Location::class] as $model) {
             $model::observe(AnalyticsInvalidationObserver::class);
         }
-
-        VerifyEmail::toMailUsing(fn (object $notifiable, string $url): MailMessage => (new MailMessage)
-            ->subject('Verifica tu email en LumaFlow')
-            ->greeting('Hola '.$notifiable->name)
-            ->line('Confirma que este email te pertenece para continuar con la configuracion de tu estudio.')
-            ->action('Verificar email', $url)
-            ->line('El enlace caduca en 60 minutos. Si no has creado esta cuenta, puedes ignorar este mensaje.'));
     }
 }

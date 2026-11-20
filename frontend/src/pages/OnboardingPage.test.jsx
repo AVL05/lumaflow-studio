@@ -7,7 +7,6 @@ import { OnboardingPage } from "./OnboardingPage";
 const authState = {
   user: {
     id: 1,
-    email_verified: true,
     onboarding_completed: false,
     photography_specialties: [],
   },

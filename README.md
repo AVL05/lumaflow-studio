@@ -187,7 +187,7 @@ Usa una base propia (`backend/database/showcase.sqlite`) que se regenera en cada
 
 Con el modo exhibición en marcha, `pnpm run capture:showcase` regenera las capturas de producto de la landing (`frontend/public/product`) y de `docs/screenshots` con Chromium de Playwright.
 
-El alta local sigue `crear cuenta -> verificar email -> configurar estudio -> elegir primer paso -> dashboard`. Tras el onboarding puedes crear el primer trabajo, cargar un workspace ficticio o importar clientes mediante CSV. Como `pnpm run start` usa correo por log, copia el enlace de verificacion desde `backend/storage/logs/laravel.log`.
+El alta local sigue `crear cuenta -> configurar estudio -> elegir primer paso -> dashboard`. Tras el onboarding puedes crear el primer trabajo, cargar un workspace ficticio o importar clientes mediante CSV. Como `pnpm run start` usa correo por log, copia el enlace de verificacion desde `backend/storage/logs/laravel.log`.
 
 El dashboard incorpora un checklist de activacion 0/5 basado en datos reales: estudio configurado, primer cliente, primer trabajo, reservas activadas y primera sesion. LumaFlow solo muestra el estado **Estudio operativo** cuando existe una entrega completada o se activa un enlace publico de reservas; los datos de ejemplo nunca completan ese hito.
 

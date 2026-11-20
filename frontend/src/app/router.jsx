@@ -29,7 +29,8 @@ export const router = createBrowserRouter([
       },
       {
         path: "/verify-email",
-        element: lazyRoute(() => import("../pages/EmailVerificationPage"), "EmailVerificationPage"),
+        // Ya no se verifica el email: los enlaces antiguos llevan a la app.
+        element: <Navigate to="/app/dashboard" replace />,
         errorElement,
       },
       {
