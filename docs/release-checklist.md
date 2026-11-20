@@ -40,3 +40,7 @@ Disparadores: smoke rojo que no se corrige hacia delante en minutos, migración 
 ## Registro
 
 Cada release deja en su PR: SHA fusionado y SHA de CI, backup, IDs de deployment antes y después, resultado del smoke y, si hubo, rollback. Eso es lo que hace la release repetible y auditable.
+
+## Con staging (#55)
+
+Desde que existe el staging, el paso «Merge» de esta checklist se divide: fusionar en `main` solo despliega el staging. Para producción: (1) comprobar el staging, (2) lanzar el workflow **Promote to production**, (3) seguir con «Smoke posterior» y «Rollback». Ver `docs/deployment.md` → «Staging y promoción a producción».
