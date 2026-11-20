@@ -29,6 +29,7 @@ class HealthService
         return [
             'status' => $this->aggregate($checks),
             'checks' => array_map(fn (array $check) => ['status' => $check['status']], $checks),
+            'release' => $this->release(),
             'timestamp' => now()->toISOString(),
         ];
     }
@@ -49,6 +50,14 @@ class HealthService
             'checks' => $checks,
             'timestamp' => now()->toISOString(),
         ];
+    }
+
+    /** Commit desplegado (Render lo inyecta como RENDER_GIT_COMMIT); null fuera de Render. */
+    private function release(): ?string
+    {
+        $commit = (string) (getenv('RENDER_GIT_COMMIT') ?: config('app.release', ''));
+
+        return preg_match('/^[0-9a-f]{7,40}$/', $commit) ? substr($commit, 0, 40) : null;
     }
 
     private function database(): array

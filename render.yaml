@@ -4,7 +4,9 @@ services:
     runtime: docker
     plan: free
     region: frankfurt
-    branch: main
+    # Produccion despliega la rama `production`, que solo se actualiza con el workflow
+    # `Promote to production` tras comprobar CI y el staging (docs/deployment.md, #55).
+    branch: production
     autoDeployTrigger: checksPass
     rootDir: backend
     dockerfilePath: ./Dockerfile

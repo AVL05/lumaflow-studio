@@ -371,3 +371,26 @@ Datos personales: los eventos pasan por `SentryScrubber` (backend) y por el scru
 ## Tareas programadas (#57)
 
 Render no ejecuta el scheduler de Laravel. `.github/workflows/scheduled-maintenance.yml` (diario, 02:30 UTC) conecta con la base de datos de producción con los secretos `PROD_DB_*` (los mismos que el backup, ver `docs/backup-recovery.md`) y lanza `php artisan sanctum:prune-expired --hours=24`. Las tareas se invocan por su nombre y no con `schedule:run`, porque los cron de GitHub se retrasan unos minutos y las frecuencias exactas del scheduler se perderían. Las futuras tareas (por ejemplo la purga de cuentas borradas) se añaden como pasos de ese workflow.
+
+## Staging y promoción a producción (#55)
+
+Antes, fusionar en `main` desplegaba y migraba producción al instante. Ahora hay un entorno intermedio, todo en planes gratuitos:
+
+| Entorno | API | Rama | Base de datos |
+| --- | --- | --- | --- |
+| Staging | `https://lumaflow-studio-api-staging.onrender.com` (servicio `lumaflow-studio-api-staging`) | `main` (despliega solo en cada commit) | esquema `lumaflow_staging` del mismo proyecto de Supabase, rol `lumaflow_staging_app` sin acceso a `lumaflow` |
+| Producción | `https://lumaflow-api.aleviclop.dev` | `production` | esquema `lumaflow` |
+
+Flujo:
+
+1. Se fusiona en `main`. El staging despliega ese commit y aplica sus migraciones sobre `lumaflow_staging`; CI corre sobre `main`.
+2. Se comprueba el staging (`/api/health`, y lo que haga falta a mano).
+3. Se lanza el workflow **Promote to production** (Actions → Run workflow, rama `main`). Exige CI en verde del commit y que `GET /api/health` del staging informe de `release` igual a ese commit con `database` en `up` (el staging se duerme: reintenta unos 6 minutos). Si se cumple, avanza `production` a `main` por fast-forward y Render despliega producción.
+
+Detalles:
+
+- El staging usa `FILESYSTEM_DISK=local` y correo `log` para no tocar el bucket ni enviar mensajes reales; sus datos no se mezclan con los de producción. Se duerme tras inactividad y comparte el cupo de horas gratuitas de Render con el resto de servicios: no tiene monitor propio.
+- `/api/health` publica `release` (SHA del commit desplegado, `RENDER_GIT_COMMIT`); el repositorio es público, no es dato sensible.
+- Emergencias: el workflow acepta `skip_staging_check`. Para volver atrás, usar el rollback de Render al deploy anterior o revertir en `main` y promover.
+- **Vercel:** para que el frontend siga el mismo flujo, en Vercel → Settings → Git cambiar la *Production Branch* a `production` (hasta entonces Vercel sigue desplegando `main`). Es un ajuste del panel de Vercel que no se puede hacer desde el repositorio.
+- Si cambia el dominio del staging hay que actualizar `STAGING_URL` en `promote-production.yml`.

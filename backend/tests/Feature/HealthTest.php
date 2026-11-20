@@ -37,6 +37,19 @@ class HealthTest extends TestCase
             ->assertJsonStructure(['status', 'timestamp', 'checks' => ['api', 'database', 'storage', 'cache', 'ollama']]);
     }
 
+    public function test_public_health_reports_the_deployed_release_only_when_it_is_a_commit(): void
+    {
+        $this->fakeOllama(true);
+
+        putenv('RENDER_GIT_COMMIT=0123456789abcdef0123456789abcdef01234567');
+        $this->getJson('/api/health')->assertJsonPath('release', '0123456789abcdef0123456789abcdef01234567');
+
+        putenv('RENDER_GIT_COMMIT=no-es-un-commit');
+        $this->getJson('/api/health')->assertJsonPath('release', null);
+
+        putenv('RENDER_GIT_COMMIT');
+    }
+
     public function test_liveness_probe_does_not_depend_on_any_dependency(): void
     {
         $this->mock(HealthService::class)->shouldNotReceive('summary');

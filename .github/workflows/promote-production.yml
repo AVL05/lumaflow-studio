@@ -1,0 +1,74 @@
+name: Promote to production
+
+# Produccion despliega la rama `production`. Este workflow (manual) la adelanta hasta `main`
+# SOLO si: (1) el CI de ese commit esta en verde y (2) el staging ya ejecuta exactamente ese
+# commit y responde sano, con lo que las migraciones ya se han aplicado alli antes que en
+# produccion. Es un fast-forward: no se reescribe historia. Si algo sale mal, volver al deploy
+# anterior en Render o revertir en `main` y promover de nuevo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_staging_check:
+        description: "Saltar la comprobacion del staging (solo emergencias)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Verify and fast-forward production
+    if: github.repository == 'AVL05/lumaflow-studio' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      STAGING_URL: https://lumaflow-studio-api-staging.onrender.com
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Require green CI on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          result=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --commit "$sha" --json conclusion,status --jq '[.[]|select(.status=="completed")|.conclusion]|first // "none"')
+          echo "CI de $sha: $result"
+          [ "$result" = "success" ] || { echo "::error::El CI de $sha no esta en verde ($result)."; exit 1; }
+
+      - name: Require staging to run this exact commit and be healthy
+        if: inputs.skip_staging_check != true
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          for attempt in $(seq 1 12); do
+            # El staging se duerme: la primera respuesta puede tardar ~1 min.
+            body=$(curl -s -m 90 "$STAGING_URL/api/health" || true)
+            release=$(echo "$body" | jq -r '.release // empty' 2>/dev/null || true)
+            db=$(echo "$body" | jq -r '.checks.database.status // empty' 2>/dev/null || true)
+            echo "intento $attempt: release=${release:-?} database=${db:-?}"
+            if [ -n "$release" ] && [ "$release" = "$sha" ] && [ "$db" = "up" ]; then
+              echo "Staging ejecuta $sha y esta sano."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::El staging no ejecuta $sha (o no esta sano). Espera a que despliegue o revisa su log."
+          exit 1
+
+      - name: Fast-forward production
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git push origin HEAD:refs/heads/production
+          echo "production -> $(git rev-parse --short HEAD)" >> "$GITHUB_STEP_SUMMARY"
