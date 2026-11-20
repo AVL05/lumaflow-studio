@@ -3,9 +3,7 @@ import { getAuthDestination } from "./getAuthDestination";
 
 describe("getAuthDestination", () => {
   it("ordena onboarding, primeros pasos y dashboard", () => {
-    expect(getAuthDestination({ onboarding_completed: false })).toBe(
-      "/onboarding",
-    );
+    expect(getAuthDestination({ onboarding_completed: false })).toBe("/onboarding");
     expect(
       getAuthDestination({
         onboarding_completed: true,
